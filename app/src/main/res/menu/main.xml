@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_search"
+        android:title="@string/search"
+        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:showAsAction="always"
+        tools:ignore="AlwaysShowAction" />
+
+    <item
+        android:id="@+id/update_library"
+        android:title="@string/update_library"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/clear_image_cache"
+        android:title="@string/clear_image_cache"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/app_update"
+        android:title="@string/app_repository"
+        app:showAsAction="never" />
+
+</menu>

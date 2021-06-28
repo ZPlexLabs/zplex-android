@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">ZPlex</string>
+    <string name="search">Search</string>
+    <string name="synopsis">Synopsis</string>
+    <string name="episodes">Episodes</string>
+    <string name="divider">\u0020•\u0020</string>
+    <string name="update_library">Update library</string>
+    <string name="clear_image_cache">Clear image cache</string>
+    <string name="movies">Movies</string>
+    <string name="tv_shows">TV Shows</string>
+    <string name="retry">Retry</string>
+    <string name="something_went_wrong">Something went wrong!</string>
+    <string name="app_repository">App repository</string>
+    <string name="clearing_image_cache">Clearing image cache...</string>
+    <string name="updating_library">Updating library...</string>
+    <string name="failed_to_load_episodes">Failed to load episodes</string>
+    <string name="vlc_not_found">VLC not found</string>
+    <string name="failed_to_fetch_details">Failed to fetch details</string>
+</resources>

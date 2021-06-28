@@ -1,0 +1,43 @@
+<resources>
+
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="android:windowAnimationStyle">@style/CustomActivityAnimation</item>
+    </style>
+
+    <style name="CustomActivityAnimation" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
+        <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
+    </style>
+
+
+    <style name="AppTheme.Home" parent="AppTheme">
+        <item name="android:navigationBarColor">@color/colorPrimary</item>
+    </style>
+
+    <style name="AppTheme.About" parent="AppTheme">
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+    </style>
+
+    <style name="MenuTheme" parent="ThemeOverlay.AppCompat.Dark">
+        <item name="android:textColorSecondary">@color/textColor</item>
+        <item name="android:actionMenuTextColor">@color/textColor</item>
+        <item name="android:backgroundTint">@color/cardColor</item>
+        <item name="android:textColor">@color/textColor</item>
+    </style>
+
+    <style name="titleTextAppearance">
+        <item name="android:textColor">@color/textColor_87</item>
+        <item name="fontFamily">@font/open_sans_bold</item>
+        <item name="android:textSize">21sp</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+
+</resources>
