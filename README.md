@@ -4,7 +4,7 @@ Media streaming app based on cloudflare, uses Team Drive as database gets media 
 
 # Design
 
-![Design](Design.png?raw=true "Design")
+![Design](Design.jpg?raw=true "Design")
 
 # Code stats
 
