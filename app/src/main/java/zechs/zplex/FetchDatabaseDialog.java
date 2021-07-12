@@ -3,22 +3,19 @@ package zechs.zplex;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Window;
 import android.widget.Toast;
 
-import org.jetbrains.annotations.NotNull;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import zechs.zplex.utils.APIHolder;
+import java.util.Arrays;
 
 import static zechs.zplex.utils.Constants.API;
 
@@ -41,50 +38,39 @@ public class FetchDatabaseDialog extends Dialog {
         setContentView(R.layout.fetch_dialog);
 
         File dbFile = new File(getContext().getFilesDir() + "/dbJson.json");
-        if (dbFile.exists())
-            dbFile.delete();
+        if (dbFile.exists()) {
+            boolean isDeleted = dbFile.delete();
+            Log.d("isDeleted", String.valueOf(isDeleted));
 
-        Retrofit retrofit1 = new Retrofit.Builder()
-                .baseUrl(API)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-        APIHolder randomAPI = retrofit1.create(APIHolder.class);
-        Call<ResponseBody> callQuery = randomAPI.getLibrary();
-        callQuery.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(@NotNull Call<ResponseBody> call, @NotNull Response<ResponseBody> response) {
-                if (!response.isSuccessful()) {
-                    Toast.makeText(getContext(), "Failed to fetch library", Toast.LENGTH_SHORT).show();
-                    dismiss();
-                } else {
-                    try {
-                        if (response.body() != null) {
-                            String JsonRequest = response.body().string();
-                            try {
-                                FileWriter file = new FileWriter(getContext().getFilesDir() + "/dbJson.json");
-                                file.write(JsonRequest);
-                                file.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                            dismiss();
-                        }
+        }
 
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Toast.makeText(getContext(), "IOException e", Toast.LENGTH_SHORT).show();
+        if (getContext() != null) {
 
-                    }
+            RequestQueue requestQueue = Volley.newRequestQueue(getContext());
+            String url = API + "/media/library";
+
+            JsonArrayRequest objectArray = new JsonArrayRequest(url, response -> {
+                try {
+                    FileWriter file = new FileWriter(getContext().getFilesDir() + "/dbJson.json");
+                    file.write(response.toString());
+                    file.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getContext(), "Failed to load library", Toast.LENGTH_SHORT).show();
                 }
-
-            }
-
-            @Override
-            public void onFailure(@NotNull Call<ResponseBody> call, @NotNull Throwable t) {
-                Toast.makeText(getContext(), "Failed to load library", Toast.LENGTH_SHORT).show();
                 dismiss();
-            }
-        });
+                Log.d("objectArray", "executed");
+
+            }, error -> {
+                Toast.makeText(getContext(), "Failed to fetch library", Toast.LENGTH_SHORT).show();
+                dismiss();
+                Log.d("objectArray", Arrays.toString(error.getStackTrace()));
+
+            });
+            objectArray.setShouldCache(false);
+            objectArray.setRetryPolicy(new DefaultRetryPolicy(5000, -1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+            requestQueue.add(objectArray);
+        }
     }
 
     @Override

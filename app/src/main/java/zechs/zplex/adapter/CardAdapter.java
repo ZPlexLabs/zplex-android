@@ -1,12 +1,12 @@
 package zechs.zplex.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,32 +25,24 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
     private final ArrayList<CardItem> cardItems;
     private final Context context;
-    private final int layoutId;
+    private final Activity activity;
 
-    public CardAdapter(ArrayList<CardItem> cardItems, Context context, int layoutId) {
+    public CardAdapter(ArrayList<CardItem> cardItems, Context context, Activity activity) {
         this.cardItems = cardItems;
         this.context = context;
-        this.layoutId = layoutId;
+        this.activity = activity;
     }
 
     @NonNull
     @Override
     public CardAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(layoutId, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.media_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull CardAdapter.ViewHolder holder, int position) {
         CardItem cardItem = cardItems.get(position);
-        if (cardItem.getType().equals("Music")) {
-            String[] nameSplit = cardItem.getName().split(" - ", 2);
-            holder.animeName.setText(nameSplit[0]);
-        } else {
-            holder.animeName.setText(cardItem.getName());
-        }
-
-
         Glide.with(context)
                 .load(cardItem.getPosterURL())
                 .placeholder(R.color.cardColor)
@@ -65,13 +57,10 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
 
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-        TextView animeName;
         ImageView posterView;
 
         public ViewHolder(@NonNull View view) {
             super(view);
-            animeName = view.findViewById(R.id.item_name);
             posterView = view.findViewById(R.id.item_poster);
             view.setOnClickListener(this);
         }
@@ -80,13 +69,13 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
         public void onClick(View view) {
             int position = getLayoutPosition();
             CardItem cardItem = cardItems.get(position);
-            Intent intent = new Intent(context, AboutActivity.class);
+            Intent intent = new Intent(activity, AboutActivity.class);
             intent.putExtra("NAME", cardItem.getName());
             intent.putExtra("TYPE", cardItem.getType());
             intent.putExtra("POSTERURL", cardItem.getPosterURL());
             intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
+            activity.startActivity(intent);
+            activity.overridePendingTransition(R.anim.slide_up, R.anim.no_animation);
         }
     }
-
 }

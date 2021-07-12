@@ -21,5 +21,4 @@ public class CardItem {
     public String getPosterURL() {
         return posterURL;
     }
-
 }

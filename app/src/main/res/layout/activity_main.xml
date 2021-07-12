@@ -5,90 +5,21 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@color/colorPrimaryDark"
     tools:context=".activity.MainActivity">
 
-    <androidx.core.widget.NestedScrollView
+    <include
+        android:id="@+id/error_view"
+        layout="@layout/error_layout"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/media_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <TextView
-                android:id="@+id/expand_movies"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="24dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:fontFamily="@font/open_sans_bold"
-                android:text="@string/movies"
-                android:textAlignment="viewStart"
-                android:textSize="24sp"
-                app:drawableEndCompat="@drawable/ic_next"
-                app:drawableTint="@color/textColor_87"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/horz_movies"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:divider="@null"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/expand_movies"
-                tools:itemCount="10"
-                tools:listitem="@layout/items" />
-
-            <TextView
-                android:id="@+id/expand_tv"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="24dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:fontFamily="@font/open_sans_bold"
-                android:text="@string/tv_shows"
-                android:textAlignment="viewStart"
-                android:textSize="24sp"
-                app:drawableEndCompat="@drawable/ic_next"
-                app:drawableTint="@color/textColor_87"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/horz_movies" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/horz_tv"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:divider="@null"
-                android:orientation="horizontal"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/expand_tv"
-                app:layout_constraintVertical_bias="0.0"
-                tools:itemCount="10"
-                tools:listitem="@layout/items" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </androidx.core.widget.NestedScrollView>
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior" />
 
     <ProgressBar
         android:id="@+id/loading_home"
@@ -98,10 +29,10 @@
         android:visibility="gone" />
 
     <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/colorPrimaryDark"
+        app:elevation="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -111,7 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:theme="@style/MenuTheme"
-            app:layout_scrollFlags="noScroll"
+            app:layout_scrollFlags="scroll|snap|enterAlways"
             app:logo="@drawable/ic_z_round"
             app:title="@string/app_name"
             app:titleMarginStart="24dp"
@@ -119,6 +50,20 @@
             app:titleTextColor="@color/textColor"
             tools:menu="@menu/main" />
 
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dp"
+            android:background="@color/colorPrimaryDark"
+            android:paddingBottom="4dp"
+            app:tabIndicatorFullWidth="false"
+            app:tabIndicatorHeight="0dp"
+            app:tabMode="scrollable"
+            app:tabSelectedTextColor="@color/colorAccent"
+            app:tabTextAppearance="@style/tabTextAppearance"
+            app:tabTextColor="@color/textColor_54" />
     </com.google.android.material.appbar.AppBarLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

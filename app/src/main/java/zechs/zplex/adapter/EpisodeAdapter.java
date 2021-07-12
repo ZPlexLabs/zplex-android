@@ -1,5 +1,6 @@
 package zechs.zplex.adapter;
 
+import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -16,8 +17,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.ArrayList;
 
@@ -44,16 +49,18 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.ViewHold
         return new ViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull EpisodeAdapter.ViewHolder holder, int position) {
         EpisodeItem episodeItem = episodeItems.get(position);
-        holder.episodeCount.setText(episodeItem.getEpisode());
+        holder.episodeCount.setText("Episode " + Integer.parseInt(episodeItem.getEpisode().substring(4)));
         holder.episodeName.setText(episodeItem.getEpisodeTitle());
 
         holder.offlineEp.setOnClickListener(v -> {
             if (context != null) {
                 DownloadManager.Request dlRequest = new DownloadManager.Request(Uri.parse(episodeItem.getPlayUrl()));
                 String fileName = episodeItem.getShow() + "/" + episodeItem.getEpisode() + " - " + episodeItem.getEpisodeTitle() + ".mkv";
+                dlRequest.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
                 dlRequest.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
                 dlRequest.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
                 dlRequest.setMimeType("video/x-matroska");
@@ -64,6 +71,10 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.ViewHold
             }
         });
 
+        Glide.with(context)
+                .load(episodeItem.getPlayUrl().substring(0, episodeItem.getPlayUrl().length() - 3) + "jpg")
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(holder.thumbImage);
     }
 
     @Override
@@ -74,13 +85,15 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         TextView episodeCount, episodeName;
-        ImageView offlineEp;
+        AppCompatImageButton offlineEp;
+        ImageView thumbImage;
 
         public ViewHolder(@NonNull View view) {
             super(view);
             offlineEp = view.findViewById(R.id.offline);
             episodeCount = view.findViewById(R.id.episode_count);
             episodeName = view.findViewById(R.id.episode_title);
+            thumbImage = view.findViewById(R.id.thumb);
             view.setOnClickListener(this);
         }
 

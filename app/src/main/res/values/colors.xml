@@ -8,4 +8,5 @@
     <color name="textColor_87">#DEFFFFFF</color>
     <color name="cardColor">#232426</color>
     <color name="fabColor">#9874d9</color>
+    <color name="transparent">#00000000</color>
 </resources>
