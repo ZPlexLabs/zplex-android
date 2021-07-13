@@ -247,7 +247,10 @@ public class AboutActivity extends AppCompatActivity {
                         getShow();
                         if (plot.length() >= 200) {
                             Plot.setText(plot.substring(0, 200) + "...");
-                            Plot.setOnClickListener(v -> Plot.setText(plot));
+                            Plot.setOnClickListener(v -> {
+                                TransitionManager.beginDelayedTransition(rootView);
+                                Plot.setText(plot);
+                            });
                         } else {
                             Plot.setText(plot);
                         }
@@ -365,6 +368,10 @@ public class AboutActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "IOException | JSONException e", Toast.LENGTH_SHORT).show();
                 }
                 loadingEpisodes.setVisibility(View.GONE);
+                playButton.setOnClickListener(v -> {
+                    int scrollTo = ((View) tabLayout.getParent().getParent()).getTop() + tabLayout.getTop();
+                    nestedScrollView.smoothScrollTo(0, scrollTo - 30);
+                });
                 Log.d("showQueue", "executed");
             }, errorEpisodes -> {
                 retryEpisodes.setVisibility(View.VISIBLE);

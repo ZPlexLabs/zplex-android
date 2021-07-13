@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
     private void queryDB(String query) {
         runOnUiThread(() -> {
             TransitionManager.beginDelayedTransition(rootView);
+            mediaView.stopScroll();
             mediaItems.clear();
             errorView.setVisibility(View.GONE);
             loadingHome.setVisibility(View.VISIBLE);
@@ -271,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
 
         EditText searchEditText = searchView.findViewById(androidx.appcompat.R.id.search_src_text);
         searchEditText.setHint("Search...");
-        searchEditText.setTextColor(ContextCompat.getColor(this, R.color.textColor));
+        searchEditText.setTextColor(ContextCompat.getColor(this, R.color.textColor_87));
         searchEditText.setHintTextColor(ContextCompat.getColor(this, R.color.textColor_54));
 
         int searchImgId = androidx.appcompat.R.id.search_button;

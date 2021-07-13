@@ -10,9 +10,9 @@
     {
       "type": "SINGLE",
       "filters": [],
-      "versionCode": 4,
-      "versionName": "2.0-rc01",
-      "outputFile": "zechs.zplex-4-release.apk"
+      "versionCode": 5,
+      "versionName": "2.0-rc02",
+      "outputFile": "zechs.zplex-5-release.apk"
     }
   ]
 }
