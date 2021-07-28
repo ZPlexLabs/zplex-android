@@ -2,9 +2,11 @@
 
 Media streaming app based on cloudflare, uses Team Drive as database gets media information from API hosted on heroku and cloudflare for streaming.
 
-# Design
-
-![Design](Design.jpg?raw=true "Design")
+Screenshots
+-----------
+Movies|Movies View|TV Shows|TVView
+:-----:|:--------------:|:-----------:|:---------:|
+![Movies](Movies.png?raw=true "Movies")|![Movies View](MoviesView.png?raw=true "Movies View")|![TV Shows](TVShows.png?raw=true "TV Shows")|![TVView](TVView.png?raw=true "TV View")
 
 # Code stats
 
@@ -12,10 +14,10 @@ Media streaming app based on cloudflare, uses Team Drive as database gets media 
 --------------------------------------------------------------------------------
  Language             Files        Lines        Blank      Comment         Code
 --------------------------------------------------------------------------------
- Java                    11         1158          183          167          808
- XML                     26          807           64            4          739
+ Kotlin                  10         1311           88          297          926
+ XML                     27          838           69            4          765
 --------------------------------------------------------------------------------
- Total                   37         1965          247          171         1547
+ Total                   37         2149          157          301         1691
 --------------------------------------------------------------------------------
 
 ```
