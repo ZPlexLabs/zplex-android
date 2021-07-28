@@ -37,6 +37,7 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.JsonParser;
 
 import org.jetbrains.annotations.NotNull;
@@ -123,6 +124,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         errorView.setVisibility(View.GONE);
+
+        new Thread(() -> FirebaseMessaging.getInstance().subscribeToTopic("all")).start();
+
         if (dbJson.exists()) {
             queryDB("");
         } else {

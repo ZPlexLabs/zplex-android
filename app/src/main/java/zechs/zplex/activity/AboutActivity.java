@@ -98,14 +98,37 @@ public class AboutActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Log.d("onNewIntent", "Intent received");
+        TYPE = intent.getStringExtra("TYPE");
+        NAME = intent.getStringExtra("NAME");
+        POSTERURL = intent.getStringExtra("POSTERURL");
+        TransitionManager.beginDelayedTransition(rootView);
+        Poster.setImageResource(0);
+        Title.setText("");
+        Year_MPAA.setText("");
+        Genre.setText("");
+        Plot.setText("");
+        tabLayout.removeAllTabs();
+        episodeItems.clear();
+        getDetails();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
-        rootView = findViewById(R.id.root);
 
         TYPE = getIntent().getStringExtra("TYPE");
         NAME = getIntent().getStringExtra("NAME");
         POSTERURL = getIntent().getStringExtra("POSTERURL");
+        init();
+        getDetails();
+    }
+
+    private void init() {
+        rootView = findViewById(R.id.root);
 
         frameLayout = findViewById(R.id.frameLayout);
         loadingAbout = findViewById(R.id.loading_media);
@@ -139,8 +162,6 @@ public class AboutActivity extends AppCompatActivity {
         episodeAdapter = new EpisodeAdapter(episodeItems, getApplicationContext());
         episodesView.setAdapter(episodeAdapter);
         episodesView.setPadding(0, 0, 0, getNavigationBarHeight() + 24);
-
-        getDetails();
     }
 
     @SuppressLint("SetTextI18n")
@@ -448,5 +469,4 @@ public class AboutActivity extends AppCompatActivity {
         finish();
         overridePendingTransition(R.anim.no_animation, R.anim.slide_down);
     }
-
 }

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "996653127321",
+    "project_id": "zplex-3805a",
+    "storage_bucket": "zplex-3805a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:996653127321:android:f24c0ca3a14fb745d0ca08",
+        "android_client_info": {
+          "package_name": "zechs.zplex"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "996653127321-h0akuopgfbjd6dn8he6ogql8a8l6abpt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTGwD7lhntsJ6_btIFAgjJHyP8jC6suus"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "996653127321-h0akuopgfbjd6dn8he6ogql8a8l6abpt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

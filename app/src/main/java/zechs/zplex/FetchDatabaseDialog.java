@@ -1,5 +1,6 @@
 package zechs.zplex;
 
+
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -21,11 +22,8 @@ import static zechs.zplex.utils.Constants.API;
 
 public class FetchDatabaseDialog extends Dialog {
 
-    public final Activity activity;
-
     public FetchDatabaseDialog(Activity a) {
         super(a);
-        this.activity = a;
     }
 
     @Override
@@ -41,11 +39,9 @@ public class FetchDatabaseDialog extends Dialog {
         if (dbFile.exists()) {
             boolean isDeleted = dbFile.delete();
             Log.d("isDeleted", String.valueOf(isDeleted));
-
         }
 
         if (getContext() != null) {
-
             RequestQueue requestQueue = Volley.newRequestQueue(getContext());
             String url = API + "/media/library";
 
@@ -59,12 +55,12 @@ public class FetchDatabaseDialog extends Dialog {
                     Toast.makeText(getContext(), "Failed to load library", Toast.LENGTH_SHORT).show();
                 }
                 dismiss();
-                Log.d("objectArray", "executed");
+                Log.d("FetchDatabaseDialog", "executed");
 
             }, error -> {
-                Toast.makeText(getContext(), "Failed to fetch library", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Failed to fetch library, Please try again!", Toast.LENGTH_SHORT).show();
                 dismiss();
-                Log.d("objectArray", Arrays.toString(error.getStackTrace()));
+                Log.d("FetchDatabaseDialog", Arrays.toString(error.getStackTrace()));
 
             });
             objectArray.setShouldCache(false);

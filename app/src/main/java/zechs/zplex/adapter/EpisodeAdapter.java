@@ -7,7 +7,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,7 +17,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageButton;
-import androidx.core.app.ActivityOptionsCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -66,7 +64,7 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.ViewHold
                 dlRequest.setMimeType("video/x-matroska");
                 DownloadManager dlManager = (DownloadManager) context.getSystemService(DOWNLOAD_SERVICE);
                 dlManager.enqueue(dlRequest);
-                String size = ConverterUtils.getSize(Long.parseLong(episodeItem.getBytes()));
+                String size = ConverterUtils.Companion.getSize(Long.parseLong(episodeItem.getBytes()));
                 Toast.makeText(context, "Download started (" + size + ")", Toast.LENGTH_SHORT).show();
             }
         });
@@ -101,7 +99,6 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.ViewHold
         public void onClick(View view) {
             int position = getLayoutPosition();
             EpisodeItem episodeItem = episodeItems.get(position);
-
             try {
                 Intent vlcIntent = new Intent(Intent.ACTION_VIEW);
                 vlcIntent.setPackage("org.videolan.vlc");
@@ -109,11 +106,10 @@ public class EpisodeAdapter extends RecyclerView.Adapter<EpisodeAdapter.ViewHold
                 vlcIntent.setDataAndTypeAndNormalize(Uri.parse(episodeItem.getPlayUrl()), "video/*");
                 vlcIntent.putExtra("title", episodeItem.getEpisode() + " - " + episodeItem.getEpisodeTitle());
                 vlcIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-                Bundle bundle = ActivityOptionsCompat.makeCustomAnimation(context, android.R.anim.fade_in, android.R.anim.fade_out).toBundle();
-                context.startActivity(vlcIntent, bundle);
+                context.startActivity(vlcIntent);
             } catch (ActivityNotFoundException notFoundException) {
                 notFoundException.printStackTrace();
-                Toast.makeText(context, "VLC not found", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "VLC not found, Install VLC from Play Store", Toast.LENGTH_LONG).show();
             }
         }
     }

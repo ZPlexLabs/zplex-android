@@ -17,15 +17,19 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup">
+
         <activity
             android:name=".activity.AboutActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:launchMode="singleTask"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:parentActivityName=".activity.MainActivity"
             android:theme="@style/AppTheme.About" />
+
         <activity
             android:name=".activity.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:launchMode="singleTop"
+            android:exported="true"
             android:theme="@style/AppTheme.Home">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -33,6 +37,23 @@
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
+
+        <service
+            android:name=".MyFirebaseMessagingService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_outline_new_releases_24" />
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="New releases" />
     </application>
 
 </manifest>
