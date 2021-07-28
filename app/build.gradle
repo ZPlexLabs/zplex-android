@@ -25,6 +25,10 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    android.sourceSets.all {
+        java.srcDir("src/$name/kotlin")
+    }
+
     buildTypes {
         release {
             minifyEnabled true
