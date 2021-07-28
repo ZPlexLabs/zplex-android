@@ -1,76 +1,70 @@
-package zechs.zplex;
+package zechs.zplex
 
+import android.app.Dialog
+import android.content.Context
+import android.os.Bundle
+import android.util.Log
+import android.view.Window
+import android.widget.Toast
+import com.android.volley.DefaultRetryPolicy
+import com.android.volley.VolleyError
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.Volley
+import org.json.JSONArray
+import zechs.zplex.utils.Constants
+import java.io.File
+import java.io.FileWriter
+import java.io.IOException
+import java.util.*
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Window;
-import android.widget.Toast;
+class FetchDatabaseDialog(context: Context) : Dialog(context) {
 
-import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-
-import static zechs.zplex.utils.Constants.API;
-
-public class FetchDatabaseDialog extends Dialog {
-
-    public FetchDatabaseDialog(Activity a) {
-        super(a);
+    init {
+        setCancelable(false)
+        setCanceledOnTouchOutside(false)
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        setContentView(R.layout.fetch_dialog)
 
-        setCancelable(false);
-        setCanceledOnTouchOutside(false);
-        setContentView(R.layout.fetch_dialog);
+        val dbFile = File(context.filesDir.toString() + "/dbJson.json")
 
-        File dbFile = new File(getContext().getFilesDir() + "/dbJson.json");
         if (dbFile.exists()) {
-            boolean isDeleted = dbFile.delete();
-            Log.d("isDeleted", String.valueOf(isDeleted));
+            val isDeleted = dbFile.delete()
+            Log.d("isDeleted", isDeleted.toString())
         }
 
-        if (getContext() != null) {
-            RequestQueue requestQueue = Volley.newRequestQueue(getContext());
-            String url = API + "/media/library";
-
-            JsonArrayRequest objectArray = new JsonArrayRequest(url, response -> {
-                try {
-                    FileWriter file = new FileWriter(getContext().getFilesDir() + "/dbJson.json");
-                    file.write(response.toString());
-                    file.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(getContext(), "Failed to load library", Toast.LENGTH_SHORT).show();
-                }
-                dismiss();
-                Log.d("FetchDatabaseDialog", "executed");
-
-            }, error -> {
-                Toast.makeText(getContext(), "Failed to fetch library, Please try again!", Toast.LENGTH_SHORT).show();
-                dismiss();
-                Log.d("FetchDatabaseDialog", Arrays.toString(error.getStackTrace()));
-
-            });
-            objectArray.setShouldCache(false);
-            objectArray.setRetryPolicy(new DefaultRetryPolicy(5000, -1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-            requestQueue.add(objectArray);
+        val requestQueue = Volley.newRequestQueue(context)
+        val url = Constants.API + "/media/library"
+        val objectArray = JsonArrayRequest(url, { response: JSONArray ->
+            try {
+                val file = FileWriter(context.filesDir.toString() + "/dbJson.json")
+                file.write(response.toString())
+                file.close()
+            } catch (e: IOException) {
+                e.printStackTrace()
+                Toast.makeText(context, "Failed to load library", Toast.LENGTH_SHORT).show()
+            }
+            dismiss()
+            Log.d("FetchDatabaseDialog", "executed")
+        }) { error: VolleyError ->
+            Toast.makeText(
+                context,
+                "Failed to fetch library, Please try again!",
+                Toast.LENGTH_SHORT
+            ).show()
+            dismiss()
+            Log.d("FetchDatabaseDialog", Arrays.toString(error.stackTrace))
         }
+        objectArray.setShouldCache(false)
+        objectArray.retryPolicy =
+            DefaultRetryPolicy(5000, -1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+        requestQueue.add(objectArray)
     }
 
-    @Override
-    public void onBackPressed() {
+    override fun onBackPressed() {
         //super.onBackPressed();
     }
 }

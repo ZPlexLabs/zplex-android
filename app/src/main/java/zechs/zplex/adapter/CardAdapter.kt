@@ -1,81 +1,60 @@
-package zechs.zplex.adapter;
+package zechs.zplex.adapter
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import zechs.zplex.R
+import zechs.zplex.activity.AboutActivity
+import java.util.*
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+class CardItem(var name: String, var type: String, var posterURL: String)
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-
-import java.util.ArrayList;
-
-import zechs.zplex.R;
-import zechs.zplex.activity.AboutActivity;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
-public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder> {
-
-    private final ArrayList<CardItem> cardItems;
-    private final Context context;
-    private final Activity activity;
-
-    public CardAdapter(ArrayList<CardItem> cardItems, Context context, Activity activity) {
-        this.cardItems = cardItems;
-        this.context = context;
-        this.activity = activity;
+class CardAdapter(
+    private val cardItems: ArrayList<CardItem>,
+    private val context: Context,
+    private val activity: Activity
+) : RecyclerView.Adapter<CardAdapter.ViewHolder>() {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.media_item, parent, false)
+        return ViewHolder(view)
     }
 
-    @NonNull
-    @Override
-    public CardAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.media_item, parent, false);
-        return new ViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull CardAdapter.ViewHolder holder, int position) {
-        CardItem cardItem = cardItems.get(position);
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val cardItem = cardItems[position]
         Glide.with(context)
-                .load(cardItem.getPosterURL())
-                .placeholder(R.color.cardColor)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(holder.posterView);
+            .load(cardItem.posterURL)
+            .placeholder(R.color.cardColor)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .into(holder.posterView)
     }
 
-    @Override
-    public int getItemCount() {
-        return cardItems.size();
+    override fun getItemCount(): Int {
+        return cardItems.size
     }
 
-
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        ImageView posterView;
-
-        public ViewHolder(@NonNull View view) {
-            super(view);
-            posterView = view.findViewById(R.id.item_poster);
-            view.setOnClickListener(this);
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
+        var posterView: ImageView = view.findViewById(R.id.item_poster)
+        override fun onClick(view: View) {
+            val position = layoutPosition
+            val cardItem = cardItems[position]
+            val intent = Intent(activity, AboutActivity::class.java)
+            intent.putExtra("NAME", cardItem.name)
+            intent.putExtra("TYPE", cardItem.type)
+            intent.putExtra("POSTERURL", cardItem.posterURL)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            activity.startActivity(intent)
+            activity.overridePendingTransition(R.anim.slide_up, R.anim.no_animation)
         }
 
-        @Override
-        public void onClick(View view) {
-            int position = getLayoutPosition();
-            CardItem cardItem = cardItems.get(position);
-            Intent intent = new Intent(activity, AboutActivity.class);
-            intent.putExtra("NAME", cardItem.getName());
-            intent.putExtra("TYPE", cardItem.getType());
-            intent.putExtra("POSTERURL", cardItem.getPosterURL());
-            intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
-            activity.startActivity(intent);
-            activity.overridePendingTransition(R.anim.slide_up, R.anim.no_animation);
+        init {
+            view.setOnClickListener(this)
         }
     }
 }
