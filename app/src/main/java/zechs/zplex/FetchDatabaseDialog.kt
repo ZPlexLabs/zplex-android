@@ -60,7 +60,7 @@ class FetchDatabaseDialog(context: Context) : Dialog(context) {
         }
         objectArray.setShouldCache(false)
         objectArray.retryPolicy =
-            DefaultRetryPolicy(5000, -1, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
+            DefaultRetryPolicy(10000, 2, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT)
         requestQueue.add(objectArray)
     }
 
