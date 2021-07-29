@@ -12,6 +12,28 @@ static def getDate() {
 }
 
 android {
+
+    signingConfigs {
+        release {
+            storeFile file('/home/zechs/zechs_dev.jks')
+            storePassword 'sirzechs'
+            keyAlias 'key0'
+            keyPassword 'sirzechs'
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/ASL2.0'
+        exclude("META-INF/*.kotlin_module")
+    }
+
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
 
@@ -23,6 +45,7 @@ android {
         versionName "2.0-rc03-beta"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.release
     }
 
     android.sourceSets.all {
