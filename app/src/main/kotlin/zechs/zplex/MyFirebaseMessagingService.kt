@@ -9,6 +9,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import zechs.zplex.activity.AboutActivity
@@ -19,9 +20,7 @@ import java.util.*
 
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
-    companion object {
-        private const val TAG = "MyFirebaseMsgService"
-    }
+    private val tag = "MyFirebaseMsgService"
 
     override fun onNewToken(p0: String) {
         super.onNewToken(p0)
@@ -31,10 +30,10 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        Log.d(TAG, "From: " + remoteMessage.from)
+        Log.d(tag, "From: " + remoteMessage.from)
 
         if (remoteMessage.notification != null) {
-            Log.d(TAG, "Message  " + remoteMessage.data)
+            Log.d(tag, "Message  " + remoteMessage.data)
         }
 
         if (remoteMessage.data.isNotEmpty()) {
@@ -43,8 +42,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             val title = data["title"]
             val body = data["body"]
 
-            Log.d(TAG, "Notification Title: $title")
-            Log.d(TAG, "Notification Body: $body")
+            Log.d(tag, "Notification Title: $title")
+            Log.d(tag, "Notification Body: $body")
 
             var show: String? = null
             var episode: String? = null
@@ -101,7 +100,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             vlcIntent.putExtra("title", "$episode - $episodeTitle")
             vlcIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
-            val finalVlcIntent = PendingIntent.getActivity(this, requestCode, vlcIntent, 0)
+            val finalVlcIntent = PendingIntent.getActivity(
+                this,
+                requestCode,
+                vlcIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
 
             val notificationIntent = Intent(this, AboutActivity::class.java)
             notificationIntent.putExtra("NAME", show)
@@ -116,17 +120,18 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 this,
                 requestCode,
                 notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
             val builder = NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_outline_new_releases_24)
                 .setContentTitle(title)
                 .setContentText(bodyText)
-                .setFullScreenIntent(intent, true)
+                .setAutoCancel(true)
+                .setContentIntent(intent)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(title))
                 .setStyle(NotificationCompat.BigTextStyle().bigText(bodyText))
-                .setAutoCancel(true)
+                .setColor(ContextCompat.getColor(this, R.color.colorAccent))
                 .addAction(R.drawable.ic_baseline_play_arrow_24, "Watch now", finalVlcIntent)
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
