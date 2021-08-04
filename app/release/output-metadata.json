@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "artifactType": {
     "type": "APK",
     "kind": "Directory"
@@ -10,9 +10,11 @@
     {
       "type": "SINGLE",
       "filters": [],
+      "attributes": [],
       "versionCode": 6,
       "versionName": "2.0-rc03-beta",
-      "outputFile": "zechs.zplex-6-release-28 Jul, 20.53 PM.apk"
+      "outputFile": "zechs.zplex-6-release-4 Aug, 18.46 PM.apk"
     }
-  ]
+  ],
+  "elementType": "File"
 }

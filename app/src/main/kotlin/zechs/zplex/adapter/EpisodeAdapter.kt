@@ -44,7 +44,7 @@ class EpisodeAdapter(
         val episodeItem = episodeItems[position]
         holder.episodeCount.text = "Episode ${episodeItem.episode.substring(4).toInt()}"
         holder.episodeName.text = episodeItem.episodeTitle
-        holder.offlineEp.setOnClickListener { v: View? ->
+        holder.offlineEp.setOnClickListener {
             if (context != null) {
                 val dlRequest = DownloadManager.Request(Uri.parse(episodeItem.playUrl))
                 val fileName =

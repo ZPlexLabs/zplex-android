@@ -277,13 +277,18 @@ class AboutActivity : AppCompatActivity() {
                         }
                         val plot = root.getString("plot")
                         val genres = StringBuilder()
-                        val genreArray = JSONArray(root.getString("genre"))
-                        for (i in 0 until genreArray.length()) {
-                            genres.append(genreArray.getJSONObject(i).getString("content"))
-                                .append(", ")
+                        val rootGenre = root.getString("genre")
+                        try {
+                            val genreArray = JSONArray(rootGenre)
+                            for (i in 0 until genreArray.length()) {
+                                genres.append(genreArray.getJSONObject(i).getString("content"))
+                                    .append(", ")
+                            }
+                            genres.deleteCharAt(genres.length - 2)
+                            genre!!.text = genres
+                        } catch (genresException: JSONException) {
+                            genre!!.text = rootGenre
                         }
-                        genres.deleteCharAt(genres.length - 2)
-                        genre!!.text = genres
                         if (typeShow == "TV") {
                             getShow()
                             if (plot.length >= 200) {
@@ -488,6 +493,7 @@ class AboutActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun getEpisodes(tabName: String, index: Int, episodesResponse: JSONArray) {
         try {
             val obj = episodesResponse[index] as JSONObject

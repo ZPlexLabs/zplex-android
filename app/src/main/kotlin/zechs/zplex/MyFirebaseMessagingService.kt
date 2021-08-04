@@ -1,6 +1,8 @@
 package zechs.zplex
 
 import android.app.Notification
+import android.app.Notification.DEFAULT_SOUND
+import android.app.Notification.DEFAULT_VIBRATE
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -134,8 +136,8 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
                 .setColor(ContextCompat.getColor(this, R.color.colorAccent))
                 .addAction(R.drawable.ic_baseline_play_arrow_24, "Watch now", finalVlcIntent)
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setDefaults(Notification.DEFAULT_SOUND)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(DEFAULT_SOUND and DEFAULT_VIBRATE)
                 .setDefaults(Notification.DEFAULT_ALL)
 
 

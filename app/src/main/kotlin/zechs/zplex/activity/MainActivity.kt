@@ -1,5 +1,6 @@
 package zechs.zplex.activity
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -74,11 +75,13 @@ class MainActivity : AppCompatActivity() {
         loadingHome = findViewById(R.id.loading_home)
         mediaView = findViewById(R.id.media_view)
         mediaAdapter = CardAdapter(mediaItems, applicationContext, this@MainActivity)
+
         if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
             mediaView?.layoutManager = GridLayoutManager(this, 2)
         } else {
             mediaView?.layoutManager = GridLayoutManager(this, 5)
         }
+
         mediaView?.adapter = mediaAdapter
         tabLayout = findViewById(R.id.tabs)
         tabLayout?.newTab()?.let { tabLayout?.addTab(it.setText("Movies")) }
@@ -100,6 +103,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun queryDB(query: String) {
         runOnUiThread {
             TransitionManager.beginDelayedTransition(rootView!!)
@@ -186,9 +190,7 @@ class MainActivity : AppCompatActivity() {
             Constraints.LayoutParams.MATCH_PARENT
         )
         fetchDatabaseDialog!!.setOnDismissListener {
-            if (dbJson!!.exists()) queryDB(
-                ""
-            )
+            if (dbJson!!.exists()) queryDB("")
         }
     }
 
@@ -236,7 +238,7 @@ class MainActivity : AppCompatActivity() {
                         text = query
                         queryDB(text)
                     }
-                }, 150)
+                }, 200)
                 return false
             }
 
@@ -253,7 +255,7 @@ class MainActivity : AppCompatActivity() {
                         queryDB(text)
                     }
                 }
-            }, 150)
+            }, 200)
             false
         }
         val searchEditText =
