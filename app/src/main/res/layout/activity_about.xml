@@ -40,6 +40,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/item_poster"
                 android:layout_width="wrap_content"
@@ -140,6 +141,26 @@
                 app:layout_constraintTop_toBottomOf="@+id/item_poster" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/save_show"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:text="Watchlist"
+                android:textColor="@color/textColor"
+                app:elevation="0dp"
+                app:icon="@drawable/ic_baseline_add_to_queue_24"
+                app:iconGravity="textStart"
+                app:iconTint="@color/textColor"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/play_btn"
+                app:strokeColor="@color/colorAccent" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/down_btn"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
                 android:layout_width="match_parent"
@@ -156,7 +177,7 @@
                 app:iconTint="@color/textColor"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/play_btn"
+                app:layout_constraintTop_toBottomOf="@+id/save_show"
                 app:strokeColor="@color/colorAccent" />
 
             <TextView

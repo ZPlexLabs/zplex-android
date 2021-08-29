@@ -1,0 +1,195 @@
+package zechs.zplex.ui.fragment
+
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.transition.TransitionManager
+import android.util.Log
+import android.view.View
+import android.widget.AbsListView
+import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.transition.MaterialSharedAxis
+import kotlinx.android.synthetic.main.fragment_search.*
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import zechs.zplex.R
+import zechs.zplex.adapter.FilesAdapter
+import zechs.zplex.ui.FileViewModel
+import zechs.zplex.ui.activity.AboutActivity
+import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.utils.Constants.Companion.PAGE_TOKEN
+import zechs.zplex.utils.Constants.Companion.SEARCH_DELAY_AMOUNT
+import zechs.zplex.utils.Resource
+
+
+class SearchFragment : Fragment(R.layout.fragment_search) {
+
+    private lateinit var viewModel: FileViewModel
+    private lateinit var filesAdapter: FilesAdapter
+    private val TAG = "SearchFragment"
+    private var text = ""
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        viewModel = (activity as ZPlexActivity).viewModel
+        setupRecyclerView()
+
+        appBarLayout.setPadding(
+            appBarLayout.paddingLeft,
+            appBarLayout.paddingTop + getStatusBarHeight() + 16,
+            appBarLayout.paddingRight,
+            appBarLayout.paddingBottom
+        )
+
+        var job: Job? = null
+        search_box.editText?.addTextChangedListener { editable ->
+            job?.cancel()
+            job = MainScope().launch {
+                delay(SEARCH_DELAY_AMOUNT)
+                editable?.let {
+                    PAGE_TOKEN = ""
+                    text = editable.toString()
+                    viewModel.getDriveFiles(15, PAGE_TOKEN, setDriveQuery(text))
+                }
+            }
+        }
+
+        viewModel.filesList.observe(viewLifecycleOwner, { response ->
+            when (response) {
+                is Resource.Success -> {
+                    hideProgressBar()
+                    TransitionManager.beginDelayedTransition(root)
+                    response.data?.let { filesResponse ->
+                        filesAdapter.differ.submitList(filesResponse.files.toList())
+                        isLastPage = filesResponse.nextPageToken == null
+                        println(filesResponse.nextPageToken)
+                        Log.d("pageToken", PAGE_TOKEN)
+                    }
+                }
+                is Resource.Error -> {
+                    hideProgressBar()
+                    response.message?.let { message ->
+                        Toast.makeText(
+                            context,
+                            "An error occurred: $message",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        Log.e(TAG, "An error occurred: $message")
+                    }
+                }
+                is Resource.Loading -> {
+                    showProgressBar()
+                }
+            }
+        })
+    }
+
+    private fun setDriveQuery(query: String): String {
+        return if (query == "") {
+            "mimeType='application/vnd.google-apps.folder' and parents in '0AASFDMjRqUB0Uk9PVA' and trashed = false"
+        } else {
+            "name contains '$query' and mimeType='application/vnd.google-apps.folder' and parents in '0AASFDMjRqUB0Uk9PVA' and trashed = false"
+        }
+    }
+
+    private fun hideProgressBar() {
+        loadingSearch.visibility = View.INVISIBLE
+        isLoading = false
+    }
+
+    private fun showProgressBar() {
+        loadingSearch.visibility = View.VISIBLE
+        isLoading = true
+    }
+
+    var isLoading = false
+    var isLastPage = false
+    var isScrolling = false
+
+    private val scrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+
+            val layoutManager = recyclerView.layoutManager as GridLayoutManager
+            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+            val visibleItemCount = layoutManager.childCount
+            val totalItemCount = layoutManager.itemCount
+
+            val isNotLoadingAndNotLastPage = !isLoading && !isLastPage
+            val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
+            val isNotAtBeginning = firstVisibleItemPosition >= 0
+            val isTotalMoreThanVisible = totalItemCount >= 1
+
+            val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
+                    isTotalMoreThanVisible && isScrolling
+
+            if (shouldPaginate) {
+                viewModel.getDriveFiles(15, PAGE_TOKEN, setDriveQuery(text))
+                isScrolling = false
+                Log.d(tag, "Paginating")
+            } else {
+                Log.d(tag, "Not paginating")
+                rvSearch.setPadding(0, 0, 0, 0)
+            }
+        }
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            super.onScrollStateChanged(recyclerView, newState)
+            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
+                isScrolling = true
+            }
+        }
+    }
+
+    private fun setupRecyclerView() {
+        filesAdapter = FilesAdapter()
+        rvSearch.apply {
+            adapter = filesAdapter
+            layoutManager = GridLayoutManager(activity, 3)
+            addOnScrollListener(this@SearchFragment.scrollListener)
+        }
+
+        filesAdapter.setOnItemClickListener {
+            val posterUrl = Uri.parse("https://zplex.zechs.workers.dev/0:/${it.name}/poster.jpg")
+            val name = it.name.split(" - ").toTypedArray()[0]
+            val type = it.name.split(" - ").toTypedArray()[1]
+            val intent = Intent(activity, AboutActivity::class.java)
+            intent.putExtra("NAME", name)
+            intent.putExtra("TYPE", type)
+            intent.putExtra("POSTERURL", posterUrl.toString())
+
+            val bundle = Bundle().apply {
+                putSerializable("file", it)
+            }
+
+            intent.putExtras(bundle)
+
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intent)
+            activity?.overridePendingTransition(R.anim.slide_up, R.anim.no_animation)
+        }
+    }
+
+    private fun getStatusBarHeight(): Int {
+        var result = 0
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            result = resources.getDimensionPixelSize(resourceId)
+        }
+        return result
+    }
+}

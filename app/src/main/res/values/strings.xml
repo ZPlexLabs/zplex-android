@@ -12,7 +12,13 @@
     <string name="vlc_not_found">VLC not found</string>
     <string name="play">Play</string>
     <string name="download">Download</string>
-    <string name="anim_duration">150</string>
+    <string name="anim_duration">250</string>
     <string name="no_results">No results</string>
     <string name="failed_to_load_poster_image">Failed to load poster image</string>
+    <string name="search_hint">Search anime, movies, tv shows…</string>
+    <string name="recently_added">Recently added</string>
+    <string name="new_episodes">New episodes</string>
+    <string name="my_shows">My Shows</string>
+    <string name="my_shows_lower">My shows</string>
+    <string name="home">Home</string>
 </resources>

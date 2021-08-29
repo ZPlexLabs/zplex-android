@@ -3,7 +3,33 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/dark_gradient.xml" value="0.26614583333333336" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/delete_me_bg.xml" value="0.26614583333333336" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/ic_home.xml" value="0.2703125" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/ic_my_shows.xml" value="0.26614583333333336" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/ic_releases.xml" value="0.26614583333333336" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/icon_color.xml" value="0.26614583333333336" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/search_bg.xml" value="0.26614583333333336" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/toolbar_bg.xml" value="0.26614583333333336" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/activity_about.xml" value="0.4" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/activity_main.xml" value="0.16296296296296298" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/activity_zplex.xml" value="0.264" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/episode_list.xml" value="0.264" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/error_layout.xml" value="0.25416666666666665" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/example.xml" value="0.264" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fetch_dialog.xml" value="0.1398148148148148" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_about.xml" value="0.25" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_home.xml" value="0.264" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_my_shows.xml" value="0.25416666666666665" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_releases.xml" value="0.25416666666666665" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_search.xml" value="0.4682926829268293" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/home_layout.xml" value="0.25" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/logs_item.xml" value="0.4" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/media_item.xml" value="0.12360688956433637" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/media_item_home.xml" value="0.25" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/not_of_this_project.xml" value="0.264" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/test.xml" value="0.6" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/menu/bottom_navigation_menu.xml" value="0.25416666666666665" />
       </map>
     </option>
   </component>
@@ -12,5 +38,12 @@
   </component>
   <component name="ProjectType">
     <option name="id" value="Android" />
+  </component>
+  <component name="VisualizationToolProject">
+    <option name="state">
+      <ProjectState>
+        <option name="scale" value="0.72" />
+      </ProjectState>
+    </option>
   </component>
 </project>

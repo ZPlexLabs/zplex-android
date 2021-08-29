@@ -3,9 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="zechs.zplex">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".ThisApp"
         android:allowBackup="true"
         android:colorMode="wideColorGamut"
         android:fullBackupContent="false"
@@ -17,22 +19,30 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup">
-
         <activity
-            android:name=".activity.AboutActivity"
+            android:name=".ui.activity.ZPlexActivity"
+            android:exported="true"
+            android:theme="@style/NewAppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.activity.AboutActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
             android:launchMode="singleTop"
-            android:parentActivityName=".activity.MainActivity"
+            android:parentActivityName=".ui.activity.MainActivity"
             android:theme="@style/AppTheme.About" />
-
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".ui.activity.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:exported="true"
             android:theme="@style/AppTheme.Home">
             <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER" />
+                <!--                <category android:name="android.intent.category.LAUNCHER" />-->
 
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
@@ -50,7 +60,6 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_outline_new_releases_24" />
-
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="New releases" />
