@@ -12,7 +12,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.media_item.view.*
 import zechs.zplex.R
 import zechs.zplex.models.drive.File
-import zechs.zplex.utils.Constants.Companion.ZPLEX
+import zechs.zplex.utils.Constants.Companion.TVDB_IMAGE_REDIRECT
 
 
 class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
@@ -21,7 +21,7 @@ class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
 
     private val differCallback = object : DiffUtil.ItemCallback<File>() {
         override fun areItemsTheSame(oldItem: File, newItem: File): Boolean {
-            return oldItem.name == newItem.name
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: File, newItem: File): Boolean {
@@ -47,17 +47,34 @@ class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
 
     override fun onBindViewHolder(holder: FilesViewHolder, position: Int) {
         val file = differ.currentList[position]
-        val posterUrl = Uri.parse("${ZPLEX}${file.name}/poster.jpg")
+        val name = file.name
 
-        holder.itemView.apply {
-            Glide.with(context)
-                .asBitmap()
-                .load(posterUrl)
-                .placeholder(R.color.cardColor)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .into(item_poster)
-            setOnClickListener {
-                onItemClickListener?.let { it(file) }
+        if (name.endsWith("TV") || name.endsWith("Movie")) {
+
+//            val posterURL = URL("${ZPLEX}${name}/poster.jpg")
+//            val posterUri = URI(
+//                posterURL.protocol,
+//                posterURL.userInfo,
+//                IDN.toASCII(posterURL.host),
+//                posterURL.port,
+//                posterURL.path,
+//                posterURL.query,
+//                posterURL.ref
+//            ).toASCIIString()
+
+            val redirectImagePoster =
+                Uri.parse("${TVDB_IMAGE_REDIRECT}${file.name.split(" - ").toTypedArray()[0]}")
+
+            holder.itemView.apply {
+                Glide.with(context)
+                    .asBitmap()
+                    .load(redirectImagePoster)
+                    .placeholder(R.color.cardColor)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(item_poster)
+                setOnClickListener {
+                    onItemClickListener?.let { it(file) }
+                }
             }
         }
     }

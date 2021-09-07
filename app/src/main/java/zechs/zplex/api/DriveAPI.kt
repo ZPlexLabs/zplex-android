@@ -20,9 +20,11 @@ interface DriveAPI {
         @Query("pageToken")
         pageToken: String = "",
         @Query("fields")
-        fields: String = "nextPageToken, files(id, name)",
+        fields: String = "nextPageToken, files(id, name, size, thumbnailLink)",
         @Query("q")
-        q: String = "mimeType='application/vnd.google-apps.folder' and parents in '0AASFDMjRqUB0Uk9PVA' and trashed = false",
+        q: String = "mimeType='application/vnd.google-apps.folder' and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false",
+        @Query("orderBy")
+        orderBy: String = "modifiedTime desc"
     ): Response<DriveResponse>
 
 }

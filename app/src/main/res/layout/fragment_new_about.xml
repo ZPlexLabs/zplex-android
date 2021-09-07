@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimaryDark"
+    android:orientation="vertical"
+    tools:context=".ui.fragment.AboutFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/series_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            app:constraint_referenced_ids="tv_year_mpaa,cg_genre,tv_plot" />
+
+        <FrameLayout
+            android:id="@+id/frameLayout"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/iv_fanart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:contentDescription="@null"
+                android:scaleType="centerCrop"
+                android:transitionName="poster"
+                tools:ignore="ImageContrastCheck"
+                tools:srcCompat="@drawable/fanart" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="175dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/dark_faded_gradient" />
+        </FrameLayout>
+
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/poster_card"
+            android:layout_width="170dp"
+            android:layout_height="250dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="4dp"
+            app:layout_constraintBottom_toBottomOf="@+id/frameLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.025"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/frameLayout">
+
+            <ImageView
+                android:id="@+id/iv_poster"
+                android:layout_width="170dp"
+                android:layout_height="250dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@null"
+                android:elevation="24dp"
+                android:scaleType="centerCrop"
+                tools:ignore="ImageContrastCheck"
+                tools:srcCompat="@drawable/poster" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/open_sans_semibold"
+            android:textColor="@color/textColor"
+            android:textSize="21sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toBottomOf="@+id/poster_card"
+            tools:text="That Time I Got Reincarnated as a Slime" />
+
+        <TextView
+            android:id="@+id/tv_year_mpaa"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="@font/open_sans_semibold"
+            android:textColor="@color/textColor_74"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/btn_my_list"
+            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/btn_my_list"
+            tools:text="Tokyo MX • TV-MA • 2018 • 24 min" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_my_list"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:elevation="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:minHeight="0dp"
+            android:padding="5dp"
+            android:text="@string/save"
+            android:textColor="@color/colorAccent"
+            app:elevation="0dp"
+            app:icon="@drawable/ic_baseline_playlist_add_24"
+            app:iconGravity="textStart"
+            app:iconTint="@color/colorAccent"
+            app:layout_constraintBottom_toBottomOf="@+id/poster_card"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/poster_card"
+            app:strokeColor="@color/cardColor"
+            tools:iconTint="#2898f0"
+            tools:ignore="TouchTargetSizeCheck"
+            tools:strokeColor="@color/cardColor"
+            tools:textColor="#2898f0" />
+
+        <TextView
+            android:id="@+id/tv_plot"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/open_sans"
+            android:textColor="@color/textColor_87"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="@+id/tv_title"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title"
+            tools:text="37-year-old corporate worker Mikami Satoru is stabbed by a random killer, and is reborn to an alternate world. But he turns out to be reborn a slime! Thrown into this new world with the name Rimuru Tempest, he begins his quest to create a world that’s welcoming to all races. Broken free from ordinary, stale past life, his fresh adventure in a fantasy world as a slime monster with unique abilities begins." />
+
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/cg_genre"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
+            app:layout_constraintStart_toStartOf="@+id/tv_plot"
+            app:layout_constraintTop_toBottomOf="@+id/tv_plot"
+            app:selectionRequired="false"
+            app:singleLine="false"
+            app:singleSelection="false" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="@android:color/transparent"
+            app:layout_constraintEnd_toStartOf="@+id/seasons_menu"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toBottomOf="@+id/cg_genre"
+            app:tabGravity="start"
+            app:tabIndicatorColor="@color/colorAccent"
+            app:tabIndicatorFullWidth="false"
+            app:tabIndicatorHeight="4dp"
+            app:tabMode="scrollable"
+            app:tabSelectedTextColor="@color/colorAccent"
+            app:tabTextAppearance="@style/seasonsTabTextAppearance"
+            app:tabTextColor="@color/textColor_54"
+            tools:tabIndicatorColor="#2898f0"
+            tools:tabSelectedTextColor="#2898f0">
+
+        </com.google.android.material.tabs.TabLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/seasons_menu"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:insetTop="2dp"
+            android:insetBottom="2dp"
+            android:minHeight="0dp"
+            android:textSize="12sp"
+            app:backgroundTint="@color/transparent"
+            app:cornerRadius="16dp"
+            app:elevation="0dp"
+            app:icon="@drawable/ic_round_keyboard_arrow_down_24"
+            app:iconGravity="end"
+            app:iconTint="@color/textColor"
+            app:layout_constraintBottom_toBottomOf="@+id/tabs"
+            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toTopOf="@+id/tabs"
+            tools:text="Season 1" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_episodes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
+            app:layout_constraintStart_toStartOf="@+id/tv_plot"
+            app:layout_constraintTop_toBottomOf="@+id/tabs"
+            tools:listitem="@layout/episode_list" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_retry_episodes"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:text="@string/retry"
+            android:textColor="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toBottomOf="@+id/cg_genre"
+            tools:textColor="#2898f0" />
+
+        <ProgressBar
+            android:id="@+id/pb_episodes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toBottomOf="@+id/cg_genre"
+            tools:indeterminateTint="#2898f0" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

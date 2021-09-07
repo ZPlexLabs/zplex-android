@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../../layout/custom_preview.xml" value="0.33958333333333335" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/dark_gradient.xml" value="0.26614583333333336" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/delete_me_bg.xml" value="0.26614583333333336" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/ic_home.xml" value="0.2703125" />
@@ -19,10 +20,10 @@
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/example.xml" value="0.264" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fetch_dialog.xml" value="0.1398148148148148" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_about.xml" value="0.25" />
-        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_home.xml" value="0.264" />
-        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_my_shows.xml" value="0.25416666666666665" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_home.xml" value="0.28546712802768165" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_my_shows.xml" value="0.5136842105263157" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_releases.xml" value="0.25416666666666665" />
-        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_search.xml" value="0.4682926829268293" />
+        <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/fragment_search.xml" value="0.4701348747591522" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/home_layout.xml" value="0.25" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/logs_item.xml" value="0.4" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/media_item.xml" value="0.12360688956433637" />
@@ -30,6 +31,24 @@
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/not_of_this_project.xml" value="0.264" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/layout/test.xml" value="0.6" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/menu/bottom_navigation_menu.xml" value="0.25416666666666665" />
+        <entry key="app/src/main/res/drawable/dark_faded_gradient.xml" value="0.340625" />
+        <entry key="app/src/main/res/drawable/dark_gradient.xml" value="0.340625" />
+        <entry key="app/src/main/res/drawable/ic_download.xml" value="0.340625" />
+        <entry key="app/src/main/res/drawable/popup_menu_bg.xml" value="0.340625" />
+        <entry key="app/src/main/res/layout/activity_about.xml" value="0.72" />
+        <entry key="app/src/main/res/layout/activity_zplex.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/episode_list.xml" value="0.8" />
+        <entry key="app/src/main/res/layout/error_layout.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/fragment_about.xml" value="0.38317757009345793" />
+        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/fragment_new_about.xml" value="0.23837209302325582" />
+        <entry key="app/src/main/res/layout/fragment_releases.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/item_chip.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/item_dropdown.xml" value="0.72" />
+        <entry key="app/src/main/res/layout/item_episode.xml" value="0.6" />
+        <entry key="app/src/main/res/layout/logs_item.xml" value="0.72" />
+        <entry key="app/src/main/res/layout/media_item.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/media_item_home.xml" value="0.254981884057971" />
       </map>
     </option>
   </component>

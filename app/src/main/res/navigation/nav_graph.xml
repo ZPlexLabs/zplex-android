@@ -26,7 +26,11 @@
         tools:layout="@layout/fragment_search">
         <action
             android:id="@+id/action_searchFragment_to_aboutFragment"
-            app:destination="@id/aboutFragment" />
+            app:destination="@id/aboutFragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@anim/slide_down"
+            app:popEnterAnim="@anim/slide_up"
+            app:popExitAnim="@anim/slide_down" />
     </fragment>
 
     <fragment
@@ -36,13 +40,34 @@
         tools:layout="@layout/fragment_my_shows">
         <action
             android:id="@+id/action_myShowsFragment_to_aboutFragment"
-            app:destination="@id/aboutFragment" />
+            app:destination="@id/aboutFragment"
+            app:enterAnim="@anim/slide_up"
+            app:exitAnim="@anim/slide_down"
+            app:popEnterAnim="@anim/slide_up"
+            app:popExitAnim="@anim/slide_down" />
     </fragment>
     <fragment
         android:id="@+id/aboutFragment"
         android:name="zechs.zplex.ui.fragment.AboutFragment"
         android:label="fragment_about"
-        tools:layout="@layout/fragment_about" />
+        tools:layout="@layout/fragment_about">
+        <argument
+            android:name="file"
+            app:argType="zechs.zplex.models.drive.File"
+            app:nullable="false" />
+        <argument
+            android:name="SERIES_ID"
+            app:argType="integer" />
+        <argument
+            android:name="TYPE"
+            app:argType="string" />
+        <argument
+            android:name="NAME"
+            app:argType="string" />
+        <argument
+            android:name="POSTER_URL"
+            app:argType="string" />
+    </fragment>
 
     <!--    <fragment-->
     <!--        android:id="@+id/releasesFragment"-->

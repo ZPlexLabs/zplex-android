@@ -1,7 +1,5 @@
 package zechs.zplex.ui.fragment
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionManager
 import android.util.Log
@@ -10,9 +8,10 @@ import android.widget.AbsListView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.transition.MaterialSharedAxis
+import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -21,11 +20,14 @@ import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.adapter.FilesAdapter
 import zechs.zplex.ui.FileViewModel
-import zechs.zplex.ui.activity.AboutActivity
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.utils.Constants.Companion.PAGE_TOKEN
 import zechs.zplex.utils.Constants.Companion.SEARCH_DELAY_AMOUNT
+import zechs.zplex.utils.Constants.Companion.ZPLEX
 import zechs.zplex.utils.Resource
+import java.net.IDN
+import java.net.URI
+import java.net.URL
 
 
 class SearchFragment : Fragment(R.layout.fragment_search) {
@@ -38,8 +40,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
+        enterTransition = MaterialFadeThrough()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -100,9 +101,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
     private fun setDriveQuery(query: String): String {
         return if (query == "") {
-            "mimeType='application/vnd.google-apps.folder' and parents in '0AASFDMjRqUB0Uk9PVA' and trashed = false"
+            "mimeType='application/vnd.google-apps.folder' and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false"
         } else {
-            "name contains '$query' and mimeType='application/vnd.google-apps.folder' and parents in '0AASFDMjRqUB0Uk9PVA' and trashed = false"
+            "name contains '$query' and mimeType='application/vnd.google-apps.folder' and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false"
         }
     }
 
@@ -164,23 +165,32 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         }
 
         filesAdapter.setOnItemClickListener {
-            val posterUrl = Uri.parse("https://zplex.zechs.workers.dev/0:/${it.name}/poster.jpg")
-            val name = it.name.split(" - ").toTypedArray()[0]
-            val type = it.name.split(" - ").toTypedArray()[1]
-            val intent = Intent(activity, AboutActivity::class.java)
-            intent.putExtra("NAME", name)
-            intent.putExtra("TYPE", type)
-            intent.putExtra("POSTERURL", posterUrl.toString())
+            try {
+                val posterURL = URL("${ZPLEX}${it.name}/poster.jpg")
+                val posterUri = URI(
+                    posterURL.protocol,
+                    posterURL.userInfo,
+                    IDN.toASCII(posterURL.host),
+                    posterURL.port,
+                    posterURL.path,
+                    posterURL.query,
+                    posterURL.ref
+                )
+                val seriesId = (it.name.split(" - ").toTypedArray()[0]).toInt()
+                val name = it.name.split(" - ").toTypedArray()[1]
+                val type = it.name.split(" - ").toTypedArray()[2]
 
-            val bundle = Bundle().apply {
-                putSerializable("file", it)
+                val action = SearchFragmentDirections.actionSearchFragmentToAboutFragment(
+                    it,
+                    seriesId,
+                    type,
+                    name,
+                    posterUri.toASCIIString()
+                )
+                findNavController().navigate(action)
+            } catch (e: NumberFormatException) {
+                Toast.makeText(context, "TVDB id not found", Toast.LENGTH_LONG).show()
             }
-
-            intent.putExtras(bundle)
-
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            activity?.overridePendingTransition(R.anim.slide_up, R.anim.no_animation)
         }
     }
 

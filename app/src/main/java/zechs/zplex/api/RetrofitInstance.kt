@@ -5,6 +5,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import zechs.zplex.utils.Constants.Companion.GOOGLE_API_URL
+import zechs.zplex.utils.Constants.Companion.TVDB_API_URL
 import zechs.zplex.utils.Constants.Companion.WITCH_API_URL
 
 class RetrofitInstance {
@@ -48,6 +49,25 @@ class RetrofitInstance {
 
         val api_witch: WitchAPI by lazy {
             witch_api.create(WitchAPI::class.java)
+        }
+
+        private val tvdb_api by lazy {
+            val logging = HttpLoggingInterceptor()
+            logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+
+            Retrofit.Builder()
+                .baseUrl(TVDB_API_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(
+                    OkHttpClient.Builder()
+                        .addInterceptor(logging)
+                        .build()
+                )
+                .build()
+        }
+
+        val api_tvdb: TvdbAPI by lazy {
+            tvdb_api.create(TvdbAPI::class.java)
         }
 
     }

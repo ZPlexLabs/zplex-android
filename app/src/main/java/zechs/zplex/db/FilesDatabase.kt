@@ -9,7 +9,8 @@ import zechs.zplex.models.drive.File
 
 @Database(
     entities = [File::class],
-    version = 1
+    version = 1,
+    exportSchema = false
 )
 
 abstract class FilesDatabase : RoomDatabase() {
@@ -30,6 +31,6 @@ abstract class FilesDatabase : RoomDatabase() {
                 context.applicationContext,
                 FilesDatabase::class.java,
                 "files_db.db"
-            ).build()
+            ).fallbackToDestructiveMigration().build()
     }
 }

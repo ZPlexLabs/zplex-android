@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.logs_item.view.*
 import zechs.zplex.R
 import zechs.zplex.models.witch.ReleasesLog
 import zechs.zplex.utils.Constants.Companion.ZPLEX
-import zechs.zplex.utils.TimeAgo
+import zechs.zplex.utils.ConverterUtils
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -50,13 +50,15 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
 
     override fun onBindViewHolder(holder: LogsViewHolder, position: Int) {
         val log = differ.currentList[position]
-        val show = log.folder.split(" - ", ignoreCase = false, limit = 2).toTypedArray()[0]
+        val id = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[0]
+        val show = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[1]
+        val type = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[2]
+
         val episode = log.file.split(" - ", ignoreCase = false, limit = 2).toTypedArray()[0]
         val episodeTitle =
             (log.file.split(" - ", ignoreCase = false, limit = 2).toTypedArray()[1]).dropLast(4)
-        val posterUrl = Uri.parse("${ZPLEX}${show} - TV/poster.jpg")
-        val episodeThumbUrl = Uri.parse("${ZPLEX}${show} - TV/${log.file.dropLast(4)}.jpg")
-
+        val posterUrl = Uri.parse("${ZPLEX}${id} - $show - TV/poster.jpg")
+        val episodeThumbUrl = Uri.parse("${ZPLEX}${log.folder}/${log.file.dropLast(4)}.jpg")
 
         val bodyText = try {
             "Ep ${
@@ -84,7 +86,7 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
             tv_show.text = show
             tv_episode.text = bodyText
             date?.let {
-                tv_time.text = TimeAgo.toDuration(pstFormat.format(date))
+                tv_time.text = ConverterUtils.toDuration(pstFormat.format(date))
             }
             Glide.with(context)
                 .asBitmap()

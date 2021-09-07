@@ -5,49 +5,51 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:foreground="?android:attr/selectableItemBackground"
-    app:cardBackgroundColor="@color/colorPrimary"
+    app:cardBackgroundColor="@android:color/transparent"
     app:cardCornerRadius="0dp"
     app:cardElevation="0dp"
     app:cardMaxElevation="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="2dp">
+        android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/thumb"
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/thumb_card"
             android:layout_width="144dp"
             android:layout_height="81dp"
-            android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:contentDescription="@null"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="4dp"
+            app:cardElevation="0dp"
+            app:cardMaxElevation="0dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@drawable/thumb" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:alpha="0.25"
-            android:background="@color/colorPrimary"
-            app:layout_constraintBottom_toBottomOf="@+id/thumb"
-            app:layout_constraintEnd_toEndOf="@+id/thumb"
-            app:layout_constraintStart_toStartOf="@+id/thumb"
-            app:layout_constraintTop_toTopOf="@+id/thumb" />
+            <ImageView
+                android:id="@+id/thumb"
+                android:layout_width="144dp"
+                android:layout_height="81dp"
+                android:contentDescription="@null"
+                tools:src="@drawable/thumb" />
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:alpha=".7"
-            android:contentDescription="@null"
-            app:layout_constraintBottom_toBottomOf="@+id/thumb"
-            app:layout_constraintEnd_toEndOf="@+id/thumb"
-            app:layout_constraintStart_toStartOf="@+id/thumb"
-            app:layout_constraintTop_toTopOf="@+id/thumb"
-            app:srcCompat="@drawable/ic_play_svg" />
+            <FrameLayout
+                android:layout_width="144dp"
+                android:layout_height="81dp"
+                android:alpha="0.25"
+                android:background="@color/colorPrimary" />
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:alpha=".7"
+                android:contentDescription="@null"
+                android:visibility="invisible"
+                app:srcCompat="@drawable/ic_play_svg" />
+        </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/episode_count"
@@ -64,8 +66,8 @@
             app:layout_constraintBottom_toTopOf="@+id/episode_title"
             app:layout_constraintEnd_toStartOf="@+id/offline"
             app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/thumb"
-            app:layout_constraintTop_toTopOf="@+id/thumb"
+            app:layout_constraintStart_toEndOf="@+id/thumb_card"
+            app:layout_constraintTop_toTopOf="@+id/thumb_card"
             app:layout_constraintVertical_chainStyle="packed"
             tools:text="Episode 1" />
 
@@ -79,7 +81,7 @@
             android:maxLines="2"
             android:textColor="@color/textColor"
             android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="@+id/thumb"
+            app:layout_constraintBottom_toBottomOf="@+id/thumb_card"
             app:layout_constraintEnd_toStartOf="@+id/offline"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="@+id/episode_count"
@@ -91,16 +93,17 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@null"
+            android:minWidth="32dp"
             android:padding="8dp"
             android:src="@drawable/ic_download"
             android:tint="@color/textColor_87"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="SpeakableTextPresentCheck" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

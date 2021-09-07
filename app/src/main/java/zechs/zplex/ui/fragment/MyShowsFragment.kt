@@ -1,21 +1,24 @@
 package zechs.zplex.ui.fragment
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.transition.MaterialSharedAxis
+import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.android.synthetic.main.fragment_my_shows.*
 import zechs.zplex.R
 import zechs.zplex.adapter.FilesAdapter
 import zechs.zplex.ui.FileViewModel
-import zechs.zplex.ui.activity.AboutActivity
 import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.utils.Constants.Companion.ZPLEX
+import java.net.IDN
+import java.net.URI
+import java.net.URL
 
 
 class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
@@ -26,8 +29,7 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Z, true)
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Z, false)
+        exitTransition = MaterialFadeThrough()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -75,24 +77,32 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
             adapter = filesAdapter
             layoutManager = GridLayoutManager(activity, 3)
             filesAdapter.setOnItemClickListener {
-                val posterUrl =
-                    Uri.parse("https://zplex.zechs.workers.dev/0:/${it.name}/poster.jpg")
-                val name = it.name.split(" - ").toTypedArray()[0]
-                val type = it.name.split(" - ").toTypedArray()[1]
-                val intent = Intent(activity, AboutActivity::class.java)
-                intent.putExtra("NAME", name)
-                intent.putExtra("TYPE", type)
-                intent.putExtra("POSTERURL", posterUrl.toString())
+                try {
+                    val posterURL = URL("${ZPLEX}${it.name}/poster.jpg")
+                    val posterUri = URI(
+                        posterURL.protocol,
+                        posterURL.userInfo,
+                        IDN.toASCII(posterURL.host),
+                        posterURL.port,
+                        posterURL.path,
+                        posterURL.query,
+                        posterURL.ref
+                    )
+                    val seriesId = (it.name.split(" - ").toTypedArray()[0]).toInt()
+                    val name = it.name.split(" - ").toTypedArray()[1]
+                    val type = it.name.split(" - ").toTypedArray()[2]
 
-                val bundle = Bundle().apply {
-                    putSerializable("file", it)
+                    val action = MyShowsFragmentDirections.actionMyShowsFragmentToAboutFragment(
+                        it,
+                        seriesId,
+                        type,
+                        name,
+                        posterUri.toASCIIString()
+                    )
+                    findNavController().navigate(action)
+                } catch (e: NumberFormatException) {
+                    Toast.makeText(context, "TVDB id not found", Toast.LENGTH_LONG).show()
                 }
-
-                intent.putExtras(bundle)
-
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(intent)
-                activity?.overridePendingTransition(R.anim.slide_up, R.anim.no_animation)
             }
         }
     }

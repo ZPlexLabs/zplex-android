@@ -33,6 +33,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.JsonArrayRequest
 import com.android.volley.toolbox.Volley
+import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
@@ -58,7 +59,7 @@ import zechs.zplex.repository.FilesRepository
 import zechs.zplex.ui.FileViewModel
 import zechs.zplex.ui.FilesViewModelProviderFactory
 import zechs.zplex.utils.Constants
-import zechs.zplex.utils.GlideApp
+import zechs.zplex.utils.Constants.Companion.ZPLEX
 import zechs.zplex.utils.LXStringRequest
 import java.net.*
 import java.util.*
@@ -179,7 +180,8 @@ class AboutActivity : AppCompatActivity() {
             nestedScrollView!!.visibility = View.VISIBLE
             retryEpisodes!!.visibility = View.GONE
             title!!.text = nameShow
-            GlideApp.with(applicationContext)
+
+            Glide.with(applicationContext)
                 .asBitmap()
                 .load(posterURL)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
@@ -221,7 +223,7 @@ class AboutActivity : AppCompatActivity() {
 
                                     val colorPrimary = ContextCompat.getColor(
                                         applicationContext,
-                                        R.color.colorPrimary
+                                        R.color.colorPrimaryDark
                                     )
 
                                     val gradientDrawable = GradientDrawable(
@@ -537,7 +539,7 @@ class AboutActivity : AppCompatActivity() {
                 val episode = file.split(" - ".toRegex(), 2).toTypedArray()[0]
                 val title = file.split(" - ".toRegex(), 2).toTypedArray()[1]
                 val bytes = season["bytes"].toString()
-                val playURL = URL(Constants.ZPLEX + nameShow + " - " + typeShow + "/" + file)
+                val playURL = URL("$ZPLEX$nameShow - $typeShow/$file")
                 val playURI = URI(
                     playURL.protocol,
                     playURL.userInfo,

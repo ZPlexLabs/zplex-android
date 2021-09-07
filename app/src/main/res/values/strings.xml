@@ -21,4 +21,8 @@
     <string name="my_shows">My Shows</string>
     <string name="my_shows_lower">My shows</string>
     <string name="home">Home</string>
+    <string name="my_list">My List</string>
+    <string name="cast">Cast</string>
+    <string name="episodes">Episodes</string>
+    <string name="save">Save</string>
 </resources>

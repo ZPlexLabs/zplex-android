@@ -1,8 +1,12 @@
 package zechs.zplex.utils
 
+@Suppress("SpellCheckingInspection")
 class Constants {
     companion object {
         const val ZPLEX = "https://zplex.zechs.workers.dev/0:/"
+        const val TVDB_IMAGE_PATH = "https://www.thetvdb.com/banners/"
+        const val TVDB_IMAGE_REDIRECT = "https://tvdbimageredirect.zechs.workers.dev/"
+        const val TVDB_API_URL = "https://api.thetvdb.com"
         const val GOOGLE_API_URL = "https://www.googleapis.com"
         const val WITCH_API_URL = "http://wandering-witch.herokuapp.com"
         const val GOOGLE_OAUTH_URL = "https://accounts.google.com"

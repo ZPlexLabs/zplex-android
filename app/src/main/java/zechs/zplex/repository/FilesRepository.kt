@@ -12,13 +12,15 @@ class FilesRepository(
         pageSize: Int,
         accessToken: String,
         pageToken: String,
-        driveQuery: String
+        driveQuery: String,
+        orderBy: String
     ) =
         RetrofitInstance.api.getDriveFiles(
             pageSize = pageSize,
             accessToken = accessToken,
             pageToken = pageToken,
-            q = driveQuery
+            q = driveQuery,
+            orderBy = orderBy
         )
 
     suspend fun upsert(file: File) = db.getFilesDao().upsert(file)

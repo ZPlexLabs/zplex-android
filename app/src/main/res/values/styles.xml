@@ -16,10 +16,13 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColor">@color/textColor</item>
         <item name="android:windowContentTransitions">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/colorPrimary</item>
+        <item name="android:colorBackground">@color/colorPrimary</item>
         <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
         <item name="android:windowTranslucentStatus">true</item>
+        <item name="chipStyle">@style/Widget.App.Chip</item>
+        <item name="popupMenuBackground">@drawable/popup_menu_bg</item>
+
     </style>
 
     <style name="AppTheme.Home" parent="AppTheme">
@@ -57,6 +60,17 @@
 
     <style name="BottomNavTextStyle">
         <item name="fontFamily">@font/open_sans</item>
+    </style>
+
+    <style name="Widget.App.Chip" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="chipBackgroundColor">@color/cardColor</item>
+        <item name="android:textColor">@color/textColor</item>
+    </style>
+
+    <style name="TextAppearance.App.Body2" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:textColor">@color/textColor</item>
+        <item name="fontFamily">@font/open_sans_bold</item>
+        <item name="android:fontFamily">@font/open_sans_bold</item>
     </style>
 
 </resources>
