@@ -1,9 +1,12 @@
 package zechs.zplex.ui.fragment
 
 import android.os.Bundle
+import android.text.Editable
 import android.transition.TransitionManager
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
@@ -17,8 +20,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import zechs.zplex.R
 import zechs.zplex.adapter.FilesAdapter
+import zechs.zplex.databinding.FragmentSearchBinding
 import zechs.zplex.ui.FileViewModel
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.utils.Constants.Companion.PAGE_TOKEN
@@ -30,7 +33,9 @@ import java.net.URI
 import java.net.URL
 
 
-class SearchFragment : Fragment(R.layout.fragment_search) {
+class SearchFragment : Fragment() {
+
+    private lateinit var binding: FragmentSearchBinding
 
     private lateinit var viewModel: FileViewModel
     private lateinit var filesAdapter: FilesAdapter
@@ -41,6 +46,15 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         super.onCreate(savedInstanceState)
 
         enterTransition = MaterialFadeThrough()
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        binding = FragmentSearchBinding.inflate(layoutInflater)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -57,19 +71,22 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         )
 
         var job: Job? = null
-        search_box.editText?.addTextChangedListener { editable ->
-            job?.cancel()
-            job = MainScope().launch {
-                delay(SEARCH_DELAY_AMOUNT)
-                editable?.let {
-                    PAGE_TOKEN = ""
-                    text = editable.toString()
-                    viewModel.getDriveFiles(15, PAGE_TOKEN, setDriveQuery(text))
+        binding.searchBox.apply {
+            editText?.text = Editable.Factory.getInstance().newEditable(text)
+            editText?.addTextChangedListener { editable ->
+                job?.cancel()
+                job = MainScope().launch {
+                    delay(SEARCH_DELAY_AMOUNT)
+                    editable?.let {
+                        PAGE_TOKEN = ""
+                        text = editable.toString()
+                        viewModel.getSearchList(setDriveQuery(text), "")
+                    }
                 }
             }
         }
 
-        viewModel.filesList.observe(viewLifecycleOwner, { response ->
+        viewModel.searchList.observe(viewLifecycleOwner, { response ->
             when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
@@ -77,7 +94,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     response.data?.let { filesResponse ->
                         filesAdapter.differ.submitList(filesResponse.files.toList())
                         isLastPage = filesResponse.nextPageToken == null
-                        println(filesResponse.nextPageToken)
                         Log.d("pageToken", PAGE_TOKEN)
                     }
                 }
@@ -139,7 +155,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     isTotalMoreThanVisible && isScrolling
 
             if (shouldPaginate) {
-                viewModel.getDriveFiles(15, PAGE_TOKEN, setDriveQuery(text))
+                viewModel.getSearchList(setDriveQuery(text), PAGE_TOKEN)
                 isScrolling = false
                 Log.d(tag, "Paginating")
             } else {
@@ -185,7 +201,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     seriesId,
                     type,
                     name,
-                    posterUri.toASCIIString()
                 )
                 findNavController().navigate(action)
             } catch (e: NumberFormatException) {

@@ -24,26 +24,74 @@ class FileViewModel(
     private val filesRepository: FilesRepository
 ) : AndroidViewModel(app) {
 
-    val filesList: MutableLiveData<Resource<DriveResponse>> = MutableLiveData()
+    val homeList: MutableLiveData<Resource<DriveResponse>> = MutableLiveData()
     val searchList: MutableLiveData<Resource<DriveResponse>> = MutableLiveData()
     val mediaList: MutableLiveData<Resource<DriveResponse>> = MutableLiveData()
 
-    private var filesListResponse: DriveResponse? = null
     private var searchListResponse: DriveResponse? = null
     private val tempAccessToken =
         "ya29.a0ARrdaM-Eo6FAlBA4oY9LkSYHNi79ulu8NfovWyvKypPqQ682tICYQU2l7SH-4UfVt2nOveHpsdniCgwXsN8c1ATeCShidcJMgnAdzDtYADCS_heFn0udfMOVxwwfFY2cxzy0CD9Eh68xggCUa2iyVLGRAYvG9w"
 
+    private var newSearchQuery: String? = null
+    private var oldSearchQuery: String? = null
+
     init {
-        getDriveFiles(
-            15,
-            PAGE_TOKEN,
+        getHomeList()
+        getSearchList(
             "mimeType='application/vnd.google-apps.folder' and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false",
+            ""
         )
     }
 
-    fun getDriveFiles(pageSize: Int, pageToken: String, driveQuery: String) =
+    private fun getHomeList() = viewModelScope.launch {
+        homeList.postValue(Resource.Loading())
+        try {
+            if (hasInternetConnection()) {
+                val accessToken =
+                    SessionManager(getApplication<Application>().applicationContext).fetchAuthToken()
+                val response = if (accessToken == "") {
+                    filesRepository.getDriveFiles(
+                        20,
+                        tempAccessToken,
+                        "",
+                        "mimeType='application/vnd.google-apps.folder' and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false",
+                        "modifiedTime desc"
+                    )
+                } else {
+                    filesRepository.getDriveFiles(
+                        20,
+                        accessToken,
+                        "",
+                        "mimeType='application/vnd.google-apps.folder' and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false",
+                        "modifiedTime desc"
+                    )
+                }
+                homeList.postValue(handleHomeListResponse(response))
+            } else {
+                homeList.postValue(Resource.Error("No internet connection"))
+            }
+        } catch (t: Throwable) {
+            println(t.stackTrace)
+            println(t.message)
+            when (t) {
+                is IOException -> homeList.postValue(Resource.Error("Network Failure"))
+                else -> homeList.postValue(Resource.Error("Conversion Error"))
+            }
+        }
+    }
+
+    private fun handleHomeListResponse(response: Response<DriveResponse>): Resource<DriveResponse> {
+        if (response.isSuccessful) {
+            response.body()?.let { resultResponse ->
+                return Resource.Success(resultResponse)
+            }
+        }
+        return Resource.Error(response.message())
+    }
+
+    fun getSearchList(searchQuery: String, pageToken: String) =
         viewModelScope.launch {
-            filesList.postValue(Resource.Loading())
+            newSearchQuery = searchQuery
             searchList.postValue(Resource.Loading())
             try {
                 if (hasInternetConnection()) {
@@ -51,76 +99,47 @@ class FileViewModel(
                         SessionManager(getApplication<Application>().applicationContext).fetchAuthToken()
                     val response = if (accessToken == "") {
                         filesRepository.getDriveFiles(
-                            pageSize,
+                            20,
                             tempAccessToken,
                             pageToken,
-                            driveQuery,
-                            "modifiedTime desc"
+                            searchQuery,
+                            "name desc"
                         )
                     } else {
                         filesRepository.getDriveFiles(
-                            pageSize,
+                            20,
                             accessToken,
                             pageToken,
-                            driveQuery,
-                            "modifiedTime desc"
+                            searchQuery,
+                            "name desc"
                         )
                     }
-
-                    filesList.postValue(handleFilesListResponse(response, driveQuery))
-
+                    searchList.postValue(handleSearchListResponse(response))
                 } else {
-                    filesList.postValue(Resource.Error("No internet connection"))
                     searchList.postValue(Resource.Error("No internet connection"))
                 }
             } catch (t: Throwable) {
                 println(t.stackTrace)
                 println(t.message)
                 when (t) {
-                    is IOException -> {
-                        filesList.postValue(Resource.Error("Network Failure"))
-                        searchList.postValue(Resource.Error("Network Failure"))
-                    }
-                    else -> {
-                        filesList.postValue(Resource.Error("Conversion Error"))
-                        searchList.postValue(Resource.Error("Conversion Error"))
-                    }
+                    is IOException -> searchList.postValue(Resource.Error("Network Failure"))
+                    else -> searchList.postValue(Resource.Error("Conversion Error"))
                 }
             }
         }
 
-    private fun handleFilesListResponse(
-        response: Response<DriveResponse>,
-        driveQuery: String
-    ): Resource<DriveResponse> {
+    private fun handleSearchListResponse(response: Response<DriveResponse>): Resource<DriveResponse> {
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
-                PAGE_TOKEN = resultResponse.nextPageToken ?: PAGE_TOKEN
-                if (filesListResponse == null || driveQuery != "") {
-                    filesListResponse = resultResponse
-                } else {
-                    val oldArticles = filesListResponse?.files
-                    val newArticles = resultResponse.files
-                    oldArticles?.addAll(newArticles)
-                }
-                return Resource.Success(filesListResponse ?: resultResponse)
-            }
-        }
-        return Resource.Error(response.message())
-    }
-
-    private fun handleSearchResponse(
-        response: Response<DriveResponse>,
-    ): Resource<DriveResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                PAGE_TOKEN = resultResponse.nextPageToken ?: PAGE_TOKEN
-                if (searchListResponse == null) {
+                if (searchListResponse == null || newSearchQuery != oldSearchQuery) {
+                    PAGE_TOKEN = ""
+                    oldSearchQuery = newSearchQuery
                     searchListResponse = resultResponse
                 } else {
-                    val oldArticles = searchListResponse?.files
-                    val newArticles = resultResponse.files
-                    oldArticles?.addAll(newArticles)
+                    PAGE_TOKEN = resultResponse.nextPageToken ?: PAGE_TOKEN
+                    val oldItems = searchListResponse?.files
+                    val newItems = resultResponse.files
+                    oldItems?.addAll(newItems)
                 }
                 return Resource.Success(searchListResponse ?: resultResponse)
             }

@@ -16,10 +16,12 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListPopupWindow
 import android.widget.Toast
+import android.widget.Toast.LENGTH_LONG
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import androidx.palette.graphics.Palette
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
@@ -31,13 +33,16 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
 import com.google.android.material.transition.MaterialFade
 import zechs.zplex.R
+import zechs.zplex.adapter.ActorsAdapter
 import zechs.zplex.adapter.MediaAdapter
 import zechs.zplex.databinding.FragmentNewAboutBinding
 import zechs.zplex.models.drive.File
 import zechs.zplex.ui.FileViewModel
-import zechs.zplex.ui.SeriesViewModel
+import zechs.zplex.ui.TvdbViewModel
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.utils.Constants.Companion.TVDB_IMAGE_PATH
 import zechs.zplex.utils.Constants.Companion.TVDB_IMAGE_REDIRECT
@@ -51,9 +56,10 @@ class AboutFragment : Fragment() {
     private val args: AboutFragmentArgs by navArgs()
     private lateinit var binding: FragmentNewAboutBinding
 
-    private lateinit var viewModel: SeriesViewModel
+    private lateinit var viewModel: TvdbViewModel
     private lateinit var fileViewModel: FileViewModel
     private lateinit var mediaAdapter: MediaAdapter
+    private lateinit var actorsAdapter: ActorsAdapter
 
     private lateinit var groupedList: Map<String, List<File>>
 
@@ -71,16 +77,19 @@ class AboutFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = (activity as ZPlexActivity).seriesViewModel
+        viewModel = (activity as ZPlexActivity).tvdbViewModel
         fileViewModel = (activity as ZPlexActivity).viewModel
+        val prefix = args.seriesId.toString() + " - " + args.name
 
-        setupRecyclerView()
+        actorsAdapter = ActorsAdapter()
+        mediaAdapter = MediaAdapter(prefix)
+
+        setupRecyclerView("Episodes")
 
         val file = args.file
-        val seriesId = args.seriesid
+        val seriesId = args.seriesId
         val type = args.type
         val name = args.name
-        val posterUrl = args.posterurl
 
         binding.tvTitle.text = name
         binding.mainView.visibility = View.VISIBLE
@@ -144,9 +153,6 @@ class AboutFragment : Fragment() {
                                         intArrayOf(accent, colorPrimary)
                                     )
 
-                                    TransitionManager.beginDelayedTransition(
-                                        binding.root
-                                    )
                                     binding.frameLayout.background = gradientDrawable
                                     binding.tabs.setTabTextColors(
                                         ContextCompat.getColor(
@@ -181,6 +187,26 @@ class AboutFragment : Fragment() {
                 viewModel.getSeries(seriesId)
             }
 
+            tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab) {
+                    TransitionManager.beginDelayedTransition(
+                        binding.root,
+                        MaterialFade()
+                    )
+                    setupRecyclerView(tab.text.toString())
+                }
+
+                override fun onTabUnselected(
+                    tab: TabLayout.Tab
+                ) {
+                }
+
+                override fun onTabReselected(
+                    tab: TabLayout.Tab
+                ) {
+                }
+            })
+
             viewModel.getSeries(seriesId)
 
             viewModel.series.observe(viewLifecycleOwner, { response ->
@@ -189,11 +215,21 @@ class AboutFragment : Fragment() {
                     is Resource.Success -> {
                         response.data?.let { seriesResponse ->
                             seriesResponse.data?.let {
+
+                                val driveQuery =
+                                    "name contains 'mkv' and '${file.id}' in parents and trashed = false"
+                                fileViewModel.getMediaFiles(driveQuery)
+
                                 TransitionManager.beginDelayedTransition(binding.root)
                                 binding.seriesInfo.visibility = View.VISIBLE
                                 binding.cgGenre.visibility = View.VISIBLE
                                 tabLayout.visibility = View.VISIBLE
-
+                                tabLayout.addTab(
+                                    tabLayout.newTab().setText(getString(R.string.episodes))
+                                )
+                                tabLayout.addTab(
+                                    tabLayout.newTab().setText(getString(R.string.cast))
+                                )
                                 context?.let { cont ->
 
                                     Glide.with(cont)
@@ -233,12 +269,7 @@ class AboutFragment : Fragment() {
                                     "${it.network} • ${it.rating} • $year • ${it.runtime} min"
                                 binding.tvTitle.text = it.seriesName
                                 binding.tvYearMpaa.text = miscText
-                                tabLayout.addTab(
-                                    tabLayout.newTab().setText(getString(R.string.episodes))
-                                )
-                                tabLayout.addTab(
-                                    tabLayout.newTab().setText(getString(R.string.cast))
-                                )
+
                                 it.genre?.forEach { text ->
                                     val mChip = layoutInflater.inflate(
                                         R.layout.item_chip,
@@ -255,8 +286,11 @@ class AboutFragment : Fragment() {
                                             val trimPlot = plot.substring(0, 175) + "..."
                                             text = trimPlot
                                             setOnClickListener {
-                                                TransitionManager.beginDelayedTransition(binding.root)
-                                                text = if (text.length > 178) trimPlot else plot
+                                                TransitionManager.beginDelayedTransition(
+                                                    binding.root
+                                                )
+                                                text =
+                                                    if (text.length > 178) trimPlot else plot
                                             }
                                         } else {
                                             text = plot
@@ -268,7 +302,7 @@ class AboutFragment : Fragment() {
                     }
 
                     is Resource.Error -> {
-                        binding.seriesInfo.visibility = View.GONE
+                        binding.seriesInfo.visibility = View.INVISIBLE
                         response.message?.let { message ->
                             Toast.makeText(
                                 context,
@@ -282,18 +316,20 @@ class AboutFragment : Fragment() {
                         binding.apply {
                             cgGenre.removeAllViews()
                             tabLayout.removeAllTabs()
-                            cgGenre.visibility = View.GONE
-                            tabLayout.visibility = View.GONE
-                            seriesInfo.visibility = View.GONE
+                            cgGenre.visibility = View.INVISIBLE
+                            tabLayout.visibility = View.INVISIBLE
+                            seriesInfo.visibility = View.INVISIBLE
                             ivFanart.visibility = View.INVISIBLE
+                            rvEpisodes.visibility = View.INVISIBLE
+                            btnRetryEpisodes.visibility = View.INVISIBLE
+                            pbEpisodes.visibility = View.VISIBLE
+                            tabs.visibility = View.INVISIBLE
+                            seasonsMenu.visibility = View.INVISIBLE
                         }
                     }
                 }
             })
 
-            val driveQuery =
-                "name contains 'mkv' and '${file.id}' in parents and trashed = false"
-            fileViewModel.getMediaFiles(driveQuery)
 
             fileViewModel.mediaList.observe(viewLifecycleOwner, { responseMedia ->
                 when (responseMedia) {
@@ -312,10 +348,10 @@ class AboutFragment : Fragment() {
                             val seasons = groupedList.keys.toList()
                             mediaAdapter.differ.submitList(groupedList[seasons[0]]?.toList())
 
-                            TransitionManager.beginDelayedTransition(
-                                binding.root,
-                                MaterialFade()
-                            )
+//                            TransitionManager.beginDelayedTransition(
+//                                binding.root,
+//                                MaterialFade()
+//                            )
 
                             binding.apply {
                                 rvEpisodes.visibility = View.VISIBLE
@@ -328,7 +364,11 @@ class AboutFragment : Fragment() {
                                         visibility = View.VISIBLE
                                         text = seasons[0]
                                         val listPopupWindow =
-                                            ListPopupWindow(it, null, R.attr.listPopupWindowStyle)
+                                            ListPopupWindow(
+                                                it,
+                                                null,
+                                                R.attr.listPopupWindowStyle
+                                            )
                                         val adapter = ArrayAdapter(
                                             it,
                                             R.layout.item_dropdown,
@@ -341,10 +381,6 @@ class AboutFragment : Fragment() {
                                         setOnClickListener { listPopupWindow.show() }
 
                                         listPopupWindow.setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
-                                            TransitionManager.beginDelayedTransition(
-                                                binding.root,
-                                                MaterialFade()
-                                            )
                                             mediaAdapter.differ.submitList(groupedList[seasons[position]]?.toList())
                                             seasonsMenu.text = seasons[position]
                                             listPopupWindow.dismiss()
@@ -358,11 +394,11 @@ class AboutFragment : Fragment() {
 
                     is Resource.Error -> {
                         binding.apply {
-                            rvEpisodes.visibility = View.GONE
+                            rvEpisodes.visibility = View.INVISIBLE
                             btnRetryEpisodes.visibility = View.VISIBLE
-                            pbEpisodes.visibility = View.GONE
-                            tabs.visibility = View.GONE
-                            seasonsMenu.visibility = View.GONE
+                            pbEpisodes.visibility = View.INVISIBLE
+                            tabs.visibility = View.INVISIBLE
+                            seasonsMenu.visibility = View.INVISIBLE
                         }
                         responseMedia.message?.let { message ->
                             Toast.makeText(
@@ -376,29 +412,49 @@ class AboutFragment : Fragment() {
 
                     is Resource.Loading -> {
                         binding.apply {
-                            rvEpisodes.visibility = View.GONE
-                            btnRetryEpisodes.visibility = View.GONE
+                            rvEpisodes.visibility = View.INVISIBLE
+                            btnRetryEpisodes.visibility = View.INVISIBLE
                             pbEpisodes.visibility = View.VISIBLE
-                            tabs.visibility = View.GONE
-                            seasonsMenu.visibility = View.GONE
+                            tabs.visibility = View.INVISIBLE
+                            seasonsMenu.visibility = View.INVISIBLE
                         }
+                    }
+                }
+            })
+
+            viewModel.getActor(args.seriesId)
+
+            viewModel.actors.observe(viewLifecycleOwner, { responseMedia ->
+                when (responseMedia) {
+                    is Resource.Success -> {
+                        responseMedia.data?.let { actorsResponse ->
+                            actorsAdapter.differ.submitList(actorsResponse.data.toList())
+                        }
+                    }
+
+                    is Resource.Error -> {
+                        responseMedia.message?.let { message ->
+                            Toast.makeText(
+                                context,
+                                "An error occurred: $message",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            Log.e(itTAG, "An error occurred: $message")
+                        }
+                    }
+
+                    is Resource.Loading -> {
+
                     }
                 }
             })
         }
     }
 
-    private fun setupRecyclerView() {
-        val prefix = args.seriesid.toString() + " - " + args.name
-        mediaAdapter = MediaAdapter(prefix)
-
-        binding.rvEpisodes.apply {
-            adapter = mediaAdapter
-            layoutManager = LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-        }
+    private fun setupRecyclerView(tabText: String) {
 
         mediaAdapter.setOnItemClickListener {
-            val playUrl = "${ZPLEX}${args.seriesid} - ${args.name} - TV/${it.name}"
+            val playUrl = "${ZPLEX}${args.seriesId} - ${args.name} - TV/${it.name}"
             try {
                 val vlcIntent = Intent(Intent.ACTION_VIEW)
                 vlcIntent.setPackage("org.videolan.vlc")
@@ -420,5 +476,29 @@ class AboutFragment : Fragment() {
                 ).show()
             }
         }
+
+        when (tabText) {
+            "Episodes" -> {
+                binding.rvEpisodes.apply {
+                    adapter = mediaAdapter
+                    layoutManager =
+                        LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
+                }
+                binding.seasonsMenu.visibility = View.VISIBLE
+            }
+
+            "Cast" -> {
+                binding.rvEpisodes.apply {
+                    adapter = actorsAdapter
+                    layoutManager = GridLayoutManager(activity, 2)
+                }
+                binding.seasonsMenu.visibility = View.INVISIBLE
+            }
+            else -> {
+                Toast.makeText(context, " No adapter attached; skipping layout", LENGTH_LONG).show()
+            }
+        }
+
     }
+
 }

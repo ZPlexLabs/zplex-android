@@ -36,12 +36,10 @@ class HomeFragment : Fragment() {
     private lateinit var binding: FragmentHomeBinding
 
     private lateinit var viewModel: FileViewModel
-    private lateinit var viewModel2: FileViewModel
+    private lateinit var logsViewModel: ReleaseLogViewModel
 
     private lateinit var filesAdapter: FilesAdapter
     private lateinit var filesAdapter2: FilesAdapter
-
-    private lateinit var logsViewModel: ReleaseLogViewModel
     private lateinit var logsAdapter: LogsAdapter
 
     private val TAG = "HomeFragment"
@@ -60,13 +58,12 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = (activity as ZPlexActivity).viewModel
-        viewModel2 = (activity as ZPlexActivity).viewModel
         logsViewModel = (activity as ZPlexActivity).logsViewModel
 
         setupRecyclerView()
         appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0)
 
-        viewModel.filesList.observe(viewLifecycleOwner, { response ->
+        viewModel.homeList.observe(viewLifecycleOwner, { response ->
             when (response) {
                 is Resource.Success -> {
                     homeView(true)
@@ -114,7 +111,7 @@ class HomeFragment : Fragment() {
             }
         })
 
-        viewModel2.getSavedFiles().observe(viewLifecycleOwner, { files ->
+        viewModel.getSavedFiles().observe(viewLifecycleOwner, { files ->
             if (files.toList().isNotEmpty()) {
                 binding.myShows.visibility = View.VISIBLE
                 binding.rvMyShowsHome.visibility = View.VISIBLE
@@ -214,17 +211,6 @@ class HomeFragment : Fragment() {
 
     private fun getDetails(it: File) {
         try {
-
-            val posterURL = URL("${ZPLEX}${it.name}/poster.jpg")
-            val posterUri = URI(
-                posterURL.protocol,
-                posterURL.userInfo,
-                IDN.toASCII(posterURL.host),
-                posterURL.port,
-                posterURL.path,
-                posterURL.query,
-                posterURL.ref
-            )
             val seriesId = (it.name.split(" - ").toTypedArray()[0]).toInt()
             val name = it.name.split(" - ").toTypedArray()[1]
             val type = it.name.split(" - ").toTypedArray()[2]
@@ -234,7 +220,6 @@ class HomeFragment : Fragment() {
                 seriesId,
                 type,
                 name,
-                posterUri.toASCIIString()
             )
             findNavController().navigate(action)
         } catch (e: NumberFormatException) {

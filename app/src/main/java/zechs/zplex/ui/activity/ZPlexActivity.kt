@@ -16,7 +16,7 @@ import zechs.zplex.R
 import zechs.zplex.db.FilesDatabase
 import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.ReleasesRepository
-import zechs.zplex.repository.SeriesRepository
+import zechs.zplex.repository.TvdbRepository
 import zechs.zplex.ui.*
 
 
@@ -24,7 +24,7 @@ class ZPlexActivity : AppCompatActivity() {
 
     lateinit var viewModel: FileViewModel
     lateinit var logsViewModel: ReleaseLogViewModel
-    lateinit var seriesViewModel: SeriesViewModel
+    lateinit var tvdbViewModel: TvdbViewModel
 
     @DelicateCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -40,12 +40,11 @@ class ZPlexActivity : AppCompatActivity() {
         logsViewModel =
             ViewModelProvider(this, logsModelProviderFactory).get(ReleaseLogViewModel::class.java)
 
-        val seriesRepository = SeriesRepository()
+        val seriesRepository = TvdbRepository()
         val seriesModelProviderFactory =
-            SeriesViewModelProviderFactory(application, seriesRepository)
-        seriesViewModel =
-            ViewModelProvider(this, seriesModelProviderFactory).get(SeriesViewModel::class.java)
-
+            TvdbViewModelProviderFactory(application, seriesRepository)
+        tvdbViewModel =
+            ViewModelProvider(this, seriesModelProviderFactory).get(TvdbViewModel::class.java)
 
         setContentView(R.layout.activity_zplex)
 

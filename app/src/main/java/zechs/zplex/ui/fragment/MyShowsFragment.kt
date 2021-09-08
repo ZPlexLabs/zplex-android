@@ -1,7 +1,9 @@
 package zechs.zplex.ui.fragment
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -11,25 +13,30 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.android.synthetic.main.fragment_my_shows.*
-import zechs.zplex.R
 import zechs.zplex.adapter.FilesAdapter
+import zechs.zplex.databinding.FragmentMyShowsBinding
 import zechs.zplex.ui.FileViewModel
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.utils.Constants.Companion.ZPLEX
-import java.net.IDN
-import java.net.URI
-import java.net.URL
 
 
-class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
+class MyShowsFragment : Fragment() {
 
     private lateinit var viewModel: FileViewModel
     private lateinit var filesAdapter: FilesAdapter
-
+    private lateinit var binding: FragmentMyShowsBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         exitTransition = MaterialFadeThrough()
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?,
+    ): View {
+        binding = FragmentMyShowsBinding.inflate(layoutInflater)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -78,16 +85,6 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
             layoutManager = GridLayoutManager(activity, 3)
             filesAdapter.setOnItemClickListener {
                 try {
-                    val posterURL = URL("${ZPLEX}${it.name}/poster.jpg")
-                    val posterUri = URI(
-                        posterURL.protocol,
-                        posterURL.userInfo,
-                        IDN.toASCII(posterURL.host),
-                        posterURL.port,
-                        posterURL.path,
-                        posterURL.query,
-                        posterURL.ref
-                    )
                     val seriesId = (it.name.split(" - ").toTypedArray()[0]).toInt()
                     val name = it.name.split(" - ").toTypedArray()[1]
                     val type = it.name.split(" - ").toTypedArray()[2]
@@ -97,7 +94,6 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
                         seriesId,
                         type,
                         name,
-                        posterUri.toASCIIString()
                     )
                     findNavController().navigate(action)
                 } catch (e: NumberFormatException) {

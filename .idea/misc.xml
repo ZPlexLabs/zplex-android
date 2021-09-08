@@ -41,8 +41,9 @@
         <entry key="app/src/main/res/layout/error_layout.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/fragment_about.xml" value="0.38317757009345793" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.3203125" />
-        <entry key="app/src/main/res/layout/fragment_new_about.xml" value="0.23837209302325582" />
+        <entry key="app/src/main/res/layout/fragment_new_about.xml" value="0.3671794871794872" />
         <entry key="app/src/main/res/layout/fragment_releases.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/item_actor.xml" value="0.72" />
         <entry key="app/src/main/res/layout/item_chip.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/item_dropdown.xml" value="0.72" />
         <entry key="app/src/main/res/layout/item_episode.xml" value="0.6" />
@@ -61,7 +62,7 @@
   <component name="VisualizationToolProject">
     <option name="state">
       <ProjectState>
-        <option name="scale" value="0.72" />
+        <option name="scale" value="0.3671794871794872" />
       </ProjectState>
     </option>
   </component>

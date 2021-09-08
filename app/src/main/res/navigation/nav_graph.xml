@@ -56,16 +56,13 @@
             app:argType="zechs.zplex.models.drive.File"
             app:nullable="false" />
         <argument
-            android:name="SERIES_ID"
+            android:name="series_id"
             app:argType="integer" />
         <argument
-            android:name="TYPE"
+            android:name="type"
             app:argType="string" />
         <argument
-            android:name="NAME"
-            app:argType="string" />
-        <argument
-            android:name="POSTER_URL"
+            android:name="name"
             app:argType="string" />
     </fragment>
 

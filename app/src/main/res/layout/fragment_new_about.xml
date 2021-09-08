@@ -17,8 +17,18 @@
             android:id="@+id/series_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:visibility="visible"
-            app:constraint_referenced_ids="tv_year_mpaa,cg_genre,tv_plot" />
+            android:visibility="invisible"
+            app:constraint_referenced_ids="tv_year_mpaa,cg_genre,tv_plot"
+            tools:visibility="visible" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/media_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            app:constraint_referenced_ids="tabs,seasons_menu,rv_episodes, pb_episodes, btn_retry_episodes"
+            tools:visibility="visible" />
+
 
         <FrameLayout
             android:id="@+id/frameLayout"
@@ -53,7 +63,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginEnd="8dp"
             app:cardBackgroundColor="@android:color/transparent"
-            app:cardCornerRadius="4dp"
+            app:cardCornerRadius="8dp"
             app:layout_constraintBottom_toBottomOf="@+id/frameLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.025"
@@ -183,16 +193,17 @@
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
-            android:insetTop="2dp"
+            android:insetTop="4dp"
             android:insetBottom="2dp"
             android:minHeight="0dp"
-            android:textSize="12sp"
+            android:textAllCaps="false"
+            android:textSize="14sp"
             app:backgroundTint="@color/transparent"
             app:cornerRadius="16dp"
             app:elevation="0dp"
             app:icon="@drawable/ic_round_keyboard_arrow_down_24"
             app:iconGravity="end"
-            app:iconTint="@color/textColor"
+            app:iconTint="@color/textColor_74"
             app:layout_constraintBottom_toBottomOf="@+id/tabs"
             app:layout_constraintEnd_toEndOf="@+id/tv_plot"
             app:layout_constraintHorizontal_bias="1.0"

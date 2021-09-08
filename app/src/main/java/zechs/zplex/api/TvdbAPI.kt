@@ -3,7 +3,8 @@ package zechs.zplex.api
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
-import zechs.zplex.models.tvdb.SeriesResponse
+import zechs.zplex.models.tvdb.actors.ActorsResponse
+import zechs.zplex.models.tvdb.series.SeriesResponse
 
 interface TvdbAPI {
 
@@ -12,5 +13,11 @@ interface TvdbAPI {
         @Path("series_id")
         series_id: Int,
     ): Response<SeriesResponse>
+
+    @GET("series/{series_id}/actors")
+    suspend fun getActors(
+        @Path("series_id")
+        series_id: Int,
+    ): Response<ActorsResponse>
 
 }
