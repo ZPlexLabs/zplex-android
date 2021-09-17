@@ -15,8 +15,8 @@ import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.android.synthetic.main.fragment_my_shows.*
 import zechs.zplex.adapter.FilesAdapter
 import zechs.zplex.databinding.FragmentMyShowsBinding
-import zechs.zplex.ui.FileViewModel
 import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.viewmodel.file.FileViewModel
 
 
 class MyShowsFragment : Fragment() {

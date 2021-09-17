@@ -15,22 +15,17 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.transition.MaterialFadeThrough
-import kotlinx.android.synthetic.main.fragment_search.*
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import zechs.zplex.adapter.FilesAdapter
 import zechs.zplex.databinding.FragmentSearchBinding
-import zechs.zplex.ui.FileViewModel
 import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.viewmodel.file.FileViewModel
 import zechs.zplex.utils.Constants.Companion.PAGE_TOKEN
 import zechs.zplex.utils.Constants.Companion.SEARCH_DELAY_AMOUNT
-import zechs.zplex.utils.Constants.Companion.ZPLEX
 import zechs.zplex.utils.Resource
-import java.net.IDN
-import java.net.URI
-import java.net.URL
 
 
 class SearchFragment : Fragment() {
@@ -63,6 +58,7 @@ class SearchFragment : Fragment() {
         viewModel = (activity as ZPlexActivity).viewModel
         setupRecyclerView()
 
+        val appBarLayout = binding.appBarLayout
         appBarLayout.setPadding(
             appBarLayout.paddingLeft,
             appBarLayout.paddingTop + getStatusBarHeight() + 16,
@@ -90,7 +86,7 @@ class SearchFragment : Fragment() {
             when (response) {
                 is Resource.Success -> {
                     hideProgressBar()
-                    TransitionManager.beginDelayedTransition(root)
+                    TransitionManager.beginDelayedTransition(binding.root)
                     response.data?.let { filesResponse ->
                         filesAdapter.differ.submitList(filesResponse.files.toList())
                         isLastPage = filesResponse.nextPageToken == null
@@ -117,19 +113,19 @@ class SearchFragment : Fragment() {
 
     private fun setDriveQuery(query: String): String {
         return if (query == "") {
-            "mimeType='application/vnd.google-apps.folder' and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false"
+            "(name contains 'TV' or name contains 'Movie') and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false"
         } else {
-            "name contains '$query' and mimeType='application/vnd.google-apps.folder' and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false"
+            "name contains '$query' and (name contains 'TV' or name contains 'Movie') and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false"
         }
     }
 
     private fun hideProgressBar() {
-        loadingSearch.visibility = View.INVISIBLE
+        binding.loadingSearch.visibility = View.INVISIBLE
         isLoading = false
     }
 
     private fun showProgressBar() {
-        loadingSearch.visibility = View.VISIBLE
+        binding.loadingSearch.visibility = View.VISIBLE
         isLoading = true
     }
 
@@ -160,7 +156,7 @@ class SearchFragment : Fragment() {
                 Log.d(tag, "Paginating")
             } else {
                 Log.d(tag, "Not paginating")
-                rvSearch.setPadding(0, 0, 0, 0)
+                binding.rvSearch.setPadding(0, 0, 0, 0)
             }
         }
 
@@ -173,25 +169,25 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
+        val nestedScroll = binding.nestedScrollView
+        nestedScroll.viewTreeObserver.addOnScrollChangedListener {
+            val view = nestedScroll.getChildAt(nestedScroll.childCount - 1) as View
+            val diff: Int = view.bottom - (nestedScroll.height + nestedScroll.scrollY)
+            if (diff == 0 && !isLastPage) {
+                viewModel.getSearchList(setDriveQuery(text), PAGE_TOKEN)
+            }
+        }
+
         filesAdapter = FilesAdapter()
-        rvSearch.apply {
+        binding.rvSearch.apply {
             adapter = filesAdapter
             layoutManager = GridLayoutManager(activity, 3)
-            addOnScrollListener(this@SearchFragment.scrollListener)
+            //addOnScrollListener(this@SearchFragment.scrollListener)
+            isNestedScrollingEnabled = false
         }
 
         filesAdapter.setOnItemClickListener {
             try {
-                val posterURL = URL("${ZPLEX}${it.name}/poster.jpg")
-                val posterUri = URI(
-                    posterURL.protocol,
-                    posterURL.userInfo,
-                    IDN.toASCII(posterURL.host),
-                    posterURL.port,
-                    posterURL.path,
-                    posterURL.query,
-                    posterURL.ref
-                )
                 val seriesId = (it.name.split(" - ").toTypedArray()[0]).toInt()
                 val name = it.name.split(" - ").toTypedArray()[1]
                 val type = it.name.split(" - ").toTypedArray()[2]

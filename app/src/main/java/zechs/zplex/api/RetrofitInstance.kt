@@ -1,24 +1,34 @@
 package zechs.zplex.api
 
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
+import zechs.zplex.api.interfaces.DriveAPI
+import zechs.zplex.api.interfaces.TmdbAPI
+import zechs.zplex.api.interfaces.TvdbAPI
+import zechs.zplex.api.interfaces.WitchAPI
 import zechs.zplex.utils.Constants.Companion.GOOGLE_API_URL
+import zechs.zplex.utils.Constants.Companion.TMDB_API_URL
 import zechs.zplex.utils.Constants.Companion.TVDB_API_URL
 import zechs.zplex.utils.Constants.Companion.WITCH_API_URL
 
 class RetrofitInstance {
 
     companion object {
+        private val moshi = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
+
+        private val logging = HttpLoggingInterceptor()
+            .setLevel(HttpLoggingInterceptor.Level.BODY)
 
         private val drive_api by lazy {
-            val logging = HttpLoggingInterceptor()
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY)
-
             Retrofit.Builder()
                 .baseUrl(GOOGLE_API_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(MoshiConverterFactory.create(moshi))
                 .client(
                     OkHttpClient.Builder()
                         .addInterceptor(logging)
@@ -33,12 +43,10 @@ class RetrofitInstance {
         }
 
         private val witch_api by lazy {
-            val logging = HttpLoggingInterceptor()
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY)
 
             Retrofit.Builder()
                 .baseUrl(WITCH_API_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(MoshiConverterFactory.create(moshi))
                 .client(
                     OkHttpClient.Builder()
                         .addInterceptor(logging)
@@ -52,12 +60,9 @@ class RetrofitInstance {
         }
 
         private val tvdb_api by lazy {
-            val logging = HttpLoggingInterceptor()
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY)
-
             Retrofit.Builder()
                 .baseUrl(TVDB_API_URL)
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(MoshiConverterFactory.create(moshi))
                 .client(
                     OkHttpClient.Builder()
                         .addInterceptor(logging)
@@ -68,6 +73,22 @@ class RetrofitInstance {
 
         val api_tvdb: TvdbAPI by lazy {
             tvdb_api.create(TvdbAPI::class.java)
+        }
+
+        private val tmdb_api by lazy {
+            Retrofit.Builder()
+                .baseUrl(TMDB_API_URL)
+                .addConverterFactory(MoshiConverterFactory.create(moshi))
+                .client(
+                    OkHttpClient.Builder()
+                        .addInterceptor(logging)
+                        .build()
+                )
+                .build()
+        }
+
+        val api_tmdb: TmdbAPI by lazy {
+            tmdb_api.create(TmdbAPI::class.java)
         }
 
     }

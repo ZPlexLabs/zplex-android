@@ -1,258 +1,399 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimaryDark"
     android:orientation="vertical"
     tools:context=".ui.fragment.AboutFragment">
 
-    <ProgressBar
-        android:id="@+id/loading_media"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone" />
-
-    <include
-        android:id="@+id/error_view"
-        layout="@layout/error_layout" />
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/main_view"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/series_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            app:constraint_referenced_ids="tv_runtime,cg_genre,tv_plot"
+            tools:visibility="visible" />
 
-            <androidx.constraintlayout.widget.Group
-                android:id="@+id/series_info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:constraint_referenced_ids="year_mpaa,genre,plot" />
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/media_data"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            app:constraint_referenced_ids="tabs,seasons_menu,rv_episodes, pb_episodes, btn_retry_episodes"
+            tools:visibility="visible" />
+
+        <FrameLayout
+            android:id="@+id/frameLayout"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <ImageView
+                android:id="@+id/iv_fanart"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:adjustViewBounds="true"
+                android:contentDescription="@null"
+                android:scaleType="centerCrop"
+                android:transitionName="poster"
+                tools:ignore="ImageContrastCheck"
+                tools:srcCompat="@drawable/fanart" />
 
             <FrameLayout
-                android:id="@+id/frameLayout"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:background="@drawable/dark_gradient"
-                app:layout_constraintBottom_toTopOf="@+id/tabs"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_height="175dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/dark_faded_gradient" />
+        </FrameLayout>
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/item_poster"
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/poster_card"
+            android:layout_width="170dp"
+            android:layout_height="250dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/frameLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.025"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/frameLayout">
+
+            <FrameLayout
+                android:id="@+id/dark_tint"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:alpha="0.25"
+                android:background="@color/colorPrimary"
+                android:elevation="1dp"
+                android:visibility="invisible"
+                app:layout_constraintBottom_toBottomOf="@+id/thumb"
+                app:layout_constraintEnd_toEndOf="@+id/thumb"
+                app:layout_constraintStart_toStartOf="@+id/thumb"
+                app:layout_constraintTop_toTopOf="@+id/thumb" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/dark_play"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                app:cardBackgroundColor="@color/colorAccent"
-                app:cardCornerRadius="10dp"
-                app:cardElevation="24dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:layout_gravity="center"
+                android:alpha=".75"
+                android:contentDescription="@null"
+                android:elevation="16dp"
+                android:tint="@color/cardColor"
+                android:visibility="invisible"
+                app:backgroundTint="@color/colorAccent"
+                app:borderWidth="0dp"
+                app:layout_constraintBottom_toBottomOf="@+id/thumb"
+                app:layout_constraintEnd_toEndOf="@+id/thumb"
+                app:layout_constraintStart_toStartOf="@+id/thumb"
+                app:layout_constraintTop_toTopOf="@+id/thumb"
+                app:srcCompat="@drawable/ic_baseline_play_arrow_24"
+                tools:backgroundTint="#2898f0" />
 
-                <ImageView
-                    android:id="@+id/poster_view"
-                    android:layout_width="170dp"
-                    android:layout_height="250dp"
-                    android:layout_gravity="center"
-                    android:adjustViewBounds="true"
-                    android:contentDescription="@null"
-                    android:elevation="24dp"
-                    android:scaleType="centerCrop"
-                    android:transitionName="poster"
-                    tools:src="@drawable/poster" />
-
-            </com.google.android.material.card.MaterialCardView>
-
-
-            <TextView
-                android:id="@+id/item_title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="4dp"
-                android:ellipsize="end"
-                android:fontFamily="@font/open_sans_bold"
-                android:maxLines="3"
-                android:textColor="@color/textColor"
-                android:textSize="18sp"
-                android:transitionName="name"
-                app:layout_constraintBottom_toTopOf="@+id/year_mpaa"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/item_poster"
-                app:layout_constraintTop_toTopOf="@+id/item_poster"
-                app:layout_constraintVertical_bias="1.0"
-                tools:text="Goblin Slayer" />
-
-            <TextView
-                android:id="@+id/year_mpaa"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="4dp"
-                android:fontFamily="@font/open_sans_semibold"
-                android:maxLines="2"
-                android:textColor="@color/textColor_87"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toTopOf="@+id/genre"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="@+id/item_title"
-                tools:text="2018 • TV-MA\n25m" />
-
-            <TextView
-                android:id="@+id/genre"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="4dp"
-                android:fontFamily="@font/open_sans_semibold"
-                android:textColor="@color/textColor_87"
-                android:textSize="14sp"
-                app:layout_constraintBottom_toBottomOf="@+id/item_poster"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/year_mpaa"
-                tools:text="Action, Adventure, Animation, Anime, Fantasy, Thriller" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/play_btn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="24dp"
-                android:layout_marginEnd="16dp"
-                android:backgroundTint="@color/colorAccent"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:text="@string/play"
-                android:textColor="@color/textColor"
-                app:elevation="0dp"
-                app:icon="@drawable/ic_baseline_play_arrow_24"
-                app:iconGravity="textStart"
-                app:iconTint="@color/textColor"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/item_poster" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/save_show"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+            <ImageView
+                android:id="@+id/iv_poster"
+                android:layout_width="170dp"
+                android:layout_height="250dp"
+                android:layout_gravity="center"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:text="Watchlist"
-                android:textColor="@color/textColor"
-                app:elevation="0dp"
-                app:icon="@drawable/ic_baseline_add_to_queue_24"
-                app:iconGravity="textStart"
-                app:iconTint="@color/textColor"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/play_btn"
-                app:strokeColor="@color/colorAccent" />
+                android:adjustViewBounds="true"
+                android:contentDescription="@null"
+                android:elevation="0dp"
+                android:scaleType="centerCrop"
+                tools:ignore="ImageContrastCheck"
+                tools:srcCompat="@drawable/poster" />
+        </com.google.android.material.card.MaterialCardView>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/down_btn"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:text="@string/download"
-                android:textColor="@color/textColor"
-                app:elevation="0dp"
-                app:icon="@drawable/ic_round_file_download_24"
-                app:iconGravity="textStart"
-                app:iconTint="@color/textColor"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/save_show"
-                app:strokeColor="@color/colorAccent" />
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/open_sans_semibold"
+            android:textColor="@color/textColor"
+            android:textSize="21sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toBottomOf="@+id/poster_card"
+            tools:text="That Time I Got Reincarnated as a Slime" />
 
-            <TextView
-                android:id="@+id/plot"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:fontFamily="@font/open_sans"
-                android:textColor="@color/textColor_87"
-                android:textSize="14sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/down_btn"
-                tools:text="Goblins are known for their ferocity, cunning, and rapid reproduction, but their reputation as the lowliest of monsters causes their threat to be overlooked as adventurers turn a blind eye in favor of more rewarding assignments with larger bounties.\nA young priestess has formed her first adventuring party, but almost immediately they find themselves in distress. It's the Goblin Slayer who comes to their rescue\u00e2\u20ac\u201da man who's dedicated his life to the extermination of all goblins, by any means necessary. As a holder of the prestigious Silver rank, the Goblin Slayer allows her to accompany him as he assists the Adventurer's Guild in all goblin-related matters. Together with the Priestess, High Elf, Dwarf, and Lizard-man, the armored warrior will not rest until every single goblin in the frontier lands has been eradicated for good." />
+        <TextView
+            android:id="@+id/tv_network"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:fontFamily="@font/open_sans"
+            android:text="@string/network"
+            android:textColor="@color/textColor_74"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/tv_rating"
+            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/btn_my_list" />
 
-            <com.google.android.material.tabs.TabLayout
-                android:id="@+id/tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top"
-                android:layout_marginTop="8dp"
-                android:background="@color/colorPrimaryDark"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/plot"
-                app:tabGravity="start"
-                app:tabIndicatorColor="@color/colorAccent"
-                app:tabIndicatorFullWidth="false"
-                app:tabMode="scrollable"
-                app:tabSelectedTextColor="@color/colorAccent"
-                app:tabTextAppearance="@style/seasonsTabTextAppearance"
-                app:tabTextColor="@color/textColor_54" />
+        <TextView
+            android:id="@+id/network"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginBottom="2dp"
+            android:fontFamily="@font/open_sans_semibold"
+            android:maxLines="1"
+            android:textAlignment="textEnd"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/rating"
+            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/tv_runtime"
+            tools:text="Tokyo MX"
+            tools:textColor="#2898f0" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/episodes_view"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tabs" />
+        <TextView
+            android:id="@+id/tv_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:fontFamily="@font/open_sans"
+            android:text="@string/rating"
+            android:textColor="@color/textColor_74"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/tv_released"
+            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/btn_my_list" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/retry_episodes"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:clickable="true"
-                android:foreground="?attr/selectableItemBackground"
-                android:text="@string/retry"
-                android:textColor="@color/fabColor"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/plot" />
+        <TextView
+            android:id="@+id/rating"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginBottom="2dp"
+            android:fontFamily="@font/open_sans_semibold"
+            android:maxLines="1"
+            android:textAlignment="textEnd"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/released"
+            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/tv_runtime"
+            tools:text="TV-MA"
+            tools:textColor="#2898f0" />
 
+        <TextView
+            android:id="@+id/tv_released"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:fontFamily="@font/open_sans"
+            android:text="@string/released"
+            android:textColor="@color/textColor_74"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/tv_runtime"
+            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/btn_my_list" />
 
-            <ProgressBar
-                android:id="@+id/loading_episodes"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/plot" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/released"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginBottom="2dp"
+            android:fontFamily="@font/open_sans_semibold"
+            android:maxLines="1"
+            android:textAlignment="textEnd"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/runtime"
+            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/tv_runtime"
+            tools:text="2018"
+            tools:textColor="#2898f0" />
 
-    </androidx.core.widget.NestedScrollView>
+        <TextView
+            android:id="@+id/tv_runtime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="@font/open_sans"
+            android:text="@string/runtime"
+            android:textColor="@color/textColor_74"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/btn_my_list"
+            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="@+id/btn_my_list" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <TextView
+            android:id="@+id/runtime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="@font/open_sans_semibold"
+            android:maxLines="1"
+            android:textAlignment="textEnd"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/btn_my_list"
+            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@+id/tv_runtime"
+            tools:text="25 min"
+            tools:textColor="#2898f0" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_my_list"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            android:elevation="0dp"
+            android:insetTop="0dp"
+            android:insetBottom="0dp"
+            android:minHeight="0dp"
+            android:padding="5dp"
+            android:text="@string/save"
+            android:textColor="@color/colorAccent"
+            app:elevation="0dp"
+            app:icon="@drawable/ic_baseline_playlist_add_24"
+            app:iconGravity="textStart"
+            app:iconTint="@color/colorAccent"
+            app:layout_constraintBottom_toBottomOf="@+id/poster_card"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/poster_card"
+            app:strokeColor="@color/cardColor"
+            tools:iconTint="#2898f0"
+            tools:ignore="TouchTargetSizeCheck"
+            tools:strokeColor="@color/cardColor"
+            tools:textColor="#2898f0" />
+
+        <TextView
+            android:id="@+id/tv_plot"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:fontFamily="@font/open_sans"
+            android:textColor="@color/textColor_87"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="@+id/tv_title"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title"
+            tools:text="37-year-old corporate worker Mikami Satoru is stabbed by a random killer, and is reborn to an alternate world. But he turns out to be reborn a slime! Thrown into this new world with the name Rimuru Tempest, he begins his quest to create a world that’s welcoming to all races. Broken free from ordinary, stale past life, his fresh adventure in a fantasy world as a slime monster with unique abilities begins." />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/cg_genre"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
+            app:layout_constraintStart_toStartOf="@+id/tv_plot"
+            app:layout_constraintTop_toBottomOf="@+id/tv_plot"
+            app:selectionRequired="false"
+            app:singleLine="false"
+            app:singleSelection="false" />
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="@android:color/transparent"
+            app:layout_constraintEnd_toStartOf="@+id/seasons_menu"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toBottomOf="@+id/cg_genre"
+            app:tabGravity="start"
+            app:tabIndicatorColor="@color/colorAccent"
+            app:tabIndicatorFullWidth="false"
+            app:tabIndicatorHeight="4dp"
+            app:tabMode="scrollable"
+            app:tabSelectedTextColor="@color/colorAccent"
+            app:tabTextAppearance="@style/seasonsTabTextAppearance"
+            app:tabTextColor="@color/textColor_54"
+            tools:tabIndicatorColor="#2898f0"
+            tools:tabSelectedTextColor="#2898f0">
+
+        </com.google.android.material.tabs.TabLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/seasons_menu"
+            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:insetTop="4dp"
+            android:insetBottom="2dp"
+            android:minHeight="0dp"
+            android:textAllCaps="false"
+            android:textColor="@color/textColor_74"
+            android:textSize="14sp"
+            app:backgroundTint="@color/transparent"
+            app:cornerRadius="16dp"
+            app:elevation="0dp"
+            app:icon="@drawable/ic_round_keyboard_arrow_down_24"
+            app:iconGravity="end"
+            app:iconTint="@color/textColor_74"
+            app:layout_constraintBottom_toBottomOf="@+id/tabs"
+            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toTopOf="@+id/tabs"
+            tools:text="Season 1" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_episodes"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
+            app:layout_constraintStart_toStartOf="@+id/tv_plot"
+            app:layout_constraintTop_toBottomOf="@+id/tabs"
+            tools:listitem="@layout/episode_list" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_retry_episodes"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:clickable="true"
+            android:foreground="?attr/selectableItemBackground"
+            android:text="@string/retry"
+            android:textColor="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toBottomOf="@+id/seasons_menu"
+            tools:textColor="#2898f0" />
+
+        <ProgressBar
+            android:id="@+id/pb_episodes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
+            app:layout_constraintStart_toStartOf="@+id/poster_card"
+            app:layout_constraintTop_toBottomOf="@+id/seasons_menu"
+            tools:indeterminateTint="#2898f0" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

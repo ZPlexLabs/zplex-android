@@ -12,7 +12,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.media_item.view.*
 import zechs.zplex.R
 import zechs.zplex.models.drive.File
-import zechs.zplex.utils.Constants.Companion.TVDB_IMAGE_REDIRECT
+import zechs.zplex.utils.Constants.Companion.TMDB_API_KEY
+import zechs.zplex.utils.Constants.Companion.ZPLEX_IMAGE_REDIRECT
 
 
 class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
@@ -49,21 +50,21 @@ class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
         val file = differ.currentList[position]
         val name = file.name
 
-        if (name.endsWith("TV") || name.endsWith("Movie")) {
+        if (name.contains("TV") || name.contains("Movie")) {
 
-//            val posterURL = URL("${ZPLEX}${name}/poster.jpg")
-//            val posterUri = URI(
-//                posterURL.protocol,
-//                posterURL.userInfo,
-//                IDN.toASCII(posterURL.host),
-//                posterURL.port,
-//                posterURL.path,
-//                posterURL.query,
-//                posterURL.ref
-//            ).toASCIIString()
-
-            val redirectImagePoster =
-                Uri.parse("${TVDB_IMAGE_REDIRECT}${file.name.split(" - ").toTypedArray()[0]}")
+            val redirectImagePoster = if (name.endsWith("TV")) {
+                Uri.parse(
+                    "${ZPLEX_IMAGE_REDIRECT}/tvdb/${
+                        file.name.split(" - ").toTypedArray()[0]
+                    }"
+                )
+            } else {
+                Uri.parse(
+                    "${ZPLEX_IMAGE_REDIRECT}/tmdb/${
+                        file.name.split(" - ").toTypedArray()[0]
+                    }?api_key=${TMDB_API_KEY}&language=en-US"
+                )
+            }
 
             holder.itemView.apply {
                 Glide.with(context)

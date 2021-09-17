@@ -1,6 +1,5 @@
 package zechs.zplex.ui.fragment
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.transition.TransitionManager
@@ -12,9 +11,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.fragment_releases.*
 import zechs.zplex.R
 import zechs.zplex.adapter.LogsAdapter
-import zechs.zplex.ui.ReleaseLogViewModel
-import zechs.zplex.ui.activity.AboutActivity
 import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.viewmodel.release_log.ReleaseLogViewModel
 import zechs.zplex.utils.Constants
 import zechs.zplex.utils.Resource
 
@@ -90,13 +88,13 @@ class ReleasesFragment : Fragment(R.layout.fragment_releases) {
                 "$episode - $episodeTitle"
             }
 
-            val intent = Intent(activity, AboutActivity::class.java)
-            intent.putExtra("NAME", show)
-            intent.putExtra("TYPE", "TV")
-            intent.putExtra("POSTERURL", posterUrl.toString())
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            startActivity(intent)
-            activity?.overridePendingTransition(R.anim.slide_up, R.anim.no_animation)
+//            val intent = Intent(activity, AboutActivity::class.java)
+//            intent.putExtra("NAME", show)
+//            intent.putExtra("TYPE", "TV")
+//            intent.putExtra("POSTERURL", posterUrl.toString())
+//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//            startActivity(intent)
+//            activity?.overridePendingTransition(R.anim.slide_up, R.anim.no_animation)
         }
     }
 }

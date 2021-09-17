@@ -34,15 +34,20 @@
         <entry key="app/src/main/res/drawable/dark_faded_gradient.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/dark_gradient.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/ic_download.xml" value="0.340625" />
+        <entry key="app/src/main/res/drawable/ic_play_svg.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/popup_menu_bg.xml" value="0.340625" />
         <entry key="app/src/main/res/layout/activity_about.xml" value="0.72" />
+        <entry key="app/src/main/res/layout/activity_exo_player.xml" value="0.3020833333333333" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/activity_player.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/activity_zplex.xml" value="0.1" />
         <entry key="app/src/main/res/layout/episode_list.xml" value="0.8" />
         <entry key="app/src/main/res/layout/error_layout.xml" value="0.3203125" />
-        <entry key="app/src/main/res/layout/fragment_about.xml" value="0.38317757009345793" />
+        <entry key="app/src/main/res/layout/fragment_about.xml" value="0.3559027777777778" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/fragment_new_about.xml" value="0.3671794871794872" />
         <entry key="app/src/main/res/layout/fragment_releases.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/fragment_search.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/item_actor.xml" value="0.72" />
         <entry key="app/src/main/res/layout/item_chip.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/item_dropdown.xml" value="0.72" />
@@ -50,6 +55,8 @@
         <entry key="app/src/main/res/layout/logs_item.xml" value="0.72" />
         <entry key="app/src/main/res/layout/media_item.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/media_item_home.xml" value="0.254981884057971" />
+        <entry key="app/src/main/res/layout/temp.xml" value="0.8" />
+        <entry key="app/src/main/res/menu/bottom_navigation_menu.xml" value="0.3203125" />
       </map>
     </option>
   </component>

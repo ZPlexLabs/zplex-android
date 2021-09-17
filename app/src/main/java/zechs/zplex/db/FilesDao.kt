@@ -13,8 +13,10 @@ interface FilesDao {
     @Query("SELECT * FROM files")
     fun getAllFiles(): LiveData<List<File>>
 
+    @Query("SELECT EXISTS(SELECT * FROM files WHERE id = :id)")
+    fun getFile(id: String): Boolean
+
     @Delete
     suspend fun deleteFile(file: File)
-
 
 }

@@ -20,6 +20,13 @@
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup">
         <activity
+            android:name=".ui.activity.PlayerActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:exported="true"
+            android:keepScreenOn="true"
+            android:label="@string/title_activity_player"
+            android:theme="@style/NewAppTheme.Fullscreen" />
+        <activity
             android:name=".ui.activity.ZPlexActivity"
             android:exported="true">
             <intent-filter>
@@ -28,12 +35,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ui.activity.AboutActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:exported="true"
-            android:launchMode="singleTop"
-            android:theme="@style/AppTheme.About" />
 
         <service
             android:name=".MyFirebaseMessagingService"

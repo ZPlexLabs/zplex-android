@@ -22,7 +22,7 @@
         <item name="android:windowTranslucentStatus">true</item>
         <item name="chipStyle">@style/Widget.App.Chip</item>
         <item name="popupMenuBackground">@drawable/popup_menu_bg</item>
-
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
     </style>
 
     <style name="AppTheme.Home" parent="AppTheme">
@@ -73,4 +73,41 @@
         <item name="android:fontFamily">@font/open_sans_bold</item>
     </style>
 
+    <style name="Widget.NewAppTheme.ActionBar.Fullscreen" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@color/black_overlay</item>
+    </style>
+
+    <style name="Widget.NewAppTheme.ButtonBar.Fullscreen" parent="">
+        <item name="android:background">@color/black_overlay</item>
+        <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
+    </style>
+
+    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.App.Title.Text
+        </item>
+        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialog.App.Body.Text
+        </item>
+    </style>
+
+    <style name="MaterialAlertDialog.App.Title.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="fontFamily">@font/open_sans_semibold</item>
+        <item name="android:textColor">@color/textColor</item>
+    </style>
+
+    <style name="MaterialAlertDialog.App.Body.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
+        <item name="fontFamily">@font/open_sans</item>
+        <item name="android:textColor">@color/textColor_87</item>
+    </style>
+
+    <style name="NewAppTheme.Fullscreen" parent="NewAppTheme">
+        <item name="android:actionBarStyle">@style/Widget.NewAppTheme.ActionBar.Fullscreen</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowBackground">@null</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+
+    </style>
+
+    <style name="ThemeOverlay.ZPlex.FullscreenContainer" parent="">
+        <item name="fullscreenBackgroundColor">#000</item>
+    </style>
 </resources>

@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.logs_item.view.*
 import zechs.zplex.R
 import zechs.zplex.models.witch.ReleasesLog
 import zechs.zplex.utils.Constants.Companion.ZPLEX
+import zechs.zplex.utils.Constants.Companion.ZPLEX_IMAGE_REDIRECT
 import zechs.zplex.utils.ConverterUtils
 import java.text.SimpleDateFormat
 import java.util.*
@@ -50,14 +51,14 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
 
     override fun onBindViewHolder(holder: LogsViewHolder, position: Int) {
         val log = differ.currentList[position]
-        val id = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[0]
+        val tvdbId = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[0]
         val show = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[1]
         val type = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[2]
 
         val episode = log.file.split(" - ", ignoreCase = false, limit = 2).toTypedArray()[0]
         val episodeTitle =
             (log.file.split(" - ", ignoreCase = false, limit = 2).toTypedArray()[1]).dropLast(4)
-        val posterUrl = Uri.parse("${ZPLEX}${id} - $show - TV/poster.jpg")
+        val posterUrl = Uri.parse("${ZPLEX}${tvdbId} - $show - TV/poster.jpg")
         val episodeThumbUrl = Uri.parse("${ZPLEX}${log.folder}/${log.file.dropLast(4)}.jpg")
 
         val bodyText = try {
@@ -82,6 +83,18 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
         val pstFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
         pstFormat.timeZone = TimeZone.getTimeZone("IST")
 
+        val redirectImagePoster =
+            Uri.parse(
+                "${ZPLEX_IMAGE_REDIRECT}/tvdb/${tvdbId}/episodes/query?airedSeason=${
+                    episode.substring(
+                        1,
+                        3
+                    ).toInt()
+                }&airedEpisode=${
+                    episode.substring(4).toInt()
+                }"
+            )
+
         holder.itemView.apply {
             tv_show.text = show
             tv_episode.text = bodyText
@@ -90,7 +103,7 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
             }
             Glide.with(context)
                 .asBitmap()
-                .load(episodeThumbUrl)
+                .load(redirectImagePoster)
                 .placeholder(R.color.cardColor)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(iv_thumb)

@@ -27,6 +27,8 @@ class FilesRepository(
 
     fun getSavedFiles() = db.getFilesDao().getAllFiles()
 
+    fun getFile(id: String) = db.getFilesDao().getFile(id)
+
     suspend fun deleteFile(file: File) = db.getFilesDao().deleteFile(file)
 
 }

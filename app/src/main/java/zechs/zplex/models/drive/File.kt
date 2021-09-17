@@ -12,6 +12,6 @@ data class File(
     var serial: Int? = null,
     val id: String,
     val name: String,
-    val size: Long,
+    val size: Long?,
     val thumbnailLink: String?
 ) : Serializable

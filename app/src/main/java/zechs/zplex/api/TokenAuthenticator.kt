@@ -1,13 +1,16 @@
 package zechs.zplex.api
 
 import android.net.Uri
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import zechs.zplex.ThisApp
+import zechs.zplex.api.interfaces.TokenAPI
 import zechs.zplex.models.drive.TokenRequest
 import zechs.zplex.utils.Constants
 import zechs.zplex.utils.Constants.Companion.CLIENT_ID
@@ -25,10 +28,15 @@ class TokenAuthenticator : Authenticator {
     @Throws(IOException::class)
     override fun authenticate(route: Route?, response: Response): Request? {
 
+        val moshi = Moshi.Builder()
+            .add(KotlinJsonAdapterFactory())
+            .build()
+
         val service = Retrofit.Builder()
             .baseUrl(Constants.GOOGLE_OAUTH_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
+
         val tokenAPI = service.create(TokenAPI::class.java)
 
         val call = tokenAPI.getAccessToken(

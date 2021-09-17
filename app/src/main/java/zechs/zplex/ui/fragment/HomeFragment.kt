@@ -21,9 +21,9 @@ import zechs.zplex.adapter.FilesAdapter
 import zechs.zplex.adapter.LogsAdapter
 import zechs.zplex.databinding.FragmentHomeBinding
 import zechs.zplex.models.drive.File
-import zechs.zplex.ui.FileViewModel
-import zechs.zplex.ui.ReleaseLogViewModel
 import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.viewmodel.file.FileViewModel
+import zechs.zplex.ui.viewmodel.release_log.ReleaseLogViewModel
 import zechs.zplex.utils.Constants.Companion.ZPLEX
 import zechs.zplex.utils.Resource
 import java.net.IDN

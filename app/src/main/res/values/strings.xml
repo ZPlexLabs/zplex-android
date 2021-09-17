@@ -24,5 +24,13 @@
     <string name="my_list">My List</string>
     <string name="cast">Cast</string>
     <string name="episodes">Episodes</string>
+    <string name="released">Released</string>
+    <string name="runtime">Runtime</string>
+    <string name="rating">Rating</string>
+    <string name="network">Network</string>
+    <string name="title_activity_player">PlayerActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="save">Save</string>
+    <string name="saved">Saved</string>
 </resources>

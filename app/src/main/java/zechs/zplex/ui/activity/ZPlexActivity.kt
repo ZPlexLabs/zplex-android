@@ -16,8 +16,16 @@ import zechs.zplex.R
 import zechs.zplex.db.FilesDatabase
 import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.ReleasesRepository
+import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.repository.TvdbRepository
-import zechs.zplex.ui.*
+import zechs.zplex.ui.viewmodel.file.FileViewModel
+import zechs.zplex.ui.viewmodel.file.FilesViewModelProviderFactory
+import zechs.zplex.ui.viewmodel.release_log.ReleaseLogViewModel
+import zechs.zplex.ui.viewmodel.release_log.ReleaseLogViewModelProviderFactory
+import zechs.zplex.ui.viewmodel.tmdb.TmdbViewModel
+import zechs.zplex.ui.viewmodel.tmdb.TmdbViewModelProviderFactory
+import zechs.zplex.ui.viewmodel.tvdb.TvdbViewModel
+import zechs.zplex.ui.viewmodel.tvdb.TvdbViewModelProviderFactory
 
 
 class ZPlexActivity : AppCompatActivity() {
@@ -25,6 +33,7 @@ class ZPlexActivity : AppCompatActivity() {
     lateinit var viewModel: FileViewModel
     lateinit var logsViewModel: ReleaseLogViewModel
     lateinit var tvdbViewModel: TvdbViewModel
+    lateinit var tmdbViewModel: TmdbViewModel
 
     @DelicateCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +54,13 @@ class ZPlexActivity : AppCompatActivity() {
             TvdbViewModelProviderFactory(application, seriesRepository)
         tvdbViewModel =
             ViewModelProvider(this, seriesModelProviderFactory).get(TvdbViewModel::class.java)
+
+        val moviesRepository = TmdbRepository()
+        val moviesModelProviderFactory =
+            TmdbViewModelProviderFactory(application, moviesRepository)
+        tmdbViewModel =
+            ViewModelProvider(this, moviesModelProviderFactory).get(TmdbViewModel::class.java)
+
 
         setContentView(R.layout.activity_zplex)
 

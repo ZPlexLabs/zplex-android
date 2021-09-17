@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 
 class ThisApp : Application() {
+
     override fun onCreate() {
         instance = this
         super.onCreate()
@@ -16,4 +17,5 @@ class ThisApp : Application() {
         val context: Context?
             get() = instance
     }
+
 }
