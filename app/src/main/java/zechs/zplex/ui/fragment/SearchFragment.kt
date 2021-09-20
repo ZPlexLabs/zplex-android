@@ -7,13 +7,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AbsListView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -25,6 +23,7 @@ import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.viewmodel.file.FileViewModel
 import zechs.zplex.utils.Constants.Companion.PAGE_TOKEN
 import zechs.zplex.utils.Constants.Companion.SEARCH_DELAY_AMOUNT
+import zechs.zplex.utils.Constants.Companion.isLastPage
 import zechs.zplex.utils.Resource
 
 
@@ -88,8 +87,14 @@ class SearchFragment : Fragment() {
                     hideProgressBar()
                     TransitionManager.beginDelayedTransition(binding.root)
                     response.data?.let { filesResponse ->
+                        if (filesResponse.files.isEmpty()) {
+                            Toast.makeText(
+                                context,
+                                "Nothing found",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                         filesAdapter.differ.submitList(filesResponse.files.toList())
-                        isLastPage = filesResponse.nextPageToken == null
                         Log.d("pageToken", PAGE_TOKEN)
                     }
                 }
@@ -121,52 +126,12 @@ class SearchFragment : Fragment() {
 
     private fun hideProgressBar() {
         binding.loadingSearch.visibility = View.INVISIBLE
-        isLoading = false
     }
 
     private fun showProgressBar() {
         binding.loadingSearch.visibility = View.VISIBLE
-        isLoading = true
     }
 
-    var isLoading = false
-    var isLastPage = false
-    var isScrolling = false
-
-    private val scrollListener = object : RecyclerView.OnScrollListener() {
-        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            super.onScrolled(recyclerView, dx, dy)
-
-            val layoutManager = recyclerView.layoutManager as GridLayoutManager
-            val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
-            val visibleItemCount = layoutManager.childCount
-            val totalItemCount = layoutManager.itemCount
-
-            val isNotLoadingAndNotLastPage = !isLoading && !isLastPage
-            val isAtLastItem = firstVisibleItemPosition + visibleItemCount >= totalItemCount
-            val isNotAtBeginning = firstVisibleItemPosition >= 0
-            val isTotalMoreThanVisible = totalItemCount >= 1
-
-            val shouldPaginate = isNotLoadingAndNotLastPage && isAtLastItem && isNotAtBeginning &&
-                    isTotalMoreThanVisible && isScrolling
-
-            if (shouldPaginate) {
-                viewModel.getSearchList(setDriveQuery(text), PAGE_TOKEN)
-                isScrolling = false
-                Log.d(tag, "Paginating")
-            } else {
-                Log.d(tag, "Not paginating")
-                binding.rvSearch.setPadding(0, 0, 0, 0)
-            }
-        }
-
-        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            super.onScrollStateChanged(recyclerView, newState)
-            if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
-                isScrolling = true
-            }
-        }
-    }
 
     private fun setupRecyclerView() {
         val nestedScroll = binding.nestedScrollView
@@ -182,7 +147,6 @@ class SearchFragment : Fragment() {
         binding.rvSearch.apply {
             adapter = filesAdapter
             layoutManager = GridLayoutManager(activity, 3)
-            //addOnScrollListener(this@SearchFragment.scrollListener)
             isNestedScrollingEnabled = false
         }
 

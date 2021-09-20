@@ -57,12 +57,12 @@
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/poster_card"
-            android:layout_width="170dp"
-            android:layout_height="250dp"
+            android:layout_width="150dp"
+            android:layout_height="220dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="8dp"
             app:cardBackgroundColor="@android:color/transparent"
-            app:cardCornerRadius="8dp"
+            app:cardCornerRadius="4dp"
             app:layout_constraintBottom_toBottomOf="@+id/frameLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.025"
@@ -103,8 +103,8 @@
 
             <ImageView
                 android:id="@+id/iv_poster"
-                android:layout_width="170dp"
-                android:layout_height="250dp"
+                android:layout_width="150dp"
+                android:layout_height="220dp"
                 android:layout_gravity="center"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
@@ -273,6 +273,7 @@
             android:padding="5dp"
             android:text="@string/save"
             android:textColor="@color/colorAccent"
+            app:cornerRadius="24dp"
             app:elevation="0dp"
             app:icon="@drawable/ic_baseline_playlist_add_24"
             app:iconGravity="textStart"
@@ -363,8 +364,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
-            app:layout_constraintStart_toStartOf="@+id/tv_plot"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/tabs"
             tools:listitem="@layout/episode_list" />
 

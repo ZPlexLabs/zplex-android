@@ -15,6 +15,7 @@ import zechs.zplex.models.drive.DriveResponse
 import zechs.zplex.models.drive.File
 import zechs.zplex.repository.FilesRepository
 import zechs.zplex.utils.Constants.Companion.PAGE_TOKEN
+import zechs.zplex.utils.Constants.Companion.isLastPage
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.SessionManager
 import java.io.IOException
@@ -141,6 +142,7 @@ class FileViewModel(
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
                 PAGE_TOKEN = resultResponse.nextPageToken ?: PAGE_TOKEN
+                isLastPage = resultResponse.nextPageToken == null
                 if (searchListResponse == null || newSearchQuery != oldSearchQuery) {
                     oldSearchQuery = newSearchQuery
                     searchListResponse = resultResponse

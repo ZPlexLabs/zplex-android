@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import kotlinx.android.synthetic.main.media_item.view.*
+import kotlinx.android.synthetic.main.media_item_home.view.*
 import zechs.zplex.R
 import zechs.zplex.models.drive.File
 import zechs.zplex.utils.Constants.Companion.TMDB_API_KEY
@@ -68,8 +68,8 @@ class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
 
             holder.itemView.apply {
                 Glide.with(context)
-                    .asBitmap()
                     .load(redirectImagePoster)
+                    .override(170, 250)
                     .placeholder(R.color.cardColor)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(item_poster)

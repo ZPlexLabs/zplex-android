@@ -24,6 +24,7 @@ class MyShowsFragment : Fragment() {
     private lateinit var viewModel: FileViewModel
     private lateinit var filesAdapter: FilesAdapter
     private lateinit var binding: FragmentMyShowsBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -66,7 +67,7 @@ class MyShowsFragment : Fragment() {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
+                val position = viewHolder.absoluteAdapterPosition
                 val file = filesAdapter.differ.currentList[position]
                 viewModel.deleteFile(file)
                 Snackbar.make(view, "Successfully removed", Snackbar.LENGTH_LONG).show()

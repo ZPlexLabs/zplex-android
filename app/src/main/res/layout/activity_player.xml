@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/fullscreenBackgroundColor"
+    android:keepScreenOn="true"
     android:theme="@style/ThemeOverlay.ZPlex.FullscreenContainer"
     tools:context=".ui.activity.PlayerActivity">
 
@@ -12,10 +13,8 @@
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:animation_enabled="true"
         app:show_buffering="when_playing"
         app:show_shuffle_button="false"
-        app:show_subtitle_button="true"
-        app:show_timeout="300" />
+        app:show_subtitle_button="true" />
 
 </FrameLayout>

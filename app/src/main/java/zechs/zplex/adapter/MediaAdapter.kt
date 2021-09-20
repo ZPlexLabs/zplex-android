@@ -9,7 +9,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.episode_list.view.*
 import zechs.zplex.R
 import zechs.zplex.models.drive.File
@@ -72,17 +71,17 @@ class MediaAdapter(private val tvdbId: Int) :
                     episode.substring(4, 6).toInt()
                 }"
             )
-
-        val episodeThumbUri: Uri
-        val cacheOption: RequestOptions
-
-        if (file.thumbnailLink == null) {
-            episodeThumbUri = redirectImagePoster
-            cacheOption = RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL)
-        } else {
-            episodeThumbUri = Uri.parse(file.thumbnailLink)
-            cacheOption = RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE)
-        }
+//
+//        val episodeThumbUri: Uri
+//        val cacheOption: RequestOptions
+//
+//        if (file.thumbnailLink == null) {
+//            episodeThumbUri = redirectImagePoster
+//            cacheOption = RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL)
+//        } else {
+//            episodeThumbUri = Uri.parse(file.thumbnailLink)
+//            cacheOption = RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE)
+//        }
 
         holder.itemView.apply {
             episode_title.text = title.substring(0, title.length - 4)
@@ -90,8 +89,8 @@ class MediaAdapter(private val tvdbId: Int) :
 
             Glide.with(context)
                 .asBitmap()
-                .load(episodeThumbUri)
-                .apply(cacheOption)
+                .load(redirectImagePoster)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(R.color.cardColor)
                 .into(thumb)
 

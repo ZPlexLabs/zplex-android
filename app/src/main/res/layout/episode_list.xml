@@ -18,6 +18,7 @@
             android:id="@+id/thumb_card"
             android:layout_width="144dp"
             android:layout_height="81dp"
+            android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
             app:cardBackgroundColor="@android:color/transparent"
@@ -35,20 +36,6 @@
                 android:contentDescription="@null"
                 tools:src="@drawable/thumb" />
 
-            <FrameLayout
-                android:layout_width="144dp"
-                android:layout_height="81dp"
-                android:alpha="0.25"
-                android:background="@color/colorPrimary" />
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:alpha=".7"
-                android:contentDescription="@null"
-                android:visibility="invisible"
-                app:srcCompat="@drawable/ic_play_svg" />
         </com.google.android.material.card.MaterialCardView>
 
         <TextView
@@ -93,6 +80,7 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
             android:layout_marginBottom="8dp"
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@null"

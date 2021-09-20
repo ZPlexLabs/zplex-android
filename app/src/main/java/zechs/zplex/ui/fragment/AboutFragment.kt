@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Bundle
@@ -19,6 +20,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListPopupWindow
 import android.widget.Toast.*
+import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
@@ -197,53 +199,63 @@ class AboutFragment : Fragment() {
                         isFirstResource: Boolean
                     ): Boolean {
                         resource?.let { _ ->
-                            Palette.from(resource).generate { p: Palette? ->
-                                p?.let { _ ->
-                                    val accent = p.getVibrantColor(
-                                        p.getDominantColor(
-                                            ContextCompat.getColor(
-                                                it, R.color.colorAccent
+                            Palette.from(resource)
+                                .generate { p: Palette? ->
+                                    p?.let { _ ->
+                                        var accent = p.getVibrantColor(
+                                            p.getDarkVibrantColor(
+                                                p.getDominantColor(
+                                                    ContextCompat.getColor(
+                                                        it, R.color.colorAccent
+                                                    )
+                                                )
                                             )
                                         )
-                                    )
+                                        accent =
+                                            if (getContrastColor(accent)) ContextCompat.getColor(
+                                                it, R.color.textColor
+                                            ) else accent
 
-                                    val colorPrimary =
-                                        ContextCompat.getColor(
-                                            it,
-                                            R.color.colorPrimaryDark
-                                        )
 
-                                    val gradientDrawable = GradientDrawable(
-                                        GradientDrawable.Orientation.TOP_BOTTOM,
-                                        intArrayOf(accent, colorPrimary)
-                                    )
-
-                                    binding.btnMyList.apply {
-                                        setTextColor(accent)
-                                        iconTint = ColorStateList.valueOf(accent)
-                                    }
-
-                                    binding.apply {
-                                        frameLayout.background = gradientDrawable
-                                        tabs.setTabTextColors(
+                                        val colorPrimary =
                                             ContextCompat.getColor(
                                                 it,
-                                                R.color.textColor_54
-                                            ), accent
+                                                R.color.colorPrimaryDark
+                                            )
+
+                                        val gradientDrawable = GradientDrawable(
+                                            GradientDrawable.Orientation.TOP_BOTTOM,
+                                            intArrayOf(accent, colorPrimary)
                                         )
-                                        tabs.setSelectedTabIndicatorColor(
-                                            accent
-                                        )
-                                        pbEpisodes.indeterminateTintList =
-                                            ColorStateList.valueOf(accent)
-                                        network.setTextColor(accent)
-                                        rating.setTextColor(accent)
-                                        released.setTextColor(accent)
-                                        runtime.setTextColor(accent)
-                                        darkPlay.backgroundTintList = ColorStateList.valueOf(accent)
+
+                                        binding.btnMyList.apply {
+                                            setTextColor(accent)
+                                            iconTint = ColorStateList.valueOf(accent)
+                                        }
+
+                                        binding.apply {
+                                            frameLayout.background = gradientDrawable
+                                            tabs.setTabTextColors(
+                                                ContextCompat.getColor(
+                                                    it,
+                                                    R.color.textColor_54
+                                                ), accent
+                                            )
+                                            tabs.setSelectedTabIndicatorColor(
+                                                accent
+                                            )
+                                            pbEpisodes.indeterminateTintList =
+                                                ColorStateList.valueOf(accent)
+                                            network.setTextColor(accent)
+                                            rating.setTextColor(accent)
+                                            released.setTextColor(accent)
+                                            runtime.setTextColor(accent)
+                                            darkPlay.backgroundTintList =
+                                                ColorStateList.valueOf(accent)
+                                        }
+
                                     }
                                 }
-                            }
                         }
                         return false
                     }
@@ -386,6 +398,7 @@ class AboutFragment : Fragment() {
                             seriesInfo.visibility = View.INVISIBLE
                             mediaData.visibility = View.INVISIBLE
                             ivFanart.visibility = View.INVISIBLE
+                            seasonsMenu.visibility = View.INVISIBLE
                         }
                     }
                 }
@@ -508,9 +521,7 @@ class AboutFragment : Fragment() {
                     }
                 }
             })
-        }
-
-        if (type == "Movie.mkv") {
+        } else {
             binding.apply {
                 darkTint.visibility = View.VISIBLE
                 darkPlay.visibility = View.VISIBLE
@@ -532,7 +543,7 @@ class AboutFragment : Fragment() {
 
                 Handler(Looper.getMainLooper()).postDelayed({
                     playMedia(file)
-                }, 350)
+                }, 250)
             }
 
             tmdbViewModel.getMovies(moviesId)
@@ -582,12 +593,9 @@ class AboutFragment : Fragment() {
                                             TransitionManager.beginDelayedTransition(
                                                 binding.root
                                             )
-                                            text =
-                                                if (text.length > 178) trimPlot else plot
+                                            text = if (text.length > 178) trimPlot else plot
                                         }
-                                    } else {
-                                        text = plot
-                                    }
+                                    } else text = plot
                                 }
                             }
                             context?.let { cont ->
@@ -745,7 +753,7 @@ class AboutFragment : Fragment() {
                         }
                         1 -> {
                             val playUrl =
-                                "${ZPLEX}${args.seriesId} - ${args.name} - TV/${it.name}"
+                                if (args.type == "TV") "${ZPLEX}${args.seriesId} - ${args.name} - TV/${it.name}" else "${ZPLEX}${args.name}"
                             try {
                                 val episodeURL = URL(playUrl)
                                 val episodeURI = URI(
@@ -806,5 +814,11 @@ class AboutFragment : Fragment() {
                 }
                 .show()
         }
+    }
+
+    fun getContrastColor(@ColorInt color: Int): Boolean {
+        val a: Double =
+            1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255
+        return a >= 0.75
     }
 }

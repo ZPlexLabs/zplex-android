@@ -52,6 +52,7 @@ class PlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -153,6 +154,7 @@ class PlayerActivity : AppCompatActivity() {
             setShowPreviousButton(false)
             setShowFastForwardButton(true)
             setShowRewindButton(true)
+            controllerHideOnTouch = true
         }
     }
 

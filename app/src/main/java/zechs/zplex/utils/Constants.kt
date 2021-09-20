@@ -25,5 +25,6 @@ class Constants {
 
         const val SEARCH_DELAY_AMOUNT = 500L
         var PAGE_TOKEN = ""
+        var isLastPage = false
     }
 }
