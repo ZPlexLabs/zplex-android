@@ -47,7 +47,7 @@ class CreditsAdapter : RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder>() 
         val data = differ.currentList[position]
 
         holder.itemView.apply {
-            Glide.with(context)
+            Glide.with(this)
                 .load("${TMDB_IMAGE_PATH}${data.profile_path}")
                 .placeholder(R.color.cardColor)
                 .into(actor_image)

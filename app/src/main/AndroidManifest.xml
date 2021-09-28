@@ -16,7 +16,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/NewAppTheme"
+        android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
         tools:ignore="AllowBackup">
         <activity
@@ -25,7 +25,7 @@
             android:exported="true"
             android:keepScreenOn="true"
             android:label="@string/title_activity_player"
-            android:theme="@style/NewAppTheme.Fullscreen" />
+            android:theme="@style/AppTheme.Fullscreen" />
         <activity
             android:name=".ui.activity.ZPlexActivity"
             android:exported="true">

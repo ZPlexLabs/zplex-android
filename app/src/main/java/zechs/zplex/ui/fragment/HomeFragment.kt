@@ -6,9 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
 import androidx.fragment.app.Fragment
@@ -16,7 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import com.google.android.material.transition.MaterialFadeThrough
-import kotlinx.android.synthetic.main.fragment_home.*
+import zechs.zplex.R
 import zechs.zplex.adapter.FilesAdapter
 import zechs.zplex.adapter.LogsAdapter
 import zechs.zplex.databinding.FragmentHomeBinding
@@ -31,9 +29,10 @@ import java.net.URI
 import java.net.URL
 
 
-class HomeFragment : Fragment() {
+class HomeFragment : Fragment(R.layout.fragment_home) {
 
-    private lateinit var binding: FragmentHomeBinding
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: FileViewModel
     private lateinit var logsViewModel: ReleaseLogViewModel
@@ -42,26 +41,17 @@ class HomeFragment : Fragment() {
     private lateinit var filesAdapter2: FilesAdapter
     private lateinit var logsAdapter: LogsAdapter
 
-    private val TAG = "HomeFragment"
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
-        binding = FragmentHomeBinding.inflate(layoutInflater)
-        enterTransition = MaterialFadeThrough()
-        return binding.root
-    }
+    private val thisTAG = "HomeFragment"
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentHomeBinding.bind(view)
 
         viewModel = (activity as ZPlexActivity).viewModel
         logsViewModel = (activity as ZPlexActivity).logsViewModel
 
         setupRecyclerView()
-        appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0)
+        binding.newEpisodes.setPadding(0, getStatusBarHeight() + 8, 0, 0)
 
         viewModel.homeList.observe(viewLifecycleOwner, { response ->
             when (response) {
@@ -79,7 +69,7 @@ class HomeFragment : Fragment() {
                             "An error occurred: $message",
                             Toast.LENGTH_SHORT
                         ).show()
-                        Log.e(TAG, "An error occurred: $message")
+                        Log.e(thisTAG, "An error occurred: $message")
                     }
                 }
                 is Resource.Loading -> {
@@ -103,7 +93,7 @@ class HomeFragment : Fragment() {
                             "An error occurred: $message",
                             Toast.LENGTH_SHORT
                         ).show()
-                        Log.e(TAG, "An error occurred: $message")
+                        Log.e(thisTAG, "An error occurred: $message")
                     }
                 }
                 is Resource.Loading -> {
@@ -186,7 +176,7 @@ class HomeFragment : Fragment() {
                 Toast.makeText(
                     context,
                     "VLC not found, Install VLC from Play Store",
-                    Toast.LENGTH_LONG
+                    LENGTH_LONG
                 ).show()
             }
         }
@@ -198,15 +188,6 @@ class HomeFragment : Fragment() {
                 getDetails(it)
             }
         }
-    }
-
-    private fun getStatusBarHeight(): Int {
-        var result = 0
-        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            result = resources.getDimensionPixelSize(resourceId)
-        }
-        return result
     }
 
     private fun getDetails(it: File) {
@@ -226,4 +207,24 @@ class HomeFragment : Fragment() {
             Toast.makeText(context, "TVDB id not found", LENGTH_LONG).show()
         }
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.apply {
+            rvHome.adapter = null
+            rvNewEpisodes.adapter = null
+            rvMyShowsHome.adapter = null
+        }
+        _binding = null
+    }
+
+    private fun getStatusBarHeight(): Int {
+        var result = 0
+        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
+        if (resourceId > 0) {
+            result = resources.getDimensionPixelSize(resourceId)
+        }
+        return result
+    }
+
 }

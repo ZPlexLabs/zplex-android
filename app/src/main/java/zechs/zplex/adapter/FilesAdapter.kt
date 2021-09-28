@@ -67,9 +67,8 @@ class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
             }
 
             holder.itemView.apply {
-                Glide.with(context)
+                Glide.with(this)
                     .load(redirectImagePoster)
-                    .override(170, 250)
                     .placeholder(R.color.cardColor)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(item_poster)

@@ -36,19 +36,22 @@
         <entry key="app/src/main/res/drawable/ic_download.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/ic_play_svg.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/popup_menu_bg.xml" value="0.340625" />
-        <entry key="app/src/main/res/layout/activity_about.xml" value="0.72" />
+        <entry key="app/src/main/res/drawable/search_bg.xml" value="0.3229166666666667" />
+        <entry key="app/src/main/res/drawable/toolbar_bg.xml" value="0.31875" />
+        <entry key="app/src/main/res/layout/activity_about.xml" value="0.264" />
+        <entry key="app/src/main/res/layout/activity_error.xml" value="0.29791666666666666" />
         <entry key="app/src/main/res/layout/activity_exo_player.xml" value="0.3020833333333333" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/activity_player.xml" value="0.3203125" />
-        <entry key="app/src/main/res/layout/activity_zplex.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_zplex.xml" value="0.2984375" />
         <entry key="app/src/main/res/layout/episode_list.xml" value="0.8" />
         <entry key="app/src/main/res/layout/error_layout.xml" value="0.3203125" />
-        <entry key="app/src/main/res/layout/fragment_about.xml" value="0.4022236756049706" />
-        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.3203125" />
-        <entry key="app/src/main/res/layout/fragment_my_shows.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/fragment_about.xml" value="0.3671794871794872" />
+        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.2984375" />
+        <entry key="app/src/main/res/layout/fragment_my_shows.xml" value="0.2984375" />
         <entry key="app/src/main/res/layout/fragment_new_about.xml" value="0.3671794871794872" />
         <entry key="app/src/main/res/layout/fragment_releases.xml" value="0.3203125" />
-        <entry key="app/src/main/res/layout/fragment_search.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/fragment_search.xml" value="0.6" />
         <entry key="app/src/main/res/layout/item_actor.xml" value="0.72" />
         <entry key="app/src/main/res/layout/item_chip.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/item_dropdown.xml" value="0.72" />

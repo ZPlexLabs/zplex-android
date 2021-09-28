@@ -8,17 +8,7 @@
         <item name="android:windowContentTransitions">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackground">@android:color/transparent</item>
-    </style>
-
-    <style name="NewAppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColor">@color/textColor</item>
-        <item name="android:windowContentTransitions">true</item>
-        <item name="android:windowBackground">@color/colorPrimary</item>
-        <item name="android:colorBackground">@color/colorPrimary</item>
-        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
+        <item name="android:navigationBarColor">@color/colorPrimary</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="chipStyle">@style/Widget.App.Chip</item>
         <item name="popupMenuBackground">@drawable/popup_menu_bg</item>
@@ -26,7 +16,7 @@
     </style>
 
     <style name="AppTheme.Home" parent="AppTheme">
-        <item name="android:navigationBarColor">@color/colorPrimary</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
     </style>
 
     <style name="AppTheme.About" parent="AppTheme.Home">
@@ -44,7 +34,7 @@
     <style name="titleTextAppearance">
         <item name="android:textColor">@color/textColor_87</item>
         <item name="fontFamily">@font/open_sans_bold</item>
-        <item name="android:textSize">20sp</item>
+        <item name="android:textSize">21sp</item>
         <item name="android:textAlignment">center</item>
     </style>
 
@@ -63,7 +53,7 @@
     </style>
 
     <style name="Widget.App.Chip" parent="Widget.MaterialComponents.Chip.Action">
-        <item name="chipBackgroundColor">@color/cardColor</item>
+        <item name="chipBackgroundColor">@color/colorPrimaryDark</item>
         <item name="android:textColor">@color/textColor</item>
     </style>
 
@@ -99,7 +89,7 @@
         <item name="android:textColor">@color/textColor_87</item>
     </style>
 
-    <style name="NewAppTheme.Fullscreen" parent="NewAppTheme">
+    <style name="AppTheme.Fullscreen" parent="AppTheme">
         <item name="android:actionBarStyle">@style/Widget.NewAppTheme.ActionBar.Fullscreen</item>
         <item name="android:windowActionBarOverlay">true</item>
         <item name="android:windowBackground">@null</item>

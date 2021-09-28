@@ -4,66 +4,44 @@ import android.os.Bundle
 import android.text.Editable
 import android.transition.TransitionManager
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.material.transition.MaterialFadeThrough
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import zechs.zplex.R
 import zechs.zplex.adapter.FilesAdapter
 import zechs.zplex.databinding.FragmentSearchBinding
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.viewmodel.file.FileViewModel
 import zechs.zplex.utils.Constants.Companion.PAGE_TOKEN
 import zechs.zplex.utils.Constants.Companion.SEARCH_DELAY_AMOUNT
-import zechs.zplex.utils.Constants.Companion.isLastPage
 import zechs.zplex.utils.Resource
 
 
-class SearchFragment : Fragment() {
+class SearchFragment : Fragment(R.layout.fragment_search) {
 
-    private lateinit var binding: FragmentSearchBinding
+    private var _binding: FragmentSearchBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: FileViewModel
     private lateinit var filesAdapter: FilesAdapter
-    private val TAG = "SearchFragment"
+    private val thisTag = "SearchFragment"
     private var text = ""
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enterTransition = MaterialFadeThrough()
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
-        binding = FragmentSearchBinding.inflate(layoutInflater)
-        return binding.root
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentSearchBinding.bind(view)
 
         viewModel = (activity as ZPlexActivity).viewModel
         setupRecyclerView()
-
-        val appBarLayout = binding.appBarLayout
-        appBarLayout.setPadding(
-            appBarLayout.paddingLeft,
-            appBarLayout.paddingTop + getStatusBarHeight() + 16,
-            appBarLayout.paddingRight,
-            appBarLayout.paddingBottom
-        )
+        binding.appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0)
 
         var job: Job? = null
         binding.searchBox.apply {
@@ -106,7 +84,7 @@ class SearchFragment : Fragment() {
                             "An error occurred: $message",
                             Toast.LENGTH_SHORT
                         ).show()
-                        Log.e(TAG, "An error occurred: $message")
+                        Log.e(thisTag, "An error occurred: $message")
                     }
                 }
                 is Resource.Loading -> {
@@ -125,29 +103,33 @@ class SearchFragment : Fragment() {
     }
 
     private fun hideProgressBar() {
-        binding.loadingSearch.visibility = View.INVISIBLE
+//        binding.loadingSearch.visibility = View.INVISIBLE
     }
 
     private fun showProgressBar() {
-        binding.loadingSearch.visibility = View.VISIBLE
+//        binding.loadingSearch.visibility = View.VISIBLE
     }
 
-
-    private fun setupRecyclerView() {
-        val nestedScroll = binding.nestedScrollView
-        nestedScroll.viewTreeObserver.addOnScrollChangedListener {
-            val view = nestedScroll.getChildAt(nestedScroll.childCount - 1) as View
-            val diff: Int = view.bottom - (nestedScroll.height + nestedScroll.scrollY)
-            if (diff == 0 && !isLastPage) {
-                viewModel.getSearchList(setDriveQuery(text), PAGE_TOKEN)
+    private val scrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            if (dy > 0) {
+                val layoutManager = binding.rvSearch.layoutManager as GridLayoutManager
+                val visibleItemCount = layoutManager.findLastCompletelyVisibleItemPosition() + 1
+                if (visibleItemCount == layoutManager.itemCount) {
+                    viewModel.getSearchList(setDriveQuery(text), PAGE_TOKEN)
+                }
             }
         }
+    }
 
+    private fun setupRecyclerView() {
         filesAdapter = FilesAdapter()
         binding.rvSearch.apply {
             adapter = filesAdapter
             layoutManager = GridLayoutManager(activity, 3)
             isNestedScrollingEnabled = false
+            addOnScrollListener(this@SearchFragment.scrollListener)
         }
 
         filesAdapter.setOnItemClickListener {
@@ -167,6 +149,12 @@ class SearchFragment : Fragment() {
                 Toast.makeText(context, "TVDB id not found", Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.rvSearch.adapter = null
+        _binding = null
     }
 
     private fun getStatusBarHeight(): Int {

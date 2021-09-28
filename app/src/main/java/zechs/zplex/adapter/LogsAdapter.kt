@@ -56,8 +56,12 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
         val type = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[2]
 
         val episode = log.file.split(" - ", ignoreCase = false, limit = 2).toTypedArray()[0]
-        val episodeTitle =
+        val episodeTitle = try {
             (log.file.split(" - ", ignoreCase = false, limit = 2).toTypedArray()[1]).dropLast(4)
+        } catch (indexOutOfBound: ArrayIndexOutOfBoundsException) {
+            "No title"
+        }
+
         val posterUrl = Uri.parse("${ZPLEX}${tvdbId} - $show - TV/poster.jpg")
         val episodeThumbUrl = Uri.parse("${ZPLEX}${log.folder}/${log.file.dropLast(4)}.jpg")
 
@@ -101,8 +105,7 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
             date?.let {
                 tv_time.text = ConverterUtils.toDuration(pstFormat.format(date))
             }
-            Glide.with(context)
-                .asBitmap()
+            Glide.with(this)
                 .load(redirectImagePoster)
                 .placeholder(R.color.cardColor)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)

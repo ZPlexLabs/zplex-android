@@ -71,23 +71,12 @@ class MediaAdapter(private val tvdbId: Int) :
                     episode.substring(4, 6).toInt()
                 }"
             )
-//
-//        val episodeThumbUri: Uri
-//        val cacheOption: RequestOptions
-//
-//        if (file.thumbnailLink == null) {
-//            episodeThumbUri = redirectImagePoster
-//            cacheOption = RequestOptions().diskCacheStrategy(DiskCacheStrategy.ALL)
-//        } else {
-//            episodeThumbUri = Uri.parse(file.thumbnailLink)
-//            cacheOption = RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE)
-//        }
 
         holder.itemView.apply {
             episode_title.text = title.substring(0, title.length - 4)
             episode_count.text = count
 
-            Glide.with(context)
+            Glide.with(this)
                 .asBitmap()
                 .load(redirectImagePoster)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)

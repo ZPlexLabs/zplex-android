@@ -5,8 +5,7 @@
     android:id="@+id/main_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
-    android:orientation="vertical"
+    android:background="@color/colorPrimary"
     tools:context=".ui.fragment.AboutFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -49,7 +48,7 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="175dp"
+                android:layout_height="match_parent"
                 android:layout_gravity="bottom"
                 android:background="@drawable/dark_faded_gradient" />
         </FrameLayout>

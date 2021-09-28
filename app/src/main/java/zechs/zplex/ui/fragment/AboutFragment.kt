@@ -13,9 +13,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListPopupWindow
@@ -47,8 +45,11 @@ import zechs.zplex.adapter.ActorsAdapter
 import zechs.zplex.adapter.CreditsAdapter
 import zechs.zplex.adapter.MediaAdapter
 import zechs.zplex.databinding.FragmentAboutBinding
+import zechs.zplex.models.drive.DriveResponse
 import zechs.zplex.models.drive.File
 import zechs.zplex.models.tmdb.credits.Cast
+import zechs.zplex.models.tmdb.movies.MoviesResponse
+import zechs.zplex.models.tvdb.series.SeriesResponse
 import zechs.zplex.ui.activity.PlayerActivity
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.viewmodel.file.FileViewModel
@@ -65,10 +66,11 @@ import java.net.*
 
 
 @DelicateCoroutinesApi
-class AboutFragment : Fragment() {
+class AboutFragment : Fragment(R.layout.fragment_about) {
 
     private val args: AboutFragmentArgs by navArgs()
-    private lateinit var binding: FragmentAboutBinding
+    private var _binding: FragmentAboutBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var tvdbViewModel: TvdbViewModel
     private lateinit var tmdbViewModel: TmdbViewModel
@@ -81,17 +83,18 @@ class AboutFragment : Fragment() {
 
     private val itTAG = "AboutFragment"
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
-        binding = FragmentAboutBinding.inflate(layoutInflater)
-        return binding.root
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        activity?.window?.decorView?.systemUiVisibility = (
+                View.SYSTEM_UI_FLAG_LAYOUT_STABLE and View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                )
+        activity?.window?.statusBarColor = Color.TRANSPARENT
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        _binding = FragmentAboutBinding.bind(view)
 
         tmdbViewModel = (activity as ZPlexActivity).tmdbViewModel
         tvdbViewModel = (activity as ZPlexActivity).tvdbViewModel
@@ -176,90 +179,7 @@ class AboutFragment : Fragment() {
                 .load(redirectImagePoster)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .fitCenter()
-                .listener(object : RequestListener<Bitmap?> {
-                    override fun onLoadFailed(
-                        e: GlideException?,
-                        model: Any,
-                        target: Target<Bitmap?>,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        makeText(
-                            it,
-                            R.string.failed_to_load_poster_image,
-                            LENGTH_SHORT
-                        ).show()
-                        return false
-                    }
-
-                    override fun onResourceReady(
-                        resource: Bitmap?,
-                        model: Any,
-                        target: Target<Bitmap?>,
-                        dataSource: DataSource,
-                        isFirstResource: Boolean
-                    ): Boolean {
-                        resource?.let { _ ->
-                            Palette.from(resource)
-                                .generate { p: Palette? ->
-                                    p?.let { _ ->
-                                        var accent = p.getVibrantColor(
-                                            p.getDarkVibrantColor(
-                                                p.getDominantColor(
-                                                    ContextCompat.getColor(
-                                                        it, R.color.colorAccent
-                                                    )
-                                                )
-                                            )
-                                        )
-                                        accent =
-                                            if (getContrastColor(accent)) ContextCompat.getColor(
-                                                it, R.color.textColor
-                                            ) else accent
-
-
-                                        val colorPrimary =
-                                            ContextCompat.getColor(
-                                                it,
-                                                R.color.colorPrimaryDark
-                                            )
-
-                                        val gradientDrawable = GradientDrawable(
-                                            GradientDrawable.Orientation.TOP_BOTTOM,
-                                            intArrayOf(accent, colorPrimary)
-                                        )
-
-                                        binding.btnMyList.apply {
-                                            setTextColor(accent)
-                                            iconTint = ColorStateList.valueOf(accent)
-                                        }
-
-                                        binding.apply {
-                                            frameLayout.background = gradientDrawable
-                                            tabs.setTabTextColors(
-                                                ContextCompat.getColor(
-                                                    it,
-                                                    R.color.textColor_54
-                                                ), accent
-                                            )
-                                            tabs.setSelectedTabIndicatorColor(
-                                                accent
-                                            )
-                                            pbEpisodes.indeterminateTintList =
-                                                ColorStateList.valueOf(accent)
-                                            network.setTextColor(accent)
-                                            rating.setTextColor(accent)
-                                            released.setTextColor(accent)
-                                            runtime.setTextColor(accent)
-                                            darkPlay.backgroundTintList =
-                                                ColorStateList.valueOf(accent)
-                                        }
-
-                                    }
-                                }
-                        }
-                        return false
-                    }
-                })
+                .listener(this@AboutFragment.imageRequestListener)
                 .into(binding.ivPoster)
         }
 
@@ -285,122 +205,22 @@ class AboutFragment : Fragment() {
                 ) {
                 }
             })
+
             tvdbViewModel.getSeries(seriesId)
 
             tvdbViewModel.series.observe(viewLifecycleOwner, { response ->
-                Log.d("viewModel, AboutFragment", "observing")
                 when (response) {
                     is Resource.Success -> {
                         response.data?.let { seriesResponse ->
-                            seriesResponse.data?.let {
-
-
-                                tabLayout.addTab(
-                                    tabLayout.newTab().setText(getString(R.string.episodes))
-                                )
-                                tabLayout.addTab(
-                                    tabLayout.newTab().setText(getString(R.string.cast))
-                                )
-                                TransitionManager.beginDelayedTransition(binding.root)
-                                binding.tvTitle.text = it.seriesName
-
-                                binding.seriesInfo.visibility = View.VISIBLE
-                                binding.cgGenre.visibility = View.VISIBLE
-                                tabLayout.visibility = View.VISIBLE
-
-                                val runtimeText = "${it.runtime} min"
-                                binding.apply {
-                                    tvTitle.text = it.seriesName
-                                    network.text = it.network
-                                    rating.text = it.rating
-                                    released.text = it.firstAired?.take(4)
-                                    runtime.text = runtimeText
-                                }
-                                it.genre?.forEach { text ->
-                                    val mChip = layoutInflater.inflate(
-                                        R.layout.item_chip,
-                                        binding.root,
-                                        false
-                                    ) as Chip
-                                    mChip.text = text
-                                    binding.cgGenre.addView(mChip)
-                                }
-
-                                it.overview?.let { plot ->
-                                    binding.tvPlot.apply {
-                                        if (plot.length > 175) {
-                                            val trimPlot = plot.substring(0, 175) + "..."
-                                            text = trimPlot
-                                            setOnClickListener {
-                                                TransitionManager.beginDelayedTransition(
-                                                    binding.root
-                                                )
-                                                text =
-                                                    if (text.length > 178) trimPlot else plot
-                                            }
-                                        } else {
-                                            text = plot
-                                        }
-                                    }
-                                }
-                                context?.let { cont ->
-
-                                    Glide.with(cont)
-                                        .asBitmap()
-                                        .load("${TVDB_IMAGE_PATH}${it.fanart}")
-                                        .placeholder(R.color.cardColor)
-                                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                        .listener(object : RequestListener<Bitmap?> {
-                                            override fun onLoadFailed(
-                                                e: GlideException?,
-                                                model: Any,
-                                                target: Target<Bitmap?>,
-                                                isFirstResource: Boolean
-                                            ): Boolean {
-                                                return false
-                                            }
-
-                                            override fun onResourceReady(
-                                                resource: Bitmap?,
-                                                model: Any,
-                                                target: Target<Bitmap?>,
-                                                dataSource: DataSource,
-                                                isFirstResource: Boolean
-                                            ): Boolean {
-                                                binding.ivFanart.visibility = View.VISIBLE
-                                                return false
-                                            }
-
-                                        })
-                                        .into(binding.ivFanart)
-                                }
-                            }
+                            tvdbSuccess(seriesResponse)
                         }
                     }
 
                     is Resource.Error -> {
-                        binding.seriesInfo.visibility = View.INVISIBLE
-                        response.message?.let { message ->
-                            makeText(
-                                context,
-                                "An error occurred: $message",
-                                LENGTH_SHORT
-                            ).show()
-                            Log.e(itTAG, "An error occurred: $message")
-                        }
+                        tvdbError(response)
                     }
-                    is Resource.Loading -> {
-                        binding.apply {
-                            cgGenre.removeAllViews()
-                            tabLayout.removeAllTabs()
-                            cgGenre.visibility = View.INVISIBLE
-                            tabLayout.visibility = View.INVISIBLE
-                            seriesInfo.visibility = View.INVISIBLE
-                            mediaData.visibility = View.INVISIBLE
-                            ivFanart.visibility = View.INVISIBLE
-                            seasonsMenu.visibility = View.INVISIBLE
-                        }
-                    }
+                    is Resource.Loading ->
+                        tvdbLoading()
                 }
             })
 
@@ -412,85 +232,16 @@ class AboutFragment : Fragment() {
                 when (responseMedia) {
                     is Resource.Success -> {
                         responseMedia.data?.let { filesResponse ->
-
-                            val filesList = filesResponse.files.toList()
-
-                            groupedList = filesList.groupBy {
-                                val season = it.name.take(3)
-                                val first = season.take(1).replace("S", "Season ")
-                                val count = parseInt(season.drop(1))
-                                first + count
-                            }
-
-                            val seasons = groupedList.keys.toList()
-                            mediaAdapter.differ.submitList(groupedList[seasons[0]]?.toList())
-
-                            binding.apply {
-                                rvEpisodes.visibility = View.VISIBLE
-                                btnRetryEpisodes.visibility = View.GONE
-                                pbEpisodes.visibility = View.GONE
-                                tabs.visibility = View.VISIBLE
-
-                                seasonsMenu.apply {
-                                    context?.let {
-                                        visibility = View.VISIBLE
-                                        text = seasons[0]
-                                        val listPopupWindow =
-                                            ListPopupWindow(
-                                                it,
-                                                null,
-                                                R.attr.listPopupWindowStyle
-                                            )
-                                        val adapter = ArrayAdapter(
-                                            it,
-                                            R.layout.item_dropdown,
-                                            seasons
-                                        )
-
-                                        listPopupWindow.anchorView = seasonsMenu
-                                        listPopupWindow.setAdapter(adapter)
-
-                                        setOnClickListener { listPopupWindow.show() }
-
-                                        listPopupWindow.setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
-                                            mediaAdapter.differ.submitList(groupedList[seasons[position]]?.toList())
-                                            seasonsMenu.text = seasons[position]
-                                            listPopupWindow.dismiss()
-                                        }
-
-                                    }
-                                }
-                            }
+                            filesSuccess(filesResponse)
                         }
                     }
 
                     is Resource.Error -> {
-                        binding.apply {
-                            rvEpisodes.visibility = View.INVISIBLE
-                            btnRetryEpisodes.visibility = View.VISIBLE
-                            pbEpisodes.visibility = View.INVISIBLE
-                            tabs.visibility = View.INVISIBLE
-                            seasonsMenu.visibility = View.INVISIBLE
-                        }
-                        responseMedia.message?.let { message ->
-                            makeText(
-                                context,
-                                "An error occurred: $message",
-                                LENGTH_SHORT
-                            ).show()
-                            Log.e(itTAG, "An error occurred: $message")
-                        }
+                        filesError(responseMedia)
                     }
 
                     is Resource.Loading -> {
-                        mediaAdapter.differ.submitList(listOf<File>().toList())
-                        binding.apply {
-                            rvEpisodes.visibility = View.INVISIBLE
-                            btnRetryEpisodes.visibility = View.INVISIBLE
-                            pbEpisodes.visibility = View.VISIBLE
-                            tabs.visibility = View.INVISIBLE
-                            seasonsMenu.visibility = View.INVISIBLE
-                        }
+                        filesLoading()
                     }
                 }
             })
@@ -517,7 +268,6 @@ class AboutFragment : Fragment() {
                     }
 
                     is Resource.Loading -> {
-
                     }
                 }
             })
@@ -553,82 +303,7 @@ class AboutFragment : Fragment() {
                 when (response) {
                     is Resource.Success -> {
                         response.data?.let {
-                            tabLayout.addTab(
-                                tabLayout.newTab().setText(getString(R.string.cast))
-                            )
-                            TransitionManager.beginDelayedTransition(binding.root)
-
-                            binding.seriesInfo.visibility = View.VISIBLE
-                            binding.cgGenre.visibility = View.VISIBLE
-                            tabLayout.visibility = View.VISIBLE
-
-                            val runtimeText = "${it.runtime} min"
-                            binding.apply {
-                                tvTitle.text = it.title
-                                it.production_companies?.let { companies ->
-                                    if (companies.isNotEmpty()) {
-                                        network.text = companies[0].name
-                                    }
-                                }
-                                rating.text = it.vote_average.toString()
-                                released.text = it.release_date?.take(4)
-                                runtime.text = runtimeText
-                            }
-                            it.genres?.forEach { genre ->
-                                val mChip = layoutInflater.inflate(
-                                    R.layout.item_chip,
-                                    binding.root,
-                                    false
-                                ) as Chip
-                                mChip.text = genre.name
-                                binding.cgGenre.addView(mChip)
-                            }
-
-                            it.overview?.let { plot ->
-                                binding.tvPlot.apply {
-                                    if (plot.length > 175) {
-                                        val trimPlot = plot.substring(0, 175) + "..."
-                                        text = trimPlot
-                                        setOnClickListener {
-                                            TransitionManager.beginDelayedTransition(
-                                                binding.root
-                                            )
-                                            text = if (text.length > 178) trimPlot else plot
-                                        }
-                                    } else text = plot
-                                }
-                            }
-                            context?.let { cont ->
-                                Glide.with(cont)
-                                    .asBitmap()
-                                    .load("${TMDB_IMAGE_PATH}${it.backdrop_path}")
-                                    .placeholder(R.color.cardColor)
-                                    .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                    .listener(object : RequestListener<Bitmap?> {
-                                        override fun onLoadFailed(
-                                            e: GlideException?,
-                                            model: Any,
-                                            target: Target<Bitmap?>,
-                                            isFirstResource: Boolean
-                                        ): Boolean {
-                                            return false
-                                        }
-
-                                        override fun onResourceReady(
-                                            resource: Bitmap?,
-                                            model: Any,
-                                            target: Target<Bitmap?>,
-                                            dataSource: DataSource,
-                                            isFirstResource: Boolean
-                                        ): Boolean {
-                                            binding.ivFanart.visibility = View.VISIBLE
-                                            return false
-                                        }
-
-                                    })
-                                    .into(binding.ivFanart)
-
-                            }
+                            tmdbSuccess(it)
                         }
                     }
 
@@ -644,15 +319,7 @@ class AboutFragment : Fragment() {
                         }
                     }
                     is Resource.Loading -> {
-                        binding.apply {
-                            cgGenre.removeAllViews()
-                            tabLayout.removeAllTabs()
-                            cgGenre.visibility = View.INVISIBLE
-                            tabLayout.visibility = View.INVISIBLE
-                            seriesInfo.visibility = View.INVISIBLE
-                            mediaData.visibility = View.INVISIBLE
-                            ivFanart.visibility = View.INVISIBLE
-                        }
+                        tmdbLoading()
                     }
                 }
             })
@@ -697,6 +364,7 @@ class AboutFragment : Fragment() {
             })
         }
     }
+
 
     private fun setupRecyclerView(tabText: String) {
 
@@ -816,9 +484,389 @@ class AboutFragment : Fragment() {
         }
     }
 
+    private val imageRequestListener = object : RequestListener<Bitmap?> {
+        override fun onLoadFailed(
+            e: GlideException?,
+            model: Any,
+            target: Target<Bitmap?>,
+            isFirstResource: Boolean
+        ): Boolean {
+            makeText(
+                requireContext(),
+                R.string.failed_to_load_poster_image,
+                LENGTH_SHORT
+            ).show()
+            return false
+        }
+
+        override fun onResourceReady(
+            resource: Bitmap?,
+            model: Any,
+            target: Target<Bitmap?>,
+            dataSource: DataSource,
+            isFirstResource: Boolean
+        ): Boolean {
+            resource?.let { _ ->
+                Palette.from(resource).generate { p: Palette? ->
+                    p?.let { _ ->
+                        var accent = p.getVibrantColor(
+                            p.getDarkVibrantColor(
+                                p.getDominantColor(
+                                    ContextCompat.getColor(
+                                        requireContext(), R.color.colorAccent
+                                    )
+                                )
+                            )
+                        )
+                        accent =
+                            if (getContrastColor(accent)) ContextCompat.getColor(
+                                requireContext(), R.color.textColor
+                            ) else accent
+
+
+                        val colorPrimary =
+                            ContextCompat.getColor(
+                                requireContext(),
+                                R.color.colorPrimaryDark
+                            )
+
+                        val gradientDrawable = GradientDrawable(
+                            GradientDrawable.Orientation.TOP_BOTTOM,
+                            intArrayOf(accent, colorPrimary)
+                        )
+
+                        binding.btnMyList.apply {
+                            setTextColor(accent)
+                            iconTint = ColorStateList.valueOf(accent)
+                        }
+
+                        binding.apply {
+                            frameLayout.background = gradientDrawable
+                            tabs.setTabTextColors(
+                                ContextCompat.getColor(
+                                    requireContext(),
+                                    R.color.textColor_54
+                                ), accent
+                            )
+                            tabs.setSelectedTabIndicatorColor(
+                                accent
+                            )
+                            pbEpisodes.indeterminateTintList =
+                                ColorStateList.valueOf(accent)
+                            network.setTextColor(accent)
+                            rating.setTextColor(accent)
+                            released.setTextColor(accent)
+                            runtime.setTextColor(accent)
+                            darkPlay.backgroundTintList =
+                                ColorStateList.valueOf(accent)
+                        }
+
+                    }
+                }
+            }
+            return false
+        }
+    }
+
+    private fun tvdbSuccess(seriesResponse: SeriesResponse) {
+        val tabLayout = binding.tabs
+
+        seriesResponse.data?.let {
+
+            tabLayout.addTab(
+                tabLayout.newTab().setText(getString(R.string.episodes))
+            )
+            tabLayout.addTab(
+                tabLayout.newTab().setText(getString(R.string.cast))
+            )
+            TransitionManager.beginDelayedTransition(binding.root)
+
+            binding.seriesInfo.visibility = View.VISIBLE
+            binding.cgGenre.visibility = View.VISIBLE
+            tabLayout.visibility = View.VISIBLE
+
+            val runtimeText = "${it.runtime} min"
+            binding.apply {
+                tvTitle.text = it.seriesName
+                network.text = it.network
+                rating.text = it.rating
+                released.text = it.firstAired?.take(4)
+                runtime.text = runtimeText
+            }
+            it.genre?.forEach { text ->
+                val mChip = layoutInflater.inflate(
+                    R.layout.item_chip,
+                    binding.root,
+                    false
+                ) as Chip
+                mChip.text = text
+                binding.cgGenre.addView(mChip)
+            }
+
+            it.overview?.let { plot ->
+                binding.tvPlot.apply {
+                    if (plot.length > 175) {
+                        val trimPlot = plot.substring(0, 175) + "..."
+                        text = trimPlot
+                        setOnClickListener {
+                            TransitionManager.beginDelayedTransition(
+                                binding.root
+                            )
+                            text =
+                                if (text.length > 178) trimPlot else plot
+                        }
+                    } else {
+                        text = plot
+                        setOnClickListener(null)
+                    }
+                }
+            }
+            context?.let { cont ->
+
+                Glide.with(cont)
+                    .asBitmap()
+                    .load("${TVDB_IMAGE_PATH}${it.fanart}")
+                    .placeholder(R.color.cardColor)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .listener(object : RequestListener<Bitmap?> {
+                        override fun onLoadFailed(
+                            e: GlideException?,
+                            model: Any,
+                            target: Target<Bitmap?>,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            return false
+                        }
+
+                        override fun onResourceReady(
+                            resource: Bitmap?,
+                            model: Any,
+                            target: Target<Bitmap?>,
+                            dataSource: DataSource,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            binding.ivFanart.visibility = View.VISIBLE
+                            return false
+                        }
+
+                    })
+                    .into(binding.ivFanart)
+            }
+        }
+
+    }
+
+    private fun tvdbError(response: Resource.Error<SeriesResponse>) {
+        binding.seriesInfo.visibility = View.INVISIBLE
+        response.message?.let { message ->
+            makeText(
+                context,
+                "An error occurred: $message",
+                LENGTH_SHORT
+            ).show()
+            Log.e(itTAG, "An error occurred: $message")
+        }
+    }
+
+    private fun tvdbLoading() {
+        binding.apply {
+            cgGenre.removeAllViews()
+            tabs.removeAllTabs()
+            cgGenre.visibility = View.INVISIBLE
+            tabs.visibility = View.INVISIBLE
+            seriesInfo.visibility = View.INVISIBLE
+            mediaData.visibility = View.INVISIBLE
+            ivFanart.visibility = View.INVISIBLE
+            seasonsMenu.visibility = View.INVISIBLE
+        }
+    }
+
+
+    private fun filesSuccess(filesResponse: DriveResponse) {
+        val filesList = filesResponse.files.toList()
+
+        groupedList = filesList.groupBy {
+            val season = it.name.take(3)
+            val first = season.take(1).replace("S", "Season ")
+            val count = parseInt(season.drop(1))
+            first + count
+        }
+
+        val seasons = groupedList.keys.toList()
+        mediaAdapter.differ.submitList(groupedList[seasons[0]]?.toList())
+
+        binding.apply {
+            rvEpisodes.visibility = View.VISIBLE
+            btnRetryEpisodes.visibility = View.GONE
+            pbEpisodes.visibility = View.GONE
+            tabs.visibility = View.VISIBLE
+        }
+
+        binding.seasonsMenu.apply {
+            context?.let {
+                visibility = View.VISIBLE
+                text = seasons[0]
+                val listPopupWindow =
+                    ListPopupWindow(
+                        it,
+                        null,
+                        R.attr.listPopupWindowStyle
+                    )
+                val adapter = ArrayAdapter(
+                    it,
+                    R.layout.item_dropdown,
+                    seasons
+                )
+
+                listPopupWindow.anchorView = binding.seasonsMenu
+                listPopupWindow.setAdapter(adapter)
+
+                setOnClickListener { listPopupWindow.show() }
+
+                listPopupWindow.setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
+                    mediaAdapter.differ.submitList(groupedList[seasons[position]]?.toList())
+                    binding.seasonsMenu.text = seasons[position]
+                    listPopupWindow.dismiss()
+                }
+            }
+        }
+    }
+
+    private fun filesError(responseMedia: Resource.Error<DriveResponse>) {
+        binding.apply {
+            rvEpisodes.visibility = View.INVISIBLE
+            btnRetryEpisodes.visibility = View.VISIBLE
+            pbEpisodes.visibility = View.INVISIBLE
+            tabs.visibility = View.INVISIBLE
+            seasonsMenu.visibility = View.INVISIBLE
+        }
+        responseMedia.message?.let { message ->
+            makeText(
+                context,
+                "An error occurred: $message",
+                LENGTH_SHORT
+            ).show()
+            Log.e(itTAG, "An error occurred: $message")
+        }
+    }
+
+    private fun filesLoading() {
+        mediaAdapter.differ.submitList(listOf<File>().toList())
+        binding.apply {
+            rvEpisodes.visibility = View.INVISIBLE
+            btnRetryEpisodes.visibility = View.INVISIBLE
+            pbEpisodes.visibility = View.VISIBLE
+            tabs.visibility = View.INVISIBLE
+            seasonsMenu.visibility = View.INVISIBLE
+        }
+    }
+
+    private fun tmdbSuccess(it: MoviesResponse) {
+        val tabLayout = binding.tabs
+        tabLayout.addTab(
+            tabLayout.newTab().setText(getString(R.string.cast))
+        )
+        TransitionManager.beginDelayedTransition(binding.root)
+
+        binding.seriesInfo.visibility = View.VISIBLE
+        binding.cgGenre.visibility = View.VISIBLE
+        tabLayout.visibility = View.VISIBLE
+
+        val runtimeText = "${it.runtime} min"
+        binding.apply {
+            tvTitle.text = it.title
+            it.production_companies?.let { companies ->
+                if (companies.isNotEmpty()) {
+                    network.text = companies[0].name
+                }
+            }
+            rating.text = it.vote_average.toString()
+            released.text = it.release_date?.take(4)
+            runtime.text = runtimeText
+        }
+        it.genres?.forEach { genre ->
+            val mChip = layoutInflater.inflate(
+                R.layout.item_chip,
+                binding.root,
+                false
+            ) as Chip
+            mChip.text = genre.name
+            binding.cgGenre.addView(mChip)
+        }
+
+        it.overview?.let { plot ->
+            binding.tvPlot.apply {
+                if (plot.length > 175) {
+                    val trimPlot = plot.substring(0, 175) + "..."
+                    text = trimPlot
+                    setOnClickListener {
+                        TransitionManager.beginDelayedTransition(
+                            binding.root
+                        )
+                        text = if (text.length > 178) trimPlot else plot
+                    }
+                } else {
+                    text = plot
+                    setOnClickListener(null)
+                }
+            }
+        }
+        context?.let { cont ->
+            Glide.with(cont)
+                .asBitmap()
+                .load("${TMDB_IMAGE_PATH}${it.backdrop_path}")
+                .placeholder(R.color.cardColor)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .listener(object : RequestListener<Bitmap?> {
+                    override fun onLoadFailed(
+                        e: GlideException?,
+                        model: Any,
+                        target: Target<Bitmap?>,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: Bitmap?,
+                        model: Any,
+                        target: Target<Bitmap?>,
+                        dataSource: DataSource,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        binding.ivFanart.visibility = View.VISIBLE
+                        return false
+                    }
+
+                })
+                .into(binding.ivFanart)
+
+
+        }
+    }
+
+    private fun tmdbLoading() {
+        binding.apply {
+            cgGenre.removeAllViews()
+            tabs.removeAllTabs()
+            cgGenre.visibility = View.INVISIBLE
+            tabs.visibility = View.INVISIBLE
+            seriesInfo.visibility = View.INVISIBLE
+            mediaData.visibility = View.INVISIBLE
+            ivFanart.visibility = View.INVISIBLE
+        }
+    }
+
     fun getContrastColor(@ColorInt color: Int): Boolean {
         val a: Double =
             1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255
-        return a >= 0.75
+        return a >= 0.80
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Glide.get(binding.ivPoster.context).clearMemory()
+        binding.rvEpisodes.adapter = null
+        _binding = null
     }
 }

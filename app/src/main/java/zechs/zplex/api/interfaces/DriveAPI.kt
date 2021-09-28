@@ -20,7 +20,7 @@ interface DriveAPI {
         @Query("pageToken")
         pageToken: String = "",
         @Query("fields")
-        fields: String = "nextPageToken, files(id, name, size, thumbnailLink)",
+        fields: String = "nextPageToken, files(id, name, size)",
         @Query("q")
         q: String = "(name contains 'TV' or name contains 'Movie') and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false",
         @Query("orderBy")

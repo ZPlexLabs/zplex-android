@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#27292c</color>
-    <color name="colorPrimaryDark">#1f1f1f</color>
-    <color name="cardColor">#292a2b</color>
-    <color name="colorAccent">#B388FF</color>
+    <color name="colorPrimary">#121212</color>
+    <color name="colorPrimaryDark">#1e1e1f</color>
+    <color name="cardColor">#1f1f1f</color>
+    <color name="colorAccent">#9c66ef</color>
     <color name="textColor">#FFFFFF</color>
     <color name="textColor_54">#8AFFFFFF</color>
     <color name="textColor_74">#BDFFFFFF</color>
@@ -11,9 +11,5 @@
     <color name="fabColor">#9874d9</color>
     <color name="transparent">#00000000</color>
     <color name="dark_tint">#40000000</color>
-    <color name="light_blue_600">#FF039BE5</color>
-    <color name="light_blue_900">#FF01579B</color>
-    <color name="light_blue_A200">#FF40C4FF</color>
-    <color name="light_blue_A400">#FF00B0FF</color>
     <color name="black_overlay">#66000000</color>
 </resources>

@@ -32,7 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="62dp"
         android:layout_gravity="bottom"
-        app:backgroundTint="@color/colorPrimaryDark"
+        app:backgroundTint="@color/colorPrimary"
         app:itemIconSize="20dp"
         app:itemIconTint="@drawable/icon_color"
         app:itemTextAppearanceActive="@style/BottomNavTextStyle"

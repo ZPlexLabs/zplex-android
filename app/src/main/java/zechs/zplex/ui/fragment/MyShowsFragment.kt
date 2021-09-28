@@ -1,9 +1,7 @@
 package zechs.zplex.ui.fragment
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -11,44 +9,28 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.transition.MaterialFadeThrough
-import kotlinx.android.synthetic.main.fragment_my_shows.*
+import zechs.zplex.R
 import zechs.zplex.adapter.FilesAdapter
 import zechs.zplex.databinding.FragmentMyShowsBinding
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.viewmodel.file.FileViewModel
 
 
-class MyShowsFragment : Fragment() {
+class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
 
     private lateinit var viewModel: FileViewModel
     private lateinit var filesAdapter: FilesAdapter
-    private lateinit var binding: FragmentMyShowsBinding
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        exitTransition = MaterialFadeThrough()
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?,
-    ): View {
-        binding = FragmentMyShowsBinding.inflate(layoutInflater)
-        return binding.root
-    }
+    private var _binding: FragmentMyShowsBinding? = null
+    private val binding get() = _binding!!
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentMyShowsBinding.bind(view)
 
         viewModel = (activity as ZPlexActivity).viewModel
         setupRecyclerView()
-
-        appBarLayout.setPadding(
-            0, appBarLayout.paddingTop + getStatusBarHeight(), 0, 0
-        )
+//        binding.rvMyShows.setPadding(0, getStatusBarHeight() + 24, 0, 0)
 
         viewModel.getSavedFiles().observe(viewLifecycleOwner, { files ->
             filesAdapter.differ.submitList(files)
@@ -75,13 +57,13 @@ class MyShowsFragment : Fragment() {
         }
 
         ItemTouchHelper(itemTouchHelperCallback).apply {
-            attachToRecyclerView(rvMyShows)
+            attachToRecyclerView(binding.rvMyShows)
         }
     }
 
     private fun setupRecyclerView() {
         filesAdapter = FilesAdapter()
-        rvMyShows.apply {
+        binding.rvMyShows.apply {
             adapter = filesAdapter
             layoutManager = GridLayoutManager(activity, 3)
             filesAdapter.setOnItemClickListener {
@@ -102,6 +84,12 @@ class MyShowsFragment : Fragment() {
                 }
             }
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding.rvMyShows.adapter = null
+        _binding = null
     }
 
     private fun getStatusBarHeight(): Int {
