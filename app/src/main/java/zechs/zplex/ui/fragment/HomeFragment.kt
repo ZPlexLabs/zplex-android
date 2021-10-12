@@ -51,7 +51,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         logsViewModel = (activity as ZPlexActivity).logsViewModel
 
         setupRecyclerView()
-        binding.newEpisodes.setPadding(0, getStatusBarHeight() + 8, 0, 0)
+//        binding.newEpisodes.setPadding(0, getStatusBarHeight() + 8, 0, 0)
 
         viewModel.homeList.observe(viewLifecycleOwner, { response ->
             when (response) {

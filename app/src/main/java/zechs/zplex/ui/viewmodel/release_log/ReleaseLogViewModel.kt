@@ -55,9 +55,9 @@ class ReleaseLogViewModel(
                 if (logsListResponse == null) {
                     logsListResponse = resultResponse
                 } else {
-                    val oldArticles = logsListResponse?.releasesLog
-                    val newArticles = resultResponse.releasesLog
-                    oldArticles?.addAll(newArticles)
+                    val oldLog = logsListResponse?.releasesLog
+                    val newLog = resultResponse.releasesLog
+                    oldLog?.addAll(newLog)
                 }
                 return Resource.Success(logsListResponse ?: resultResponse)
             }

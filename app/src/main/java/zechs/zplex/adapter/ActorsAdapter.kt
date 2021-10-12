@@ -47,11 +47,12 @@ class ActorsAdapter : RecyclerView.Adapter<ActorsAdapter.ActorsViewHolder>() {
         val data = differ.currentList[position]
 
         holder.itemView.apply {
-            Glide.with(this)
-                .load("${TVDB_IMAGE_PATH}${data.image}")
-                .placeholder(R.color.cardColor)
-                .into(actor_image)
-
+            if (data.image != null) {
+                Glide.with(this)
+                    .load("${TVDB_IMAGE_PATH}${data.image}")
+                    .placeholder(R.color.cardColor)
+                    .into(actor_image)
+            }
             actor_name.text = data.name
             role.text = data.role
         }

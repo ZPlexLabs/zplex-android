@@ -6,29 +6,25 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColor">@color/textColor</item>
         <item name="android:windowContentTransitions">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:colorBackground">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorPrimary</item>
-        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowBackground">@color/colorPrimaryDark</item>
+        <item name="android:colorBackground">@color/colorPrimaryDark</item>
+        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
         <item name="chipStyle">@style/Widget.App.Chip</item>
         <item name="popupMenuBackground">@drawable/popup_menu_bg</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
     </style>
 
-    <style name="AppTheme.Home" parent="AppTheme">
-        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
-    </style>
-
-    <style name="AppTheme.About" parent="AppTheme.Home">
+    <style name="AppTheme.About" parent="AppTheme">
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
     </style>
 
-    <style name="MenuTheme" parent="ThemeOverlay.AppCompat.Dark">
+    <style name="MenuTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorSecondary">@color/textColor</item>
         <item name="android:actionMenuTextColor">@color/textColor</item>
         <item name="android:backgroundTint">@color/cardColor</item>
         <item name="android:textColor">@color/textColor</item>
+        <item name="colorControlNormal">@color/textColor</item>
     </style>
 
     <style name="titleTextAppearance">
@@ -99,5 +95,17 @@
 
     <style name="ThemeOverlay.ZPlex.FullscreenContainer" parent="">
         <item name="fullscreenBackgroundColor">#000</item>
+    </style>
+
+    <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="iconPadding">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="iconTint">@color/icon_tint_selector</item>
+
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
     </style>
 </resources>

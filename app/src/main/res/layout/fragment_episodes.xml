@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    tools:background="@color/cardColor">
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/seasons_menu"
+        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="4dp"
+        android:insetTop="4dp"
+        android:insetBottom="2dp"
+        android:minHeight="0dp"
+        android:textAllCaps="false"
+        android:textColor="@color/textColor_74"
+        android:textSize="14sp"
+        app:backgroundTint="@color/transparent"
+        app:cornerRadius="16dp"
+        app:elevation="0dp"
+        app:icon="@drawable/ic_round_keyboard_arrow_down_24"
+        app:iconGravity="end"
+        app:iconTint="@color/textColor_74"
+        tools:text="Season 1" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/filter_eps"
+        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@id/seasons_menu"
+        android:layout_toEndOf="@id/seasons_menu"
+        android:insetTop="4dp"
+        android:insetBottom="2dp"
+        android:minHeight="0dp"
+        android:textAllCaps="false"
+        android:textColor="@color/textColor_74"
+        android:textSize="14sp"
+        app:backgroundTint="@color/transparent"
+        app:cornerRadius="16dp"
+        app:elevation="0dp"
+        app:icon="@drawable/ic_round_keyboard_arrow_down_24"
+        app:iconGravity="end"
+        app:iconTint="@color/textColor_74"
+        tools:text="Newest" />
+
+    <com.google.android.material.button.MaterialButtonToggleGroup
+        android:id="@+id/toggleView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/seasons_menu"
+        android:layout_toEndOf="@id/filter_eps"
+        android:insetTop="4dp"
+        android:insetBottom="2dp"
+        android:minHeight="0dp"
+        app:checkedButton="@+id/btn_grid"
+        app:selectionRequired="true"
+        app:singleSelection="true">
+
+        <Button
+            android:id="@+id/btn_list"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/toggle_list" />
+
+        <Button
+            android:id="@+id/btn_grid"
+            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/toggle_grid" />
+    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_episodes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/seasons_menu"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="8dp"
+        android:visibility="visible"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/item_episode" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_retry_episodes"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:clickable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:text="@string/retry"
+        android:textColor="@color/colorAccent"
+        tools:textColor="#2898f0" />
+
+    <ProgressBar
+        android:id="@+id/pb_episodes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:visibility="visible"
+        tools:indeterminateTint="#2898f0" />
+</RelativeLayout>

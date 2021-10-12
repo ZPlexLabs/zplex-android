@@ -41,7 +41,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         viewModel = (activity as ZPlexActivity).viewModel
         setupRecyclerView()
-        binding.appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0)
+//        binding.appBarLayout.setPadding(0, getStatusBarHeight(), 0, 0)
 
         var job: Job? = null
         binding.searchBox.apply {

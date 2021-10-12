@@ -4,11 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginTop="16dp"
-    android:layout_marginBottom="16dp"
+    android:layout_centerInParent="true"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="8dp"
     android:foreground="?android:attr/selectableItemBackground"
     app:cardBackgroundColor="@android:color/transparent"
-    app:cardCornerRadius="16dp"
+    app:cardCornerRadius="8dp"
     app:cardElevation="0dp"
     app:cardMaxElevation="16dp">
 
@@ -31,8 +34,7 @@
         <FrameLayout
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:alpha="0.5"
-            android:background="@color/colorPrimary"
+            android:background="@drawable/dark_gradient_episode"
             app:layout_constraintBottom_toBottomOf="@+id/thumb"
             app:layout_constraintEnd_toEndOf="@+id/thumb"
             app:layout_constraintStart_toStartOf="@+id/thumb"
@@ -63,10 +65,10 @@
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
             android:ellipsize="end"
-            android:fontFamily="@font/open_sans_bold"
-            android:maxLines="2"
+            android:fontFamily="@font/open_sans_semibold"
+            android:maxLines="3"
             android:textColor="@color/textColor"
-            android:textSize="18sp"
+            android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/thumb"
             app:layout_constraintHorizontal_bias="0.0"
@@ -89,6 +91,35 @@
             app:layout_constraintEnd_toEndOf="@+id/thumb"
             app:layout_constraintTop_toTopOf="@+id/thumb"
             tools:ignore="SpeakableTextPresentCheck" />
+
+        <TextView
+            android:id="@+id/episode_size"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:elevation="8dp"
+            android:ellipsize="end"
+            android:fontFamily="@font/open_sans"
+            android:maxLines="1"
+            android:padding="6dp"
+            android:textColor="@android:color/black"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:ignore="TextContrastCheck"
+            tools:text="250 MB" />
+
+        <FrameLayout
+            android:id="@+id/episode_size_bg"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@drawable/round_bg"
+            android:elevation="0dp"
+            app:layout_constraintBottom_toBottomOf="@+id/episode_size"
+            app:layout_constraintEnd_toEndOf="@+id/episode_size"
+            app:layout_constraintStart_toStartOf="@+id/episode_size"
+            app:layout_constraintTop_toTopOf="@+id/episode_size" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

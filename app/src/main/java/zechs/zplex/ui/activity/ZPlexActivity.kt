@@ -3,9 +3,12 @@ package zechs.zplex.ui.activity
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import androidx.transition.TransitionManager
+import com.google.android.material.transition.MaterialSharedAxis
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_zplex.*
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -64,16 +67,62 @@ class ZPlexActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_zplex)
 
-        bottomNavigationView.setupWithNavController(mainNavHostFragment.findNavController())
+        val navHostFragment = supportFragmentManager.findFragmentById(
+            R.id.mainNavHostFragment
+        ) as NavHostFragment
 
-        mainNavHostFragment.findNavController()
-            .addOnDestinationChangedListener { _, destination, _ ->
-                if (destination.id == R.id.aboutFragment) {
-                    bottomNavigationView.visibility = View.GONE
+        val navController = navHostFragment.navController
+        bottomNavigationView.setupWithNavController(navController)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.aboutFragment) {
+                val transition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
+                transition.duration = 500L
+                transition.excludeTarget(android.R.id.statusBarBackground, true)
+                transition.excludeTarget(android.R.id.navigationBarBackground, true)
+                TransitionManager.beginDelayedTransition(root, transition)
+                bottomNavigationView.visibility = View.GONE
+                appBarLayout.visibility = View.GONE
+                view1.visibility = View.GONE
+                view2.visibility = View.GONE
+                window.navigationBarColor = ContextCompat.getColor(this, R.color.cardColor)
+                window.statusBarColor = ContextCompat.getColor(this, R.color.cardColor)
+            } else {
+                window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
+                window.navigationBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
+                val transition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
+                transition.duration = 500L
+                transition.excludeTarget(toolbar, true)
+                transition.excludeTarget(bottomNavigationView, true)
+                transition.excludeTarget(android.R.id.statusBarBackground, true)
+                transition.excludeTarget(android.R.id.navigationBarBackground, true)
+                TransitionManager.beginDelayedTransition(root, transition)
+                bottomNavigationView.visibility = View.VISIBLE
+                view1.visibility = View.VISIBLE
+                view2.visibility = View.VISIBLE
+                if (destination.id == R.id.searchFragment) {
+                    appBarLayout.visibility = View.GONE
                 } else {
-                    bottomNavigationView.visibility = View.VISIBLE
+                    appBarLayout.visibility = View.VISIBLE
                 }
             }
+
+            when (destination.id) {
+                R.id.homeFragment -> {
+                    view1.visibility = View.VISIBLE
+                    toolbar.setTitle(R.string.home)
+                }
+                R.id.searchFragment -> {
+                    view1.visibility = View.GONE
+                    toolbar.setTitle(R.string.search)
+                }
+                R.id.myShowsFragment -> {
+                    view1.visibility = View.VISIBLE
+                    toolbar.setTitle(R.string.my_shows)
+                }
+            }
+
+        }
 
         GlobalScope.launch(Dispatchers.Main) {
             FirebaseMessaging.getInstance().subscribeToTopic("all")
@@ -81,7 +130,10 @@ class ZPlexActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        val navController = mainNavHostFragment.findNavController()
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.mainNavHostFragment) as NavHostFragment
+        val navController = navHostFragment.navController
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
+
 }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#121212</color>
-    <color name="colorPrimaryDark">#1e1e1f</color>
-    <color name="cardColor">#1f1f1f</color>
+    <color name="colorPrimary">#303134</color>
+    <color name="colorPrimaryDark">#202124</color>
+    <color name="cardColor">#121212</color>
     <color name="colorAccent">#9c66ef</color>
     <color name="textColor">#FFFFFF</color>
     <color name="textColor_54">#8AFFFFFF</color>
@@ -12,4 +12,6 @@
     <color name="transparent">#00000000</color>
     <color name="dark_tint">#40000000</color>
     <color name="black_overlay">#66000000</color>
+    <color name="darker">#202124</color>
+    <color name="gray">#323639</color>
 </resources>

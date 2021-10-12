@@ -14,17 +14,12 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ListPopupWindow
 import android.widget.Toast.*
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import androidx.palette.graphics.Palette
-import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -35,23 +30,21 @@ import com.bumptech.glide.request.target.Target
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayout.OnTabSelectedListener
+import com.google.android.material.tabs.TabLayoutMediator
+import com.google.android.material.transition.MaterialFade
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import zechs.zplex.R
-import zechs.zplex.adapter.ActorsAdapter
-import zechs.zplex.adapter.CreditsAdapter
-import zechs.zplex.adapter.MediaAdapter
 import zechs.zplex.databinding.FragmentAboutBinding
-import zechs.zplex.models.drive.DriveResponse
 import zechs.zplex.models.drive.File
-import zechs.zplex.models.tmdb.credits.Cast
 import zechs.zplex.models.tmdb.movies.MoviesResponse
 import zechs.zplex.models.tvdb.series.SeriesResponse
+import zechs.zplex.ui.ViewPagerAdapter
 import zechs.zplex.ui.activity.PlayerActivity
 import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.fragment.viewpager.CastFragment
+import zechs.zplex.ui.fragment.viewpager.EpisodesFragment
 import zechs.zplex.ui.viewmodel.file.FileViewModel
 import zechs.zplex.ui.viewmodel.tmdb.TmdbViewModel
 import zechs.zplex.ui.viewmodel.tvdb.TvdbViewModel
@@ -61,7 +54,6 @@ import zechs.zplex.utils.Constants.Companion.TVDB_IMAGE_PATH
 import zechs.zplex.utils.Constants.Companion.ZPLEX
 import zechs.zplex.utils.Constants.Companion.ZPLEX_IMAGE_REDIRECT
 import zechs.zplex.utils.Resource
-import java.lang.Integer.parseInt
 import java.net.*
 
 
@@ -75,21 +67,8 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
     private lateinit var tvdbViewModel: TvdbViewModel
     private lateinit var tmdbViewModel: TmdbViewModel
     private lateinit var fileViewModel: FileViewModel
-    private lateinit var mediaAdapter: MediaAdapter
-    private lateinit var actorsAdapter: ActorsAdapter
-    private lateinit var creditsAdapter: CreditsAdapter
 
-    private lateinit var groupedList: Map<String, List<File>>
-
-    private val itTAG = "AboutFragment"
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        activity?.window?.decorView?.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_LAYOUT_STABLE and View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                )
-        activity?.window?.statusBarColor = Color.TRANSPARENT
-    }
+    private val thisTAG = "AboutFragment"
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -101,16 +80,6 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
         fileViewModel = (activity as ZPlexActivity).viewModel
         val prefix = args.seriesId.toString() + " - " + args.name
 
-        if (args.type == "TV") {
-            actorsAdapter = ActorsAdapter()
-        } else {
-            creditsAdapter = CreditsAdapter()
-        }
-
-        mediaAdapter = MediaAdapter(args.seriesId)
-
-        setupRecyclerView("Episodes")
-
         val file = args.file
         val seriesId = args.seriesId
         val moviesId = args.seriesId
@@ -119,7 +88,6 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
 
         binding.tvTitle.text = name
         binding.seriesInfo.visibility = View.INVISIBLE
-        binding.mediaData.visibility = View.INVISIBLE
 
         GlobalScope.launch {
             val isSaved = fileViewModel.getFile(file.id)
@@ -159,6 +127,7 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                 }
             }
         }
+
         val redirectImagePoster = if (type == "TV") {
             Uri.parse(
                 "${ZPLEX_IMAGE_REDIRECT}/tvdb/${
@@ -183,28 +152,9 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                 .into(binding.ivPoster)
         }
 
-        val tabLayout = binding.tabs
+        setupViewPager(type == "TV", file)
+
         if (type == "TV") {
-
-            binding.btnRetryEpisodes.setOnClickListener {
-                tvdbViewModel.getSeries(seriesId)
-            }
-
-            tabLayout.addOnTabSelectedListener(object : OnTabSelectedListener {
-                override fun onTabSelected(tab: TabLayout.Tab) {
-                    setupRecyclerView(tab.text.toString())
-                }
-
-                override fun onTabUnselected(
-                    tab: TabLayout.Tab
-                ) {
-                }
-
-                override fun onTabReselected(
-                    tab: TabLayout.Tab
-                ) {
-                }
-            })
 
             tvdbViewModel.getSeries(seriesId)
 
@@ -224,53 +174,6 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                 }
             })
 
-            val driveQuery =
-                "name contains 'mkv' and '${file.id}' in parents and trashed = false"
-            fileViewModel.getMediaFiles(driveQuery)
-
-            fileViewModel.mediaList.observe(viewLifecycleOwner, { responseMedia ->
-                when (responseMedia) {
-                    is Resource.Success -> {
-                        responseMedia.data?.let { filesResponse ->
-                            filesSuccess(filesResponse)
-                        }
-                    }
-
-                    is Resource.Error -> {
-                        filesError(responseMedia)
-                    }
-
-                    is Resource.Loading -> {
-                        filesLoading()
-                    }
-                }
-            })
-
-            tvdbViewModel.getActor(args.seriesId)
-
-            tvdbViewModel.actors.observe(viewLifecycleOwner, { responseMedia ->
-                when (responseMedia) {
-                    is Resource.Success -> {
-                        responseMedia.data?.let {
-                            actorsAdapter.differ.submitList(it.data?.toList())
-                        }
-                    }
-
-                    is Resource.Error -> {
-                        responseMedia.message?.let { message ->
-                            makeText(
-                                context,
-                                "An error occurred: $message",
-                                LENGTH_SHORT
-                            ).show()
-                            Log.e(itTAG, "An error occurred: $message")
-                        }
-                    }
-
-                    is Resource.Loading -> {
-                    }
-                }
-            })
         } else {
             binding.apply {
                 darkTint.visibility = View.VISIBLE
@@ -299,7 +202,6 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
             tmdbViewModel.getMovies(moviesId)
 
             tmdbViewModel.movies.observe(viewLifecycleOwner, { response ->
-                Log.d("viewModel, AboutFragment", "observing")
                 when (response) {
                     is Resource.Success -> {
                         response.data?.let {
@@ -315,7 +217,7 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                                 "An error occurred: $message",
                                 LENGTH_SHORT
                             ).show()
-                            Log.e(itTAG, "An error occurred: $message")
+                            Log.e(thisTAG, "An error occurred: $message")
                         }
                     }
                     is Resource.Loading -> {
@@ -324,82 +226,6 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                 }
             })
 
-            tmdbViewModel.getCredits(moviesId)
-
-            tmdbViewModel.credits.observe(viewLifecycleOwner, { responseMedia ->
-                when (responseMedia) {
-                    is Resource.Success -> {
-                        binding.apply {
-                            pbEpisodes.visibility = View.INVISIBLE
-                            rvEpisodes.visibility = View.VISIBLE
-                        }
-                        responseMedia.data?.let {
-                            creditsAdapter.differ.submitList(it.cast?.toList())
-                        }
-                    }
-
-                    is Resource.Error -> {
-                        binding.apply {
-                            pbEpisodes.visibility = View.INVISIBLE
-                            rvEpisodes.visibility = View.INVISIBLE
-                        }
-                        responseMedia.message?.let { message ->
-                            makeText(
-                                context,
-                                "An error occurred: $message",
-                                LENGTH_SHORT
-                            ).show()
-                            Log.e(itTAG, "An error occurred: $message")
-                        }
-                    }
-
-                    is Resource.Loading -> {
-                        creditsAdapter.differ.submitList(listOf<Cast>().toList())
-                        binding.apply {
-                            pbEpisodes.visibility = View.VISIBLE
-                            rvEpisodes.visibility = View.INVISIBLE
-                        }
-                    }
-                }
-            })
-        }
-    }
-
-
-    private fun setupRecyclerView(tabText: String) {
-
-        if (args.type == "TV") {
-            mediaAdapter.setOnItemClickListener {
-                playMedia(it)
-            }
-
-            when (tabText) {
-                "Episodes" -> {
-                    binding.rvEpisodes.apply {
-                        adapter = mediaAdapter
-                        layoutManager =
-                            LinearLayoutManager(activity, LinearLayoutManager.VERTICAL, false)
-                    }
-                    binding.seasonsMenu.visibility = View.VISIBLE
-                }
-
-                "Cast" -> {
-                    binding.rvEpisodes.apply {
-                        adapter = actorsAdapter
-                        layoutManager = GridLayoutManager(activity, 2)
-                    }
-                    binding.seasonsMenu.visibility = View.INVISIBLE
-                }
-                else -> {
-                    makeText(context, " No adapter attached; skipping layout", LENGTH_LONG).show()
-                }
-            }
-        } else {
-            binding.rvEpisodes.apply {
-                adapter = creditsAdapter
-                layoutManager = GridLayoutManager(activity, 2)
-            }
-            binding.seasonsMenu.visibility = View.INVISIBLE
         }
     }
 
@@ -551,8 +377,8 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                             tabs.setSelectedTabIndicatorColor(
                                 accent
                             )
-                            pbEpisodes.indeterminateTintList =
-                                ColorStateList.valueOf(accent)
+//                            pbEpisodes.indeterminateTintList =
+//                                ColorStateList.valueOf(accent)
                             network.setTextColor(accent)
                             rating.setTextColor(accent)
                             released.setTextColor(accent)
@@ -569,21 +395,15 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
     }
 
     private fun tvdbSuccess(seriesResponse: SeriesResponse) {
-        val tabLayout = binding.tabs
+
+        val transition = MaterialFade()
+        transition.excludeTarget(android.R.id.statusBarBackground, true)
+        transition.excludeTarget(android.R.id.navigationBarBackground, true)
+        TransitionManager.beginDelayedTransition(binding.root, transition)
 
         seriesResponse.data?.let {
 
-            tabLayout.addTab(
-                tabLayout.newTab().setText(getString(R.string.episodes))
-            )
-            tabLayout.addTab(
-                tabLayout.newTab().setText(getString(R.string.cast))
-            )
-            TransitionManager.beginDelayedTransition(binding.root)
-
             binding.seriesInfo.visibility = View.VISIBLE
-            binding.cgGenre.visibility = View.VISIBLE
-            tabLayout.visibility = View.VISIBLE
 
             val runtimeText = "${it.runtime} min"
             binding.apply {
@@ -621,9 +441,9 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                     }
                 }
             }
-            context?.let { cont ->
 
-                Glide.with(cont)
+            if (it.fanart != null) {
+                Glide.with(binding.root)
                     .asBitmap()
                     .load("${TVDB_IMAGE_PATH}${it.fanart}")
                     .placeholder(R.color.cardColor)
@@ -664,113 +484,26 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                 "An error occurred: $message",
                 LENGTH_SHORT
             ).show()
-            Log.e(itTAG, "An error occurred: $message")
+            Log.e(thisTAG, "An error occurred: $message")
         }
     }
 
     private fun tvdbLoading() {
         binding.apply {
             cgGenre.removeAllViews()
-            tabs.removeAllTabs()
-            cgGenre.visibility = View.INVISIBLE
-            tabs.visibility = View.INVISIBLE
-            seriesInfo.visibility = View.INVISIBLE
-            mediaData.visibility = View.INVISIBLE
+            seriesInfo.visibility = View.GONE
             ivFanart.visibility = View.INVISIBLE
-            seasonsMenu.visibility = View.INVISIBLE
         }
     }
 
-
-    private fun filesSuccess(filesResponse: DriveResponse) {
-        val filesList = filesResponse.files.toList()
-
-        groupedList = filesList.groupBy {
-            val season = it.name.take(3)
-            val first = season.take(1).replace("S", "Season ")
-            val count = parseInt(season.drop(1))
-            first + count
-        }
-
-        val seasons = groupedList.keys.toList()
-        mediaAdapter.differ.submitList(groupedList[seasons[0]]?.toList())
-
-        binding.apply {
-            rvEpisodes.visibility = View.VISIBLE
-            btnRetryEpisodes.visibility = View.GONE
-            pbEpisodes.visibility = View.GONE
-            tabs.visibility = View.VISIBLE
-        }
-
-        binding.seasonsMenu.apply {
-            context?.let {
-                visibility = View.VISIBLE
-                text = seasons[0]
-                val listPopupWindow =
-                    ListPopupWindow(
-                        it,
-                        null,
-                        R.attr.listPopupWindowStyle
-                    )
-                val adapter = ArrayAdapter(
-                    it,
-                    R.layout.item_dropdown,
-                    seasons
-                )
-
-                listPopupWindow.anchorView = binding.seasonsMenu
-                listPopupWindow.setAdapter(adapter)
-
-                setOnClickListener { listPopupWindow.show() }
-
-                listPopupWindow.setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
-                    mediaAdapter.differ.submitList(groupedList[seasons[position]]?.toList())
-                    binding.seasonsMenu.text = seasons[position]
-                    listPopupWindow.dismiss()
-                }
-            }
-        }
-    }
-
-    private fun filesError(responseMedia: Resource.Error<DriveResponse>) {
-        binding.apply {
-            rvEpisodes.visibility = View.INVISIBLE
-            btnRetryEpisodes.visibility = View.VISIBLE
-            pbEpisodes.visibility = View.INVISIBLE
-            tabs.visibility = View.INVISIBLE
-            seasonsMenu.visibility = View.INVISIBLE
-        }
-        responseMedia.message?.let { message ->
-            makeText(
-                context,
-                "An error occurred: $message",
-                LENGTH_SHORT
-            ).show()
-            Log.e(itTAG, "An error occurred: $message")
-        }
-    }
-
-    private fun filesLoading() {
-        mediaAdapter.differ.submitList(listOf<File>().toList())
-        binding.apply {
-            rvEpisodes.visibility = View.INVISIBLE
-            btnRetryEpisodes.visibility = View.INVISIBLE
-            pbEpisodes.visibility = View.VISIBLE
-            tabs.visibility = View.INVISIBLE
-            seasonsMenu.visibility = View.INVISIBLE
-        }
-    }
 
     private fun tmdbSuccess(it: MoviesResponse) {
-        val tabLayout = binding.tabs
-        tabLayout.addTab(
-            tabLayout.newTab().setText(getString(R.string.cast))
-        )
-        TransitionManager.beginDelayedTransition(binding.root)
+        val transition = MaterialFade()
+        transition.excludeTarget(android.R.id.statusBarBackground, true)
+        transition.excludeTarget(android.R.id.navigationBarBackground, true)
+        TransitionManager.beginDelayedTransition(binding.root, transition)
 
         binding.seriesInfo.visibility = View.VISIBLE
-        binding.cgGenre.visibility = View.VISIBLE
-        tabLayout.visibility = View.VISIBLE
 
         val runtimeText = "${it.runtime} min"
         binding.apply {
@@ -811,8 +544,9 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                 }
             }
         }
-        context?.let { cont ->
-            Glide.with(cont)
+
+        if (it.backdrop_path != null) {
+            Glide.with(binding.ivFanart)
                 .asBitmap()
                 .load("${TMDB_IMAGE_PATH}${it.backdrop_path}")
                 .placeholder(R.color.cardColor)
@@ -840,33 +574,71 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
 
                 })
                 .into(binding.ivFanart)
-
-
         }
     }
 
     private fun tmdbLoading() {
         binding.apply {
             cgGenre.removeAllViews()
-            tabs.removeAllTabs()
             cgGenre.visibility = View.INVISIBLE
-            tabs.visibility = View.INVISIBLE
             seriesInfo.visibility = View.INVISIBLE
-            mediaData.visibility = View.INVISIBLE
             ivFanart.visibility = View.INVISIBLE
         }
     }
 
+    private fun setupViewPager(isTV: Boolean, file: File) {
+
+        val fragmentList: ArrayList<Fragment> = if (isTV) {
+            arrayListOf(
+                EpisodesFragment(file, args),
+                CastFragment(isTV, args.seriesId),
+            )
+        } else {
+            arrayListOf(
+                CastFragment(isTV, args.seriesId)
+            )
+        }
+
+        val adapter = ViewPagerAdapter(
+            fragmentList,
+            childFragmentManager,
+            lifecycle
+        )
+
+        binding.viewPager.adapter = adapter
+
+        TabLayoutMediator(binding.tabs, binding.viewPager) { tab, position ->
+            tab.text =
+                if (isTV) {
+                    when (position) {
+                        0 -> getString(R.string.episodes)
+                        1 -> getString(R.string.cast)
+                        else -> throw IndexOutOfBoundsException()
+                    }
+                } else {
+                    when (position) {
+                        0 -> getString(R.string.cast)
+                        else -> throw IndexOutOfBoundsException()
+                    }
+                }
+        }.attach()
+    }
+
     fun getContrastColor(@ColorInt color: Int): Boolean {
-        val a: Double =
+        val ratio =
             1 - (0.299 * Color.red(color) + 0.587 * Color.green(color) + 0.114 * Color.blue(color)) / 255
-        return a >= 0.80
+        return ratio >= 0.80
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        Glide.get(binding.ivPoster.context).clearMemory()
-        binding.rvEpisodes.adapter = null
+        binding.apply {
+            cgGenre.removeAllViews()
+            seriesInfo.visibility = View.GONE
+            ivFanart.visibility = View.INVISIBLE
+            if (tabs.tabCount > 0) tabs.removeAllTabs()
+            Glide.get(ivPoster.context).clearMemory()
+        }
         _binding = null
     }
 }

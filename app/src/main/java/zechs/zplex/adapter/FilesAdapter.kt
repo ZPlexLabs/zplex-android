@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import kotlinx.android.synthetic.main.media_item_home.view.*
+import kotlinx.android.synthetic.main.item_media.view.*
 import zechs.zplex.R
 import zechs.zplex.models.drive.File
 import zechs.zplex.utils.Constants.Companion.TMDB_API_KEY
@@ -35,7 +35,7 @@ class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilesViewHolder {
         return FilesViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.media_item_home,
+                R.layout.item_media,
                 parent,
                 false
             )

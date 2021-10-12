@@ -12,11 +12,7 @@
         tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_homeFragment_to_aboutFragment"
-            app:destination="@id/aboutFragment"
-            app:enterAnim="@anim/slide_up"
-            app:exitAnim="@anim/slide_down"
-            app:popEnterAnim="@anim/slide_up"
-            app:popExitAnim="@anim/slide_down" />
+            app:destination="@id/aboutFragment" />
     </fragment>
 
     <fragment
@@ -26,11 +22,7 @@
         tools:layout="@layout/fragment_search">
         <action
             android:id="@+id/action_searchFragment_to_aboutFragment"
-            app:destination="@id/aboutFragment"
-            app:enterAnim="@anim/slide_up"
-            app:exitAnim="@anim/slide_down"
-            app:popEnterAnim="@anim/slide_up"
-            app:popExitAnim="@anim/slide_down" />
+            app:destination="@id/aboutFragment" />
     </fragment>
 
     <fragment
@@ -40,16 +32,12 @@
         tools:layout="@layout/fragment_my_shows">
         <action
             android:id="@+id/action_myShowsFragment_to_aboutFragment"
-            app:destination="@id/aboutFragment"
-            app:enterAnim="@anim/slide_up"
-            app:exitAnim="@anim/slide_down"
-            app:popEnterAnim="@anim/slide_up"
-            app:popExitAnim="@anim/slide_down" />
+            app:destination="@id/aboutFragment" />
     </fragment>
     <fragment
         android:id="@+id/aboutFragment"
         android:name="zechs.zplex.ui.fragment.AboutFragment"
-        android:label="fragment_about"
+        android:label="About"
         tools:layout="@layout/fragment_about">
         <argument
             android:name="file"

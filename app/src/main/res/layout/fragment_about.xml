@@ -5,7 +5,7 @@
     android:id="@+id/main_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
+    android:background="@color/cardColor"
     tools:context=".ui.fragment.AboutFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -17,15 +17,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="invisible"
-            app:constraint_referenced_ids="tv_runtime,cg_genre,tv_plot"
-            tools:visibility="visible" />
-
-        <androidx.constraintlayout.widget.Group
-            android:id="@+id/media_data"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            app:constraint_referenced_ids="tabs,seasons_menu,rv_episodes, pb_episodes, btn_retry_episodes"
+            app:constraint_referenced_ids="tv_runtime,cg_genre,tv_plot, tv_title,network,rating,released,runtime"
             tools:visibility="visible" />
 
         <FrameLayout
@@ -280,10 +272,10 @@
             app:layout_constraintBottom_toBottomOf="@+id/poster_card"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/poster_card"
-            app:strokeColor="@color/cardColor"
+            app:strokeColor="@color/colorPrimaryDark"
             tools:iconTint="#2898f0"
             tools:ignore="TouchTargetSizeCheck"
-            tools:strokeColor="@color/cardColor"
+            tools:strokeColor="@color/colorPrimaryDark"
             tools:textColor="#2898f0" />
 
         <TextView
@@ -317,7 +309,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="top"
             android:background="@android:color/transparent"
-            app:layout_constraintEnd_toStartOf="@+id/seasons_menu"
+            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
             app:layout_constraintStart_toStartOf="@+id/poster_card"
             app:layout_constraintTop_toBottomOf="@+id/cg_genre"
             app:tabGravity="start"
@@ -329,71 +321,16 @@
             app:tabTextAppearance="@style/seasonsTabTextAppearance"
             app:tabTextColor="@color/textColor_54"
             tools:tabIndicatorColor="#2898f0"
-            tools:tabSelectedTextColor="#2898f0">
+            tools:tabSelectedTextColor="#2898f0" />
 
-        </com.google.android.material.tabs.TabLayout>
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/seasons_menu"
-            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:insetTop="4dp"
-            android:insetBottom="2dp"
-            android:minHeight="0dp"
-            android:textAllCaps="false"
-            android:textColor="@color/textColor_74"
-            android:textSize="14sp"
-            app:backgroundTint="@color/transparent"
-            app:cornerRadius="16dp"
-            app:elevation="0dp"
-            app:icon="@drawable/ic_round_keyboard_arrow_down_24"
-            app:iconGravity="end"
-            app:iconTint="@color/textColor_74"
-            app:layout_constraintBottom_toBottomOf="@+id/tabs"
-            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="@+id/poster_card"
-            app:layout_constraintTop_toTopOf="@+id/tabs"
-            tools:text="Season 1" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_episodes"
-            android:layout_width="0dp"
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tabs"
-            tools:listitem="@layout/episode_list" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_retry_episodes"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:clickable="true"
-            android:foreground="?attr/selectableItemBackground"
-            android:text="@string/retry"
-            android:textColor="@color/colorAccent"
-            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
-            app:layout_constraintStart_toStartOf="@+id/poster_card"
-            app:layout_constraintTop_toBottomOf="@+id/seasons_menu"
-            tools:textColor="#2898f0" />
-
-        <ProgressBar
-            android:id="@+id/pb_episodes"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:visibility="visible"
-            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
-            app:layout_constraintStart_toStartOf="@+id/poster_card"
-            app:layout_constraintTop_toBottomOf="@+id/seasons_menu"
-            tools:indeterminateTint="#2898f0" />
+            app:layout_constraintTop_toBottomOf="@+id/tabs" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

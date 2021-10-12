@@ -1,15 +1,15 @@
 plugins {
-    id 'com.android.application'
-    id 'com.google.gms.google-services'
-    id 'kotlin-android'
-    id 'kotlin-kapt'
-    id 'kotlin-android-extensions'
-    id 'androidx.navigation.safeargs'
+    id "com.android.application"
+    id "com.google.gms.google-services"
+    id "kotlin-android"
+    id "kotlin-kapt"
+    id "kotlin-android-extensions"
+    id "androidx.navigation.safeargs"
 }
 
 static def getDate() {
     def date = new Date()
-    def formattedDate = date.format('d MMM, HH.mm aa')
+    def formattedDate = date.format("d MMM, HH.mm aa")
     return formattedDate
 }
 
@@ -17,22 +17,22 @@ android {
 
     signingConfigs {
         release {
-            storeFile file('/home/zechs/zechs_dev.jks')
-            storePassword 'sirzechs'
-            keyAlias 'key0'
-            keyPassword 'sirzechs'
+            storeFile file("/home/zechs/zechs_dev.jks")
+            storePassword "sirzechs"
+            keyAlias "key0"
+            keyPassword "sirzechs"
         }
     }
 
     packagingOptions {
-        exclude 'META-INF/DEPENDENCIES'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/notice.txt'
-        exclude 'META-INF/ASL2.0'
+        exclude "META-INF/DEPENDENCIES"
+        exclude "META-INF/LICENSE"
+        exclude "META-INF/LICENSE.txt"
+        exclude "META-INF/license.txt"
+        exclude "META-INF/NOTICE"
+        exclude "META-INF/NOTICE.txt"
+        exclude "META-INF/notice.txt"
+        exclude "META-INF/ASL2.0"
         exclude("META-INF/*.kotlin_module")
     }
 
@@ -55,7 +55,7 @@ android {
         release {
             minifyEnabled false
             shrinkResources false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
 
@@ -76,14 +76,9 @@ android {
 }
 
 dependencies {
-    // Moshi
-    implementation "com.squareup.moshi:moshi:1.12.0"
-    implementation "com.squareup.moshi:moshi-kotlin:1.12.0"
-    kapt "com.squareup.moshi:moshi-kotlin-codegen:1.10.0"
-    implementation "com.squareup.retrofit2:converter-moshi:2.9.0"
 
     // Exoplayer
-    implementation "com.google.android.exoplayer:exoplayer:2.15.0"
+    implementation "com.google.android.exoplayer:exoplayer:2.15.1"
 
     // Room
     implementation "androidx.room:room-runtime:2.3.0"
@@ -97,14 +92,18 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1"
 
     // Coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
+
+    // Moshi
+    implementation "com.squareup.moshi:moshi:1.12.0"
+    implementation "com.squareup.moshi:moshi-kotlin:1.12.0"
+    kapt "com.squareup.moshi:moshi-kotlin-codegen:1.10.0"
+    implementation "com.squareup.retrofit2:converter-moshi:2.9.0"
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
     implementation "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2"
-    implementation "com.google.code.gson:gson:2.8.8"
 
     // Navigation Components
     implementation "androidx.navigation:navigation-fragment-ktx:2.3.5"
@@ -118,30 +117,32 @@ dependencies {
 
     //Firebase
     implementation platform("com.google.firebase:firebase-bom:28.2.1")
-    implementation "com.google.firebase:firebase-analytics:19.0.1"
+    implementation "com.google.firebase:firebase-analytics:19.0.2"
     implementation "com.google.firebase:firebase-messaging:22.0.0"
 
     //Utils
     implementation "org.jetbrains:annotations:21.0.1"
-    implementation "com.github.smart-fun:XmlToJson:1.5.1"
 
-    //Volley
-    implementation "com.android.volley:volley:1.2.1"
-    implementation "com.google.guava:guava:30.1.1-jre"
-
+    //Kotlin
     implementation "androidx.core:core-ktx:1.6.0"
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.5.30"
 
+    //AndroidX
     implementation "androidx.palette:palette-ktx:1.0.0"
     implementation "androidx.appcompat:appcompat:1.3.1"
     implementation "androidx.legacy:legacy-support-v4:1.0.0"
     implementation "com.google.android.material:material:1.4.0"
-    implementation "androidx.constraintlayout:constraintlayout:2.1.0"
+    implementation "androidx.constraintlayout:constraintlayout:2.1.1"
 
+    //Memory Leak
+    debugImplementation "com.squareup.leakcanary:leakcanary-android:2.7"
+
+    //CrashLogger
+    implementation "cat.ereza:customactivityoncrash:2.3.0"
+
+    //Tests
     testImplementation "junit:junit:4.13.2"
     androidTestImplementation "androidx.test.ext:junit:1.1.3"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.4.0"
-
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:2.7"
 
 }

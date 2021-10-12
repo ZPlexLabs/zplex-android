@@ -1,6 +1,7 @@
 package zechs.zplex.ui.activity
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -27,7 +28,6 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var fullscreenContent: StyledPlayerView
     private val hideHandler = Handler(Looper.getMainLooper())
     private lateinit var exoPlayer: SimpleExoPlayer
-
 
     private val hidePart2Runnable = Runnable {
         if (Build.VERSION.SDK_INT >= 30) {
@@ -129,7 +129,7 @@ class PlayerActivity : AppCompatActivity() {
         val fileId = intent.getStringExtra("fileId")
 
         val mediaItem = MediaItem.Builder()
-            .setUri("https://www.googleapis.com/drive/v3/files/${fileId}?supportsAllDrives=True&alt=media")
+            .setUri(getStreamUrl(fileId))
             .build()
 
         exoPlayer.apply {
@@ -156,6 +156,10 @@ class PlayerActivity : AppCompatActivity() {
             setShowRewindButton(true)
             controllerHideOnTouch = true
         }
+    }
+
+    private fun getStreamUrl(fileId: String?): Uri {
+        return Uri.parse("https://www.googleapis.com/drive/v3/files/${fileId}?supportsAllDrives=True&alt=media")
     }
 
     override fun onDestroy() {

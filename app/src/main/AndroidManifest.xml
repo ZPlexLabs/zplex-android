@@ -18,6 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true"
+        android:windowSoftInputMode="adjustPan"
         tools:ignore="AllowBackup">
         <activity
             android:name=".ui.activity.PlayerActivity"

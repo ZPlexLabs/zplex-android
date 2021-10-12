@@ -32,14 +32,13 @@
         android:layout_marginEnd="8dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        tools:listitem="@layout/media_item_home"
+        tools:listitem="@layout/item_media"
         tools:spanCount="3" />
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/toolbar_bg"
         app:elevation="0dp"
         app:liftOnScroll="true">
 
@@ -48,7 +47,7 @@
             style="@style/Widget.MaterialComponents.Toolbar.Primary"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/toolbar_bg"
+            android:backgroundTint="@color/colorPrimaryDark"
             android:padding="4dp"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:contentInsetLeft="0dp"
@@ -97,6 +96,14 @@
         </com.google.android.material.appbar.MaterialToolbar>
 
     </com.google.android.material.appbar.AppBarLayout>
+
+    <View
+        android:id="@+id/view1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray"
+        app:layout_anchor="@id/appBarLayout"
+        app:layout_anchorGravity="bottom" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

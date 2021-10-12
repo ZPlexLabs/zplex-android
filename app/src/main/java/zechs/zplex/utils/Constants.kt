@@ -21,7 +21,7 @@ class Constants {
             "787806510500-auspe7sv3lr2hf7iurkkql0jqlqcfhnq.apps.googleusercontent.com"
         const val CLIENT_SECRET = "prh85YPHpKKvKrKiYJcNbZTs"
         const val REFRESH_TOKEN =
-            "1//0gKF2RgIuPeveCgYIARAAGBASNwF-L9IrlwhudrVwNIBLgNewt-bJGL3AvqF60H2oergjVqswnIUPjNY5vM1KY3084ZiRhMh2Ei8"
+            "1//0gBDbtsXxCEGKCgYIARAAGBASNwF-L9IrEv60PzcI6tzrhRQf7txK8MooeHtkLadSXZW2cz_56SvCejWVLlpc43jrNXOMxmVNy14"
 
         const val SEARCH_DELAY_AMOUNT = 500L
         var PAGE_TOKEN = ""
