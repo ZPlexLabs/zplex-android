@@ -161,4 +161,9 @@ class CastFragment(
         binding.rvCasts.adapter = null
         _binding = null
     }
+
+    override fun onResume() {
+        super.onResume()
+        binding.root.requestLayout()
+    }
 }

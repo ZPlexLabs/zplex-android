@@ -17,10 +17,7 @@ import androidx.appcompat.widget.ListPopupWindow
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.TransitionManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.transition.MaterialSharedAxis
-import kotlinx.android.synthetic.main.activity_zplex.*
 import zechs.zplex.R
 import zechs.zplex.adapter.MediaAdapter
 import zechs.zplex.databinding.FragmentEpisodesBinding
@@ -115,16 +112,16 @@ class EpisodesFragment(
             }
 
             val filters = listOf("Chronological", "Newest Aired")
-            context?.let {
+            context?.let { context ->
                 val listPopUpSeasons =
                     ListPopupWindow(
-                        it,
+                        context,
                         null,
                         R.attr.listPopupWindowStyle
                     )
                 val listPopUpFilters =
                     ListPopupWindow(
-                        it,
+                        context,
                         null,
                         R.attr.listPopupWindowStyle
                     )
@@ -134,7 +131,7 @@ class EpisodesFragment(
                     text = seasons[seasonIndex]
 
                     val adapter = ArrayAdapter(
-                        it,
+                        context,
                         R.layout.item_dropdown,
                         seasons
                     )
@@ -159,17 +156,26 @@ class EpisodesFragment(
 
                 binding.toggleView.apply {
                     visibility = View.VISIBLE
-                    addOnButtonCheckedListener { _, checkedId, isChecked ->
-                        if (isChecked) loadBig = checkedId != R.id.btn_list
-                        val transition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
-                        transition.duration = 250L
-                        transition.excludeTarget(toolbar, true)
-                        transition.excludeTarget(android.R.id.statusBarBackground, true)
-                        transition.excludeTarget(android.R.id.navigationBarBackground, true)
-                        TransitionManager.beginDelayedTransition(binding.root, transition)
+                    setOnClickListener {
+//                        val transition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
+//                        transition.duration = 500
+//                        transition.excludeTarget(toolbar, true)
+//                        transition.excludeTarget(android.R.id.statusBarBackground, true)
+//                        transition.excludeTarget(android.R.id.navigationBarBackground, true)
+//                        TransitionManager.beginDelayedTransition(binding.root, transition)
+
+                        if (loadBig) {
+                            loadBig = false
+                            icon = ContextCompat.getDrawable(context, R.drawable.toggle_grid)
+                        } else {
+                            loadBig = true
+                            icon = ContextCompat.getDrawable(context, R.drawable.toggle_list)
+                        }
+
                         setupRecyclerView(reverseList, loadBig)
                         mediaAdapter.differ.submitList(groupedList[seasons[seasonIndex]]?.toList())
                         binding.rvEpisodes.smoothScrollToPosition(0)
+
                     }
                 }
 
@@ -180,7 +186,7 @@ class EpisodesFragment(
                     text = filters[0]
 
                     val adapter = ArrayAdapter(
-                        it,
+                        context,
                         R.layout.item_dropdown,
                         filters
                     )
@@ -361,5 +367,10 @@ class EpisodesFragment(
         mediaAdapter.differ.submitList(listOf<File>().toList())
         binding.rvEpisodes.adapter = null
         _binding = null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.root.requestLayout()
     }
 }

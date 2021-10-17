@@ -34,7 +34,7 @@
         <FrameLayout
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="@drawable/dark_gradient_episode"
+            android:background="@drawable/dark_faded_gradient"
             app:layout_constraintBottom_toBottomOf="@+id/thumb"
             app:layout_constraintEnd_toEndOf="@+id/thumb"
             app:layout_constraintStart_toStartOf="@+id/thumb"

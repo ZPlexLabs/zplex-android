@@ -5,6 +5,7 @@ plugins {
     id "kotlin-kapt"
     id "kotlin-android-extensions"
     id "androidx.navigation.safeargs"
+    id "com.google.firebase.crashlytics"
 }
 
 static def getDate() {
@@ -118,6 +119,7 @@ dependencies {
     //Firebase
     implementation platform("com.google.firebase:firebase-bom:28.2.1")
     implementation "com.google.firebase:firebase-analytics:19.0.2"
+    implementation "com.google.firebase:firebase-crashlytics"
     implementation "com.google.firebase:firebase-messaging:22.0.0"
 
     //Utils
@@ -133,12 +135,6 @@ dependencies {
     implementation "androidx.legacy:legacy-support-v4:1.0.0"
     implementation "com.google.android.material:material:1.4.0"
     implementation "androidx.constraintlayout:constraintlayout:2.1.1"
-
-    //Memory Leak
-    debugImplementation "com.squareup.leakcanary:leakcanary-android:2.7"
-
-    //CrashLogger
-    implementation "cat.ereza:customactivityoncrash:2.3.0"
 
     //Tests
     testImplementation "junit:junit:4.13.2"

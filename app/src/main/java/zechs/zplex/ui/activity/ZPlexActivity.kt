@@ -64,7 +64,6 @@ class ZPlexActivity : AppCompatActivity() {
         tmdbViewModel =
             ViewModelProvider(this, moviesModelProviderFactory).get(TmdbViewModel::class.java)
 
-
         setContentView(R.layout.activity_zplex)
 
         val navHostFragment = supportFragmentManager.findFragmentById(
@@ -75,35 +74,39 @@ class ZPlexActivity : AppCompatActivity() {
         bottomNavigationView.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.aboutFragment) {
-                val transition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
-                transition.duration = 500L
-                transition.excludeTarget(android.R.id.statusBarBackground, true)
-                transition.excludeTarget(android.R.id.navigationBarBackground, true)
-                TransitionManager.beginDelayedTransition(root, transition)
-                bottomNavigationView.visibility = View.GONE
-                appBarLayout.visibility = View.GONE
-                view1.visibility = View.GONE
-                view2.visibility = View.GONE
-                window.navigationBarColor = ContextCompat.getColor(this, R.color.cardColor)
-                window.statusBarColor = ContextCompat.getColor(this, R.color.cardColor)
-            } else {
-                window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
-                window.navigationBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
-                val transition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
-                transition.duration = 500L
-                transition.excludeTarget(toolbar, true)
-                transition.excludeTarget(bottomNavigationView, true)
-                transition.excludeTarget(android.R.id.statusBarBackground, true)
-                transition.excludeTarget(android.R.id.navigationBarBackground, true)
-                TransitionManager.beginDelayedTransition(root, transition)
-                bottomNavigationView.visibility = View.VISIBLE
-                view1.visibility = View.VISIBLE
-                view2.visibility = View.VISIBLE
-                if (destination.id == R.id.searchFragment) {
+            when (destination.id) {
+                R.id.aboutFragment -> {
+                    val transition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
+                    transition.duration = 500L
+                    transition.excludeTarget(android.R.id.statusBarBackground, true)
+                    transition.excludeTarget(android.R.id.navigationBarBackground, true)
+                    TransitionManager.beginDelayedTransition(root, transition)
+                    bottomNavigationView.visibility = View.GONE
                     appBarLayout.visibility = View.GONE
-                } else {
-                    appBarLayout.visibility = View.VISIBLE
+                    view1.visibility = View.GONE
+                    view2.visibility = View.GONE
+                    window.navigationBarColor = ContextCompat.getColor(this, R.color.cardColor)
+                    window.statusBarColor = ContextCompat.getColor(this, R.color.cardColor)
+                }
+                else -> {
+                    window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
+                    window.navigationBarColor =
+                        ContextCompat.getColor(this, R.color.colorPrimaryDark)
+                    val transition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
+                    transition.duration = 500L
+                    transition.excludeTarget(toolbar, true)
+                    transition.excludeTarget(bottomNavigationView, true)
+                    transition.excludeTarget(android.R.id.statusBarBackground, true)
+                    transition.excludeTarget(android.R.id.navigationBarBackground, true)
+                    TransitionManager.beginDelayedTransition(root, transition)
+                    bottomNavigationView.visibility = View.VISIBLE
+                    view1.visibility = View.VISIBLE
+                    view2.visibility = View.VISIBLE
+                    if (destination.id == R.id.searchFragment) {
+                        appBarLayout.visibility = View.GONE
+                    } else {
+                        appBarLayout.visibility = View.VISIBLE
+                    }
                 }
             }
 

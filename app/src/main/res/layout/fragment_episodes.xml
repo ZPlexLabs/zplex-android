@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -13,8 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="4dp"
+        android:layout_marginStart="8dp"
         android:insetTop="4dp"
         android:insetBottom="2dp"
         android:minHeight="0dp"
@@ -27,6 +26,11 @@
         app:icon="@drawable/ic_round_keyboard_arrow_down_24"
         app:iconGravity="end"
         app:iconTint="@color/textColor_74"
+        app:layout_constraintEnd_toStartOf="@+id/filter_eps"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         tools:text="Season 1" />
 
     <com.google.android.material.button.MaterialButton
@@ -48,35 +52,25 @@
         app:icon="@drawable/ic_round_keyboard_arrow_down_24"
         app:iconGravity="end"
         app:iconTint="@color/textColor_74"
+        app:layout_constraintBottom_toBottomOf="@+id/seasons_menu"
+        app:layout_constraintEnd_toStartOf="@+id/toggleView"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/seasons_menu"
+        app:layout_constraintTop_toTopOf="@+id/seasons_menu"
         tools:text="Newest" />
 
-    <com.google.android.material.button.MaterialButtonToggleGroup
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/toggleView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignTop="@id/seasons_menu"
-        android:layout_toEndOf="@id/filter_eps"
-        android:insetTop="4dp"
-        android:insetBottom="2dp"
-        android:minHeight="0dp"
-        app:checkedButton="@+id/btn_grid"
-        app:selectionRequired="true"
-        app:singleSelection="true">
-
-        <Button
-            android:id="@+id/btn_list"
-            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:icon="@drawable/toggle_list" />
-
-        <Button
-            android:id="@+id/btn_grid"
-            style="@style/Widget.App.Button.OutlinedButton.IconOnly"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:icon="@drawable/toggle_grid" />
-    </com.google.android.material.button.MaterialButtonToggleGroup>
+        style="@style/Widget.App.Button.IconOnly"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+        android:background="@android:color/transparent"
+        app:icon="@drawable/toggle_list"
+        app:iconGravity="textStart"
+        app:layout_constraintBottom_toBottomOf="@+id/filter_eps"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/filter_eps" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_episodes"
@@ -88,6 +82,7 @@
         android:layout_marginTop="8dp"
         android:visibility="visible"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintTop_toBottomOf="@+id/seasons_menu"
         tools:listitem="@layout/item_episode" />
 
     <com.google.android.material.button.MaterialButton
@@ -96,19 +91,30 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
         android:clickable="true"
         android:foreground="?attr/selectableItemBackground"
         android:text="@string/retry"
         android:textColor="@color/colorAccent"
-        tools:textColor="#2898f0" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:textColor="#2898f0"
+        tools:visibility="invisible" />
 
     <ProgressBar
         android:id="@+id/pb_episodes"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:visibility="visible"
-        tools:indeterminateTint="#2898f0" />
-</RelativeLayout>
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:indeterminateTint="#2898f0"
+        tools:visibility="invisible" />
+</androidx.constraintlayout.widget.ConstraintLayout>
