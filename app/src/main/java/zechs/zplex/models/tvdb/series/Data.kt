@@ -1,5 +1,8 @@
 package zechs.zplex.models.tvdb.series
 
+import androidx.annotation.Keep
+
+@Keep
 data class Data(
     val added: String?,
     val airsDayOfWeek: String?,

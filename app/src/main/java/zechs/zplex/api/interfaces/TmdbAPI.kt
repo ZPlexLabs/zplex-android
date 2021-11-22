@@ -6,7 +6,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import zechs.zplex.models.tmdb.credits.CreditsResponse
 import zechs.zplex.models.tmdb.movies.MoviesResponse
-import zechs.zplex.utils.Constants.Companion.TMDB_API_KEY
+import zechs.zplex.utils.Constants.TMDB_API_KEY
 
 interface TmdbAPI {
 

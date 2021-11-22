@@ -1,5 +1,8 @@
 package zechs.zplex.models.tmdb.credits
 
+import androidx.annotation.Keep
+
+@Keep
 data class Cast(
     val adult: Boolean?,
     val cast_id: Int?,

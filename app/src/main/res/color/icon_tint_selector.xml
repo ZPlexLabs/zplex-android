@@ -1,6 +1,0 @@
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:alpha="1.00" android:color="?attr/colorPrimary" android:state_checkable="true" android:state_checked="true" android:state_enabled="true" />
-    <item android:alpha="0.60" android:color="@color/gray" android:state_checkable="true" android:state_checked="false" android:state_enabled="true" /> <!-- this color -->
-    <item android:alpha="1.00" android:color="?attr/colorPrimary" android:state_enabled="true" />
-    <item android:alpha="0.38" android:color="?attr/colorAccent" />
-</selector>

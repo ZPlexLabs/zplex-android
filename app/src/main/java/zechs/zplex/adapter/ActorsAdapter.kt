@@ -10,7 +10,7 @@ import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_actor.view.*
 import zechs.zplex.R
 import zechs.zplex.models.tvdb.actors.Data
-import zechs.zplex.utils.Constants.Companion.TVDB_IMAGE_PATH
+import zechs.zplex.utils.Constants.TVDB_IMAGE_PATH
 
 
 class ActorsAdapter : RecyclerView.Adapter<ActorsAdapter.ActorsViewHolder>() {

@@ -1,5 +1,8 @@
 package zechs.zplex.models.tmdb.movies
 
+import androidx.annotation.Keep
+
+@Keep
 data class MoviesResponse(
     val adult: Boolean?,
     val backdrop_path: String?,

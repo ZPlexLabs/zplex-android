@@ -13,9 +13,9 @@ import zechs.zplex.ThisApp
 import zechs.zplex.api.interfaces.TokenAPI
 import zechs.zplex.models.drive.TokenRequest
 import zechs.zplex.utils.Constants
-import zechs.zplex.utils.Constants.Companion.CLIENT_ID
-import zechs.zplex.utils.Constants.Companion.CLIENT_SECRET
-import zechs.zplex.utils.Constants.Companion.REFRESH_TOKEN
+import zechs.zplex.utils.Constants.CLIENT_ID
+import zechs.zplex.utils.Constants.CLIENT_SECRET
+import zechs.zplex.utils.Constants.REFRESH_TOKEN
 import zechs.zplex.utils.SessionManager
 import java.io.IOException
 

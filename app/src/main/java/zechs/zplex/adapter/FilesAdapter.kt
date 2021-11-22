@@ -12,8 +12,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.item_media.view.*
 import zechs.zplex.R
 import zechs.zplex.models.drive.File
-import zechs.zplex.utils.Constants.Companion.TMDB_API_KEY
-import zechs.zplex.utils.Constants.Companion.ZPLEX_IMAGE_REDIRECT
+import zechs.zplex.utils.Constants.TMDB_API_KEY
+import zechs.zplex.utils.Constants.ZPLEX_IMAGE_REDIRECT
 
 
 class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {

@@ -14,11 +14,6 @@
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
     </style>
 
-    <style name="AppTheme.About" parent="AppTheme">
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation">true</item>
-    </style>
-
     <style name="MenuTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorSecondary">@color/textColor</item>
         <item name="android:actionMenuTextColor">@color/textColor</item>
@@ -28,20 +23,21 @@
     </style>
 
     <style name="titleTextAppearance">
-        <item name="android:textColor">@color/textColor_87</item>
-        <item name="fontFamily">@font/open_sans_bold</item>
-        <item name="android:textSize">21sp</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="fontFamily">@font/open_sans</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">true</item>
         <item name="android:textAlignment">center</item>
     </style>
 
-    <style name="seasonsTabTextAppearance" parent="TextAppearance.Design.Tab">
-        <item name="fontFamily">@font/open_sans_semibold</item>
+    <style name="aboutTabAppearance" parent="Widget.Design.TabLayout">
+        <item name="tabTextAppearance">@style/aboutTabTextAppearance</item>
     </style>
 
-    <style name="tabTextAppearance" parent="TextAppearance.Design.Tab">
-        <item name="fontFamily">@font/open_sans_semibold</item>
+    <style name="aboutTabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="fontFamily">@font/open_sans</item>
         <item name="textAllCaps">false</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">15sp</item>
     </style>
 
     <style name="BottomNavTextStyle">
@@ -49,23 +45,15 @@
     </style>
 
     <style name="Widget.App.Chip" parent="Widget.MaterialComponents.Chip.Action">
-        <item name="chipBackgroundColor">@color/colorPrimaryDark</item>
+        <item name="chipBackgroundColor">#4D000000</item>
         <item name="android:textColor">@color/textColor</item>
-    </style>
-
-    <style name="TextAppearance.App.Body2" parent="TextAppearance.MaterialComponents.Body2">
-        <item name="android:textColor">@color/textColor</item>
-        <item name="fontFamily">@font/open_sans_bold</item>
-        <item name="android:fontFamily">@font/open_sans_bold</item>
+        <item name="android:clickable">false</item>
+        <item name="android:focusable">false</item>
+        <item name="chipSurfaceColor">@android:color/transparent</item>
     </style>
 
     <style name="Widget.NewAppTheme.ActionBar.Fullscreen" parent="Widget.AppCompat.ActionBar">
         <item name="android:background">@color/black_overlay</item>
-    </style>
-
-    <style name="Widget.NewAppTheme.ButtonBar.Fullscreen" parent="">
-        <item name="android:background">@color/black_overlay</item>
-        <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
     </style>
 
     <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
@@ -97,26 +85,4 @@
         <item name="fullscreenBackgroundColor">#000</item>
     </style>
 
-    <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
-        <item name="iconPadding">0dp</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="iconTint">@color/icon_tint_selector</item>
-
-        <item name="android:insetBottom">0dp</item>
-        <item name="android:paddingLeft">12dp</item>
-        <item name="android:paddingRight">12dp</item>
-        <item name="android:minWidth">48dp</item>
-        <item name="android:minHeight">48dp</item>
-    </style>
-
-    <style name="Widget.App.Button.IconOnly" parent="Widget.MaterialComponents.Button">
-        <item name="iconPadding">0dp</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-        <item name="android:padding">0dp</item>
-        <item name="iconPadding">0dp</item>
-        <item name="android:minWidth">0dp</item>
-        <item name="android:minHeight">0dp</item>
-        <item name="iconGravity">textStart</item>
-    </style>
 </resources>

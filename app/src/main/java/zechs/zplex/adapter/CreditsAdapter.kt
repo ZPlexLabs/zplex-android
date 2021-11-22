@@ -10,7 +10,7 @@ import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_actor.view.*
 import zechs.zplex.R
 import zechs.zplex.models.tmdb.credits.Cast
-import zechs.zplex.utils.Constants.Companion.TMDB_IMAGE_PATH
+import zechs.zplex.utils.Constants.TMDB_IMAGE_PATH
 
 class CreditsAdapter : RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder>() {
 

@@ -10,10 +10,10 @@ import zechs.zplex.api.interfaces.DriveAPI
 import zechs.zplex.api.interfaces.TmdbAPI
 import zechs.zplex.api.interfaces.TvdbAPI
 import zechs.zplex.api.interfaces.WitchAPI
-import zechs.zplex.utils.Constants.Companion.GOOGLE_API_URL
-import zechs.zplex.utils.Constants.Companion.TMDB_API_URL
-import zechs.zplex.utils.Constants.Companion.TVDB_API_URL
-import zechs.zplex.utils.Constants.Companion.WITCH_API_URL
+import zechs.zplex.utils.Constants.GOOGLE_API_URL
+import zechs.zplex.utils.Constants.TMDB_API_URL
+import zechs.zplex.utils.Constants.TVDB_API_URL
+import zechs.zplex.utils.Constants.WITCH_API_URL
 
 class RetrofitInstance {
 

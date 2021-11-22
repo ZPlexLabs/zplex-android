@@ -10,10 +10,10 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.DataSource
@@ -27,11 +27,13 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerBinding
     private lateinit var fullscreenContent: StyledPlayerView
     private val hideHandler = Handler(Looper.getMainLooper())
-    private lateinit var exoPlayer: SimpleExoPlayer
+    private lateinit var exoPlayer: ExoPlayer
 
     private val hidePart2Runnable = Runnable {
         if (Build.VERSION.SDK_INT >= 30) {
-            fullscreenContent.windowInsetsController?.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+            fullscreenContent.windowInsetsController?.hide(
+                WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
+            )
         } else {
             fullscreenContent.systemUiVisibility =
                 View.SYSTEM_UI_FLAG_LOW_PROFILE or
@@ -75,7 +77,7 @@ class PlayerActivity : AppCompatActivity() {
             dataSource
         }
 
-        exoPlayer = SimpleExoPlayer.Builder(this)
+        exoPlayer = ExoPlayer.Builder(this)
             .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
             .build()
         playMedia()
@@ -159,7 +161,9 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun getStreamUrl(fileId: String?): Uri {
-        return Uri.parse("https://www.googleapis.com/drive/v3/files/${fileId}?supportsAllDrives=True&alt=media")
+        return Uri.parse(
+            "https://www.googleapis.com/drive/v3/files/${fileId}?supportsAllDrives=True&alt=media"
+        )
     }
 
     override fun onDestroy() {

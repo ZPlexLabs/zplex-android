@@ -14,7 +14,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import zechs.zplex.utils.Constants.Companion.ZPLEX
+import zechs.zplex.utils.Constants.ZPLEX
 import java.net.*
 import java.util.*
 

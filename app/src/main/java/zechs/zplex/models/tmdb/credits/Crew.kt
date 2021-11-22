@@ -1,5 +1,8 @@
 package zechs.zplex.models.tmdb.credits
 
+import androidx.annotation.Keep
+
+@Keep
 data class Crew(
     val adult: Boolean?,
     val credit_id: String?,

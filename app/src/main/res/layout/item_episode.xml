@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_centerInParent="true"
-    android:layout_marginStart="16dp"
-    android:layout_marginTop="8dp"
-    android:layout_marginEnd="16dp"
-    android:layout_marginBottom="8dp"
-    android:foreground="?android:attr/selectableItemBackground"
-    app:cardBackgroundColor="@android:color/transparent"
-    app:cardCornerRadius="8dp"
-    app:cardElevation="0dp"
-    app:cardMaxElevation="16dp">
+    android:padding="4dp">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/thumb_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="8dp"
+        app:cardMaxElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/thumb"
@@ -25,102 +27,45 @@
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
             android:contentDescription="@null"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/thumb" />
+    </com.google.android.material.card.MaterialCardView>
 
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@drawable/dark_faded_gradient"
-            app:layout_constraintBottom_toBottomOf="@+id/thumb"
-            app:layout_constraintEnd_toEndOf="@+id/thumb"
-            app:layout_constraintStart_toStartOf="@+id/thumb"
-            app:layout_constraintTop_toTopOf="@+id/thumb" />
+    <TextView
+        android:id="@+id/episode_count"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/open_sans"
+        android:maxLines="1"
+        android:textColor="@color/textColor_87"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/episode_title"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/episode_title"
+        app:layout_constraintTop_toBottomOf="@+id/thumb_card"
+        tools:ignore="TextContrastCheck"
+        tools:text="Episode 1" />
 
-        <TextView
-            android:id="@+id/episode_count"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/open_sans"
-            android:maxLines="1"
-            android:textColor="@color/textColor_87"
-            android:textSize="14sp"
-            app:layout_constraintBottom_toTopOf="@+id/episode_title"
-            app:layout_constraintEnd_toEndOf="@+id/episode_title"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/episode_title"
-            tools:ignore="TextContrastCheck"
-            tools:text="Episode 1" />
+    <TextView
+        android:id="@+id/episode_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/open_sans_semibold"
+        android:maxLines="2"
+        android:textColor="@color/textColor"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/thumb_card"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/thumb_card"
+        app:layout_constraintTop_toBottomOf="@+id/episode_count"
+        app:layout_constraintVertical_bias="0.0"
+        tools:text="The Storm Dragon, Veldora" />
 
-        <TextView
-            android:id="@+id/episode_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="16dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/open_sans_semibold"
-            android:maxLines="3"
-            android:textColor="@color/textColor"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/thumb"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/thumb"
-            tools:text="The Storm Dragon, Veldora" />
 
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/offline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
-            android:background="?selectableItemBackgroundBorderless"
-            android:contentDescription="@null"
-            android:minWidth="48dp"
-            android:minHeight="48dp"
-            android:padding="8dp"
-            android:src="@drawable/ic_download"
-            android:tint="@color/textColor_87"
-            app:layout_constraintEnd_toEndOf="@+id/thumb"
-            app:layout_constraintTop_toTopOf="@+id/thumb"
-            tools:ignore="SpeakableTextPresentCheck" />
+</androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:id="@+id/episode_size"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:elevation="8dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/open_sans"
-            android:maxLines="1"
-            android:padding="6dp"
-            android:textColor="@android:color/black"
-            android:textSize="12sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="TextContrastCheck"
-            tools:text="250 MB" />
-
-        <FrameLayout
-            android:id="@+id/episode_size_bg"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@drawable/round_bg"
-            android:elevation="0dp"
-            app:layout_constraintBottom_toBottomOf="@+id/episode_size"
-            app:layout_constraintEnd_toEndOf="@+id/episode_size"
-            app:layout_constraintStart_toStartOf="@+id/episode_size"
-            app:layout_constraintTop_toTopOf="@+id/episode_size" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-</com.google.android.material.card.MaterialCardView>

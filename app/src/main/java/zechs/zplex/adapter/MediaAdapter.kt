@@ -12,12 +12,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.item_episode.view.*
 import zechs.zplex.R
 import zechs.zplex.models.drive.File
-import zechs.zplex.utils.Constants.Companion.ZPLEX_IMAGE_REDIRECT
+import zechs.zplex.utils.Constants.ZPLEX_IMAGE_REDIRECT
 
 
 class MediaAdapter(
     private val tvdbId: Int,
-    private val loadBig: Boolean
 ) :
     RecyclerView.Adapter<MediaAdapter.MediaViewHolder>() {
 
@@ -38,7 +37,7 @@ class MediaAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaViewHolder {
         return MediaViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                if (loadBig) R.layout.item_episode else R.layout.episode_list,
+                R.layout.item_episode,
                 parent,
                 false
             )
@@ -76,16 +75,16 @@ class MediaAdapter(
             )
 
         holder.itemView.apply {
-            if (loadBig) {
-                if (bytes == "0") {
-                    episode_size.visibility = View.GONE
-                    episode_size_bg.visibility = View.GONE
-                } else {
-                    episode_size.visibility = View.VISIBLE
-                    episode_size_bg.visibility = View.VISIBLE
-                    episode_size.text = bytes
-                }
-            }
+//            if (loadBig) {
+//                if (bytes == "0") {
+//                    episode_size.visibility = View.GONE
+//                    episode_size_bg.visibility = View.GONE
+//                } else {
+//                    episode_size.visibility = View.VISIBLE
+//                    episode_size_bg.visibility = View.VISIBLE
+//                    episode_size.text = bytes
+//                }
+//            }
 
             episode_title.text = title.substring(0, title.length - 4)
             episode_count.text = count
@@ -98,7 +97,7 @@ class MediaAdapter(
                 .asBitmap()
                 .load(redirectImagePoster)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(R.color.cardColor)
+                .placeholder(R.drawable.thumb)
                 .into(thumb)
 
             setOnClickListener {

@@ -1,5 +1,8 @@
 package zechs.zplex.models.tvdb.actors
 
+import androidx.annotation.Keep
+
+@Keep
 data class Errors(
     val invalidFilters: List<String>?,
     val invalidLanguage: String?,

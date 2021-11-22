@@ -12,8 +12,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.logs_item.view.*
 import zechs.zplex.R
 import zechs.zplex.models.witch.ReleasesLog
-import zechs.zplex.utils.Constants.Companion.ZPLEX
-import zechs.zplex.utils.Constants.Companion.ZPLEX_IMAGE_REDIRECT
+import zechs.zplex.utils.Constants.ZPLEX
+import zechs.zplex.utils.Constants.ZPLEX_IMAGE_REDIRECT
 import zechs.zplex.utils.ConverterUtils
 import java.text.SimpleDateFormat
 import java.util.*
@@ -88,16 +88,20 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
         pstFormat.timeZone = TimeZone.getTimeZone("IST")
 
         val redirectImagePoster =
-            Uri.parse(
-                "${ZPLEX_IMAGE_REDIRECT}/tvdb/${tvdbId}/episodes/query?airedSeason=${
-                    episode.substring(
-                        1,
-                        3
-                    ).toInt()
-                }&airedEpisode=${
-                    episode.substring(4).toInt()
-                }"
-            )
+            try {
+                Uri.parse(
+                    "${ZPLEX_IMAGE_REDIRECT}/tvdb/${tvdbId}/episodes/query?airedSeason=${
+                        episode.substring(
+                            1,
+                            3
+                        ).toInt()
+                    }&airedEpisode=${
+                        episode.substring(4).toInt()
+                    }"
+                )
+            } catch (e: NumberFormatException) {
+                ""
+            }
 
         holder.itemView.apply {
             tv_show.text = show

@@ -1,337 +1,168 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_view"
+    android:id="@+id/root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/cardColor"
-    tools:context=".ui.fragment.AboutFragment">
+    android:animateLayoutChanges="true"
+    android:orientation="vertical"
+    tools:background="#2898f0">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/mb_save"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/transparent"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        android:padding="8dp"
+        app:icon="@drawable/ic_round_favorite_border_24"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconTint="@color/textColor_87"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/poster_card" />
 
-        <androidx.constraintlayout.widget.Group
-            android:id="@+id/series_info"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"
-            app:constraint_referenced_ids="tv_runtime,cg_genre,tv_plot, tv_title,network,rating,released,runtime"
-            tools:visibility="visible" />
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/poster_card"
+        android:layout_width="150dp"
+        android:layout_height="220dp"
+        android:layout_marginTop="16dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="4dp"
+        app:cardElevation="16dp"
+        app:cardMaxElevation="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <FrameLayout
-            android:id="@+id/frameLayout"
-            android:layout_width="match_parent"
-            android:layout_height="250dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <ImageView
-                android:id="@+id/iv_fanart"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:adjustViewBounds="true"
-                android:contentDescription="@null"
-                android:scaleType="centerCrop"
-                android:transitionName="poster"
-                tools:ignore="ImageContrastCheck"
-                tools:srcCompat="@drawable/fanart" />
-
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="bottom"
-                android:background="@drawable/dark_faded_gradient" />
-        </FrameLayout>
-
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/poster_card"
+        <ImageView
+            android:id="@+id/iv_poster"
             android:layout_width="150dp"
             android:layout_height="220dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="8dp"
-            app:cardBackgroundColor="@android:color/transparent"
-            app:cardCornerRadius="4dp"
-            app:layout_constraintBottom_toBottomOf="@+id/frameLayout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.025"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/frameLayout">
-
-            <FrameLayout
-                android:id="@+id/dark_tint"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:alpha="0.25"
-                android:background="@color/colorPrimary"
-                android:elevation="1dp"
-                android:visibility="invisible"
-                app:layout_constraintBottom_toBottomOf="@+id/thumb"
-                app:layout_constraintEnd_toEndOf="@+id/thumb"
-                app:layout_constraintStart_toStartOf="@+id/thumb"
-                app:layout_constraintTop_toTopOf="@+id/thumb" />
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/dark_play"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:alpha=".75"
-                android:contentDescription="@null"
-                android:elevation="16dp"
-                android:tint="@color/cardColor"
-                android:visibility="invisible"
-                app:backgroundTint="@color/colorAccent"
-                app:borderWidth="0dp"
-                app:layout_constraintBottom_toBottomOf="@+id/thumb"
-                app:layout_constraintEnd_toEndOf="@+id/thumb"
-                app:layout_constraintStart_toStartOf="@+id/thumb"
-                app:layout_constraintTop_toTopOf="@+id/thumb"
-                app:srcCompat="@drawable/ic_baseline_play_arrow_24"
-                tools:backgroundTint="#2898f0" />
-
-            <ImageView
-                android:id="@+id/iv_poster"
-                android:layout_width="150dp"
-                android:layout_height="220dp"
-                android:layout_gravity="center"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:adjustViewBounds="true"
-                android:contentDescription="@null"
-                android:elevation="0dp"
-                android:scaleType="centerCrop"
-                tools:ignore="ImageContrastCheck"
-                tools:srcCompat="@drawable/poster" />
-        </com.google.android.material.card.MaterialCardView>
-
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/open_sans_semibold"
-            android:textColor="@color/textColor"
-            android:textSize="21sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="@+id/poster_card"
-            app:layout_constraintTop_toBottomOf="@+id/poster_card"
-            tools:text="That Time I Got Reincarnated as a Slime" />
-
-        <TextView
-            android:id="@+id/tv_network"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="2dp"
-            android:fontFamily="@font/open_sans"
-            android:text="@string/network"
-            android:textColor="@color/textColor_74"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/tv_rating"
-            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/btn_my_list" />
-
-        <TextView
-            android:id="@+id/network"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginBottom="2dp"
-            android:fontFamily="@font/open_sans_semibold"
-            android:maxLines="1"
-            android:textAlignment="textEnd"
-            android:textColor="@color/colorAccent"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/rating"
-            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/tv_runtime"
-            tools:text="Tokyo MX"
-            tools:textColor="#2898f0" />
-
-        <TextView
-            android:id="@+id/tv_rating"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="2dp"
-            android:fontFamily="@font/open_sans"
-            android:text="@string/rating"
-            android:textColor="@color/textColor_74"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/tv_released"
-            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/btn_my_list" />
-
-        <TextView
-            android:id="@+id/rating"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginBottom="2dp"
-            android:fontFamily="@font/open_sans_semibold"
-            android:maxLines="1"
-            android:textAlignment="textEnd"
-            android:textColor="@color/colorAccent"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/released"
-            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/tv_runtime"
-            tools:text="TV-MA"
-            tools:textColor="#2898f0" />
-
-        <TextView
-            android:id="@+id/tv_released"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="2dp"
-            android:fontFamily="@font/open_sans"
-            android:text="@string/released"
-            android:textColor="@color/textColor_74"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/tv_runtime"
-            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/btn_my_list" />
-
-        <TextView
-            android:id="@+id/released"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginBottom="2dp"
-            android:fontFamily="@font/open_sans_semibold"
-            android:maxLines="1"
-            android:textAlignment="textEnd"
-            android:textColor="@color/colorAccent"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/runtime"
-            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/tv_runtime"
-            tools:text="2018"
-            tools:textColor="#2898f0" />
-
-        <TextView
-            android:id="@+id/tv_runtime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="@font/open_sans"
-            android:text="@string/runtime"
-            android:textColor="@color/textColor_74"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/btn_my_list"
-            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="@+id/btn_my_list" />
-
-        <TextView
-            android:id="@+id/runtime"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginBottom="8dp"
-            android:fontFamily="@font/open_sans_semibold"
-            android:maxLines="1"
-            android:textAlignment="textEnd"
-            android:textColor="@color/colorAccent"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toTopOf="@+id/btn_my_list"
-            app:layout_constraintEnd_toEndOf="@+id/btn_my_list"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toEndOf="@+id/tv_runtime"
-            tools:text="25 min"
-            tools:textColor="#2898f0" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_my_list"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
             android:elevation="0dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:minHeight="0dp"
-            android:padding="5dp"
-            android:text="@string/save"
-            android:textColor="@color/colorAccent"
-            app:cornerRadius="24dp"
-            app:elevation="0dp"
-            app:icon="@drawable/ic_baseline_playlist_add_24"
-            app:iconGravity="textStart"
-            app:iconTint="@color/colorAccent"
-            app:layout_constraintBottom_toBottomOf="@+id/poster_card"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/poster_card"
-            app:strokeColor="@color/colorPrimaryDark"
-            tools:iconTint="#2898f0"
-            tools:ignore="TouchTargetSizeCheck"
-            tools:strokeColor="@color/colorPrimaryDark"
-            tools:textColor="#2898f0" />
+            android:scaleType="centerCrop"
+            tools:srcCompat="@drawable/poster" />
 
-        <TextView
-            android:id="@+id/tv_plot"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:fontFamily="@font/open_sans"
-            android:textColor="@color/textColor_87"
-            android:textSize="14sp"
-            app:layout_constraintEnd_toEndOf="@+id/tv_title"
-            app:layout_constraintStart_toStartOf="@+id/poster_card"
-            app:layout_constraintTop_toBottomOf="@+id/tv_title"
-            tools:text="37-year-old corporate worker Mikami Satoru is stabbed by a random killer, and is reborn to an alternate world. But he turns out to be reborn a slime! Thrown into this new world with the name Rimuru Tempest, he begins his quest to create a world that’s welcoming to all races. Broken free from ordinary, stale past life, his fresh adventure in a fantasy world as a slime monster with unique abilities begins." />
+    </com.google.android.material.card.MaterialCardView>
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/cg_genre"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
-            app:layout_constraintStart_toStartOf="@+id/tv_plot"
-            app:layout_constraintTop_toBottomOf="@+id/tv_plot"
-            app:selectionRequired="false"
-            app:singleLine="false"
-            app:singleSelection="false" />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_play"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/round_bg"
+        android:clickable="true"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="8dp"
+        android:text="@string/play"
+        android:textColor="@color/textColor_87"
+        app:backgroundTint="#80000000"
+        app:icon="@drawable/ic_round_play_arrow_24"
+        app:iconTint="@color/textColor_87"
+        app:layout_constraintEnd_toStartOf="@+id/btn_download"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/poster_card" />
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabs"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:background="@android:color/transparent"
-            app:layout_constraintEnd_toEndOf="@+id/tv_plot"
-            app:layout_constraintStart_toStartOf="@+id/poster_card"
-            app:layout_constraintTop_toBottomOf="@+id/cg_genre"
-            app:tabGravity="start"
-            app:tabIndicatorColor="@color/colorAccent"
-            app:tabIndicatorFullWidth="false"
-            app:tabIndicatorHeight="4dp"
-            app:tabMode="scrollable"
-            app:tabSelectedTextColor="@color/colorAccent"
-            app:tabTextAppearance="@style/seasonsTabTextAppearance"
-            app:tabTextColor="@color/textColor_54"
-            tools:tabIndicatorColor="#2898f0"
-            tools:tabSelectedTextColor="#2898f0" />
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/move_views"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        app:constraint_referenced_ids="btn_play,btn_download"
+        tools:visibility="visible" />
 
-        <androidx.viewpager2.widget.ViewPager2
-            android:id="@+id/viewPager"
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_download"
+        style="@style/Widget.MaterialComponents.Button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/round_bg"
+        android:clickable="true"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        android:paddingStart="0dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="0dp"
+        android:paddingBottom="12dp"
+        app:backgroundTint="#66000000"
+        app:icon="@drawable/ic_download"
+        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        app:iconTint="@color/textColor_87"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_play"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/btn_play"
+        app:layout_constraintTop_toTopOf="@+id/btn_play" />
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/transparent"
+        android:elevation="0dp"
+        app:elevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_play">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            style="@style/Widget.MaterialComponents.Toolbar.Primary"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tabs" />
+            android:layout_height="?actionBarSize"
+            android:background="@android:color/transparent"
+            android:elevation="0dp"
+            app:contentInsetEnd="0dp"
+            app:contentInsetStart="0dp"
+            app:elevation="0dp">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabs"
+                style="@style/aboutTabAppearance"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:background="@drawable/rounded"
+                android:backgroundTint="#80000000"
+                app:tabIndicatorColor="@color/textColor"
+                app:tabIndicatorFullWidth="false"
+                app:tabIndicatorHeight="4dp"
+                app:tabSelectedTextColor="@color/textColor"
+                app:tabTextColor="@color/textColor_54">
 
-</androidx.core.widget.NestedScrollView>
+            </com.google.android.material.tabs.TabLayout>
+
+        </com.google.android.material.appbar.MaterialToolbar>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@android:color/transparent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout2" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

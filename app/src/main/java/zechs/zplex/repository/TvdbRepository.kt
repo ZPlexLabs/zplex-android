@@ -11,4 +11,9 @@ class TvdbRepository {
     suspend fun getActors(
         series_id: Int
     ) = RetrofitInstance.api_tvdb.getActors(series_id)
+
+    suspend fun getEpisodes(
+        series_id: Int
+    ) = RetrofitInstance.api_tvdb.getEpisodes(series_id)
+
 }

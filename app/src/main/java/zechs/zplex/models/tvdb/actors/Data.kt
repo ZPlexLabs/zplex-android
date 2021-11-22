@@ -1,5 +1,8 @@
 package zechs.zplex.models.tvdb.actors
 
+import androidx.annotation.Keep
+
+@Keep
 data class Data(
     val id: Int?,
     val image: String?,
