@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_centerInParent="true"
+    android:animateLayoutChanges="true"
     android:padding="4dp">
 
     <com.google.android.material.card.MaterialCardView
@@ -27,7 +28,7 @@
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
             android:contentDescription="@null"
-            tools:src="@drawable/thumb" />
+            tools:src="@drawable/placeholder_shape" />
     </com.google.android.material.card.MaterialCardView>
 
     <TextView

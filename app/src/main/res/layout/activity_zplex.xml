@@ -7,41 +7,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.activity.ZPlexActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@android:color/transparent"
-        android:elevation="0dp"
-        app:elevation="0dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:backgroundTint="@color/colorPrimaryDark"
-            android:elevation="0dp"
-            android:padding="4dp"
-            android:theme="@style/MenuTheme"
-            app:elevation="0dp"
-            app:title="@string/home"
-            app:titleCentered="true"
-            app:titleTextAppearance="@style/titleTextAppearance"
-            app:titleTextColor="@color/textColor" />
-
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!--    <View-->
-    <!--        android:id="@+id/view1"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="1dp"-->
-    <!--        android:layout_gravity="center|bottom"-->
-    <!--        android:background="@color/gray"-->
-    <!--        app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />-->
-
     <FrameLayout
         android:id="@+id/zplex_frame"
         android:layout_width="match_parent"
@@ -49,7 +14,7 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/mainNavHostFragment"
@@ -58,17 +23,7 @@
             android:layout_height="match_parent"
             app:defaultNavHost="true"
             app:navGraph="@navigation/zplex_graph" />
-
     </FrameLayout>
-
-    <!--    <View-->
-    <!--        android:id="@+id/view2"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="1dp"-->
-    <!--        android:background="@color/gray"-->
-    <!--        app:layout_constraintBottom_toTopOf="@+id/bottomNavigationView"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintStart_toStartOf="parent" />-->
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"

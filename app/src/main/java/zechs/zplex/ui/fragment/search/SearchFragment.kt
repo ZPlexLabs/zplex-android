@@ -12,6 +12,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -40,6 +41,12 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     private var text = ""
     private var isLoading = true
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -136,13 +143,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 val name = it.name.split(" - ").toTypedArray()[1]
                 val type = it.name.split(" - ").toTypedArray()[2]
 
-                val action = SearchFragmentDirections.actionSearchFragmentToAboutFragment(
-                    it,
-                    seriesId,
-                    type,
-                    name,
-                )
-
                 argsModel.setArg(
                     Args(
                         file = it,
@@ -152,8 +152,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     )
                 )
 
-                findNavController().navigate(action)
-
+                findNavController().navigate(R.id.action_searchFragment_to_aboutFragment)
             } catch (e: NumberFormatException) {
                 Toast.makeText(context, "TVDB id not found", Toast.LENGTH_LONG).show()
             }

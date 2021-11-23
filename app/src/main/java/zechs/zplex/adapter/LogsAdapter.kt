@@ -111,7 +111,7 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
             }
             Glide.with(this)
                 .load(redirectImagePoster)
-                .placeholder(R.color.cardColor)
+                .placeholder(R.drawable.placeholder_shape)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(iv_thumb)
 

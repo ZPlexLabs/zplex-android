@@ -23,7 +23,12 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
+import com.google.android.material.transition.MaterialSharedAxis
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.FragmentAboutBinding
 import zechs.zplex.models.drive.File
@@ -46,53 +51,73 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
     private lateinit var aboutViewModel: AboutViewModel
     private val argsModel: ArgsViewModel by activityViewModels()
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true).apply {
+            duration = 500L
+        }
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+    }
+
+
+    @DelicateCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         _binding = FragmentAboutBinding.bind(view)
 
         aboutViewModel = (activity as ZPlexActivity).aboutViewModel
 
-//        GlobalScope.launch {
-//            val isSaved = aboutViewModel.getFile(file.id)
-//
-//            (activity as ZPlexActivity).runOnUiThread {
-//                if (isSaved) {
-//                    binding.mbSave.apply {
-//                        text = context.getString(R.string.saved)
-//                        icon = ContextCompat.getDrawable(
-//                            context,
-//                            R.drawable.ic_round_favorite_24
-//                        )
-//                        isClickable = false
-//                    }
-//                } else {
-//                    binding.mbSave.apply {
-//                        text = context.getString(R.string.save)
-//                        icon = ContextCompat.getDrawable(
-//                            context,
-//                            R.drawable.ic_round_favorite_border_24
-//                        )
-//                        setOnClickListener {
-//                            fileViewModel.saveFile(file)
-//                            Snackbar.make(
-//                                binding.root,
-//                                "$name saved successfully",
-//                                Snackbar.LENGTH_SHORT
-//                            ).show()
-//                            text = context.getString(R.string.saved)
-//                            icon = ContextCompat.getDrawable(
-//                                context,
-//                                R.drawable.ic_round_favorite_24
-//                            )
-//                            isClickable = false
-//                        }
-//                    }
-//                }
-//            }
-//        }
-
         argsModel.args.observe(viewLifecycleOwner, { arg ->
+            GlobalScope.launch {
+                val isSaved = aboutViewModel.getShow(arg.file.id)
+                if (isSaved) {
+                    binding.mbSave.apply {
+                        text = context.getString(R.string.saved)
+                        icon = ContextCompat.getDrawable(
+                            context,
+                            R.drawable.ic_round_favorite_24
+                        )
+                        setOnClickListener {
+                            aboutViewModel.deleteShow(arg.file)
+                            Snackbar.make(
+                                binding.root,
+                                "${arg.name} removed successfully",
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                            text = context.getString(R.string.save)
+                            icon = ContextCompat.getDrawable(
+                                context,
+                                R.drawable.ic_round_favorite_border_24
+                            )
+                            isClickable = false
+                        }
+                    }
+                } else {
+                    binding.mbSave.apply {
+                        text = context.getString(R.string.save)
+                        icon = ContextCompat.getDrawable(
+                            context,
+                            R.drawable.ic_round_favorite_border_24
+                        )
+                        setOnClickListener {
+                            aboutViewModel.saveShow(arg.file)
+                            Snackbar.make(
+                                binding.root,
+                                "${arg.name} saved successfully",
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                            text = context.getString(R.string.saved)
+                            icon = ContextCompat.getDrawable(
+                                context,
+                                R.drawable.ic_round_favorite_24
+                            )
+                            isClickable = false
+                        }
+                    }
+                }
+            }
+
             val isTV = arg.type == "TV"
             Log.d("AboutFragment", "isTV = $isTV")
 

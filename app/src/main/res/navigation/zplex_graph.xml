@@ -37,20 +37,6 @@
         android:id="@+id/aboutFragment"
         android:name="zechs.zplex.ui.fragment.about.AboutFragment"
         android:label="About"
-        tools:layout="@layout/fragment_about">
-        <argument
-            android:name="file"
-            app:argType="zechs.zplex.models.drive.File"
-            app:nullable="false" />
-        <argument
-            android:name="series_id"
-            app:argType="integer" />
-        <argument
-            android:name="type"
-            app:argType="string" />
-        <argument
-            android:name="name"
-            app:argType="string" />
-    </fragment>
+        tools:layout="@layout/fragment_about"></fragment>
 
 </navigation>

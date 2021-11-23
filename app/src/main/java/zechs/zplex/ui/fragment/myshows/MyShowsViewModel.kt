@@ -21,6 +21,6 @@ class MyShowsViewModel(
 
     fun getSavedShows() = filesRepository.getSavedFiles()
 
-    fun getShow(id: String) = filesRepository.getFile(id)
+    suspend fun getShow(id: String) = filesRepository.getFile(id)
 
 }

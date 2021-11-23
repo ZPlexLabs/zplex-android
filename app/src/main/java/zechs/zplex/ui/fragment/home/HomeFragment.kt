@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import com.google.android.material.transition.MaterialFadeThrough
+import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.adapter.FilesAdapter
 import zechs.zplex.adapter.LogsAdapter
@@ -44,6 +45,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val thisTAG = "HomeFragment"
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true).apply {
+            duration = 500L
+        }
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -195,13 +204,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val name = it.name.split(" - ").toTypedArray()[1]
             val type = it.name.split(" - ").toTypedArray()[2]
 
-            val action = HomeFragmentDirections.actionHomeFragmentToAboutFragment(
-                it,
-                seriesId,
-                type,
-                name,
-            )
-
             argsModel.setArg(
                 Args(
                     file = it,
@@ -211,7 +213,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 )
             )
 
-            findNavController().navigate(action)
+            findNavController().navigate(R.id.action_homeFragment_to_aboutFragment)
         } catch (e: NumberFormatException) {
             Toast.makeText(context, "TVDB id not found", LENGTH_LONG).show()
         }

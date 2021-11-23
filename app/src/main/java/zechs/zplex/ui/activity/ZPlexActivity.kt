@@ -6,11 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import androidx.transition.TransitionManager
-import com.google.android.material.transition.MaterialSharedAxis
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_zplex.*
@@ -73,72 +69,21 @@ class ZPlexActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_zplex)
 
-
-        val navHostFragment = supportFragmentManager.findFragmentById(
-            R.id.mainNavHostFragment
-        ) as NavHostFragment
-
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.mainNavHostFragment) as NavHostFragment
         val navController = navHostFragment.navController
-
-        val appBarConfiguration = AppBarConfiguration(
-            setOf(R.id.homeFragment, R.id.searchFragment, R.id.myShowsFragment)
-        )
-
-        setSupportActionBar(toolbar)
-
-        setupActionBarWithNavController(navController, appBarConfiguration)
         bottomNavigationView.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.aboutFragment -> {
-                    toolbar.title = ""
-                    val transition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
-//                    transition.duration = 500L
-                    transition.excludeTarget(android.R.id.statusBarBackground, true)
-                    transition.excludeTarget(android.R.id.navigationBarBackground, true)
-                    TransitionManager.beginDelayedTransition(root, transition)
                     bottomNavigationView.visibility = View.GONE
-//                    supportActionBar?.setHomeAsUpIndicator(R.drawable.ic_round_keyboard_backspace_24)
-                    appBarLayout.visibility = View.GONE
-//                    view1.visibility = View.GONE
-//                    view2.visibility = View.GONE
-//                    window.navigationBarColor = ContextCompat.getColor(this, R.color.cardColor)
-//                    window.statusBarColor = ContextCompat.getColor(this, R.color.cardColor)
                 }
                 else -> {
                     window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
                     window.navigationBarColor =
                         ContextCompat.getColor(this, R.color.colorPrimaryDark)
-                    val transition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
-                    transition.duration = 500L
-                    transition.excludeTarget(toolbar, true)
-                    transition.excludeTarget(bottomNavigationView, true)
-                    transition.excludeTarget(android.R.id.statusBarBackground, true)
-                    transition.excludeTarget(android.R.id.navigationBarBackground, true)
-                    TransitionManager.beginDelayedTransition(root, transition)
                     bottomNavigationView.visibility = View.VISIBLE
-                    appBarLayout.visibility = View.VISIBLE
-//                    view1.visibility = View.VISIBLE
-//                    view2.visibility = View.VISIBLE
-//                    if (destination.id == R.id.searchFragment) {
-//                        appBarLayout.visibility = View.GONE
-//                    } else {
-//                        appBarLayout.visibility = View.VISIBLE
-//                    }
-                }
-            }
-
-            when (destination.id) {
-                R.id.homeFragment -> {
-                    toolbar.setTitle(R.string.home)
-                }
-                R.id.searchFragment -> {
-//                    view1.visibility = View.GONE
-                    toolbar.setTitle(R.string.search)
-                }
-                R.id.myShowsFragment -> {
-                    toolbar.setTitle(R.string.my_shows)
                 }
             }
 

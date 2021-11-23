@@ -50,7 +50,7 @@ class ActorsAdapter : RecyclerView.Adapter<ActorsAdapter.ActorsViewHolder>() {
             if (data.image != null) {
                 Glide.with(this)
                     .load("${TVDB_IMAGE_PATH}${data.image}")
-                    .placeholder(R.color.cardColor)
+                    .placeholder(R.drawable.placeholder_shape)
                     .into(actor_image)
             }
             actor_name.text = data.name

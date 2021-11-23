@@ -82,11 +82,10 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
     }
 
     private fun tmdbSuccess(it: MoviesResponse) {
-        val transition = MaterialFade()
-        transition.excludeTarget(android.R.id.statusBarBackground, true)
-        transition.excludeTarget(android.R.id.navigationBarBackground, true)
-        TransitionManager.beginDelayedTransition(binding.root, transition)
-
+        val materialFade = MaterialFade().apply {
+            duration = 150L
+        }
+        TransitionManager.beginDelayedTransition(binding.root, materialFade)
 
         val pairsArray: MutableList<Pairs> = mutableListOf()
 
@@ -149,9 +148,10 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
                     val trimPlot = plot.substring(0, 175) + "..."
                     text = trimPlot
                     setOnClickListener {
-                        TransitionManager.beginDelayedTransition(
-                            binding.root
-                        )
+                        val materialFade = MaterialFade().apply {
+                            duration = 150L
+                        }
+                        TransitionManager.beginDelayedTransition(binding.root, materialFade)
                         text = if (text.length > 178) trimPlot else plot
                     }
                 } else {
@@ -164,11 +164,10 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
 
 
     private fun tvdbSuccess(seriesResponse: SeriesResponse) {
-
-        val transition = MaterialFade()
-        transition.excludeTarget(android.R.id.statusBarBackground, true)
-        transition.excludeTarget(android.R.id.navigationBarBackground, true)
-        TransitionManager.beginDelayedTransition(binding.root, transition)
+        val materialFade = MaterialFade().apply {
+            duration = 150L
+        }
+        TransitionManager.beginDelayedTransition(binding.root, materialFade)
 
         seriesResponse.data?.let {
 
@@ -212,9 +211,10 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
                         val trimPlot = plot.substring(0, 225) + "..."
                         text = trimPlot
                         setOnClickListener {
-                            TransitionManager.beginDelayedTransition(
-                                binding.root
-                            )
+                            val materialFade = MaterialFade().apply {
+                                duration = 150L
+                            }
+                            TransitionManager.beginDelayedTransition(binding.root, materialFade)
                             text =
                                 if (text.length > 228) trimPlot else plot
                         }

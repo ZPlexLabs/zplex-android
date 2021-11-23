@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.ThisApp
 import zechs.zplex.models.drive.DriveResponse
+import zechs.zplex.models.drive.File
 import zechs.zplex.models.tmdb.credits.CreditsResponse
 import zechs.zplex.models.tmdb.movies.MoviesResponse
 import zechs.zplex.models.tvdb.actors.ActorsResponse
@@ -29,7 +30,7 @@ class AboutViewModel(
     app: Application,
     private val filesRepository: FilesRepository,
     private val tvdbRepository: TvdbRepository,
-    private val tmdbRepository: TmdbRepository,
+    private val tmdbRepository: TmdbRepository
 ) : AndroidViewModel(app) {
 
     // TVDB
@@ -46,6 +47,17 @@ class AboutViewModel(
         SessionManager(getApplication<Application>().applicationContext).fetchAuthToken()
     private val pageSize = 1000
     private val orderBy = "name"
+
+
+    fun saveShow(file: File) = viewModelScope.launch {
+        filesRepository.upsert(file)
+    }
+
+    fun deleteShow(file: File) = viewModelScope.launch {
+        filesRepository.deleteFile(file)
+    }
+
+    suspend fun getShow(id: String) = filesRepository.getFile(id)
 
 
     fun getMediaFiles(driveQuery: String) =

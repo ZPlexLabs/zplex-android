@@ -17,4 +17,6 @@
     <string name="genres">Genres</string>
     <string name="miscellaneous">Miscellaneous</string>
     <string name="something_went_wrong">Something went wrong</string>
+    <string name="saved">Saved</string>
+    <string name="save">Save</string>
 </resources>

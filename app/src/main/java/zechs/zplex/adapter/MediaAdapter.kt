@@ -75,16 +75,6 @@ class MediaAdapter(
             )
 
         holder.itemView.apply {
-//            if (loadBig) {
-//                if (bytes == "0") {
-//                    episode_size.visibility = View.GONE
-//                    episode_size_bg.visibility = View.GONE
-//                } else {
-//                    episode_size.visibility = View.VISIBLE
-//                    episode_size_bg.visibility = View.VISIBLE
-//                    episode_size.text = bytes
-//                }
-//            }
 
             episode_title.text = title.substring(0, title.length - 4)
             episode_count.text = count
@@ -97,7 +87,7 @@ class MediaAdapter(
                 .asBitmap()
                 .load(redirectImagePoster)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(R.drawable.thumb)
+                .placeholder(R.drawable.placeholder_shape)
                 .into(thumb)
 
             setOnClickListener {

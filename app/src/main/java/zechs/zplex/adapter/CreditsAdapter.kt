@@ -50,7 +50,7 @@ class CreditsAdapter : RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder>() 
             if (data.profile_path != null) {
                 Glide.with(this)
                     .load("${TMDB_IMAGE_PATH}${data.profile_path}")
-                    .placeholder(R.color.cardColor)
+                    .placeholder(R.drawable.placeholder_shape)
                     .into(actor_image)
             }
             actor_name.text = data.name

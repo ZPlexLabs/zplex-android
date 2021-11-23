@@ -45,6 +45,7 @@
         <entry key="app/src/main/res/drawable/ic_play_svg.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/icon_color.xml" value="0.32135416666666666" />
         <entry key="app/src/main/res/drawable/icon_size.xml" value="0.32135416666666666" />
+        <entry key="app/src/main/res/drawable/placeholder_shape.xml" value="0.3" />
         <entry key="app/src/main/res/drawable/popup_menu_bg.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/round_bg.xml" value="0.3020833333333333" />
         <entry key="app/src/main/res/drawable/rounded.xml" value="0.3046875" />
@@ -57,7 +58,7 @@
         <entry key="app/src/main/res/layout/activity_exo_player.xml" value="0.3020833333333333" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/activity_player.xml" value="0.3203125" />
-        <entry key="app/src/main/res/layout/activity_zplex.xml" value="0.8084210526315789" />
+        <entry key="app/src/main/res/layout/activity_zplex.xml" value="0.264" />
         <entry key="app/src/main/res/layout/episode_list.xml" value="0.8" />
         <entry key="app/src/main/res/layout/error_layout.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/exo_playback_control_view.xml" value="0.2490740740740741" />
