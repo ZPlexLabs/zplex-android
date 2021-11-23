@@ -4,17 +4,15 @@ A Media center app based on modern Android application tech-stacks and MVVM arch
 <br>
 This project is for focusing especially on the Retrofit, MVVM Architectural Design and the use of Room Database.
 </p>
-<br>
 
-<p align="center">
-Preview
------------
+## Preview
+
 Home|Search|My Shows
 :-----:|:--------------:|:-----------:|
 ![Home](/images/home.png)|![Search](/images/search.png)|![My Shows](/images/my_shows.png)
 About|Episodes|Casts
 ![About](/images/about.png)|![Episodes](/images/episodes.png)|![Casts](/images/casts.png)
-</p>
+
 
 ## Download
 
@@ -44,4 +42,4 @@ Go to the [Releases](https://github.com/itsZECHS/ZPlex/releases) to download the
 ## MAD Score
 
 <img src="/images/summary.png"/>
-<img src="/images/jetpack.png"/>
+<img src="/images/kotlin.png"/>
