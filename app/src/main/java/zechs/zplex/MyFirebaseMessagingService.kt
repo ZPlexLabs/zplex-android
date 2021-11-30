@@ -141,12 +141,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
 
                 val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-                val channel =
-                    NotificationChannel(
-                        channelId,
-                        channelId,
-                        NotificationManager.IMPORTANCE_DEFAULT
-                    )
+                val channel = NotificationChannel(
+                    channelId,
+                    channelId,
+                    NotificationManager.IMPORTANCE_DEFAULT
+                )
+
                 manager.createNotificationChannel(channel)
                 val notify = Notification()
                 notify.flags = Notification.FLAG_ONLY_ALERT_ONCE

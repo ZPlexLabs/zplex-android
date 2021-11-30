@@ -229,7 +229,7 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                     .maximumColorCount(36)
                     .generate { p: Palette? ->
                         if (p != null) {
-                            p.lightVibrantSwatch?.rgb?.let {
+                            p.dominantSwatch?.rgb?.let {
                                 val accent = Color.argb(
                                     90,
                                     Color.red(it),
@@ -237,8 +237,10 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                                     Color.blue(it)
                                 )
                                 binding.rootView.setBackgroundColor(accent)
-                                activity?.window?.statusBarColor = accent
-                                activity?.window?.navigationBarColor = Color.parseColor("#00000000")
+                                activity?.window?.apply {
+                                    statusBarColor = accent
+                                    navigationBarColor = Color.parseColor("#00000000")
+                                }
                             }
                         }
                     }
@@ -275,7 +277,8 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
 
     private fun playVLC(it: File, name: String) {
 
-        val playUrl = "${ZPLEX}$name"
+        val playUrl = "${ZPLEX}${it.name}"
+
         try {
             val episodeURL = URL(playUrl)
             val episodeURI = URI(
@@ -298,10 +301,11 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                 Uri.parse(episodeURI),
                 "video/*"
             )
-            vlcIntent.putExtra("title", it.name.dropLast(4))
+            vlcIntent.putExtra("title", name)
             vlcIntent.flags =
                 FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
             requireContext().startActivity(vlcIntent)
+            Log.d("playUrl", episodeURI)
         } catch (notFoundException: ActivityNotFoundException) {
             notFoundException.printStackTrace()
             Toast.makeText(

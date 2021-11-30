@@ -13,7 +13,6 @@ Home|Search|My Shows
 About|Episodes|Casts
 ![About](/images/about.png)|![Episodes](/images/episodes.png)|![Casts](/images/casts.png)
 
-
 ## Download
 
 Go to the [Releases](https://github.com/itsZECHS/ZPlex/releases) to download the latest APK.

@@ -29,7 +29,10 @@
             android:theme="@style/AppTheme.Fullscreen" />
         <activity
             android:name=".ui.activity.ZPlexActivity"
-            android:exported="true">
+            android:configChanges="orientation"
+            android:exported="true"
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
