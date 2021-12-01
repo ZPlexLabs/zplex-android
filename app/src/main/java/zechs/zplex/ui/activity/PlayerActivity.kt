@@ -10,10 +10,7 @@ import android.view.View
 import android.view.WindowInsets
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.PlaybackException
-import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.DataSource
@@ -35,14 +32,14 @@ class PlayerActivity : AppCompatActivity() {
                 WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
             )
         } else {
-            fullscreenContent.systemUiVisibility =
-                View.SYSTEM_UI_FLAG_LOW_PROFILE or
-                        View.SYSTEM_UI_FLAG_FULLSCREEN or
-                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
-                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
-                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+            fullscreenContent.systemUiVisibility = View.SYSTEM_UI_FLAG_LOW_PROFILE or
+                    View.SYSTEM_UI_FLAG_FULLSCREEN or
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or
+                    View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION or
+                    View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
         }
+
     }
     private val showPart2Runnable = Runnable {
         supportActionBar?.show()
@@ -54,7 +51,6 @@ class PlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -65,8 +61,9 @@ class PlayerActivity : AppCompatActivity() {
         fullscreenContent = binding.playerView
         fullscreenContent.setOnClickListener { toggle() }
 
-        val httpDataSourceFactory =
-            DefaultHttpDataSource.Factory().setAllowCrossProtocolRedirects(true)
+        val httpDataSourceFactory = DefaultHttpDataSource
+            .Factory()
+            .setAllowCrossProtocolRedirects(true)
 
         val dataSourceFactory = DataSource.Factory {
             val dataSource = httpDataSourceFactory.createDataSource()
@@ -77,7 +74,10 @@ class PlayerActivity : AppCompatActivity() {
             dataSource
         }
 
-        exoPlayer = ExoPlayer.Builder(this)
+        val rendererFactory = DefaultRenderersFactory(this)
+            .setExtensionRendererMode(DefaultRenderersFactory.EXTENSION_RENDERER_MODE_ON);
+
+        exoPlayer = ExoPlayer.Builder(this, rendererFactory)
             .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
             .build()
         playMedia()
@@ -89,11 +89,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun toggle() {
-        if (isFullscreen) {
-            hide()
-        } else {
-            show()
-        }
+        if (isFullscreen) hide() else show()
     }
 
     private fun hide() {
@@ -106,11 +102,14 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun show() {
         if (Build.VERSION.SDK_INT >= 30) {
-            fullscreenContent.windowInsetsController?.show(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+            fullscreenContent.windowInsetsController?.show(
+                WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars()
+            )
         } else {
             fullscreenContent.systemUiVisibility =
                 View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         }
+
         isFullscreen = true
 
         hideHandler.removeCallbacks(hidePart2Runnable)

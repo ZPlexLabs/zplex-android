@@ -39,8 +39,7 @@ class CreditsAdapter : RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder>() 
     }
 
     override fun getItemCount(): Int {
-        val limit = 20
-        return if (differ.currentList.size > limit) limit else differ.currentList.size
+        return differ.currentList.size
     }
 
     override fun onBindViewHolder(holder: CreditsViewHolder, position: Int) {

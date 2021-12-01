@@ -195,14 +195,22 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                 )
             }
 
-            context?.let {
-                Glide.with(it)
+            context?.let { context ->
+                Glide.with(context)
                     .asBitmap().format(DecodeFormat.PREFER_ARGB_8888)
                     .load(redirectImagePoster)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .fitCenter()
                     .listener(this@AboutFragment.imageRequestListener)
                     .into(binding.ivPoster)
+
+                binding.btnDownload.setOnClickListener {
+                    Toast.makeText(
+                        context,
+                        "This is one of those unimplemented features",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         })
     }

@@ -55,6 +55,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         searchViewModel = (activity as ZPlexActivity).searchViewModel
         setupRecyclerView()
 
+        binding.searchBox.editText?.text = Editable.Factory.getInstance().newEditable(text)
+
         var job: Job? = null
         binding.searchBox.apply {
             editText?.text = Editable.Factory.getInstance().newEditable(text)
@@ -76,6 +78,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 is Resource.Success -> {
                     isLoading = false
                     TransitionManager.beginDelayedTransition(binding.root)
+                    binding.loadingSearch.visibility = View.INVISIBLE
                     response.data?.let { filesResponse ->
                         if (filesResponse.files.isEmpty()) {
                             Toast.makeText(
@@ -98,9 +101,12 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                         ).show()
                         Log.e(thisTag, "An error occurred: $message")
                     }
+                    binding.loadingSearch.visibility = View.INVISIBLE
+
                 }
                 is Resource.Loading -> {
                     isLoading = true
+                    binding.loadingSearch.visibility = View.VISIBLE
                 }
             }
         })

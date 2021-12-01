@@ -40,7 +40,7 @@ class ActorsAdapter : RecyclerView.Adapter<ActorsAdapter.ActorsViewHolder>() {
     }
 
     override fun getItemCount(): Int {
-        return if (differ.currentList.size > 10) 10 else differ.currentList.size
+        return differ.currentList.size
     }
 
     override fun onBindViewHolder(holder: ActorsViewHolder, position: Int) {
