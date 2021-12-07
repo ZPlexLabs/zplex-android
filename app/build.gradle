@@ -10,11 +10,6 @@ plugins {
 
 def gitCommitHash = 'git rev-parse --verify --short HEAD'.execute().text.trim()
 
-static def getDate() {
-    def date = new Date()
-    def formattedDate = date.format("d MMM, HH.mm aa")
-    return formattedDate
-}
 
 android {
 
@@ -46,7 +41,7 @@ android {
         applicationId "zechs.zplex"
         minSdkVersion 26
         targetSdkVersion 31
-        versionCode 10
+        versionCode 11
         versionName "3.0-$gitCommitHash"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -62,9 +57,25 @@ android {
         }
     }
 
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+            universalApk true
+        }
+    }
+
+    project.ext.versionCodes = [
+            'armeabi-v7a': 6,
+            'arm64-v8a'  : 7,
+            'x86'        : 8,
+            'x86_64'     : 9]
+
     android.applicationVariants.all { variant ->
-        variant.outputs.all {
-            outputFileName = "${variant.applicationId}-${variant.versionCode}-${variant.name}-${getDate()}.apk"
+        variant.outputs.each { output ->
+            output.versionCodeOverride =
+                    project.ext.versionCodes.get(output.getFilter(com.android.build.OutputFile.ABI), 0) + android.defaultConfig.versionCode
         }
     }
 

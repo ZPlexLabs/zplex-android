@@ -3,6 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="../../../../../home/zechs/.gradle/caches/transforms-3/6b8493c05bbd38099a09ee1c40ba9dcb/transformed/jetified-exoplayer-ui-2.16.1/res/layout/exo_player_view.xml" value="0.31614583333333335" />
+        <entry key="../../../../../home/zechs/.gradle/caches/transforms-3/6b8493c05bbd38099a09ee1c40ba9dcb/transformed/jetified-exoplayer-ui-2.16.1/res/layout/exo_styled_player_control_rewind_button.xml" value="0.31614583333333335" />
+        <entry key="../../../../../home/zechs/.gradle/caches/transforms-3/6b8493c05bbd38099a09ee1c40ba9dcb/transformed/jetified-exoplayer-ui-2.16.1/res/layout/exo_styled_player_control_view.xml" value="0.31614583333333335" />
         <entry key="../../../../../home/zechs/.gradle/caches/transforms-3/b32abc77d325646a686795ba3a9b31b2/transformed/jetified-exoplayer-ui-2.15.1/res/layout/exo_player_control_view.xml" value="0.14270833333333333" />
         <entry key="../../../../../layout/custom_preview.xml" value="0.33958333333333335" />
         <entry key="..\:/Documents/Android Studio Projects/ZPlex/app/src/main/res/drawable/dark_gradient.xml" value="0.26614583333333336" />
@@ -40,15 +43,19 @@
         <entry key="app/src/main/res/drawable/dark_faded_gradient.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/dark_gradient.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/dark_gradient_episode.xml" value="0.3020833333333333" />
+        <entry key="app/src/main/res/drawable/faded_bg.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_download.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/ic_home.xml" value="0.32135416666666666" />
         <entry key="app/src/main/res/drawable/ic_play_svg.xml" value="0.340625" />
+        <entry key="app/src/main/res/drawable/ic_rotate.xml" value="0.115625" />
+        <entry key="app/src/main/res/drawable/ic_round_favorite_border_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/icon_color.xml" value="0.32135416666666666" />
         <entry key="app/src/main/res/drawable/icon_size.xml" value="0.32135416666666666" />
         <entry key="app/src/main/res/drawable/placeholder_shape.xml" value="0.3" />
         <entry key="app/src/main/res/drawable/popup_menu_bg.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/round_bg.xml" value="0.3020833333333333" />
         <entry key="app/src/main/res/drawable/rounded.xml" value="0.3046875" />
+        <entry key="app/src/main/res/drawable/rounded_controls_background.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/search_bg.xml" value="0.3229166666666667" />
         <entry key="app/src/main/res/drawable/toggle_grid.xml" value="0.3020833333333333" />
         <entry key="app/src/main/res/drawable/toggle_list.xml" value="0.3020833333333333" />
@@ -57,27 +64,34 @@
         <entry key="app/src/main/res/layout/activity_error.xml" value="0.29791666666666666" />
         <entry key="app/src/main/res/layout/activity_exo_player.xml" value="0.3020833333333333" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.3203125" />
-        <entry key="app/src/main/res/layout/activity_player.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/activity_player.xml" value="0.2975609756097561" />
         <entry key="app/src/main/res/layout/activity_zplex.xml" value="0.264" />
         <entry key="app/src/main/res/layout/episode_list.xml" value="0.8" />
         <entry key="app/src/main/res/layout/error_layout.xml" value="0.3203125" />
+        <entry key="app/src/main/res/layout/exo_control_view.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/exo_playback_control_view.xml" value="0.2490740740740741" />
         <entry key="app/src/main/res/layout/exo_player_view.xml" value="0.28177083333333336" />
+        <entry key="app/src/main/res/layout/exo_styled_player_control_view.xml" value="0.31614583333333335" />
+        <entry key="app/src/main/res/layout/exo_styled_player_view.xml" value="0.31614583333333335" />
+        <entry key="app/src/main/res/layout/exo_styled_settings_list.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/fetch_dialog.xml" value="0.28177083333333336" />
-        <entry key="app/src/main/res/layout/fragment_about.xml" value="0.4" />
+        <entry key="app/src/main/res/layout/fragment_about.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_about_v2.xml" value="0.72" />
         <entry key="app/src/main/res/layout/fragment_casts.xml" value="0.28177083333333336" />
         <entry key="app/src/main/res/layout/fragment_episodes.xml" value="0.264" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.30104166666666665" />
         <entry key="app/src/main/res/layout/fragment_info.xml" value="0.4" />
         <entry key="app/src/main/res/layout/fragment_main.xml" value="0.28177083333333336" />
+        <entry key="app/src/main/res/layout/fragment_movie.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/fragment_my_shows.xml" value="0.2984375" />
         <entry key="app/src/main/res/layout/fragment_new_about.xml" value="0.3671794871794872" />
         <entry key="app/src/main/res/layout/fragment_releases.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/fragment_search.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_z_plex.xml" value="0.28129829984544047" />
         <entry key="app/src/main/res/layout/frament_cast.xml" value="0.2763023493360572" />
+        <entry key="app/src/main/res/layout/ic_rotate.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_actor.xml" value="0.4" />
+        <entry key="app/src/main/res/layout/item_cast.xml" value="0.536" />
         <entry key="app/src/main/res/layout/item_chip.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/item_dropdown.xml" value="0.72" />
         <entry key="app/src/main/res/layout/item_episode.xml" value="0.4" />
@@ -102,7 +116,7 @@
   <component name="VisualizationToolProject">
     <option name="state">
       <ProjectState>
-        <option name="scale" value="0.3671794871794872" />
+        <option name="scale" value="0.2" />
       </ProjectState>
     </option>
   </component>

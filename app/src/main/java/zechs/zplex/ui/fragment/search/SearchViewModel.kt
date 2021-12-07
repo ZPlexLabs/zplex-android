@@ -34,7 +34,7 @@ class SearchViewModel(
 
     private val accessToken =
         SessionManager(getApplication<Application>().applicationContext).fetchAuthToken()
-    private val pageSize = 18
+    private val pageSize = 21
     private val orderBy = "modifiedTime desc"
 
     init {

@@ -1,8 +1,13 @@
 package zechs.zplex.ui.fragment.about.viewpager
 
+import android.graphics.Color
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -98,7 +103,7 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
         }
 
         it.runtime?.let {
-            pairsArray.add(Pairs("Released", "$it min"))
+            pairsArray.add(Pairs("Runtime", "$it min"))
         }
 
         if (it.production_companies != null
@@ -110,7 +115,7 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
                 company.name?.let { it1 -> companies.add(it1) }
             }
             pairsArray.add(
-                Pairs("Countries", companies.joinToString(separator = ", "))
+                Pairs("Companies", companies.joinToString(separator = ", "))
             )
         }
 
@@ -145,14 +150,24 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
         it.overview?.let { plot ->
             binding.tvPlot.apply {
                 if (plot.length > 175) {
-                    val trimPlot = plot.substring(0, 175) + "..."
-                    text = trimPlot
+                    val stringBuilder = SpannableStringBuilder()
+
+                    val plotText = SpannableString(plot.substring(0, 175))
+                    plotText.setSpan(ForegroundColorSpan(Color.parseColor("#DEFFFFFF")), 0, 175, 0)
+                    stringBuilder.append(plotText)
+
+                    val readMore = SpannableString(" Read more...")
+                    readMore.setSpan(ForegroundColorSpan(Color.parseColor("#6750a4")), 0, 13, 0)
+                    stringBuilder.append(readMore)
+
+                    setText(stringBuilder, TextView.BufferType.SPANNABLE)
                     setOnClickListener {
-                        val materialFade = MaterialFade().apply {
-                            duration = 150L
+                        TransitionManager.beginDelayedTransition(binding.root)
+                        if (text.length > 188) {
+                            setText(stringBuilder, TextView.BufferType.SPANNABLE)
+                        } else {
+                            text = plot
                         }
-                        TransitionManager.beginDelayedTransition(binding.root, materialFade)
-                        text = if (text.length > 178) trimPlot else plot
                     }
                 } else {
                     text = plot
@@ -207,16 +222,30 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
 
             it.overview?.let { plot ->
                 binding.tvPlot.apply {
-                    if (plot.length > 225) {
-                        val trimPlot = plot.substring(0, 225) + "..."
-                        text = trimPlot
+                    if (plot.length > 175) {
+                        val stringBuilder = SpannableStringBuilder()
+
+                        val plotText = SpannableString(plot.substring(0, 175))
+                        plotText.setSpan(
+                            ForegroundColorSpan(Color.parseColor("#DEFFFFFF")),
+                            0,
+                            175,
+                            0
+                        )
+                        stringBuilder.append(plotText)
+
+                        val readMore = SpannableString(" Read more...")
+                        readMore.setSpan(ForegroundColorSpan(Color.parseColor("#6750a4")), 0, 13, 0)
+                        stringBuilder.append(readMore)
+
+                        setText(stringBuilder, TextView.BufferType.SPANNABLE)
                         setOnClickListener {
-                            val materialFade = MaterialFade().apply {
-                                duration = 150L
+                            TransitionManager.beginDelayedTransition(binding.root)
+                            if (text.length > 188) {
+                                setText(stringBuilder, TextView.BufferType.SPANNABLE)
+                            } else {
+                                text = plot
                             }
-                            TransitionManager.beginDelayedTransition(binding.root, materialFade)
-                            text =
-                                if (text.length > 228) trimPlot else plot
                         }
                     } else {
                         text = plot
@@ -224,9 +253,7 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
                     }
                 }
             }
-
         }
-
     }
 
     private fun apiError(message: String?) {

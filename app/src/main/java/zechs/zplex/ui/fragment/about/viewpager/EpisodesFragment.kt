@@ -245,6 +245,12 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
     private fun playMedia(it: File, mediaId: Int, name: String) {
         val items = arrayOf("ExoPlayer", "VLC")
 
+        val fullEpisodeTitle = if (name.length > 30) {
+            it.name.dropLast(4)
+        } else {
+            "$name - ${it.name.dropLast(4)}"
+        }
+
         context?.let { it1 ->
             MaterialAlertDialogBuilder(it1)
                 .setBackground(
@@ -258,6 +264,7 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
                         0 -> {
                             val intent = Intent(activity, PlayerActivity::class.java)
                             intent.putExtra("fileId", it.id)
+                            intent.putExtra("title", fullEpisodeTitle)
                             intent.flags = FLAG_ACTIVITY_NEW_TASK
                             activity?.startActivity(intent)
                             dialog.dismiss()
@@ -287,7 +294,7 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
                                     Uri.parse(episodeURI),
                                     "video/*"
                                 )
-                                vlcIntent.putExtra("title", it.name.dropLast(4))
+                                vlcIntent.putExtra("title", fullEpisodeTitle)
                                 vlcIntent.flags =
                                     FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                                 requireContext().startActivity(vlcIntent)

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <color name="colorPrimary">#3c4042</color>
     <color name="colorPrimaryDark">#1c1b1f</color>
     <color name="cardColor">#25232a</color>
-    <color name="colorAccent">#d0bcff</color>
+    <color name="nice_dark">#24242f</color>
+    <color name="nice_light_dark">#262632</color>
+    <color name="colorAccent">#6750a4</color>
     <color name="textColor">#FFFFFF</color>
     <color name="textColor_54">#8AFFFFFF</color>
     <color name="textColor_74">#BDFFFFFF</color>
@@ -11,4 +13,14 @@
     <color name="transparent">#00000000</color>
     <color name="dark_tint">#40000000</color>
     <color name="black_overlay">#66000000</color>
+    <color name="ui_controls_background">#98000000</color>
+    <color name="exo_bottom_bar_background" tools:keep="@color/exo_bottom_bar_background">
+        @color/ui_controls_background
+    </color>
+    <color name="exo_black_opacity_70" tools:keep="@color/exo_black_opacity_70">
+        @color/ui_controls_background
+    </color>
+    <color name="exo_styled_error_message_background" tools:keep="@color/exo_styled_error_message_background">
+        @color/ui_controls_background
+    </color>
 </resources>

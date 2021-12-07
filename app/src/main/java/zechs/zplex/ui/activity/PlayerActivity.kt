@@ -8,13 +8,17 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.view.WindowInsets
+import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import zechs.zplex.R
 import zechs.zplex.databinding.ActivityPlayerBinding
 import zechs.zplex.utils.SessionManager
 
@@ -41,11 +45,8 @@ class PlayerActivity : AppCompatActivity() {
         }
 
     }
-    private val showPart2Runnable = Runnable {
-        supportActionBar?.show()
-    }
+    private val showPart2Runnable = Runnable { supportActionBar?.show() }
     private var isFullscreen: Boolean = false
-
     private val hideRunnable = Runnable { hide() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -128,6 +129,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun playMedia() {
         val fileId = intent.getStringExtra("fileId")
+        val title = intent.getStringExtra("title")
 
         val mediaItem = MediaItem.Builder()
             .setUri(getStreamUrl(fileId))
@@ -137,16 +139,20 @@ class PlayerActivity : AppCompatActivity() {
             addMediaItem(mediaItem)
             prepare()
             play()
-            addListener(object : Player.Listener {
-                override fun onPlayerError(error: PlaybackException) {
-                    super.onPlayerError(error)
-                    Toast.makeText(
-                        applicationContext,
-                        error.localizedMessage,
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            })
+            addListener(
+                object : Player.Listener {
+                    override fun onPlayerError(error: PlaybackException) {
+                        super.onPlayerError(error)
+                        Toast.makeText(
+                            applicationContext, error.message, Toast.LENGTH_LONG
+                        ).show()
+                    }
+                })
+
+            trackSelectionParameters = this.trackSelectionParameters
+                .buildUpon()
+                .setPreferredAudioLanguage("en")
+                .build();
         }
 
         binding.playerView.apply {
@@ -155,7 +161,16 @@ class PlayerActivity : AppCompatActivity() {
             setShowPreviousButton(false)
             setShowFastForwardButton(true)
             setShowRewindButton(true)
-            controllerHideOnTouch = true
+            controllerHideOnTouch = false
+            controllerAutoShow = true
+            findViewById<TextView>(R.id.exo_video_title).text = title
+            findViewById<ImageButton>(R.id.exo_aspect_button).setOnClickListener {
+                if (binding.playerView.resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FIT) {
+                    binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+                } else {
+                    binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                }
+            }
         }
     }
 

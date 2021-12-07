@@ -269,6 +269,7 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                         0 -> {
                             val intent = Intent(activity, PlayerActivity::class.java)
                             intent.putExtra("fileId", it.id)
+                            intent.putExtra("title", name)
                             intent.flags = FLAG_ACTIVITY_NEW_TASK
                             activity?.startActivity(intent)
                             dialog.dismiss()
