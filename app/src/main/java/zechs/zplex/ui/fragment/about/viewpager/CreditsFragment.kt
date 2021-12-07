@@ -5,6 +5,8 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import zechs.zplex.R
 import zechs.zplex.adapter.CreditsAdapter
@@ -12,6 +14,8 @@ import zechs.zplex.databinding.FragmentCastsBinding
 import zechs.zplex.models.tmdb.credits.Cast
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.about.AboutViewModel
+import zechs.zplex.ui.fragment.image.BigImageViewModel
+import zechs.zplex.utils.Constants.TMDB_IMAGE_PATH
 import zechs.zplex.utils.Resource
 
 class CreditsFragment : Fragment(R.layout.fragment_casts) {
@@ -22,6 +26,7 @@ class CreditsFragment : Fragment(R.layout.fragment_casts) {
     private lateinit var creditsAdapter: CreditsAdapter
 
     private lateinit var aboutViewModel: AboutViewModel
+    private val bigImageViewModel: BigImageViewModel by activityViewModels()
 
     private val thisTAG = "ActorsFragment"
 
@@ -31,10 +36,18 @@ class CreditsFragment : Fragment(R.layout.fragment_casts) {
 
         creditsAdapter = CreditsAdapter()
 
+        creditsAdapter.setOnItemClickListener { cast ->
+            if (cast.profile_path != null) {
+                bigImageViewModel.setImageUrl("${TMDB_IMAGE_PATH}${cast.profile_path}")
+                findNavController().navigate(R.id.action_aboutFragment_to_bigImageFragment)
+            }
+        }
+
         binding.rvCasts.apply {
             adapter = creditsAdapter
             layoutManager = GridLayoutManager(activity, 2)
         }
+
 
         aboutViewModel = (activity as ZPlexActivity).aboutViewModel
         isLoading(true)

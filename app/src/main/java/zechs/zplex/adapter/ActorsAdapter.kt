@@ -55,6 +55,16 @@ class ActorsAdapter : RecyclerView.Adapter<ActorsAdapter.ActorsViewHolder>() {
             }
             actor_name.text = data.name
             role.text = data.role
+
+            setOnClickListener {
+                onItemClickListener?.let { it(data) }
+            }
         }
+    }
+
+    private var onItemClickListener: ((Data) -> Unit)? = null
+
+    fun setOnItemClickListener(listener: (Data) -> Unit) {
+        onItemClickListener = listener
     }
 }

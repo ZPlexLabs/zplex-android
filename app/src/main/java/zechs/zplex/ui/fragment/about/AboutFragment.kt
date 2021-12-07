@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -37,11 +38,11 @@ import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.ArgsViewModel
 import zechs.zplex.ui.fragment.ViewPagerAdapter
 import zechs.zplex.ui.fragment.about.viewpager.*
+import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.utils.Constants.TMDB_API_KEY
 import zechs.zplex.utils.Constants.ZPLEX
 import zechs.zplex.utils.Constants.ZPLEX_IMAGE_REDIRECT
 import java.net.*
-
 
 class AboutFragment : Fragment(R.layout.fragment_about) {
 
@@ -50,6 +51,7 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
 
     private lateinit var aboutViewModel: AboutViewModel
     private val argsModel: ArgsViewModel by activityViewModels()
+    private val bigImageViewModel: BigImageViewModel by activityViewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,7 +61,6 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
         }
         reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
     }
-
 
     @DelicateCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -203,6 +204,11 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                     .fitCenter()
                     .listener(this@AboutFragment.imageRequestListener)
                     .into(binding.ivPoster)
+
+                binding.ivPoster.setOnClickListener {
+                    bigImageViewModel.setImageUrl(redirectImagePoster.toString())
+                    findNavController().navigate(R.id.action_aboutFragment_to_bigImageFragment)
+                }
 
                 binding.btnDownload.setOnClickListener {
                     Toast.makeText(

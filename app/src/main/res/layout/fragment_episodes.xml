@@ -25,7 +25,7 @@
             app:contentInsetEnd="0dp"
             app:contentInsetStart="16dp"
             app:elevation="0dp"
-            app:layout_scrollFlags="scroll">
+            app:layout_scrollFlags="noScroll">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/seasons_menu"
@@ -86,7 +86,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_episodes"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@id/seasons_menu"
         android:layout_gravity="center|top"
         android:layout_marginStart="16dp"

@@ -43,17 +43,26 @@ class CreditsAdapter : RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder>() 
     }
 
     override fun onBindViewHolder(holder: CreditsViewHolder, position: Int) {
-        val data = differ.currentList[position]
+        val cast = differ.currentList[position]
 
         holder.itemView.apply {
-            if (data.profile_path != null) {
+            if (cast.profile_path != null) {
                 Glide.with(this)
-                    .load("${TMDB_IMAGE_PATH}${data.profile_path}")
+                    .load("${TMDB_IMAGE_PATH}${cast.profile_path}")
                     .placeholder(R.drawable.placeholder_shape)
                     .into(actor_image)
             }
-            actor_name.text = data.name
-            role.text = data.character
+            actor_name.text = cast.name
+            role.text = cast.character
+            setOnClickListener {
+                onItemClickListener?.let { it(cast) }
+            }
         }
+    }
+
+    private var onItemClickListener: ((Cast) -> Unit)? = null
+
+    fun setOnItemClickListener(listener: (Cast) -> Unit) {
+        onItemClickListener = listener
     }
 }

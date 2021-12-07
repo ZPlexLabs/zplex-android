@@ -160,7 +160,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
                 findNavController().navigate(R.id.action_searchFragment_to_aboutFragment)
             } catch (e: NumberFormatException) {
-                Toast.makeText(context, "TVDB id not found", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "Id not found", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -169,14 +169,5 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         super.onDestroyView()
         binding.rvSearch.adapter = null
         _binding = null
-    }
-
-    private fun getStatusBarHeight(): Int {
-        var result = 0
-        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            result = resources.getDimensionPixelSize(resourceId)
-        }
-        return result
     }
 }

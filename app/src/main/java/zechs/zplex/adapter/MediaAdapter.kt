@@ -80,7 +80,7 @@ class MediaAdapter(
             episode_count.text = count
 
             if (title.substring(0, title.length - 4) == count) {
-                episode_count.visibility = View.INVISIBLE
+                episode_count.visibility = View.GONE
             }
 
             Glide.with(this)

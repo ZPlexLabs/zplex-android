@@ -76,13 +76,12 @@ class ZPlexActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.aboutFragment -> {
-                    bottomNavigationView.visibility = View.GONE
-                }
+                R.id.aboutFragment -> bottomNavigationView.visibility = View.GONE
+                R.id.bigImageFragment -> bottomNavigationView.visibility = View.GONE
                 else -> {
-                    window.statusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
-                    window.navigationBarColor =
-                        ContextCompat.getColor(this, R.color.colorPrimaryDark)
+                    val colorPrimaryDark = ContextCompat.getColor(this, R.color.colorPrimaryDark)
+                    window.statusBarColor = colorPrimaryDark
+                    window.navigationBarColor = colorPrimaryDark
                     bottomNavigationView.visibility = View.VISIBLE
                 }
             }

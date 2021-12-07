@@ -37,6 +37,15 @@
         android:id="@+id/aboutFragment"
         android:name="zechs.zplex.ui.fragment.about.AboutFragment"
         android:label="About"
-        tools:layout="@layout/fragment_about"></fragment>
+        tools:layout="@layout/fragment_about">
+        <action
+            android:id="@+id/action_aboutFragment_to_bigImageFragment"
+            app:destination="@id/bigImageFragment" />
+    </fragment>
 
+    <fragment
+        android:id="@+id/bigImageFragment"
+        android:name="zechs.zplex.ui.fragment.image.BigImageFragment"
+        android:label="BigImageFragment"
+        tools:layout="@layout/fragment_big_image" />
 </navigation>

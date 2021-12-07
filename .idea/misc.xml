@@ -66,6 +66,7 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/activity_player.xml" value="0.2975609756097561" />
         <entry key="app/src/main/res/layout/activity_zplex.xml" value="0.264" />
+        <entry key="app/src/main/res/layout/big_image_fragment.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/episode_list.xml" value="0.8" />
         <entry key="app/src/main/res/layout/error_layout.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/exo_control_view.xml" value="0.31614583333333335" />
@@ -75,8 +76,9 @@
         <entry key="app/src/main/res/layout/exo_styled_player_view.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/exo_styled_settings_list.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/fetch_dialog.xml" value="0.28177083333333336" />
-        <entry key="app/src/main/res/layout/fragment_about.xml" value="0.2" />
+        <entry key="app/src/main/res/layout/fragment_about.xml" value="0.264" />
         <entry key="app/src/main/res/layout/fragment_about_v2.xml" value="0.72" />
+        <entry key="app/src/main/res/layout/fragment_big_image.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/fragment_casts.xml" value="0.28177083333333336" />
         <entry key="app/src/main/res/layout/fragment_episodes.xml" value="0.264" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.30104166666666665" />
@@ -87,6 +89,7 @@
         <entry key="app/src/main/res/layout/fragment_new_about.xml" value="0.3671794871794872" />
         <entry key="app/src/main/res/layout/fragment_releases.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/fragment_search.xml" value="0.2" />
+        <entry key="app/src/main/res/layout/fragment_temp.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/fragment_z_plex.xml" value="0.28129829984544047" />
         <entry key="app/src/main/res/layout/frament_cast.xml" value="0.2763023493360572" />
         <entry key="app/src/main/res/layout/ic_rotate.xml" value="0.31614583333333335" />
