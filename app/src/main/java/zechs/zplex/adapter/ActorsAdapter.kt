@@ -46,13 +46,18 @@ class ActorsAdapter : RecyclerView.Adapter<ActorsAdapter.ActorsViewHolder>() {
     override fun onBindViewHolder(holder: ActorsViewHolder, position: Int) {
         val data = differ.currentList[position]
 
+        val imageUrl = if (data.image != null) {
+            "${TVDB_IMAGE_PATH}${data.image}"
+        } else {
+            R.drawable.no_actor
+        }
+
         holder.itemView.apply {
-            if (data.image != null) {
-                Glide.with(this)
-                    .load("${TVDB_IMAGE_PATH}${data.image}")
-                    .placeholder(R.drawable.placeholder_shape)
-                    .into(actor_image)
-            }
+            Glide.with(this)
+                .load(imageUrl)
+                .placeholder(R.drawable.no_actor)
+                .into(actor_image)
+
             actor_name.text = data.name
             role.text = data.role
 

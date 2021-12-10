@@ -5,9 +5,8 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.google.android.material.transition.MaterialSharedAxis
+import com.google.android.material.transition.MaterialContainerTransform
 import zechs.zplex.R
 import zechs.zplex.databinding.FragmentBigImageBinding
 
@@ -20,10 +19,7 @@ class BigImageFragment : Fragment(R.layout.fragment_big_image) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true).apply {
-            duration = 500L
-        }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+        sharedElementEnterTransition = MaterialContainerTransform()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -33,10 +29,9 @@ class BigImageFragment : Fragment(R.layout.fragment_big_image) {
         bigImageViewModel.imageUrl.observe(viewLifecycleOwner, { imageUri ->
             context?.let {
                 Glide.with(it)
-                    .asBitmap().format(DecodeFormat.PREFER_ARGB_8888)
                     .load(imageUri)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .fitCenter()
+                    .placeholder(R.drawable.no_poster)
                     .into(binding.bigImageView)
             }
         })

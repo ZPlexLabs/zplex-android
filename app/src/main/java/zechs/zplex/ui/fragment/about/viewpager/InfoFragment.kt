@@ -1,10 +1,12 @@
 package zechs.zplex.ui.fragment.about.viewpager
 
 import android.graphics.Color
+import android.graphics.Typeface
 import android.os.Bundle
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.util.Log
 import android.view.View
 import android.widget.TextView
@@ -13,7 +15,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import com.google.android.material.chip.Chip
-import com.google.android.material.transition.MaterialFade
+import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.adapter.MiscAdapter
 import zechs.zplex.databinding.FragmentInfoBinding
@@ -34,6 +36,10 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
     private lateinit var miscAdapter: MiscAdapter
     private val thisTAG = "InfoFragment"
 
+    private val limit = 175
+    private val readMoreText = "...Read more"
+    private val readMoreTextColor = "#FFFFFF"
+    private val limitWithReadMore = limit + readMoreText.length
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -87,10 +93,10 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
     }
 
     private fun tmdbSuccess(it: MoviesResponse) {
-        val materialFade = MaterialFade().apply {
+        val materialTransition = MaterialSharedAxis(MaterialSharedAxis.X, true).apply {
             duration = 150L
         }
-        TransitionManager.beginDelayedTransition(binding.root, materialFade)
+        TransitionManager.beginDelayedTransition(binding.root, materialTransition)
 
         val pairsArray: MutableList<Pairs> = mutableListOf()
 
@@ -149,21 +155,29 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
 
         it.overview?.let { plot ->
             binding.tvPlot.apply {
-                if (plot.length > 175) {
+                if (plot.length > limit) {
                     val stringBuilder = SpannableStringBuilder()
 
-                    val plotText = SpannableString(plot.substring(0, 175))
-                    plotText.setSpan(ForegroundColorSpan(Color.parseColor("#DEFFFFFF")), 0, 175, 0)
+                    val plotText = SpannableString(plot.substring(0, limit))
+                    plotText.setSpan(
+                        ForegroundColorSpan(Color.parseColor("#DEFFFFFF")),
+                        0, limit, 0
+                    )
+
                     stringBuilder.append(plotText)
 
-                    val readMore = SpannableString(" Read more...")
-                    readMore.setSpan(ForegroundColorSpan(Color.parseColor("#6750a4")), 0, 13, 0)
+                    val readMore = SpannableString(readMoreText)
+                    readMore.setSpan(
+                        ForegroundColorSpan(Color.parseColor(readMoreTextColor)),
+                        0, readMoreText.length, 0
+                    )
+                    readMore.setSpan(StyleSpan(Typeface.BOLD), 0, readMoreText.length, 0)
                     stringBuilder.append(readMore)
 
                     setText(stringBuilder, TextView.BufferType.SPANNABLE)
                     setOnClickListener {
                         TransitionManager.beginDelayedTransition(binding.root)
-                        if (text.length > 188) {
+                        if (text.length > limitWithReadMore) {
                             setText(stringBuilder, TextView.BufferType.SPANNABLE)
                         } else {
                             text = plot
@@ -179,10 +193,10 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
 
 
     private fun tvdbSuccess(seriesResponse: SeriesResponse) {
-        val materialFade = MaterialFade().apply {
+        val materialTransition = MaterialSharedAxis(MaterialSharedAxis.X, true).apply {
             duration = 150L
         }
-        TransitionManager.beginDelayedTransition(binding.root, materialFade)
+        TransitionManager.beginDelayedTransition(binding.root, materialTransition)
 
         seriesResponse.data?.let {
 
@@ -222,26 +236,29 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
 
             it.overview?.let { plot ->
                 binding.tvPlot.apply {
-                    if (plot.length > 175) {
+                    if (plot.length > limit) {
                         val stringBuilder = SpannableStringBuilder()
 
-                        val plotText = SpannableString(plot.substring(0, 175))
+                        val plotText = SpannableString(plot.substring(0, limit))
                         plotText.setSpan(
                             ForegroundColorSpan(Color.parseColor("#DEFFFFFF")),
-                            0,
-                            175,
-                            0
+                            0, limit, 0
                         )
+
                         stringBuilder.append(plotText)
 
-                        val readMore = SpannableString(" Read more...")
-                        readMore.setSpan(ForegroundColorSpan(Color.parseColor("#6750a4")), 0, 13, 0)
+                        val readMore = SpannableString(readMoreText)
+                        readMore.setSpan(
+                            ForegroundColorSpan(Color.parseColor(readMoreTextColor)),
+                            0, readMoreText.length, 0
+                        )
+                        readMore.setSpan(StyleSpan(Typeface.BOLD), 0, readMoreText.length, 0)
                         stringBuilder.append(readMore)
 
                         setText(stringBuilder, TextView.BufferType.SPANNABLE)
                         setOnClickListener {
                             TransitionManager.beginDelayedTransition(binding.root)
-                            if (text.length > 188) {
+                            if (text.length > limitWithReadMore) {
                                 setText(stringBuilder, TextView.BufferType.SPANNABLE)
                             } else {
                                 text = plot

@@ -5,8 +5,8 @@
     android:id="@+id/root_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:background="#2898f0">
+    android:background="@color/cardColor"
+    android:orientation="vertical">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
@@ -34,9 +34,9 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@color/cardColor"
                 android:orientation="vertical"
-                app:layout_collapseMode="parallax"
-                tools:background="#2898f0">
+                app:layout_collapseMode="parallax">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/mb_save"
@@ -59,10 +59,10 @@
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/poster_card"
                     android:layout_width="150dp"
-                    android:layout_height="220dp"
+                    android:layout_height="225dp"
                     android:layout_marginTop="16dp"
                     app:cardBackgroundColor="@android:color/transparent"
-                    app:cardCornerRadius="4dp"
+                    app:cardCornerRadius="8dp"
                     app:cardElevation="16dp"
                     app:cardMaxElevation="16dp"
                     app:layout_constraintEnd_toEndOf="parent"
@@ -80,7 +80,8 @@
                         android:contentDescription="@null"
                         android:elevation="0dp"
                         android:scaleType="centerCrop"
-                        tools:srcCompat="@drawable/poster" />
+                        android:transitionName="poster_shared_transition"
+                        tools:srcCompat="@drawable/no_poster" />
 
                 </com.google.android.material.card.MaterialCardView>
 

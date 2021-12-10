@@ -43,8 +43,9 @@ class AboutViewModel(
 
     val mediaList: MutableLiveData<Resource<DriveResponse>> = MutableLiveData()
 
-    private val accessToken =
-        SessionManager(getApplication<Application>().applicationContext).fetchAuthToken()
+    private val accessToken = SessionManager(
+        getApplication<Application>().applicationContext
+    ).fetchAuthToken()
     private val pageSize = 1000
     private val orderBy = "name"
 
@@ -58,7 +59,6 @@ class AboutViewModel(
     }
 
     suspend fun getShow(id: String) = filesRepository.getFile(id)
-
 
     fun getMediaFiles(driveQuery: String) =
         viewModelScope.launch {

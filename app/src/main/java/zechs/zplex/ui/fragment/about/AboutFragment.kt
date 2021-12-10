@@ -4,8 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.ComponentName
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import android.graphics.Bitmap
-import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -14,19 +12,14 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.DecodeFormat
 import com.bumptech.glide.load.engine.DiskCacheStrategy
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.android.material.transition.MaterialSharedAxis
+import com.google.android.material.transition.MaterialElevationScale
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -37,7 +30,10 @@ import zechs.zplex.ui.activity.PlayerActivity
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.ArgsViewModel
 import zechs.zplex.ui.fragment.ViewPagerAdapter
-import zechs.zplex.ui.fragment.about.viewpager.*
+import zechs.zplex.ui.fragment.about.viewpager.ActorsFragment
+import zechs.zplex.ui.fragment.about.viewpager.CreditsFragment
+import zechs.zplex.ui.fragment.about.viewpager.EpisodesFragment
+import zechs.zplex.ui.fragment.about.viewpager.InfoFragment
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.utils.Constants.TMDB_API_KEY
 import zechs.zplex.utils.Constants.ZPLEX
@@ -55,11 +51,9 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true).apply {
-            duration = 500L
-        }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+        exitTransition = MaterialElevationScale(false)
+        reenterTransition = MaterialElevationScale(false)
+        reenterTransition = MaterialElevationScale(true)
     }
 
     @DelicateCoroutinesApi
@@ -164,22 +158,24 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
 
             binding.viewPager.adapter = adapter
 
-            TabLayoutMediator(binding.tabs, binding.viewPager) { tab, position ->
-                tab.text =
-                    if (isTV) {
-                        when (position) {
-                            0 -> getString(R.string.info)
-                            1 -> getString(R.string.episodes)
-                            2 -> getString(R.string.cast)
-                            else -> throw IndexOutOfBoundsException()
-                        }
-                    } else {
-                        when (position) {
-                            0 -> getString(R.string.info)
-                            1 -> getString(R.string.cast)
-                            else -> throw IndexOutOfBoundsException()
-                        }
+            TabLayoutMediator(
+                binding.tabs,
+                binding.viewPager
+            ) { tab, position ->
+                tab.text = if (isTV) {
+                    when (position) {
+                        0 -> getString(R.string.info)
+                        1 -> getString(R.string.episodes)
+                        2 -> getString(R.string.cast)
+                        else -> throw IndexOutOfBoundsException()
                     }
+                } else {
+                    when (position) {
+                        0 -> getString(R.string.info)
+                        1 -> getString(R.string.cast)
+                        else -> throw IndexOutOfBoundsException()
+                    }
+                }
             }.attach()
 
             val redirectImagePoster = if (arg.type == "TV") {
@@ -198,16 +194,21 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
 
             context?.let { context ->
                 Glide.with(context)
-                    .asBitmap().format(DecodeFormat.PREFER_ARGB_8888)
                     .load(redirectImagePoster)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .fitCenter()
-                    .listener(this@AboutFragment.imageRequestListener)
+                    .placeholder(R.drawable.no_poster)
                     .into(binding.ivPoster)
 
                 binding.ivPoster.setOnClickListener {
                     bigImageViewModel.setImageUrl(redirectImagePoster.toString())
-                    findNavController().navigate(R.id.action_aboutFragment_to_bigImageFragment)
+                    val extras =
+                        FragmentNavigatorExtras(binding.ivPoster to "poster_shared_transition")
+                    findNavController().navigate(
+                        R.id.action_aboutFragment_to_bigImageFragment,
+                        null,
+                        null,
+                        extras
+                    )
                 }
 
                 binding.btnDownload.setOnClickListener {
@@ -219,48 +220,6 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                 }
             }
         })
-    }
-
-    private val imageRequestListener = object : RequestListener<Bitmap?> {
-        override fun onLoadFailed(
-            e: GlideException?,
-            model: Any,
-            target: Target<Bitmap?>,
-            isFirstResource: Boolean
-        ): Boolean {
-            return false
-        }
-
-        override fun onResourceReady(
-            resource: Bitmap?,
-            model: Any,
-            target: Target<Bitmap?>,
-            dataSource: DataSource,
-            isFirstResource: Boolean
-        ): Boolean {
-            resource?.let { _ ->
-                Palette.from(resource)
-                    .maximumColorCount(36)
-                    .generate { p: Palette? ->
-                        if (p != null) {
-                            p.dominantSwatch?.rgb?.let {
-                                val accent = Color.argb(
-                                    90,
-                                    Color.red(it),
-                                    Color.green(it),
-                                    Color.blue(it)
-                                )
-                                binding.rootView.setBackgroundColor(accent)
-                                activity?.window?.apply {
-                                    statusBarColor = accent
-                                    navigationBarColor = Color.parseColor("#00000000")
-                                }
-                            }
-                        }
-                    }
-            }
-            return false
-        }
     }
 
     private fun playMedia(it: File, name: String) {

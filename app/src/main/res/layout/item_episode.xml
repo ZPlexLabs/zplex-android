@@ -6,6 +6,7 @@
     android:layout_height="wrap_content"
     android:layout_centerInParent="true"
     android:animateLayoutChanges="true"
+    android:foreground="?android:attr/selectableItemBackground"
     android:padding="4dp">
 
     <com.google.android.material.card.MaterialCardView
@@ -28,7 +29,33 @@
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
             android:contentDescription="@null"
-            tools:src="@drawable/placeholder_shape" />
+            tools:src="@drawable/no_thumb" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/size_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        app:cardBackgroundColor="#80000000"
+        app:cardCornerRadius="48dp"
+        app:cardElevation="8dp"
+        app:cardMaxElevation="8dp"
+        app:layout_constraintEnd_toEndOf="@+id/thumb_card"
+        app:layout_constraintTop_toTopOf="@+id/thumb_card">
+
+        <TextView
+            android:id="@+id/episode_size"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/open_sans"
+            android:maxLines="1"
+            android:padding="4dp"
+            android:textColor="@color/textColor_87"
+            android:textSize="11sp"
+            tools:text="250 MB" />
+
     </com.google.android.material.card.MaterialCardView>
 
     <TextView

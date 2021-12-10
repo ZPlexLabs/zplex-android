@@ -1,10 +1,12 @@
 package zechs.zplex.ui.fragment.search
 
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.transition.TransitionManager
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -38,13 +40,16 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
     private lateinit var filesAdapter: FilesAdapter
     private val thisTag = "SearchFragment"
-    private var text = ""
+    private var queryText = ""
     private var isLoading = true
+    private var isLastPage = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true).apply {
+            duration = 500L
+        }
         reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
     }
 
@@ -55,19 +60,17 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         searchViewModel = (activity as ZPlexActivity).searchViewModel
         setupRecyclerView()
 
-        binding.searchBox.editText?.text = Editable.Factory.getInstance().newEditable(text)
-
         var job: Job? = null
         binding.searchBox.apply {
-            editText?.text = Editable.Factory.getInstance().newEditable(text)
+            editText?.text = Editable.Factory.getInstance().newEditable(queryText)
             editText?.addTextChangedListener { editable ->
                 job?.cancel()
                 job = MainScope().launch {
                     delay(SEARCH_DELAY_AMOUNT)
                     editable?.let {
                         PAGE_TOKEN = ""
-                        text = editable.toString()
-                        searchViewModel.getSearchList(setDriveQuery(text), "")
+                        queryText = editable.toString()
+                        searchViewModel.getSearchList(setDriveQuery(queryText), "")
                     }
                 }
             }
@@ -88,6 +91,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                             ).show()
                         }
                         filesAdapter.differ.submitList(filesResponse.files.toList())
+                        isLastPage = filesResponse.nextPageToken == ""
                         Log.d("pageToken", PAGE_TOKEN)
                     }
                 }
@@ -113,6 +117,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     }
 
     private fun setDriveQuery(query: String): String {
+        queryText = query
         return if (query == "") {
             "(name contains 'TV' or name contains 'Movie') and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false"
         } else {
@@ -127,8 +132,15 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             if (dy > 0) {
                 val layoutManager = binding.rvSearch.layoutManager as GridLayoutManager
                 val visibleItemCount = layoutManager.findLastCompletelyVisibleItemPosition() + 1
-                if (visibleItemCount == layoutManager.itemCount && !isLoading) {
-                    searchViewModel.getSearchList(setDriveQuery(text), PAGE_TOKEN)
+                val itemCount = layoutManager.itemCount
+
+                Log.d(
+                    "onScrolled",
+                    "visibleItemCount=$visibleItemCount, itemCount=$itemCount, isLoading=$isLoading"
+                )
+
+                if (visibleItemCount == itemCount && !isLoading && !isLastPage) {
+                    searchViewModel.getSearchList(setDriveQuery(queryText), PAGE_TOKEN)
                 }
             }
         }
@@ -144,6 +156,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         }
 
         filesAdapter.setOnItemClickListener {
+            hideKeyboard()
             try {
                 val seriesId = (it.name.split(" - ").toTypedArray()[0]).toInt()
                 val name = it.name.split(" - ").toTypedArray()[1]
@@ -162,6 +175,13 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             } catch (e: NumberFormatException) {
                 Toast.makeText(context, "Id not found", Toast.LENGTH_LONG).show()
             }
+        }
+    }
+
+    private fun hideKeyboard() {
+        activity?.currentFocus.let { view ->
+            val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view?.windowToken, 0)
         }
     }
 

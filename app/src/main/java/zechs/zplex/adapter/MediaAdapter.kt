@@ -82,12 +82,13 @@ class MediaAdapter(
             if (title.substring(0, title.length - 4) == count) {
                 episode_count.visibility = View.GONE
             }
+            episode_size.text = bytes
 
             Glide.with(this)
                 .asBitmap()
                 .load(redirectImagePoster)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(R.drawable.placeholder_shape)
+                .placeholder(R.drawable.no_thumb)
                 .into(thumb)
 
             setOnClickListener {

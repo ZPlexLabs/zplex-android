@@ -69,8 +69,8 @@ class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
             holder.itemView.apply {
                 Glide.with(this)
                     .load(redirectImagePoster)
-                    .placeholder(R.drawable.placeholder_shape)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.drawable.no_poster)
                     .into(item_poster)
                 setOnClickListener {
                     onItemClickListener?.let { it(file) }

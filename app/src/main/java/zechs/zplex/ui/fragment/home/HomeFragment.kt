@@ -86,15 +86,29 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         })
 
         homeViewModel.logsList.observe(viewLifecycleOwner, { response ->
+            TransitionManager.beginDelayedTransition(binding.root)
             when (response) {
                 is Resource.Success -> {
-                    recentView(true)
+                    binding.apply {
+                        recentlyAdded.visibility = View.VISIBLE
+                        rvNewEpisodes.visibility = View.VISIBLE
+                    }
                     response.data?.let { logsResponse ->
-                        logsAdapter.differ.submitList(logsResponse.releasesLog.toList())
+                        val newEpisodeList = logsResponse.releasesLog.toList()
+                        if (newEpisodeList.isEmpty()) {
+                            binding.apply {
+                                recentlyAdded.visibility = View.GONE
+                                rvNewEpisodes.visibility = View.GONE
+                            }
+                        }
+                        logsAdapter.differ.submitList(newEpisodeList)
                     }
                 }
                 is Resource.Error -> {
-                    recentView(false)
+                    binding.apply {
+                        recentlyAdded.visibility = View.GONE
+                        rvNewEpisodes.visibility = View.GONE
+                    }
                     response.message?.let { message ->
                         Toast.makeText(
                             context,
@@ -105,6 +119,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     }
                 }
                 is Resource.Loading -> {
+                    binding.apply {
+                        recentlyAdded.visibility = View.VISIBLE
+                        rvNewEpisodes.visibility = View.INVISIBLE
+                    }
                 }
             }
         })
@@ -119,13 +137,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 binding.rvMyShowsHome.visibility = View.GONE
             }
         })
-    }
-
-    private fun recentView(visible: Boolean) {
-        val visibility = if (visible) View.VISIBLE else View.GONE
-        TransitionManager.beginDelayedTransition(binding.root)
-        binding.recentlyAdded.visibility = visibility
-        binding.rvNewEpisodes.visibility = visibility
     }
 
     private fun homeView(visible: Boolean) {
@@ -164,17 +175,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 playUrl.path,
                 playUrl.query,
                 playUrl.ref
-            )
+            ).toASCIIString().replace("?", "%3F")
 
             try {
-                println(playURI.toASCIIString())
                 val vlcIntent = Intent(Intent.ACTION_VIEW)
                 vlcIntent.setPackage("org.videolan.vlc")
                 vlcIntent.component = ComponentName(
                     "org.videolan.vlc",
                     "org.videolan.vlc.gui.video.VideoPlayerActivity"
                 )
-                vlcIntent.setDataAndTypeAndNormalize(Uri.parse(playURI.toASCIIString()), "video/*")
+                vlcIntent.setDataAndTypeAndNormalize(Uri.parse(playURI), "video/*")
                 vlcIntent.putExtra("title", it.file.dropLast(4))
                 vlcIntent.flags =
                     Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
@@ -227,15 +237,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             rvMyShowsHome.adapter = null
         }
         _binding = null
-    }
-
-    private fun getStatusBarHeight(): Int {
-        var result = 0
-        val resourceId = resources.getIdentifier("status_bar_height", "dimen", "android")
-        if (resourceId > 0) {
-            result = resources.getDimensionPixelSize(resourceId)
-        }
-        return result
     }
 
 }

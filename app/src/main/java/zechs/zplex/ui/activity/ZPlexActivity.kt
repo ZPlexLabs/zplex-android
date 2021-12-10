@@ -1,5 +1,6 @@
 package zechs.zplex.ui.activity
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -69,14 +70,18 @@ class ZPlexActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_zplex)
 
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.mainNavHostFragment) as NavHostFragment
+        val navHostFragment = supportFragmentManager.findFragmentById(
+            R.id.mainNavHostFragment
+        ) as NavHostFragment
         val navController = navHostFragment.navController
         bottomNavigationView.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.aboutFragment -> bottomNavigationView.visibility = View.GONE
+                R.id.aboutFragment -> {
+                    window.navigationBarColor = Color.parseColor("#121115")
+                    bottomNavigationView.visibility = View.GONE
+                }
                 R.id.bigImageFragment -> bottomNavigationView.visibility = View.GONE
                 else -> {
                     val colorPrimaryDark = ContextCompat.getColor(this, R.color.colorPrimaryDark)
@@ -93,8 +98,9 @@ class ZPlexActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.mainNavHostFragment) as NavHostFragment
+        val navHostFragment = supportFragmentManager.findFragmentById(
+            R.id.mainNavHostFragment
+        ) as NavHostFragment
         val navController = navHostFragment.navController
         return navController.navigateUp() || super.onSupportNavigateUp()
     }

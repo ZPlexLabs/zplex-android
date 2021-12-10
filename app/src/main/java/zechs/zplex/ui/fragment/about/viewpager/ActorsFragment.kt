@@ -63,7 +63,7 @@ class ActorsFragment : Fragment(R.layout.fragment_casts) {
 
                 is Resource.Error -> {
                     binding.apply {
-                        pbCasts.visibility = View.VISIBLE
+                        pbCasts.visibility = View.INVISIBLE
                         btnRetryCasts.visibility = View.VISIBLE
                         rvCasts.visibility = View.GONE
                     }

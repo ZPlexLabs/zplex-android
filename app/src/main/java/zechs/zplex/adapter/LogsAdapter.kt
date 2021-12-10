@@ -109,10 +109,11 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
             date?.let {
                 tv_time.text = ConverterUtils.toDuration(pstFormat.format(date))
             }
+
             Glide.with(this)
                 .load(redirectImagePoster)
-                .placeholder(R.drawable.placeholder_shape)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .placeholder(R.drawable.no_thumb)
                 .into(iv_thumb)
 
             setOnClickListener {

@@ -36,7 +36,7 @@
                 android:layout_height="match_parent"
                 android:contentDescription="@null"
                 android:scaleType="centerCrop"
-                tools:src="@drawable/placeholder_shape" />
+                tools:src="@drawable/no_thumb" />
 
         </com.google.android.material.card.MaterialCardView>
 

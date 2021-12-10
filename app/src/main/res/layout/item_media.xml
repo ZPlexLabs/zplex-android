@@ -8,16 +8,19 @@
     android:layout_marginStart="4dp"
     android:layout_marginEnd="4dp"
     android:layout_marginBottom="12dp"
+    android:foreground="?android:attr/selectableItemBackground"
     app:cardBackgroundColor="@android:color/transparent"
-    app:cardCornerRadius="4dp"
+    app:cardCornerRadius="8dp"
     app:cardElevation="8dp"
     app:cardMaxElevation="8dp">
 
     <ImageView
         android:id="@+id/item_poster"
-        android:layout_width="125dp"
-        android:layout_height="175dp"
+        android:layout_width="120dp"
+        android:layout_height="180dp"
+        android:adjustViewBounds="true"
         android:contentDescription="@null"
         android:scaleType="centerCrop"
-        tools:src="@drawable/poster" />
+        tools:src="@drawable/no_poster" />
+
 </com.google.android.material.card.MaterialCardView>

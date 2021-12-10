@@ -64,12 +64,11 @@ class TokenAuthenticator : Authenticator {
     }
 
     private fun addNewTokenInQuery(uri: Uri, newValue: String): Uri? {
-        val params = uri.queryParameterNames
         val newUri = uri.buildUpon().clearQuery()
-        for (param in params) {
+        uri.queryParameterNames.map {
             newUri.appendQueryParameter(
-                param,
-                if (param == "access_token") newValue else uri.getQueryParameter(param)
+                it,
+                if (it == "access_token") newValue else uri.getQueryParameter(it)
             )
         }
         return newUri.build()

@@ -53,6 +53,14 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
         aboutViewModel = (activity as ZPlexActivity).aboutViewModel
 
         argsModel.args.observe(viewLifecycleOwner, { arg ->
+            binding.btnRetryEpisodes.setOnClickListener {
+                val driveQuery = "name contains 'mkv' " +
+                        "and '${arg.file.id}'" +
+                        " in parents and trashed = false"
+
+                aboutViewModel.getMediaFiles(driveQuery)
+            }
+
             mediaAdapter = MediaAdapter(arg.mediaId)
             mediaAdapter.setOnItemClickListener {
                 playMedia(it, arg.mediaId, arg.name)
@@ -66,9 +74,7 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
 
         filesLoading()
 
-//        binding.btnRetryEpisodes.setOnClickListener {
-//            fileViewModel.getMediaFiles(driveQuery)
-//        }
+
 
         aboutViewModel.mediaList.observe(viewLifecycleOwner, { responseMedia ->
             when (responseMedia) {

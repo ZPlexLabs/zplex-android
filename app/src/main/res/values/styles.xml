@@ -44,7 +44,7 @@
     </style>
 
     <style name="Widget.App.Chip" parent="Widget.MaterialComponents.Chip.Action">
-        <item name="chipBackgroundColor">#4D000000</item>
+        <item name="chipBackgroundColor">#80000000</item>
         <item name="android:textColor">@color/textColor</item>
         <item name="android:clickable">false</item>
         <item name="android:focusable">false</item>

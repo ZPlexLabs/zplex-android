@@ -32,8 +32,10 @@ class SearchViewModel(
     private var newSearchQuery: String? = null
     private var oldSearchQuery: String? = null
 
-    private val accessToken =
-        SessionManager(getApplication<Application>().applicationContext).fetchAuthToken()
+    private val accessToken = SessionManager(
+        getApplication<Application>().applicationContext
+    ).fetchAuthToken()
+
     private val pageSize = 21
     private val orderBy = "modifiedTime desc"
 
@@ -95,7 +97,6 @@ class SearchViewModel(
         }
         return Resource.Error(response.message())
     }
-
 
     private fun hasInternetConnection(): Boolean {
         val connectivityManager = getApplication<ThisApp>().getSystemService(

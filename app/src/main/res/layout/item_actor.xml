@@ -41,7 +41,7 @@
                 android:adjustViewBounds="true"
                 android:contentDescription="@null"
                 android:scaleType="centerCrop"
-                tools:src="@drawable/actor" />
+                tools:src="@drawable/no_actor" />
 
         </com.google.android.material.card.MaterialCardView>
 
