@@ -74,8 +74,6 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
 
         filesLoading()
 
-
-
         aboutViewModel.mediaList.observe(viewLifecycleOwner, { responseMedia ->
             when (responseMedia) {
                 is Resource.Success -> {

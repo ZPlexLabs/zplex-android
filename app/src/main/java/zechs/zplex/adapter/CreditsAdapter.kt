@@ -31,9 +31,7 @@ class CreditsAdapter : RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder>() 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CreditsViewHolder {
         return CreditsViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_actor,
-                parent,
-                false
+                R.layout.item_actor, parent, false
             )
         )
     }

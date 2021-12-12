@@ -32,9 +32,7 @@ class ActorsAdapter : RecyclerView.Adapter<ActorsAdapter.ActorsViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ActorsViewHolder {
         return ActorsViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_actor,
-                parent,
-                false
+                R.layout.item_actor, parent, false
             )
         )
     }

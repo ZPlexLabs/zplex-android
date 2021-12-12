@@ -35,9 +35,7 @@ class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilesViewHolder {
         return FilesViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_media,
-                parent,
-                false
+                R.layout.item_media, parent, false
             )
         )
     }
@@ -48,21 +46,21 @@ class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
 
     override fun onBindViewHolder(holder: FilesViewHolder, position: Int) {
         val file = differ.currentList[position]
-        val name = file.name
+        val regex = "^(.*[0-9])( - )(.*)( - )(TV|Movie)".toRegex()
+        val nameSplit = regex.find(file.name)?.destructured?.toList()
 
-        if (name.contains("TV") || name.contains("Movie")) {
+        if (nameSplit != null) {
+            val mediaId = nameSplit[0]
+            // val mediaName = nameSplit[2]
+            val mediaType = nameSplit[4]
 
-            val redirectImagePoster = if (name.endsWith("TV")) {
-                Uri.parse(
-                    "${ZPLEX_IMAGE_REDIRECT}/tvdb/${
-                        file.name.split(" - ").toTypedArray()[0]
-                    }"
-                )
+            val redirectImagePoster = if (mediaType == "TV") {
+                Uri.parse("${ZPLEX_IMAGE_REDIRECT}/tvdb/$mediaId")
             } else {
                 Uri.parse(
-                    "${ZPLEX_IMAGE_REDIRECT}/tmdb/${
-                        file.name.split(" - ").toTypedArray()[0]
-                    }?api_key=${TMDB_API_KEY}&language=en-US"
+                    "${ZPLEX_IMAGE_REDIRECT}/tmdb/$mediaId?api_key=${
+                        TMDB_API_KEY
+                    }&language=en-US"
                 )
             }
 

@@ -4,6 +4,7 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -50,49 +51,40 @@ class MediaAdapter(
 
     override fun onBindViewHolder(holder: MediaViewHolder, position: Int) {
         val file = differ.currentList[position]
+        val regex = "^S(.*[0-9])E(.*[0-9])( - )(.*)(.mkv)".toRegex()
+        val nameSplit = regex.find(file.name)?.destructured?.toList()
 
-        val fileName = file.name
-        val episode = fileName.split(" - ".toRegex(), 2).toTypedArray()[0]
-        val title = fileName.split(" - ".toRegex(), 2).toTypedArray()[1]
-        val bytes = file.humanSize
+        if (nameSplit != null) {
+            val seasonCount = nameSplit[0].toInt()
+            val episodeCount = nameSplit[1].toInt()
+            val episodeTitle = nameSplit[3]
+            // val episodeExtension = nameSplit[4]
 
-        val count = try {
-            "Episode ${episode.substring(4).toInt()}"
-        } catch (nfe: NumberFormatException) {
-            "Episode ${episode.substring(4)}"
-        }
+            val count = "Episode $episodeCount"
 
-        val redirectImagePoster =
-            Uri.parse(
-                "${ZPLEX_IMAGE_REDIRECT}/tvdb/${tvdbId}/episodes/query?airedSeason=${
-                    episode.substring(
-                        1,
-                        3
-                    ).toInt()
-                }&airedEpisode=${
-                    episode.substring(4, 6).toInt()
-                }"
+            val redirectImagePoster = Uri.parse(
+                "${ZPLEX_IMAGE_REDIRECT}/tvdb/${
+                    tvdbId
+                }/episodes/query?airedSeason=$seasonCount&airedEpisode=$episodeCount"
             )
 
-        holder.itemView.apply {
+            holder.itemView.apply {
+                if (episodeTitle == count) episode_count.isGone = true
 
-            episode_title.text = title.substring(0, title.length - 4)
-            episode_count.text = count
+                episode_title.text = if (episodeTitle.isEmpty()) "No title" else episodeTitle
+                episode_count.text = count
+                episode_size.text = file.humanSize
 
-            if (title.substring(0, title.length - 4) == count) {
-                episode_count.visibility = View.GONE
-            }
-            episode_size.text = bytes
+                Glide.with(this)
+                    .asBitmap()
+                    .load(redirectImagePoster)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .placeholder(R.drawable.no_thumb)
+                    .into(thumb)
 
-            Glide.with(this)
-                .asBitmap()
-                .load(redirectImagePoster)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                .placeholder(R.drawable.no_thumb)
-                .into(thumb)
-
-            setOnClickListener {
-                onItemClickListener?.let { it(file) }
+                setOnClickListener {
+                    onItemClickListener?.let { it(file) }
+                }
             }
         }
     }

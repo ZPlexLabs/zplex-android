@@ -15,7 +15,7 @@ object ConverterUtils {
         TimeUnit.MINUTES.toMillis(1),
         TimeUnit.SECONDS.toMillis(1)
     )
-    private val timesString = listOf("year", "month", "day", "hour", "minute", "second")
+    private val timesString = listOf("year", "month", "day", "hr", "min", "sec")
 
     @Throws(ParseException::class)
     fun toDuration(date: String): String {
@@ -24,8 +24,9 @@ object ConverterUtils {
         format.timeZone = TimeZone.getTimeZone(TimeZone.getDefault().toString())
         val past = format.parse(date)
         val now = Date()
-        val duration =
-            TimeUnit.MILLISECONDS.toMillis(now.time - Objects.requireNonNull(past).time)
+        val duration = TimeUnit.MILLISECONDS.toMillis(
+            now.time - Objects.requireNonNull(past).time
+        )
         val response = StringBuilder()
         for (i in times.indices) {
             val current = times[i]
@@ -36,7 +37,7 @@ object ConverterUtils {
                 break
             }
         }
-        return if ("" == response.toString()) "0 seconds ago" else response.toString()
+        return if ("" == response.toString()) "0 secs ago" else response.toString()
     }
 
     fun getSize(size: Long): String {
@@ -46,7 +47,7 @@ object ConverterUtils {
         val gb = mb / 1024
         val tb = gb / 1024
         s = when {
-            size < 1024L -> "$size Bytes"
+            size < 1024L -> "$size B"
             size < 1024L * 1024 -> String.format("%.2f", kb) + " KB"
             size < 1024L * 1024 * 1024 -> String.format("%.2f", mb) + " MB"
             size < 1024L * 1024 * 1024 * 1024 -> String.format("%.2f", gb) + " GB"

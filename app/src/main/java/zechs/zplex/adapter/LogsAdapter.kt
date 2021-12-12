@@ -53,7 +53,7 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
         val log = differ.currentList[position]
         val tvdbId = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[0]
         val show = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[1]
-        val type = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[2]
+        // val type = log.folder.split(" - ", ignoreCase = false, limit = 3).toTypedArray()[2]
 
         val episode = log.file.split(" - ", ignoreCase = false, limit = 2).toTypedArray()[0]
         val episodeTitle = try {
