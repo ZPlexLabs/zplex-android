@@ -193,24 +193,16 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
 
     private fun filesLoading() {
 
-        // mediaAdapter.differ.submitList(listOf<File>().toList())
-
         val emptyList = listOf<String>().toList()
 
         context?.let {
-            val adapter =
-                ArrayAdapter(
-                    it,
-                    R.layout.item_dropdown,
-                    emptyList
-                )
+            val adapter = ArrayAdapter(
+                it, R.layout.item_dropdown, emptyList
+            )
 
-            val listPopupWindow =
-                ListPopupWindow(
-                    it,
-                    null,
-                    R.attr.listPopupWindowStyle
-                )
+            val listPopupWindow = ListPopupWindow(
+                it, null, R.attr.listPopupWindowStyle
+            )
             listPopupWindow.anchorView = binding.seasonsMenu
             listPopupWindow.setAdapter(adapter)
             binding.seasonsMenu.text = ""
@@ -256,13 +248,13 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
         }
 
         context?.let { it1 ->
+            val roundedBg = ContextCompat.getDrawable(
+                it1, R.drawable.popup_menu_bg
+            )
+
             MaterialAlertDialogBuilder(it1)
-                .setBackground(
-                    ContextCompat.getDrawable(
-                        it1,
-                        R.drawable.popup_menu_bg
-                    )
-                ).setTitle("Play using")
+                .setBackground(roundedBg)
+                .setTitle("Play using")
                 .setItems(items) { dialog, which ->
                     when (which) {
                         0 -> {
@@ -312,16 +304,12 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
                             } catch (e: MalformedURLException) {
                                 e.printStackTrace()
                                 makeText(
-                                    context,
-                                    e.localizedMessage,
-                                    LENGTH_LONG
+                                    context, e.localizedMessage, LENGTH_LONG
                                 ).show()
                             } catch (e: URISyntaxException) {
                                 e.printStackTrace()
                                 makeText(
-                                    context,
-                                    e.localizedMessage,
-                                    LENGTH_LONG
+                                    context, e.localizedMessage, LENGTH_LONG
                                 ).show()
                             }
                             dialog.dismiss()
@@ -334,7 +322,6 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mediaAdapter.differ.submitList(listOf<File>().toList())
         binding.rvEpisodes.adapter = null
         _binding = null
     }

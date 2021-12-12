@@ -90,11 +90,10 @@ class ZPlexActivity : AppCompatActivity() {
                     bottomNavigationView.visibility = View.VISIBLE
                 }
             }
-
-            FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
-            FirebaseMessaging.getInstance().subscribeToTopic("all")
-
         }
+
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
+        FirebaseMessaging.getInstance().subscribeToTopic("all")
     }
 
     override fun onSupportNavigateUp(): Boolean {

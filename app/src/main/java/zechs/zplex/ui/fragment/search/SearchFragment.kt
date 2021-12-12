@@ -8,12 +8,15 @@ import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.transition.MaterialFade
 import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -47,10 +50,13 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true).apply {
+        enterTransition = MaterialFade()
+        exitTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, true
+        ).apply {
             duration = 500L
         }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -81,17 +87,15 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 is Resource.Success -> {
                     isLoading = false
                     TransitionManager.beginDelayedTransition(binding.root)
-                    binding.loadingSearch.visibility = View.INVISIBLE
+                    binding.loadingSearch.isInvisible = true
                     response.data?.let { filesResponse ->
                         if (filesResponse.files.isEmpty()) {
                             Toast.makeText(
-                                context,
-                                "Nothing found",
-                                Toast.LENGTH_SHORT
+                                context, "Nothing found", Toast.LENGTH_SHORT
                             ).show()
                         }
                         filesAdapter.differ.submitList(filesResponse.files.toList())
-                        isLastPage = filesResponse.nextPageToken == ""
+                        isLastPage = filesResponse.nextPageToken.isNullOrEmpty()
                         Log.d("pageToken", PAGE_TOKEN)
                     }
                 }
@@ -99,18 +103,15 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     isLoading = false
                     response.message?.let { message ->
                         Toast.makeText(
-                            context,
-                            "An error occurred: $message",
-                            Toast.LENGTH_SHORT
+                            context, "An error occurred: $message", Toast.LENGTH_SHORT
                         ).show()
                         Log.e(thisTag, "An error occurred: $message")
                     }
-                    binding.loadingSearch.visibility = View.INVISIBLE
-
+                    binding.loadingSearch.isInvisible = true
                 }
                 is Resource.Loading -> {
                     isLoading = true
-                    binding.loadingSearch.visibility = View.VISIBLE
+                    binding.loadingSearch.isVisible = true
                 }
             }
         })
@@ -157,23 +158,23 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         filesAdapter.setOnItemClickListener {
             hideKeyboard()
-            try {
-                val seriesId = (it.name.split(" - ").toTypedArray()[0]).toInt()
-                val name = it.name.split(" - ").toTypedArray()[1]
-                val type = it.name.split(" - ").toTypedArray()[2]
+            val regex = "^(.*[0-9])( - )(.*)( - )(TV|Movie)".toRegex()
+            val nameSplit = regex.find(it.name)?.destructured?.toList()
+
+            if (nameSplit != null) {
+                val mediaId = nameSplit[0]
+                val mediaName = nameSplit[2]
+                val mediaType = nameSplit[4]
 
                 argsModel.setArg(
                     Args(
                         file = it,
-                        mediaId = seriesId,
-                        type = type,
-                        name = name
+                        mediaId = mediaId.toInt(),
+                        type = mediaType,
+                        name = mediaName
                     )
                 )
-
                 findNavController().navigate(R.id.action_searchFragment_to_aboutFragment)
-            } catch (e: NumberFormatException) {
-                Toast.makeText(context, "Id not found", Toast.LENGTH_LONG).show()
             }
         }
     }

@@ -80,7 +80,6 @@
                         android:contentDescription="@null"
                         android:elevation="0dp"
                         android:scaleType="centerCrop"
-                        android:transitionName="poster_shared_transition"
                         tools:srcCompat="@drawable/no_poster" />
 
                 </com.google.android.material.card.MaterialCardView>

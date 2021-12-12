@@ -37,7 +37,8 @@ class ActorsFragment : Fragment(R.layout.fragment_casts) {
         actorsAdapter = ActorsAdapter()
 
         actorsAdapter.setOnItemClickListener { data ->
-            if (data.image != null) {
+            if (!data.image.isNullOrEmpty()) {
+                Log.d("actorURL", "${TVDB_IMAGE_PATH}${data.image}")
                 bigImageViewModel.setImageUrl("${TVDB_IMAGE_PATH}${data.image}")
                 findNavController().navigate(R.id.action_aboutFragment_to_bigImageFragment)
             }

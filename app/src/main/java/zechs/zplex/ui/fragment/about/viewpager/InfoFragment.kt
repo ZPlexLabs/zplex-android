@@ -11,11 +11,12 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import com.google.android.material.chip.Chip
-import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.adapter.MiscAdapter
 import zechs.zplex.databinding.FragmentInfoBinding
@@ -57,12 +58,14 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
         aboutViewModel.series.observe(viewLifecycleOwner, { response ->
             when (response) {
                 is Resource.Success -> {
+                    binding.loadingInfo.isInvisible = true
                     response.data?.let {
                         tvdbSuccess(it)
                     }
                 }
 
                 is Resource.Error -> {
+                    binding.loadingInfo.isInvisible = true
                     response.message?.let { message ->
                         apiError(message)
                     }
@@ -75,12 +78,14 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
         aboutViewModel.movies.observe(viewLifecycleOwner, { response ->
             when (response) {
                 is Resource.Success -> {
+                    binding.loadingInfo.isInvisible = true
                     response.data?.let {
                         tmdbSuccess(it)
                     }
                 }
 
                 is Resource.Error -> {
+                    binding.loadingInfo.isInvisible = true
                     response.message?.let { message ->
                         apiError(message)
                     }
@@ -93,10 +98,10 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
     }
 
     private fun tmdbSuccess(it: MoviesResponse) {
-        val materialTransition = MaterialSharedAxis(MaterialSharedAxis.X, true).apply {
-            duration = 150L
-        }
-        TransitionManager.beginDelayedTransition(binding.root, materialTransition)
+//        val materialTransition = MaterialSharedAxis(MaterialSharedAxis.X, true).apply {
+//            duration = 150L
+//        }
+//        TransitionManager.beginDelayedTransition(binding.root, materialTransition)
 
         val pairsArray: MutableList<Pairs> = mutableListOf()
 
@@ -193,10 +198,10 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
 
 
     private fun tvdbSuccess(seriesResponse: SeriesResponse) {
-        val materialTransition = MaterialSharedAxis(MaterialSharedAxis.X, true).apply {
-            duration = 150L
-        }
-        TransitionManager.beginDelayedTransition(binding.root, materialTransition)
+//        val materialTransition = MaterialSharedAxis(MaterialSharedAxis.X, true).apply {
+//            duration = 150L
+//        }
+//        TransitionManager.beginDelayedTransition(binding.root, materialTransition)
 
         seriesResponse.data?.let {
 
@@ -287,6 +292,7 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
         binding.apply {
             cgGenre.removeAllViews()
             seriesInfo.visibility = View.GONE
+            loadingInfo.isVisible = true
         }
     }
 

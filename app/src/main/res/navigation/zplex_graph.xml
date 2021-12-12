@@ -43,7 +43,7 @@
             app:destination="@id/bigImageFragment" />
     </fragment>
 
-    <fragment
+    <dialog
         android:id="@+id/bigImageFragment"
         android:name="zechs.zplex.ui.fragment.image.BigImageFragment"
         android:label="BigImageFragment"

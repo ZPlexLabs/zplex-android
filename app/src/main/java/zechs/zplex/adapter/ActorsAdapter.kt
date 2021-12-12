@@ -44,10 +44,10 @@ class ActorsAdapter : RecyclerView.Adapter<ActorsAdapter.ActorsViewHolder>() {
     override fun onBindViewHolder(holder: ActorsViewHolder, position: Int) {
         val data = differ.currentList[position]
 
-        val imageUrl = if (data.image != null) {
-            "${TVDB_IMAGE_PATH}${data.image}"
-        } else {
+        val imageUrl = if (data.image.isNullOrEmpty()) {
             R.drawable.no_actor
+        } else {
+            "${TVDB_IMAGE_PATH}${data.image}"
         }
 
         holder.itemView.apply {

@@ -2,7 +2,6 @@ package zechs.zplex.ui.fragment.myshows
 
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -10,6 +9,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.transition.MaterialFade
 import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.adapter.FilesAdapter
@@ -32,10 +32,13 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        exitTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true).apply {
+        enterTransition = MaterialFade()
+        exitTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, true
+        ).apply {
             duration = 500L
         }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -80,23 +83,23 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
             adapter = filesAdapter
             layoutManager = GridLayoutManager(activity, 3)
             filesAdapter.setOnItemClickListener {
-                try {
-                    val seriesId = (it.name.split(" - ").toTypedArray()[0]).toInt()
-                    val name = it.name.split(" - ").toTypedArray()[1]
-                    val type = it.name.split(" - ").toTypedArray()[2]
+                val regex = "^(.*[0-9])( - )(.*)( - )(TV|Movie)".toRegex()
+                val nameSplit = regex.find(it.name)?.destructured?.toList()
+
+                if (nameSplit != null) {
+                    val mediaId = nameSplit[0]
+                    val mediaName = nameSplit[2]
+                    val mediaType = nameSplit[4]
 
                     argsModel.setArg(
                         Args(
                             file = it,
-                            mediaId = seriesId,
-                            type = type,
-                            name = name
+                            mediaId = mediaId.toInt(),
+                            type = mediaType,
+                            name = mediaName
                         )
                     )
-
                     findNavController().navigate(R.id.action_myShowsFragment_to_aboutFragment)
-                } catch (e: NumberFormatException) {
-                    Toast.makeText(context, "TVDB id not found", Toast.LENGTH_LONG).show()
                 }
             }
         }

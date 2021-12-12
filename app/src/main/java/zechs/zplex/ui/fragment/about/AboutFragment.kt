@@ -12,14 +12,13 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayoutMediator
-import com.google.android.material.transition.MaterialElevationScale
+import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -51,9 +50,19 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        exitTransition = MaterialElevationScale(false)
-        reenterTransition = MaterialElevationScale(false)
-        reenterTransition = MaterialElevationScale(true)
+
+        enterTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, true
+        ).apply {
+            duration = 500L
+        }
+
+        exitTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, false
+        ).apply {
+            duration = 500L
+        }
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
     }
 
     @DelicateCoroutinesApi
@@ -201,13 +210,8 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
 
                 binding.ivPoster.setOnClickListener {
                     bigImageViewModel.setImageUrl(redirectImagePoster.toString())
-                    val extras =
-                        FragmentNavigatorExtras(binding.ivPoster to "poster_shared_transition")
                     findNavController().navigate(
-                        R.id.action_aboutFragment_to_bigImageFragment,
-                        null,
-                        null,
-                        extras
+                        R.id.action_aboutFragment_to_bigImageFragment
                     )
                 }
 

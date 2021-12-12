@@ -9,7 +9,6 @@
     <application
         android:name=".ThisApp"
         android:allowBackup="true"
-        android:colorMode="wideColorGamut"
         android:fullBackupContent="false"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
