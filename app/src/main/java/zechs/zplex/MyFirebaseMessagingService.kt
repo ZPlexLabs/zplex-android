@@ -47,7 +47,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             Log.d(tag, "Notification Body: $body")
 
             if (body != null) {
-                val tvdbId = body.split(" - ", ignoreCase = false, limit = 4).toTypedArray()[0]
+                // val tvdbId = body.split(" - ", ignoreCase = false, limit = 4).toTypedArray()[0]
                 val show = body.split(" - ", ignoreCase = false, limit = 4).toTypedArray()[1]
                 val episode = body.split(" - ", ignoreCase = false, limit = 4).toTypedArray()[2]
                 val episodeTitle =

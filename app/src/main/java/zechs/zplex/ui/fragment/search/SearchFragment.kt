@@ -29,6 +29,7 @@ import zechs.zplex.ui.fragment.ArgsViewModel
 import zechs.zplex.utils.Constants.PAGE_TOKEN
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
 import zechs.zplex.utils.Constants.isLastPage
+import zechs.zplex.utils.Constants.regexShow
 import zechs.zplex.utils.Resource
 
 
@@ -144,8 +145,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         filesAdapter.setOnItemClickListener {
             hideKeyboard()
-            val regex = "^(.*[0-9])( - )(.*)( - )(TV|Movie)".toRegex()
-            val nameSplit = regex.find(it.name)?.destructured?.toList()
+            val nameSplit = regexShow.toRegex().find(it.name)?.destructured?.toList()
 
             if (nameSplit != null) {
                 val mediaId = nameSplit[0]

@@ -25,6 +25,7 @@ import zechs.zplex.models.drive.File
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.ArgsViewModel
 import zechs.zplex.utils.Constants.ZPLEX
+import zechs.zplex.utils.Constants.regexShow
 import zechs.zplex.utils.Resource
 import java.net.IDN
 import java.net.URI
@@ -192,8 +193,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun getDetails(it: File) {
-        val regex = "^(.*[0-9])( - )(.*)( - )(TV|Movie)".toRegex()
-        val nameSplit = regex.find(it.name)?.destructured?.toList()
+        val nameSplit = regexShow.toRegex().find(it.name)?.destructured?.toList()
 
         if (nameSplit != null) {
             val mediaId = nameSplit[0]

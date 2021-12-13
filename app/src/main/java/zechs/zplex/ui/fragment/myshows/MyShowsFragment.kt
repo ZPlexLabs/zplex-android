@@ -15,6 +15,7 @@ import zechs.zplex.databinding.FragmentMyShowsBinding
 import zechs.zplex.models.Args
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.ArgsViewModel
+import zechs.zplex.utils.Constants.regexShow
 
 
 class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
@@ -53,11 +54,15 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.absoluteAdapterPosition
                 val file = filesAdapter.differ.currentList[position]
-                myShowsViewModel.deleteShow(file)
-                Snackbar.make(
-                    view, "${file.name} Successfully removed",
-                    Snackbar.LENGTH_LONG
-                ).show()
+                val nameSplit = regexShow.toRegex().find(file.name)?.destructured?.toList()
+                if (nameSplit != null) {
+                    val mediaName = nameSplit[2]
+                    myShowsViewModel.deleteShow(file)
+                    Snackbar.make(
+                        view, "$mediaName successfully removed",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
 
@@ -72,8 +77,7 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
             adapter = filesAdapter
             layoutManager = GridLayoutManager(activity, 3)
             filesAdapter.setOnItemClickListener {
-                val regex = "^(.*[0-9])( - )(.*)( - )(TV|Movie)".toRegex()
-                val nameSplit = regex.find(it.name)?.destructured?.toList()
+                val nameSplit = regexShow.toRegex().find(it.name)?.destructured?.toList()
 
                 if (nameSplit != null) {
                     val mediaId = nameSplit[0]

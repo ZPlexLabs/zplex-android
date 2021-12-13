@@ -14,6 +14,7 @@ import zechs.zplex.R
 import zechs.zplex.models.drive.File
 import zechs.zplex.utils.Constants.TMDB_API_KEY
 import zechs.zplex.utils.Constants.ZPLEX_IMAGE_REDIRECT
+import zechs.zplex.utils.Constants.regexShow
 
 
 class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
@@ -46,8 +47,7 @@ class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
 
     override fun onBindViewHolder(holder: FilesViewHolder, position: Int) {
         val file = differ.currentList[position]
-        val regex = "^(.*[0-9])( - )(.*)( - )(TV|Movie)".toRegex()
-        val nameSplit = regex.find(file.name)?.destructured?.toList()
+        val nameSplit = regexShow.toRegex().find(file.name)?.destructured?.toList()
 
         if (nameSplit != null) {
             val mediaId = nameSplit[0]

@@ -26,4 +26,6 @@ object Constants {
     const val SEARCH_DELAY_AMOUNT = 500L
     var PAGE_TOKEN = ""
     var isLastPage = false
+    const val regexFile = "^S(.*[0-9])E(.*[0-9])( - )(.*)(.mkv)"
+    const val regexShow = "^(.*[0-9])( - )(.*)( - )(TV|Movie)"
 }

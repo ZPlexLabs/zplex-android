@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.item_episode.view.*
 import zechs.zplex.R
 import zechs.zplex.models.drive.File
 import zechs.zplex.utils.Constants.ZPLEX_IMAGE_REDIRECT
+import zechs.zplex.utils.Constants.regexFile
 
 class MediaAdapter(private val tvdbId: Int) : RecyclerView.Adapter<MediaAdapter.MediaViewHolder>() {
 
@@ -45,8 +46,7 @@ class MediaAdapter(private val tvdbId: Int) : RecyclerView.Adapter<MediaAdapter.
 
     override fun onBindViewHolder(holder: MediaViewHolder, position: Int) {
         val file = differ.currentList[position]
-        val regex = "^S(.*[0-9])E(.*[0-9])( - )(.*)(.mkv)".toRegex()
-        val nameSplit = regex.find(file.name)?.destructured?.toList()
+        val nameSplit = regexFile.toRegex().find(file.name)?.destructured?.toList()
 
         if (nameSplit != null) {
             val seasonCount = nameSplit[0].toInt()

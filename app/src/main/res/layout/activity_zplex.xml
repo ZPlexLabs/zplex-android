@@ -25,6 +25,16 @@
             app:navGraph="@navigation/zplex_graph" />
     </FrameLayout>
 
+    <View
+        android:id="@+id/view1"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_gravity="center|bottom"
+        android:background="#323639"
+        app:layout_constraintBottom_toBottomOf="@+id/zplex_frame"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
         android:layout_width="match_parent"

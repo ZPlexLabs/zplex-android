@@ -12,7 +12,6 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.logs_item.view.*
 import zechs.zplex.R
 import zechs.zplex.models.witch.ReleasesLog
-import zechs.zplex.utils.Constants.ZPLEX
 import zechs.zplex.utils.Constants.ZPLEX_IMAGE_REDIRECT
 import zechs.zplex.utils.ConverterUtils
 import java.text.SimpleDateFormat

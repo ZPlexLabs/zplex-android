@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
@@ -89,7 +90,8 @@ class ZPlexActivity : AppCompatActivity() {
             when (destination.id) {
                 R.id.aboutFragment -> {
                     window.navigationBarColor = Color.parseColor("#121115")
-                    bottomNavigationView.visibility = View.GONE
+                    bottomNavigationView.isVisible = false
+                    view1.isVisible = false
 
                     currentNavigationFragment?.apply {
                         enterTransition = MaterialFade()
@@ -108,7 +110,8 @@ class ZPlexActivity : AppCompatActivity() {
                         ContextCompat.getColor(this, R.color.colorPrimaryDark)
                     window.statusBarColor = colorPrimaryDark
                     window.navigationBarColor = colorPrimaryDark
-                    bottomNavigationView.visibility = View.VISIBLE
+                    bottomNavigationView.isVisible = true
+                    view1.isVisible = true
                 }
             }
         }

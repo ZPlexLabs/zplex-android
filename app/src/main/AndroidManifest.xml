@@ -21,10 +21,12 @@
         tools:ignore="AllowBackup">
         <activity
             android:name=".ui.activity.PlayerActivity"
-            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:configChanges="screenSize|smallestScreenSize|orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="true"
             android:keepScreenOn="true"
             android:label="@string/title_activity_player"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
             android:theme="@style/AppTheme.Fullscreen" />
         <activity
             android:name=".ui.activity.ZPlexActivity"

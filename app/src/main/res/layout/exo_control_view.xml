@@ -84,24 +84,17 @@
             android:layout_gravity="center_vertical|end"
             android:layoutDirection="ltr">
 
-
             <ImageButton
-                android:id="@id/exo_vr"
-                style="@style/ExoStyledControls.Button.Bottom.VR" />
-
-            <ImageButton
-                android:id="@id/exo_shuffle"
-                style="@style/ExoStyledControls.Button.Bottom.Shuffle" />
-
-            <ImageButton
-                android:id="@id/exo_repeat_toggle"
-                style="@style/ExoStyledControls.Button.Bottom.RepeatToggle" />
+                android:id="@+id/exo_pip_button"
+                style="@style/ExoStyledControls.Button.Bottom.VR"
+                android:padding="14dp"
+                android:src="@drawable/ic_picture_in_picture_24" />
 
             <ImageButton
                 android:id="@+id/exo_aspect_button"
                 style="@style/ExoStyledControls.Button.Bottom.VR"
                 android:padding="14dp"
-                android:src="@drawable/ic_baseline_aspect_ratio_24" />
+                android:src="@drawable/ic_aspect_ratio_24" />
 
             <ImageButton
                 android:id="@id/exo_subtitle"
@@ -110,14 +103,6 @@
             <ImageButton
                 android:id="@id/exo_settings"
                 style="@style/ExoStyledControls.Button.Bottom.Settings" />
-
-            <ImageButton
-                android:id="@id/exo_fullscreen"
-                style="@style/ExoStyledControls.Button.Bottom.FullScreen" />
-
-            <ImageButton
-                android:id="@id/exo_overflow_show"
-                style="@style/ExoStyledControls.Button.Bottom.OverflowShow" />
 
         </LinearLayout>
 
@@ -177,10 +162,6 @@
         android:gravity="center"
         android:padding="@dimen/exo_styled_controls_padding">
 
-        <ImageButton
-            android:id="@id/exo_prev"
-            style="@style/ExoStyledControls.Button.Center.Previous" />
-
         <include layout="@layout/exo_styled_player_control_rewind_button" />
 
         <ImageButton
@@ -189,9 +170,6 @@
 
         <include layout="@layout/exo_styled_player_control_ffwd_button" />
 
-        <ImageButton
-            android:id="@id/exo_next"
-            style="@style/ExoStyledControls.Button.Center.Next" />
 
     </LinearLayout>
 

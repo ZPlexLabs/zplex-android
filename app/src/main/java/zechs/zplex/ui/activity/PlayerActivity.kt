@@ -1,14 +1,15 @@
 package zechs.zplex.ui.activity
 
+import android.app.PictureInPictureParams
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
-import android.view.Window
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import com.google.android.exoplayer2.*
@@ -26,19 +27,14 @@ class PlayerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPlayerBinding
     private lateinit var exoPlayer: ExoPlayer
+    private var onStopCalled = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
-
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val windowInsetsController =
-            ViewCompat.getWindowInsetsController(window.decorView) ?: return
-        windowInsetsController.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        windowInsetsController.hide(WindowInsetsCompat.Type.systemBars())
+        hideSystemUI()
 
         val httpDataSourceFactory = DefaultHttpDataSource
             .Factory()
@@ -59,6 +55,7 @@ class PlayerActivity : AppCompatActivity() {
         exoPlayer = ExoPlayer.Builder(this, rendererFactory)
             .setMediaSourceFactory(DefaultMediaSourceFactory(dataSourceFactory))
             .build()
+
         playMedia()
     }
 
@@ -101,14 +98,19 @@ class PlayerActivity : AppCompatActivity() {
                 .build()
         }
 
+
+
         binding.playerView.apply {
             player = exoPlayer
-            setShowNextButton(false)
-            setShowPreviousButton(false)
             setShowFastForwardButton(true)
             setShowRewindButton(true)
-            controllerHideOnTouch = false
+            controllerHideOnTouch = true
             controllerAutoShow = true
+
+            setControllerVisibilityListener {
+                if (it == 0) showSystemUI() else hideSystemUI()
+            }
+
             val titleText = findViewById<TextView>(R.id.exo_video_title)
             titleText.text = title
             findViewById<ImageButton>(R.id.exo_aspect_button).setOnClickListener {
@@ -118,6 +120,23 @@ class PlayerActivity : AppCompatActivity() {
                     binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                 }
             }
+            findViewById<ImageButton>(R.id.exo_pip_button).setOnClickListener {
+                enterPIPMode()
+            }
+        }
+    }
+
+    override fun onPictureInPictureModeChanged(
+        isInPictureInPictureMode: Boolean,
+        newConfig: Configuration?
+    ) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
+        binding.playerView.apply {
+            controllerAutoShow = !isInPictureInPictureMode
+            if (isInPictureInPictureMode) hideController() else showController()
+        }
+        if (onStopCalled) {
+            finish()
         }
     }
 
@@ -127,12 +146,50 @@ class PlayerActivity : AppCompatActivity() {
         )
     }
 
+    private fun hideSystemUI() {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        WindowInsetsControllerCompat(window, window.decorView).let { controller ->
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+            controller.systemBarsBehavior =
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        }
+    }
+
+    private fun showSystemUI() {
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowInsetsControllerCompat(
+            window, window.decorView
+        ).show(WindowInsetsCompat.Type.systemBars())
+    }
+
+    private fun enterPIPMode() {
+        this.enterPictureInPictureMode(
+            PictureInPictureParams.Builder()
+                .build()
+        )
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        enterPIPMode()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        onStopCalled = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        onStopCalled = false
+    }
+
     override fun onDestroy() {
 //        val totalTime = exoPlayer.duration
 //        val watchedTime = exoPlayer.currentPosition
 //        val hasWatched = watchedTime > totalTime / 2
+        binding.playerView.player = null
         exoPlayer.release()
         super.onDestroy()
     }
-
 }

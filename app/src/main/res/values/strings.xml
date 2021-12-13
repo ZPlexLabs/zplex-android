@@ -17,4 +17,7 @@
     <string name="genres">Genres</string>
     <string name="miscellaneous">Miscellaneous</string>
     <string name="something_went_wrong">Something went wrong</string>
+    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>

@@ -21,4 +21,8 @@
     <color name="exo_styled_error_message_background" tools:keep="@color/exo_styled_error_message_background">
         @color/ui_controls_background
     </color>
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="light_blue_900">#FF01579B</color>
+    <color name="light_blue_A200">#FF40C4FF</color>
+    <color name="light_blue_A400">#FF00B0FF</color>
 </resources>
