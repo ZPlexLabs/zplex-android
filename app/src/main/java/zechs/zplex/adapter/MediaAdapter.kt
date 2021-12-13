@@ -15,11 +15,7 @@ import zechs.zplex.R
 import zechs.zplex.models.drive.File
 import zechs.zplex.utils.Constants.ZPLEX_IMAGE_REDIRECT
 
-
-class MediaAdapter(
-    private val tvdbId: Int,
-) :
-    RecyclerView.Adapter<MediaAdapter.MediaViewHolder>() {
+class MediaAdapter(private val tvdbId: Int) : RecyclerView.Adapter<MediaAdapter.MediaViewHolder>() {
 
     inner class MediaViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
@@ -38,9 +34,7 @@ class MediaAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MediaViewHolder {
         return MediaViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_episode,
-                parent,
-                false
+                R.layout.item_episode, parent, false
             )
         )
     }

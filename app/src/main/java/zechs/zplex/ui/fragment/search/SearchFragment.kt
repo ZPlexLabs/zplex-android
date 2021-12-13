@@ -16,8 +16,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.transition.MaterialFade
-import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -30,6 +28,7 @@ import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.ArgsViewModel
 import zechs.zplex.utils.Constants.PAGE_TOKEN
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
+import zechs.zplex.utils.Constants.isLastPage
 import zechs.zplex.utils.Resource
 
 
@@ -45,19 +44,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     private val thisTag = "SearchFragment"
     private var queryText = ""
     private var isLoading = true
-    private var isLastPage = false
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enterTransition = MaterialFade()
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, true
-        ).apply {
-            duration = 500L
-        }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -133,7 +119,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             if (dy > 0) {
                 val layoutManager = binding.rvSearch.layoutManager as GridLayoutManager
                 val visibleItemCount = layoutManager.findLastCompletelyVisibleItemPosition() + 1
-                val itemCount = layoutManager.itemCount
+                val itemCount = layoutManager.itemCount - 6
 
                 Log.d(
                     "onScrolled",

@@ -9,14 +9,13 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import android.widget.Toast.LENGTH_LONG
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
-import com.google.android.material.transition.MaterialFade
 import com.google.android.material.transition.MaterialFadeThrough
-import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.adapter.FilesAdapter
 import zechs.zplex.adapter.LogsAdapter
@@ -46,18 +45,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val thisTAG = "HomeFragment"
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enterTransition = MaterialFade()
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, true
-        ).apply {
-            duration = 500L
-        }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentHomeBinding.bind(view)
@@ -68,23 +55,22 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         homeViewModel.homeList.observe(viewLifecycleOwner, { response ->
             when (response) {
                 is Resource.Success -> {
-                    homeView(true)
+                    homeView(visible = true)
                     response.data?.let { filesResponse ->
                         filesAdapter.differ.submitList(filesResponse.files.toList())
                     }
                 }
                 is Resource.Error -> {
-                    homeView(false)
+                    homeView(visible = false)
                     response.message?.let { message ->
-                        Toast.makeText(
-                            context,
-                            "An error occurred: $message",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        Log.e(thisTAG, "An error occurred: $message")
+                        val errorText =
+                            "Unable to fetch recently added shows. An error occurred: $message"
+                        Toast.makeText(context, errorText, Toast.LENGTH_SHORT).show()
+                        Log.e(thisTAG, errorText)
                     }
                 }
                 is Resource.Loading -> {
+                    homeView(visible = false)
                 }
             }
         })
@@ -93,61 +79,54 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             TransitionManager.beginDelayedTransition(binding.root)
             when (response) {
                 is Resource.Success -> {
-                    binding.apply {
-                        recentlyAdded.visibility = View.VISIBLE
-                        rvNewEpisodes.visibility = View.VISIBLE
-                    }
                     response.data?.let { logsResponse ->
                         val newEpisodeList = logsResponse.releasesLog.toList()
-                        if (newEpisodeList.isEmpty()) {
-                            binding.apply {
-                                recentlyAdded.visibility = View.GONE
-                                rvNewEpisodes.visibility = View.GONE
-                            }
-                        }
+                        logView(visible = newEpisodeList.isNotEmpty())
                         logsAdapter.differ.submitList(newEpisodeList)
                     }
                 }
                 is Resource.Error -> {
-                    binding.apply {
-                        recentlyAdded.visibility = View.GONE
-                        rvNewEpisodes.visibility = View.GONE
-                    }
+                    logView(visible = false)
                     response.message?.let { message ->
-                        Toast.makeText(
-                            context,
-                            "An error occurred: $message",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        Log.e(thisTAG, "An error occurred: $message")
+                        val errorText =
+                            "Unable to fetch new episodes list. An error occurred: $message"
+                        Toast.makeText(context, errorText, Toast.LENGTH_SHORT).show()
+                        Log.e(thisTAG, errorText)
                     }
                 }
                 is Resource.Loading -> {
-                    binding.apply {
-                        recentlyAdded.visibility = View.VISIBLE
-                        rvNewEpisodes.visibility = View.INVISIBLE
-                    }
+                    logView(visible = false)
                 }
             }
         })
 
         homeViewModel.getSavedShows().observe(viewLifecycleOwner, { files ->
-            if (files.toList().isNotEmpty()) {
-                binding.myShows.visibility = View.VISIBLE
-                binding.rvMyShowsHome.visibility = View.VISIBLE
-                filesAdapter2.differ.submitList(files)
-            } else {
-                binding.myShows.visibility = View.GONE
-                binding.rvMyShowsHome.visibility = View.GONE
-            }
+            showsView(visible = files.toList().isNotEmpty())
+            if (files.toList().isNotEmpty()) filesAdapter2.differ.submitList(files)
         })
     }
 
     private fun homeView(visible: Boolean) {
-        val visibility = if (visible) View.VISIBLE else View.GONE
         TransitionManager.beginDelayedTransition(binding.root, MaterialFadeThrough())
-        binding.rvHome.visibility = visibility
-        binding.recentlyAdded.visibility = visibility
+        binding.apply {
+            recentlyAdded.isVisible = visible
+            rvNewEpisodes.isVisible = visible
+        }
+    }
+
+    private fun logView(visible: Boolean) {
+        TransitionManager.beginDelayedTransition(binding.root, MaterialFadeThrough())
+        binding.apply {
+            newEpisodes.isVisible = visible
+            rvHome.isVisible = visible
+        }
+    }
+
+    private fun showsView(visible: Boolean) {
+        binding.apply {
+            myShows.isVisible = visible
+            rvMyShowsHome.isVisible = visible
+        }
     }
 
     private fun setupRecyclerView() {

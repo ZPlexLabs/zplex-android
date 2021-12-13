@@ -49,7 +49,6 @@ class ActorsAdapter : RecyclerView.Adapter<ActorsAdapter.ActorsViewHolder>() {
         } else {
             "${TVDB_IMAGE_PATH}${data.image}"
         }
-
         holder.itemView.apply {
             Glide.with(this)
                 .load(imageUrl)

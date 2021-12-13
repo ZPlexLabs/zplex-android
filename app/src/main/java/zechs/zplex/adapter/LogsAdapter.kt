@@ -38,9 +38,7 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LogsViewHolder {
         return LogsViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.logs_item,
-                parent,
-                false
+                R.layout.logs_item, parent, false
             )
         )
     }
@@ -62,8 +60,8 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
             "No title"
         }
 
-        val posterUrl = Uri.parse("${ZPLEX}${tvdbId} - $show - TV/poster.jpg")
-        val episodeThumbUrl = Uri.parse("${ZPLEX}${log.folder}/${log.file.dropLast(4)}.jpg")
+        // val posterUrl = Uri.parse("${ZPLEX}${tvdbId} - $show - TV/poster.jpg")
+        // val episodeThumbUrl = Uri.parse("${ZPLEX}${log.folder}/${log.file.dropLast(4)}.jpg")
 
         val bodyText = try {
             "Ep ${

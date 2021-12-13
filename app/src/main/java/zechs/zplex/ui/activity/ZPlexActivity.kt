@@ -5,9 +5,12 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.transition.MaterialFade
+import com.google.android.material.transition.MaterialSharedAxis
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_zplex.*
@@ -34,6 +37,12 @@ class ZPlexActivity : AppCompatActivity() {
     lateinit var searchViewModel: SearchViewModel
     lateinit var myShowsViewModel: MyShowsViewModel
     lateinit var aboutViewModel: AboutViewModel
+
+    private val currentNavigationFragment: Fragment?
+        get() = supportFragmentManager.findFragmentById(R.id.mainNavHostFragment)
+            ?.childFragmentManager
+            ?.fragments
+            ?.first()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,10 +90,22 @@ class ZPlexActivity : AppCompatActivity() {
                 R.id.aboutFragment -> {
                     window.navigationBarColor = Color.parseColor("#121115")
                     bottomNavigationView.visibility = View.GONE
+
+                    currentNavigationFragment?.apply {
+                        enterTransition = MaterialFade()
+                        exitTransition = MaterialSharedAxis(
+                            MaterialSharedAxis.Y, false
+                        ).apply {
+                            duration = 500L
+                        }
+                        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
+                    }
                 }
+
                 R.id.bigImageFragment -> bottomNavigationView.visibility = View.GONE
                 else -> {
-                    val colorPrimaryDark = ContextCompat.getColor(this, R.color.colorPrimaryDark)
+                    val colorPrimaryDark =
+                        ContextCompat.getColor(this, R.color.colorPrimaryDark)
                     window.statusBarColor = colorPrimaryDark
                     window.navigationBarColor = colorPrimaryDark
                     bottomNavigationView.visibility = View.VISIBLE

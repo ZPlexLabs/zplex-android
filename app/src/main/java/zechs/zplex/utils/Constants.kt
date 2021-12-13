@@ -16,12 +16,10 @@ object Constants {
     const val GOOGLE_API_URL = "https://www.googleapis.com"
 
     const val GOOGLE_OAUTH_URL = "https://accounts.google.com"
-    const val CLIENT_ID =
-        "787806510500-auspe7sv3lr2hf7iurkkql0jqlqcfhnq.apps.googleusercontent.com"
+    const val CLIENT_ID = "787806510500-auspe7sv3lr2hf7iurkkql0jqlqcfhnq.apps.googleusercontent.com"
     const val CLIENT_SECRET = "prh85YPHpKKvKrKiYJcNbZTs"
     const val REFRESH_TOKEN =
         "1//0gBDbtsXxCEGKCgYIARAAGBASNwF-L9IrEv60PzcI6tzrhRQf7txK8MooeHtkLadSXZW2cz_56SvCejWVLlpc43jrNXOMxmVNy14"
-
     const val TEMP_TOKEN =
         "ya29.a0ARrdaM-eMe9zOKy57ZF4rrtIGPTxtVi1S97nRu7mIed0qAWfVkrqPxpL24vRooTu9H8Z-HYZbLXISrlTsglo7s_WuMFOH20EuRR6sVQ1KkqdvZ9wT5I33hmUYxJtu_5M7miNnstg2Zi1Tt0Gzcz3chtMFB1b"
 

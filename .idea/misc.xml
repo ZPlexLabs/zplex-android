@@ -44,11 +44,18 @@
         <entry key="app/src/main/res/drawable/dark_gradient.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/dark_gradient_episode.xml" value="0.3020833333333333" />
         <entry key="app/src/main/res/drawable/faded_bg.xml" value="0.33645833333333336" />
+        <entry key="app/src/main/res/drawable/ic_arrow_down_24.xml" value="0.33645833333333336" />
+        <entry key="app/src/main/res/drawable/ic_baseline_aspect_ratio_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_download.xml" value="0.340625" />
+        <entry key="app/src/main/res/drawable/ic_favorite_border_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_home.xml" value="0.32135416666666666" />
+        <entry key="app/src/main/res/drawable/ic_outline_new_releases_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_play_svg.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/ic_rotate.xml" value="0.115625" />
+        <entry key="app/src/main/res/drawable/ic_round_access_time_24.xml" value="0.18541666666666667" />
+        <entry key="app/src/main/res/drawable/ic_round_favorite_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_round_favorite_border_24.xml" value="0.33645833333333336" />
+        <entry key="app/src/main/res/drawable/ic_round_keyboard_arrow_down_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_round_play_arrow_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_round_star_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_round_videocam_24.xml" value="0.33645833333333336" />

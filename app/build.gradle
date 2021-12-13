@@ -10,7 +10,6 @@ plugins {
 
 def gitCommitHash = 'git rev-parse --verify --short HEAD'.execute().text.trim()
 
-
 android {
 
     signingConfigs {

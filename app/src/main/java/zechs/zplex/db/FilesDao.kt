@@ -14,7 +14,7 @@ interface FilesDao {
     fun getAllFiles(): LiveData<List<File>>
 
     @Query("SELECT EXISTS(SELECT * FROM files WHERE id = :id)")
-    suspend fun getFile(id: String): Boolean
+    fun getFile(id: String): LiveData<Boolean>
 
     @Delete
     suspend fun deleteFile(file: File)

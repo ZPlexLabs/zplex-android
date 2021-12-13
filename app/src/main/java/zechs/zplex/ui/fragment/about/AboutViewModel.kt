@@ -46,9 +46,9 @@ class AboutViewModel(
     private val accessToken = SessionManager(
         getApplication<Application>().applicationContext
     ).fetchAuthToken()
+
     private val pageSize = 1000
     private val orderBy = "name"
-
 
     fun saveShow(file: File) = viewModelScope.launch {
         filesRepository.upsert(file)
@@ -58,7 +58,7 @@ class AboutViewModel(
         filesRepository.deleteFile(file)
     }
 
-    suspend fun getShow(id: String) = filesRepository.getFile(id)
+    fun getShow(id: String) = filesRepository.getFile(id)
 
     fun getMediaFiles(driveQuery: String) =
         viewModelScope.launch {
@@ -110,9 +110,7 @@ class AboutViewModel(
                     series.postValue(Resource.Error("Network Failure"))
                 } else {
                     series.postValue(
-                        Resource.Error(
-                            t.message ?: "Something went wrong"
-                        )
+                        Resource.Error(t.message ?: "Something went wrong")
                     )
                 }
             }
@@ -147,9 +145,7 @@ class AboutViewModel(
                     actors.postValue(Resource.Error("Network Failure"))
                 } else {
                     actors.postValue(
-                        Resource.Error(
-                            t.message ?: "Something went wrong"
-                        )
+                        Resource.Error(t.message ?: "Something went wrong")
                     )
                 }
             }
@@ -184,9 +180,7 @@ class AboutViewModel(
                     movies.postValue(Resource.Error("Network Failure"))
                 } else {
                     movies.postValue(
-                        Resource.Error(
-                            t.message ?: "Something went wrong"
-                        )
+                        Resource.Error(t.message ?: "Something went wrong")
                     )
                 }
             }
@@ -221,9 +215,7 @@ class AboutViewModel(
                     credits.postValue(Resource.Error("Network Failure"))
                 } else {
                     credits.postValue(
-                        Resource.Error(
-                            t.message ?: "Something went wrong"
-                        )
+                        Resource.Error(t.message ?: "Something went wrong")
                     )
                 }
             }

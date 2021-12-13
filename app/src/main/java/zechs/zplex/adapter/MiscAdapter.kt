@@ -30,9 +30,7 @@ class MiscAdapter : RecyclerView.Adapter<MiscAdapter.MiscViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MiscViewHolder {
         return MiscViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_misc_list,
-                parent,
-                false
+                R.layout.item_misc_list, parent, false
             )
         )
     }

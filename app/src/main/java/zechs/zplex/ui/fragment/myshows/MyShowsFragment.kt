@@ -9,8 +9,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.transition.MaterialFade
-import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.adapter.FilesAdapter
 import zechs.zplex.databinding.FragmentMyShowsBinding
@@ -28,18 +26,6 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
 
     private lateinit var myShowsViewModel: MyShowsViewModel
     private lateinit var filesAdapter: FilesAdapter
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enterTransition = MaterialFade()
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, true
-        ).apply {
-            duration = 500L
-        }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -68,7 +54,10 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
                 val position = viewHolder.absoluteAdapterPosition
                 val file = filesAdapter.differ.currentList[position]
                 myShowsViewModel.deleteShow(file)
-                Snackbar.make(view, "Successfully removed", Snackbar.LENGTH_LONG).show()
+                Snackbar.make(
+                    view, "${file.name} Successfully removed",
+                    Snackbar.LENGTH_LONG
+                ).show()
             }
         }
 

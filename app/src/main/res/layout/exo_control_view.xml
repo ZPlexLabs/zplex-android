@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="ContentDescription">
 
     <View
         android:id="@id/exo_controls_background"
@@ -32,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:ellipsize="end"
-                android:fontFamily="@font/roboto_medium"
+                android:fontFamily="@font/open_sans_semibold"
                 android:maxLines="1"
                 android:textColor="@color/textColor"
                 android:textSize="16sp"
@@ -96,10 +97,10 @@
                 android:id="@id/exo_repeat_toggle"
                 style="@style/ExoStyledControls.Button.Bottom.RepeatToggle" />
 
-
             <ImageButton
                 android:id="@+id/exo_aspect_button"
                 style="@style/ExoStyledControls.Button.Bottom.VR"
+                android:padding="14dp"
                 android:src="@drawable/ic_baseline_aspect_ratio_24" />
 
             <ImageButton

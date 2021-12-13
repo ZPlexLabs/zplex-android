@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/cardColor"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:transitionGroup="true">
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
@@ -49,7 +50,7 @@
                     android:insetRight="0dp"
                     android:insetBottom="0dp"
                     android:padding="8dp"
-                    app:icon="@drawable/ic_round_favorite_border_24"
+                    app:icon="@drawable/ic_favorite_border_24"
                     app:iconGravity="textStart"
                     app:iconPadding="0dp"
                     app:iconTint="@color/textColor_87"

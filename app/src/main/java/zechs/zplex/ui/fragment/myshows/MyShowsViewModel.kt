@@ -11,9 +11,9 @@ class MyShowsViewModel(
     private val filesRepository: FilesRepository
 ) : ViewModel() {
 
-    fun saveShow(file: File) = viewModelScope.launch {
-        filesRepository.upsert(file)
-    }
+//    fun saveShow(file: File) = viewModelScope.launch {
+//        filesRepository.upsert(file)
+//    }
 
     fun deleteShow(file: File) = viewModelScope.launch {
         filesRepository.deleteFile(file)
@@ -21,6 +21,6 @@ class MyShowsViewModel(
 
     fun getSavedShows() = filesRepository.getSavedFiles()
 
-    suspend fun getShow(id: String) = filesRepository.getFile(id)
+    // fun getShow(id: String) = filesRepository.getFile(id)
 
 }
