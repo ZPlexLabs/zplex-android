@@ -12,12 +12,4 @@ class TmdbRepository {
         movies_id: Int
     ) = RetrofitInstance.api_tmdb.getCredits(movies_id)
 
-    suspend fun getShow(
-        tvId: Int
-    ) = RetrofitInstance.api_tmdb.getShow(tvId)
-
-    suspend fun getSeason(
-        tvId: Int,
-        seasonNumber: Int
-    ) = RetrofitInstance.api_tmdb.getSeason(tvId, seasonNumber)
 }
