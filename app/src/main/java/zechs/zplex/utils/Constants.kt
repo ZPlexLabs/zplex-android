@@ -9,7 +9,7 @@ object Constants {
     const val TVDB_API_URL = "https://api.thetvdb.com"
 
     const val TMDB_API_URL = "https://api.themoviedb.org"
-    const val TMDB_IMAGE_PATH = "https://www.themoviedb.org/t/p/original/"
+    const val TMDB_IMAGE_PREFIX = "https://www.themoviedb.org/t/p"
     const val TMDB_API_KEY = "1e0a0c58607f3b41846a64746bc95d92"
 
     const val WITCH_API_URL = "http://wandering-witch.herokuapp.com"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <color name="colorPrimary">#3c4042</color>
-    <color name="colorPrimaryDark">#1c1b1f</color>
+    <color name="colorPrimary">#121212</color>
+    <color name="colorPrimaryDark">#171717</color>
     <color name="cardColor">#25232a</color>
     <color name="colorAccent">#6750a4</color>
     <color name="textColor">#FFFFFF</color>

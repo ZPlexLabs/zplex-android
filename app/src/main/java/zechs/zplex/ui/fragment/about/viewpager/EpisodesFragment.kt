@@ -156,7 +156,6 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
 
                 }
 
-                var reverseList = false
 
                 binding.filterEps.apply {
 
@@ -175,11 +174,11 @@ class EpisodesFragment : Fragment(R.layout.fragment_episodes) {
                     setOnClickListener { listPopUpFilters.show() }
 
                     listPopUpFilters.setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
-                        reverseList = when (position) {
-                            0 -> false
-                            1 -> true
-                            else -> false
-                        }
+                        // val reverseList = when (position) {
+                        //     0 -> false
+                        //     1 -> true
+                        //     else -> false
+                        // }
                         // mediaAdapter.differ.submitList(groupedList[seasons[seasonIndex]]?.toList())
                         binding.rvEpisodes.smoothScrollToPosition(0)
                         text = filters[position]

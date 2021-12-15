@@ -4,11 +4,20 @@ import zechs.zplex.api.RetrofitInstance
 
 class TmdbRepository {
 
-    suspend fun getMovies(
+    suspend fun getMovie(
         movies_id: Int
-    ) = RetrofitInstance.api_tmdb.getMovies(movies_id)
+    ) = RetrofitInstance.api_tmdb.getMovie(movies_id)
 
     suspend fun getCredits(
         movies_id: Int
     ) = RetrofitInstance.api_tmdb.getCredits(movies_id)
+
+    suspend fun getShow(
+        tvId: Int
+    ) = RetrofitInstance.api_tmdb.getShow(tvId)
+
+    suspend fun getSeason(
+        tvId: Int,
+        seasonNumber: Int
+    ) = RetrofitInstance.api_tmdb.getSeason(tvId, seasonNumber)
 }

@@ -7,15 +7,15 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import kotlinx.android.synthetic.main.item_actor.view.*
+import kotlinx.android.synthetic.main.item_cast.view.*
 import zechs.zplex.R
-import zechs.zplex.models.tmdb.credits.Cast
 import zechs.zplex.models.tmdb.ProfileSize
+import zechs.zplex.models.tmdb.tv.Cast
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 
-class CreditsAdapter : RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder>() {
+class CastAdapter : RecyclerView.Adapter<CastAdapter.CastViewHolder>() {
 
-    inner class CreditsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    inner class CastViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     private val differCallback = object : DiffUtil.ItemCallback<Cast>() {
         override fun areItemsTheSame(oldItem: Cast, newItem: Cast): Boolean {
@@ -29,10 +29,10 @@ class CreditsAdapter : RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder>() 
 
     val differ = AsyncListDiffer(this, differCallback)
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CreditsViewHolder {
-        return CreditsViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CastViewHolder {
+        return CastViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_actor, parent, false
+                R.layout.item_cast, parent, false
             )
         )
     }
@@ -41,7 +41,7 @@ class CreditsAdapter : RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder>() 
         return differ.currentList.size
     }
 
-    override fun onBindViewHolder(holder: CreditsViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: CastViewHolder, position: Int) {
         val cast = differ.currentList[position]
 
         val imageUrl = if (cast.profile_path != null) {

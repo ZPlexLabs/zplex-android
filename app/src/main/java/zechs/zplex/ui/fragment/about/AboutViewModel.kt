@@ -167,7 +167,7 @@ class AboutViewModel(
             movies.postValue(Resource.Loading())
             try {
                 if (hasInternetConnection()) {
-                    val response = tmdbRepository.getMovies(moviesId)
+                    val response = tmdbRepository.getMovie(moviesId)
                     movies.postValue(handleMoviesListResponse(response))
                 } else {
                     movies.postValue(Resource.Error("No internet connection"))

@@ -49,7 +49,7 @@
                 app:boxCornerRadiusTopStart="8dp"
                 app:boxStrokeWidth="0dp"
                 app:endIconMode="clear_text"
-                app:endIconTint="@color/colorPrimary"
+                app:endIconTint="@color/cardColor"
                 app:helperTextEnabled="false"
                 app:hintEnabled="false">
 
