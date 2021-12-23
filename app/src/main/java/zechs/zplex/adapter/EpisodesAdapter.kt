@@ -7,10 +7,10 @@ import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_episode_linear.view.*
+import kotlinx.android.synthetic.main.item_episode.view.*
 import zechs.zplex.R
-import zechs.zplex.models.season.Ep
 import zechs.zplex.models.tmdb.StillSize
+import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 
@@ -18,12 +18,12 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
 
     inner class EpisodesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-    private val differCallback = object : DiffUtil.ItemCallback<Ep>() {
-        override fun areItemsTheSame(oldItem: Ep, newItem: Ep): Boolean {
-            return oldItem.fileId == newItem.fileId
+    private val differCallback = object : DiffUtil.ItemCallback<Episode>() {
+        override fun areItemsTheSame(oldItem: Episode, newItem: Episode): Boolean {
+            return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: Ep, newItem: Ep): Boolean {
+        override fun areContentsTheSame(oldItem: Episode, newItem: Episode): Boolean {
             return oldItem == newItem
         }
     }
@@ -33,7 +33,7 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EpisodesViewHolder {
         return EpisodesViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_episode_linear, parent, false
+                R.layout.item_episode, parent, false
             )
         )
     }
@@ -75,9 +75,10 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
 
     }
 
-    private var onItemClickListener: ((Ep) -> Unit)? = null
+    private var onItemClickListener: ((Episode) -> Unit)? = null
 
-    fun setOnItemClickListener(listener: (Ep) -> Unit) {
+    fun setOnItemClickListener(listener: (Episode) -> Unit) {
         onItemClickListener = listener
     }
+
 }

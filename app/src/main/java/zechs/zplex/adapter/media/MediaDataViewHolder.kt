@@ -7,10 +7,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import zechs.zplex.R
 import zechs.zplex.ThisApp.Companion.context
-import zechs.zplex.adapter.*
-import zechs.zplex.adapter.about.AboutDataModel
+import zechs.zplex.adapter.media.adapters.*
 import zechs.zplex.databinding.ItemDetailBinding
-import zechs.zplex.databinding.ItemMetaBinding
+import zechs.zplex.databinding.ItemMediaMetaBinding
 import zechs.zplex.models.tmdb.PosterSize
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
@@ -22,7 +21,7 @@ sealed class MediaDataViewHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
 
     class MetaViewHolder(
-        private val itemBinding: ItemMetaBinding,
+        private val itemBinding: ItemMediaMetaBinding,
         mediaDataAdapter: MediaDataAdapter
     ) : MediaDataViewHolder(itemBinding, mediaDataAdapter) {
 
@@ -33,7 +32,7 @@ sealed class MediaDataViewHolder(
             val posterUrl = if (item.posterUrl == null) {
                 R.drawable.no_poster
             } else {
-                "${TMDB_IMAGE_PREFIX}/${PosterSize.w342}${item.posterUrl}"
+                "${TMDB_IMAGE_PREFIX}/${PosterSize.w500}${item.posterUrl}"
             }
 
             context?.let { c ->

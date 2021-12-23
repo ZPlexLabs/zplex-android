@@ -3,16 +3,11 @@ package zechs.zplex.utils
 @Suppress("SpellCheckingInspection")
 object Constants {
     const val ZPLEX = "https://zplex.zechs.workers.dev/0:/"
-    const val ZPLEX_IMAGE_REDIRECT = "https://zplex-redirect.zechs.workers.dev"
-
-    const val TVDB_IMAGE_PATH = "https://www.thetvdb.com/banners/"
-    const val TVDB_API_URL = "https://api.thetvdb.com"
 
     const val TMDB_API_URL = "https://api.themoviedb.org"
     const val TMDB_IMAGE_PREFIX = "https://www.themoviedb.org/t/p"
     const val TMDB_API_KEY = "1e0a0c58607f3b41846a64746bc95d92"
 
-    const val WITCH_API_URL = "http://wandering-witch.herokuapp.com"
     const val GOOGLE_API_URL = "https://www.googleapis.com"
 
     const val GOOGLE_OAUTH_URL = "https://accounts.google.com"
@@ -26,6 +21,4 @@ object Constants {
     const val SEARCH_DELAY_AMOUNT = 750L
     var PAGE_TOKEN = ""
     var isLastPage = false
-    const val regexFile = "^S(.*[0-9])E(.*[0-9])( - )(.*)(.mkv)"
-    const val regexShow = "^(.*[0-9])( - )(.*)( - )(TV|Movie)"
 }

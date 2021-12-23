@@ -8,8 +8,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_season.view.*
 import zechs.zplex.R
-import zechs.zplex.models.tmdb.Media
 import zechs.zplex.models.tmdb.PosterSize
+import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 import java.text.DecimalFormat

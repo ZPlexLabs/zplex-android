@@ -11,14 +11,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
-import zechs.zplex.adapter.CastAdapter
-import zechs.zplex.adapter.about.AboutDataModel
+import zechs.zplex.adapter.media.AboutDataModel
+import zechs.zplex.adapter.media.adapters.CastAdapter
 import zechs.zplex.databinding.FragmentWatchBinding
 import zechs.zplex.models.tmdb.StillSize
-import zechs.zplex.models.tmdb.episode.EpisodeResponse
+import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.CastDetailsViewModel
-import zechs.zplex.ui.fragment.EpisodeViewModel
+import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
+import zechs.zplex.ui.fragment.viewmodels.EpisodeViewModel
 import zechs.zplex.utils.Constants
 import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
@@ -79,7 +79,7 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
 
     }
 
-    private fun doOnSuccess(episode: EpisodeResponse) {
+    private fun doOnSuccess(episode: Episode) {
 
         val episodeStillUrl = if (episode.still_path == null) {
             R.drawable.no_thumb

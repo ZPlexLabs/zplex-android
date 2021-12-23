@@ -1,7 +1,7 @@
 package zechs.zplex.adapter.browse
 
 import androidx.annotation.Keep
-import zechs.zplex.models.tmdb.genre.Genre
+import zechs.zplex.models.tmdb.entities.Genre
 
 sealed class BrowseDataModel {
 

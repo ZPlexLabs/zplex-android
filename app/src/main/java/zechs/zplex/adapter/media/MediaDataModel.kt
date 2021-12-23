@@ -1,8 +1,7 @@
 package zechs.zplex.adapter.media
 
 import androidx.annotation.Keep
-import zechs.zplex.adapter.about.AboutDataModel
-import zechs.zplex.models.misc.Pairs
+import zechs.zplex.models.tmdb.entities.Pair
 
 sealed class MediaDataModel {
 
@@ -13,7 +12,7 @@ sealed class MediaDataModel {
         val overview: String?,
         val posterUrl: String?,
         val tmdbId: Int,
-        val misc: List<Pairs>,
+        val misc: List<Pair>,
     ) : MediaDataModel()
 
     @Keep

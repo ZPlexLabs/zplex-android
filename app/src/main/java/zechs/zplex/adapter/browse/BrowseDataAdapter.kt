@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.R
 import zechs.zplex.databinding.ItemGenreListBinding
 import zechs.zplex.databinding.ItemSearchMetaBinding
-import zechs.zplex.models.tmdb.genre.Genre
+import zechs.zplex.models.tmdb.entities.Genre
 
 class BrowseDataAdapter : RecyclerView.Adapter<BrowseDataViewHolder>() {
 

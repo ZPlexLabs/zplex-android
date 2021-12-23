@@ -101,7 +101,7 @@ class HomeViewModel(
         shows.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
-                val response = tmdbRepository.getPopularShow(currentYear, "")
+                val response = tmdbRepository.getPopularShow(currentYear, null)
                 shows.postValue(handleShowsResponse(response))
             } else {
                 shows.postValue(Resource.Error("No internet connection"))
@@ -121,7 +121,7 @@ class HomeViewModel(
         animes.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
-                val response = tmdbRepository.getPopularShow(currentYear, "210024")
+                val response = tmdbRepository.getPopularShow(currentYear, 210024)
                 animes.postValue(handleShowsResponse(response))
             } else {
                 animes.postValue(Resource.Error("No internet connection"))

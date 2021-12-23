@@ -16,6 +16,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
@@ -24,7 +25,7 @@ import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentSearchBinding
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.ShowViewModel
+import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
 import zechs.zplex.utils.Constants.isLastPage
 import zechs.zplex.utils.Resource
@@ -42,6 +43,23 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     private val thisTag = "SearchFragment"
     private var queryText = ""
     private var isLoading = true
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        enterTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, true
+        ).apply {
+            duration = 500L
+        }
+
+        exitTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, false
+        ).apply {
+            duration = 500L
+        }
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

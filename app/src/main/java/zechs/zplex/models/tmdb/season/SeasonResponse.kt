@@ -1,6 +1,7 @@
 package zechs.zplex.models.tmdb.season
 
 import androidx.annotation.Keep
+import zechs.zplex.models.tmdb.entities.Episode
 
 @Keep
 data class SeasonResponse(

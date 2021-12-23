@@ -13,17 +13,17 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
-import zechs.zplex.adapter.about.AboutDataModel
+import zechs.zplex.adapter.media.AboutDataModel
 import zechs.zplex.adapter.media.MediaDataAdapter
 import zechs.zplex.adapter.media.MediaDataModel
 import zechs.zplex.databinding.FragmentMediaBinding
-import zechs.zplex.models.MediaArgs
-import zechs.zplex.models.tmdb.tv.MediaResponse
+import zechs.zplex.models.dataclass.MediaArgs
+import zechs.zplex.models.tmdb.media.MediaResponse
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.CastDetailsViewModel
-import zechs.zplex.ui.fragment.SeasonViewModel
-import zechs.zplex.ui.fragment.ShowViewModel
 import zechs.zplex.ui.fragment.image.BigImageViewModel
+import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
+import zechs.zplex.ui.fragment.viewmodels.SeasonViewModel
+import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Resource
 
 class FragmentMedia : Fragment(R.layout.fragment_media) {
@@ -52,12 +52,6 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
             duration = 500L
         }
 
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, false
-        ).apply {
-            duration = 500L
-        }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

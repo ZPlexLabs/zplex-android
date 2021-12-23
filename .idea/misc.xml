@@ -145,7 +145,7 @@
         <entry key="app/src/main/res/layout/item_misc_list.xml" value="1.0" />
         <entry key="app/src/main/res/layout/item_person_meta.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_search_meta.xml" value="0.31614583333333335" />
-        <entry key="app/src/main/res/layout/item_season.xml" value="1.0" />
+        <entry key="app/src/main/res/layout/item_season.xml" value="0.8" />
         <entry key="app/src/main/res/layout/item_video.xml" value="0.6" />
         <entry key="app/src/main/res/layout/logs_item.xml" value="0.72" />
         <entry key="app/src/main/res/layout/media_item.xml" value="0.3203125" />

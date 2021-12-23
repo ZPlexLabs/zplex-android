@@ -1,6 +1,5 @@
 package zechs.zplex.ui.activity
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -13,12 +12,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.activity_zplex.*
 import zechs.zplex.BuildConfig
 import zechs.zplex.R
-import zechs.zplex.db.FilesDatabase
-import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.TmdbRepository
-import zechs.zplex.repository.TvdbRepository
-import zechs.zplex.ui.fragment.about.AboutViewModel
-import zechs.zplex.ui.fragment.about.AboutViewModelProviderFactory
 import zechs.zplex.ui.fragment.browse.BrowseViewModel
 import zechs.zplex.ui.fragment.browse.BrowseViewModelProviderFactory
 import zechs.zplex.ui.fragment.cast.CastViewModel
@@ -29,8 +23,6 @@ import zechs.zplex.ui.fragment.home.HomeViewModel
 import zechs.zplex.ui.fragment.home.HomeViewModelProviderFactory
 import zechs.zplex.ui.fragment.media.MediaViewModel
 import zechs.zplex.ui.fragment.media.MediaViewModelProviderFactory
-import zechs.zplex.ui.fragment.myshows.MyShowsViewModel
-import zechs.zplex.ui.fragment.myshows.MyShowsViewModelProviderFactory
 import zechs.zplex.ui.fragment.search.SearchViewModel
 import zechs.zplex.ui.fragment.search.SearchViewModelProviderFactory
 import zechs.zplex.ui.fragment.watch.WatchViewModel
@@ -42,8 +34,6 @@ class ZPlexActivity : AppCompatActivity() {
     lateinit var homeViewModel: HomeViewModel
     lateinit var browseViewModel: BrowseViewModel
     lateinit var searchViewModel: SearchViewModel
-    lateinit var myShowsViewModel: MyShowsViewModel
-    lateinit var aboutViewModel: AboutViewModel
     lateinit var mediaViewModel: MediaViewModel
     lateinit var episodesViewModel: EpisodesViewModel
     lateinit var watchViewModel: WatchViewModel
@@ -58,8 +48,6 @@ class ZPlexActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val filesRepository = FilesRepository(FilesDatabase(this))
-        val tvdbRepository = TvdbRepository()
         val tmdbRepository = TmdbRepository()
 
         homeViewModel = ViewModelProvider(
@@ -77,19 +65,6 @@ class ZPlexActivity : AppCompatActivity() {
             SearchViewModelProviderFactory(application, tmdbRepository)
         )[SearchViewModel::class.java]
 
-        myShowsViewModel = ViewModelProvider(
-            this,
-            MyShowsViewModelProviderFactory(filesRepository)
-        )[MyShowsViewModel::class.java]
-
-        aboutViewModel = ViewModelProvider(
-            this,
-            AboutViewModelProviderFactory(
-                application, filesRepository,
-                tvdbRepository, tmdbRepository
-            )
-        )[AboutViewModel::class.java]
-
         mediaViewModel = ViewModelProvider(
             this,
             MediaViewModelProviderFactory(application, tmdbRepository)
@@ -97,7 +72,7 @@ class ZPlexActivity : AppCompatActivity() {
 
         episodesViewModel = ViewModelProvider(
             this,
-            EpisodesViewModelProviderFactory(application, filesRepository, tmdbRepository)
+            EpisodesViewModelProviderFactory(application, tmdbRepository)
         )[EpisodesViewModel::class.java]
 
         watchViewModel = ViewModelProvider(
@@ -123,36 +98,10 @@ class ZPlexActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.aboutFragment -> {
-                    window.navigationBarColor = Color.parseColor("#121115")
-                    bottomNavigationView.isVisible = false
-                    view1.isVisible = false
-
-//                    currentNavigationFragment?.apply {
-//                        enterTransition = MaterialFade()
-//                        exitTransition = MaterialSharedAxis(
-//                            MaterialSharedAxis.Y, false
-//                        ).apply {
-//                            duration = 500L
-//                        }
-//                        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
-//                    }
-                }
-
                 R.id.fragmentMedia -> {
                     window.navigationBarColor = colorPrimary
                     bottomNavigationView.isVisible = false
                     view1.isVisible = false
-
-//                    currentNavigationFragment?.apply {
-//                        enterTransition = MaterialFade()
-//                        exitTransition = MaterialSharedAxis(
-//                            MaterialSharedAxis.Y, false
-//                        ).apply {
-//                            duration = 500L
-//                        }
-//                        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, true)
-//                    }
                 }
                 R.id.episodesListFragment -> {
                     bottomNavigationView.isVisible = false
@@ -176,7 +125,6 @@ class ZPlexActivity : AppCompatActivity() {
         }
 
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
-//        FirebaseMessaging.getInstance().subscribeToTopic("all")
     }
 
     override fun onSupportNavigateUp(): Boolean {

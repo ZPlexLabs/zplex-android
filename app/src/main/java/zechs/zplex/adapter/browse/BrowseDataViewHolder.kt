@@ -4,10 +4,10 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import zechs.zplex.ThisApp.Companion.context
-import zechs.zplex.adapter.GenreAdapter
+import zechs.zplex.adapter.browse.adapters.GenreAdapter
 import zechs.zplex.databinding.ItemGenreListBinding
 import zechs.zplex.databinding.ItemSearchMetaBinding
-import zechs.zplex.models.tmdb.genre.Genre
+import zechs.zplex.models.tmdb.entities.Genre
 
 
 sealed class BrowseDataViewHolder(

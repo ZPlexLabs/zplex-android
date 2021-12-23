@@ -10,9 +10,9 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.ThisApp
-import zechs.zplex.models.tmdb.person.CastResponse
-import zechs.zplex.models.tmdb.person.CreditResponse
-import zechs.zplex.models.tmdb.person.PersonResponse
+import zechs.zplex.models.tmdb.credit.CastObject
+import zechs.zplex.models.tmdb.credit.CreditResponse
+import zechs.zplex.models.tmdb.credit.PersonResponse
 import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.utils.Resource
 import java.io.IOException
@@ -22,7 +22,7 @@ class CastViewModel(
     private val tmdbRepository: TmdbRepository
 ) : AndroidViewModel(app) {
 
-    val cast: MutableLiveData<Resource<CastResponse>> = MutableLiveData()
+    val cast: MutableLiveData<Resource<CastObject>> = MutableLiveData()
 
     fun getCredit(personId: Int, creditId: String) = viewModelScope.launch {
         cast.postValue(Resource.Loading())
@@ -48,13 +48,13 @@ class CastViewModel(
     private fun handleCastResponse(
         credit: Response<CreditResponse>,
         people: Response<PersonResponse>
-    ): Resource<CastResponse> {
+    ): Resource<CastObject> {
         if (credit.isSuccessful && people.isSuccessful) {
             if (credit.body() != null && people.body() != null) {
                 val creditResponse = credit.body()!!
                 val peopleResponse = people.body()!!
 
-                val castResponse = CastResponse(
+                val castObject = CastObject(
                     gender = peopleResponse.gender,
                     known_for = creditResponse.person?.known_for ?: listOf(),
                     name = peopleResponse.name,
@@ -65,7 +65,7 @@ class CastViewModel(
                     place_of_birth = peopleResponse.place_of_birth,
                     job = creditResponse.job
                 )
-                return Resource.Success(castResponse)
+                return Resource.Success(castObject)
             }
         }
         return Resource.Error(people.message())

@@ -8,9 +8,7 @@
     <color name="textColor_54">#8AFFFFFF</color>
     <color name="textColor_74">#BDFFFFFF</color>
     <color name="textColor_87">#DEFFFFFF</color>
-    <color name="transparent">#00000000</color>
     <color name="dark_tint">#40000000</color>
-    <color name="black_overlay">#66000000</color>
     <color name="ui_controls_background">#98000000</color>
     <color name="exo_bottom_bar_background" tools:keep="@color/exo_bottom_bar_background">
         @color/ui_controls_background
@@ -21,8 +19,4 @@
     <color name="exo_styled_error_message_background" tools:keep="@color/exo_styled_error_message_background">
         @color/ui_controls_background
     </color>
-    <color name="light_blue_600">#FF039BE5</color>
-    <color name="light_blue_900">#FF01579B</color>
-    <color name="light_blue_A200">#FF40C4FF</color>
-    <color name="light_blue_A400">#FF00B0FF</color>
 </resources>

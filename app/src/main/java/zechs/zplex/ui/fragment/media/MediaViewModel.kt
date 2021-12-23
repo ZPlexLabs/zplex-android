@@ -10,11 +10,11 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.ThisApp
-import zechs.zplex.models.misc.Pairs
 import zechs.zplex.models.tmdb.collection.CollectionsResponse
-import zechs.zplex.models.tmdb.tv.MediaResponse
-import zechs.zplex.models.tmdb.tv.MovieResponse
-import zechs.zplex.models.tmdb.tv.TvResponse
+import zechs.zplex.models.tmdb.entities.Pair
+import zechs.zplex.models.tmdb.media.MediaResponse
+import zechs.zplex.models.tmdb.media.MovieResponse
+import zechs.zplex.models.tmdb.media.TvResponse
 import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.utils.ConverterUtils
 import zechs.zplex.utils.Resource
@@ -35,7 +35,7 @@ class MediaViewModel(
                     val response = tmdbRepository.getMovie(tmdbId)
                     if (response.body()?.belongs_to_collection != null) {
                         val collectionsResponse = tmdbRepository.getCollection(
-                            collection_id = response.body()?.belongs_to_collection!!.id
+                            collectionId = response.body()?.belongs_to_collection!!.id
                         )
                         media.postValue(
                             handleMovieResponseWithCollection(
@@ -86,20 +86,20 @@ class MediaViewModel(
                     "Sci-Fi"
                 } else genreResponse.substringBefore(" ")
 
-                val pairsArray: MutableList<Pairs> = mutableListOf()
-                pairsArray.add(Pairs("Genre", genreText))
-                pairsArray.add(Pairs("Rating", ratingText))
-                pairsArray.add(Pairs("Duration", durationText))
+                val pairsArray: MutableList<Pair> = mutableListOf()
+                pairsArray.add(Pair("Genre", genreText))
+                pairsArray.add(Pair("Rating", ratingText))
+                pairsArray.add(Pair("Duration", durationText))
 
                 resultResponse.production_companies?.let { company ->
                     if (company.isNotEmpty()) company[0].name?.let {
-                        Pairs("Studio", it)
+                        Pair("Studio", it)
                     }?.let { pairsArray.add(it) }
                 }
 
                 resultResponse.release_date?.let { firstAired ->
                     if (firstAired.isNotEmpty()) pairsArray.add(
-                        Pairs("Released", firstAired.take(4))
+                        Pair("Released", firstAired.take(4))
                     )
                 }
 
@@ -146,24 +146,25 @@ class MediaViewModel(
                     "Sci-Fi"
                 } else genreResponse.substringBefore(" ")
 
-                val pairsArray: MutableList<Pairs> = mutableListOf()
-                pairsArray.add(Pairs("Genre", genreText))
-                pairsArray.add(Pairs("Rating", ratingText))
-                pairsArray.add(Pairs("Duration", durationText))
+                val pairsArray: MutableList<Pair> = mutableListOf()
+                pairsArray.add(Pair("Genre", genreText))
+                pairsArray.add(Pair("Rating", ratingText))
+                pairsArray.add(Pair("Duration", durationText))
 
                 resultResponse.networks?.let { network ->
                     if (network.isNotEmpty())
-                        network[0].name?.let { Pairs("Network", it) }?.let { pairsArray.add(it) }
+                        network[0].name?.let { Pair("Network", it) }?.let { pairsArray.add(it) }
                 }
 
                 resultResponse.first_air_date?.let { firstAired ->
                     if (firstAired.isNotEmpty())
-                        pairsArray.add(Pairs("Released", firstAired.take(4)))
+                        pairsArray.add(
+                            Pair(
+                                "Released",
+                                firstAired.take(4)
+                            )
+                        )
                 }
-
-                val seasonList = resultResponse.seasons?.filter { s ->
-                    s.season_number != 0
-                }?.toList() ?: listOf()
 
                 val videosList = resultResponse.videos?.results?.filter { v ->
                     v.site == "YouTube"
@@ -176,7 +177,7 @@ class MediaViewModel(
                     poster_path = resultResponse.poster_path,
                     related_media = listOf(),
                     misc = pairsArray,
-                    seasons = seasonList,
+                    seasons = resultResponse.seasons ?: listOf(),
                     cast = resultResponse.credits.cast?.toList() ?: listOf(),
                     recommendations = resultResponse.recommendations?.results?.toList() ?: listOf(),
                     similar = resultResponse.similar?.results?.toList() ?: listOf(),
@@ -209,20 +210,20 @@ class MediaViewModel(
                     "Sci-Fi"
                 } else genreResponse.substringBefore(" ")
 
-                val pairsArray: MutableList<Pairs> = mutableListOf()
-                pairsArray.add(Pairs("Genre", genreText))
-                pairsArray.add(Pairs("Rating", ratingText))
-                pairsArray.add(Pairs("Duration", durationText))
+                val pairsArray: MutableList<Pair> = mutableListOf()
+                pairsArray.add(Pair("Genre", genreText))
+                pairsArray.add(Pair("Rating", ratingText))
+                pairsArray.add(Pair("Duration", durationText))
 
                 resultResponse.production_companies?.let { company ->
                     if (company.isNotEmpty()) company[0].name?.let {
-                        Pairs("Studio", it)
+                        Pair("Studio", it)
                     }?.let { pairsArray.add(it) }
                 }
 
                 resultResponse.release_date?.let { firstAired ->
                     if (firstAired.isNotEmpty()) pairsArray.add(
-                        Pairs("Released", firstAired.take(4))
+                        Pair("Released", firstAired.take(4))
                     )
                 }
 

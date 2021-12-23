@@ -10,7 +10,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.ThisApp
-import zechs.zplex.models.tmdb.episode.EpisodeResponse
+import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.utils.Resource
 import java.io.IOException
@@ -20,7 +20,7 @@ class WatchViewModel(
     private val tmdbRepository: TmdbRepository
 ) : AndroidViewModel(app) {
 
-    val episode: MutableLiveData<Resource<EpisodeResponse>> = MutableLiveData()
+    val episode: MutableLiveData<Resource<Episode>> = MutableLiveData()
 
     fun getEpisode(tvId: Int, seasonNumber: Int, episodeNumber: Int) =
         viewModelScope.launch {
@@ -46,8 +46,8 @@ class WatchViewModel(
         }
 
     private fun handleEpisodeResponse(
-        response: Response<EpisodeResponse>
-    ): Resource<EpisodeResponse> {
+        response: Response<Episode>
+    ): Resource<Episode> {
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
                 return Resource.Success(resultResponse)

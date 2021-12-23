@@ -6,9 +6,8 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.R
-import zechs.zplex.adapter.about.AboutDataModel
 import zechs.zplex.databinding.ItemDetailBinding
-import zechs.zplex.databinding.ItemMetaBinding
+import zechs.zplex.databinding.ItemMediaMetaBinding
 
 class MediaDataAdapter : RecyclerView.Adapter<MediaDataViewHolder>() {
 
@@ -46,9 +45,9 @@ class MediaDataAdapter : RecyclerView.Adapter<MediaDataViewHolder>() {
         parent: ViewGroup, viewType: Int
     ): MediaDataViewHolder {
         return when (viewType) {
-            R.layout.item_meta ->
+            R.layout.item_media_meta ->
                 MediaDataViewHolder.MetaViewHolder(
-                    ItemMetaBinding.inflate(
+                    ItemMediaMetaBinding.inflate(
                         LayoutInflater.from(parent.context),
                         parent, false
                     ), this
@@ -79,7 +78,7 @@ class MediaDataAdapter : RecyclerView.Adapter<MediaDataViewHolder>() {
 
     override fun getItemViewType(position: Int): Int {
         return when (differ.currentList[position]) {
-            is MediaDataModel.Meta -> R.layout.item_meta
+            is MediaDataModel.Meta -> R.layout.item_media_meta
             is MediaDataModel.Details -> R.layout.item_detail
         }
     }

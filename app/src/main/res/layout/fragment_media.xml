@@ -22,7 +22,6 @@
         android:id="@+id/pb_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/seasons_menu"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
         android:elevation="24dp"

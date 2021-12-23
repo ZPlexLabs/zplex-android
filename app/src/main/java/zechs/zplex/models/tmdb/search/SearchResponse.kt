@@ -1,7 +1,7 @@
 package zechs.zplex.models.tmdb.search
 
 import androidx.annotation.Keep
-import zechs.zplex.models.tmdb.Media
+import zechs.zplex.models.tmdb.entities.Media
 
 @Keep
 data class SearchResponse(

@@ -41,9 +41,9 @@
         android:textAlignment="center"
         android:textColor="@color/textColor"
         android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="@+id/image_card"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/image_card"
+        app:layout_constraintBottom_toTopOf="@+id/episode_count"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/image_card"
         tools:text="Season 1" />
 

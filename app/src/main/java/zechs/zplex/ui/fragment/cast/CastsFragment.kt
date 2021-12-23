@@ -15,15 +15,15 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
-import zechs.zplex.adapter.CurationAdapter
-import zechs.zplex.adapter.about.AboutDataModel
+import zechs.zplex.adapter.media.AboutDataModel
+import zechs.zplex.adapter.media.adapters.CurationAdapter
 import zechs.zplex.databinding.FragmentCastDetailsBinding
 import zechs.zplex.models.tmdb.ProfileSize
-import zechs.zplex.models.tmdb.person.CastResponse
+import zechs.zplex.models.tmdb.credit.CastObject
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.CastDetailsViewModel
-import zechs.zplex.ui.fragment.ShowViewModel
 import zechs.zplex.ui.fragment.image.BigImageViewModel
+import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
+import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
@@ -41,11 +41,6 @@ class CastsFragment : Fragment(R.layout.fragment_cast_details) {
     private val knowForAdapter by lazy { CurationAdapter() }
 
     private val thisTAG = "CastsFragment"
-    private val currentNavigationFragment: Fragment?
-        get() = childFragmentManager.findFragmentById(R.id.mainNavHostFragment)
-            ?.childFragmentManager
-            ?.fragments
-            ?.first()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,9 +103,9 @@ class CastsFragment : Fragment(R.layout.fragment_cast_details) {
         })
     }
 
-    private fun doOnMediaSuccess(response: CastResponse) {
-        val profileUrl = if (response.profile_path != null) {
-            "${TMDB_IMAGE_PREFIX}/${ProfileSize.h632}${response.profile_path}"
+    private fun doOnMediaSuccess(cast: CastObject) {
+        val profileUrl = if (cast.profile_path != null) {
+            "${TMDB_IMAGE_PREFIX}/${ProfileSize.h632}${cast.profile_path}"
         } else {
             R.drawable.no_actor
         }
@@ -121,46 +116,46 @@ class CastsFragment : Fragment(R.layout.fragment_cast_details) {
                 .placeholder(R.drawable.no_actor)
                 .into(binding.actorImage)
 
-            response.job?.let {
+            cast.job?.let {
                 addChip(it, c, R.drawable.ic_work_24)
             }
 
-            response.birthday?.let {
+            cast.birthday?.let {
                 addChip("Born in ${it.take(4)}", c, R.drawable.ic_child_24)
             }
 
-            response.deathday?.let {
+            cast.deathday?.let {
                 addChip("Died in ${it.take(4)}", c, R.drawable.ic_face_sad_24)
             }
-            val genderIcon = when (response.gender) {
+            val genderIcon = when (cast.gender) {
                 0 -> R.drawable.ic_transgender_24dp
                 1 -> R.drawable.ic_female_24dp
                 2 -> R.drawable.ic_male_24dp
                 else -> R.drawable.ic_transgender_24dp
             }
 
-            addChip(response.genderName, c, genderIcon)
+            addChip(cast.genderName, c, genderIcon)
 
-            response.place_of_birth?.let {
+            cast.place_of_birth?.let {
                 addChip(it, c, R.drawable.ic_place_24)
             }
         }
         binding.apply {
-            actorName.text = response.name
-            tvBiography.text = if (response.biography.isNullOrEmpty()) {
+            actorName.text = cast.name
+            tvBiography.text = if (cast.biography.isNullOrEmpty()) {
                 "No biography available"
-            } else response.biography
+            } else cast.biography
             tvBiography.setOnClickListener {
                 TransitionManager.beginDelayedTransition(binding.root)
                 tvBiography.maxLines = if (tvBiography.lineCount > 4) 4 else 1000
             }
             actorImage.setOnClickListener {
-                bigImageViewModel.setImagePath(response.profile_path)
+                bigImageViewModel.setImagePath(cast.profile_path)
                 findNavController().navigate(R.id.action_castsFragment_to_bigImageFragment)
             }
         }
 
-        val knownForList = response.known_for.map {
+        val knownForList = cast.known_for.map {
             AboutDataModel.Curation(
                 id = it.id,
                 media_type = it.media_type,

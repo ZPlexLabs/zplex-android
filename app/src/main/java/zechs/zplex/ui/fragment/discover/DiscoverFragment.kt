@@ -11,8 +11,8 @@ import zechs.zplex.R
 import zechs.zplex.adapter.browse.BrowseDataAdapter
 import zechs.zplex.adapter.browse.BrowseDataModel
 import zechs.zplex.databinding.FragmentDiscoverBinding
-import zechs.zplex.models.tmdb.genre.Genre
-import zechs.zplex.ui.fragment.FiltersViewModel
+import zechs.zplex.models.tmdb.entities.Genre
+import zechs.zplex.ui.fragment.viewmodels.FiltersViewModel
 
 class DiscoverFragment : Fragment(R.layout.fragment_discover) {
 
@@ -105,14 +105,16 @@ class DiscoverFragment : Fragment(R.layout.fragment_discover) {
             if (it.id == 0) {
                 findNavController().navigate(R.id.action_discoverFragment_to_searchFragment)
             } else {
-                filterModel.setFilter(
-                    mediaType = it.mediaType,
-                    sortBy = "popularity.desc",
-                    page = 1,
-                    withKeyword = null,
-                    withGenres = it.id
-                )
-                findNavController().navigate(R.id.action_discoverFragment_to_browseFragment)
+                it.mediaType?.let { mediaType ->
+                    filterModel.setFilter(
+                        mediaType = mediaType,
+                        sortBy = "popularity.desc",
+                        page = 1,
+                        withKeyword = null,
+                        withGenres = it.id
+                    )
+                    findNavController().navigate(R.id.action_discoverFragment_to_browseFragment)
+                }
             }
         }
     }

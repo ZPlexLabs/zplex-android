@@ -87,7 +87,7 @@
         android:visibility="visible"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"
         tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/item_episode_linear"
+        tools:listitem="@layout/item_episode"
         tools:orientation="vertical" />
 
     <ProgressBar

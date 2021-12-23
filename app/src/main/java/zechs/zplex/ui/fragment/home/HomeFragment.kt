@@ -14,7 +14,7 @@ import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentHomeBinding
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.ShowViewModel
+import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Resource
 
 

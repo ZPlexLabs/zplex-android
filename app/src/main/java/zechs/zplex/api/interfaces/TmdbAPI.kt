@@ -5,38 +5,16 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 import zechs.zplex.models.tmdb.collection.CollectionsResponse
-import zechs.zplex.models.tmdb.credits.CreditsResponse
-import zechs.zplex.models.tmdb.episode.EpisodeResponse
-import zechs.zplex.models.tmdb.movies.MoviesResponse
-import zechs.zplex.models.tmdb.person.CreditResponse
-import zechs.zplex.models.tmdb.person.PersonResponse
+import zechs.zplex.models.tmdb.credit.CreditResponse
+import zechs.zplex.models.tmdb.credit.PersonResponse
+import zechs.zplex.models.tmdb.entities.Episode
+import zechs.zplex.models.tmdb.media.MovieResponse
+import zechs.zplex.models.tmdb.media.TvResponse
 import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.models.tmdb.season.SeasonResponse
-import zechs.zplex.models.tmdb.tv.MovieResponse
-import zechs.zplex.models.tmdb.tv.TvResponse
 import zechs.zplex.utils.Constants.TMDB_API_KEY
 
 interface TmdbAPI {
-
-    @GET("3/movie/{movies_id}")
-    suspend fun getMovies(
-        @Path("movies_id")
-        movies_id: Int,
-        @Query("api_key")
-        api_key: String = TMDB_API_KEY,
-        @Query("language")
-        language: String = "en-US"
-    ): Response<MoviesResponse>
-
-    @GET("3/movie/{movies_id}/credits")
-    suspend fun getCredits(
-        @Path("movies_id")
-        movies_id: Int,
-        @Query("api_key")
-        api_key: String = TMDB_API_KEY,
-        @Query("language")
-        language: String = "en-US"
-    ): Response<CreditsResponse>
 
     @GET("3/tv/{tv_id}")
     suspend fun getShow(
@@ -62,36 +40,6 @@ interface TmdbAPI {
         language: String = "en-US",
     ): Response<SeasonResponse>
 
-    @GET("3/discover/movie")
-    suspend fun getPopularMovies(
-        @Query("api_key")
-        api_key: String = TMDB_API_KEY,
-        @Query("language")
-        language: String = "en-US",
-        @Query("sort_by")
-        sort_by: String = "popularity.desc",
-        @Query("page")
-        page: Int = 1,
-        @Query("first_air_date_year")
-        first_air_date_year: Int,
-    ): Response<SearchResponse>
-
-    @GET("3/discover/tv")
-    suspend fun getPopularShows(
-        @Query("api_key")
-        api_key: String = TMDB_API_KEY,
-        @Query("language")
-        language: String = "en-US",
-        @Query("sort_by")
-        sort_by: String = "popularity.desc",
-        @Query("page")
-        page: Int = 1,
-        @Query("first_air_date_year")
-        first_air_date_year: Int,
-        @Query("with_keywords")
-        with_keywords: String,
-    ): Response<SearchResponse>
-
     @GET("3/tv/{tv_id}/season/{season_number}/episode/{episode_number}")
     suspend fun getEpisode(
         @Path("tv_id")
@@ -104,7 +52,7 @@ interface TmdbAPI {
         api_key: String = TMDB_API_KEY,
         @Query("language")
         language: String = "en-US",
-    ): Response<EpisodeResponse>
+    ): Response<Episode>
 
     @GET("3/search/multi")
     suspend fun getSearch(
@@ -168,7 +116,6 @@ interface TmdbAPI {
         language: String = "en-US"
     ): Response<SearchResponse>
 
-
     @GET("3/discover/{media_type}")
     suspend fun getDiscover(
         @Path("media_type")
@@ -184,7 +131,9 @@ interface TmdbAPI {
         @Query("with_keywords")
         with_keywords: Int?,
         @Query("with_genres")
-        with_genres: Int,
+        with_genres: Int?,
+        @Query("first_air_date_year")
+        first_air_date_year: Int?,
     ): Response<SearchResponse>
 
 }

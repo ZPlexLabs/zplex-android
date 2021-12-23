@@ -95,12 +95,12 @@ dependencies {
     implementation "com.google.android.exoplayer:exoplayer:2.16.1"
 
     // Room
-    implementation "androidx.room:room-runtime:2.3.0"
+    implementation "androidx.room:room-runtime:2.4.0"
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.4.0'
-    kapt "androidx.room:room-compiler:2.3.0"
+    kapt "androidx.room:room-compiler:2.4.0"
 
     // Kotlin Extensions and Coroutines support for Room
-    implementation "androidx.room:room-ktx:2.3.0"
+    implementation "androidx.room:room-ktx:2.4.0"
 
     // Coroutine Lifecycle Scopes
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0"
@@ -108,7 +108,7 @@ dependencies {
 
     // Coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2"
 
     // Moshi
     implementation "com.squareup.moshi:moshi:1.12.0"
@@ -134,10 +134,6 @@ dependencies {
     implementation platform("com.google.firebase:firebase-bom:28.2.1")
     implementation "com.google.firebase:firebase-analytics:20.0.2"
     implementation "com.google.firebase:firebase-crashlytics"
-    implementation "com.google.firebase:firebase-messaging:23.0.0"
-
-    //Utils
-    implementation "org.jetbrains:annotations:21.0.1"
 
     //Kotlin
     implementation "androidx.core:core-ktx:1.7.0"

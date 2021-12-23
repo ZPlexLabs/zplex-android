@@ -10,9 +10,6 @@
         android:label="Home"
         tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_homeFragment_to_aboutFragment"
-            app:destination="@id/aboutFragment" />
-        <action
             android:id="@+id/action_homeFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />
     </fragment>
@@ -24,14 +21,10 @@
         tools:layout="@layout/fragment_discover">
         <action
             android:id="@+id/action_discoverFragment_to_searchFragment"
-            app:destination="@id/searchFragment"
-            app:enterAnim="@android:anim/fade_in"
-            app:exitAnim="@android:anim/fade_out" />
+            app:destination="@id/searchFragment" />
         <action
             android:id="@+id/action_discoverFragment_to_browseFragment"
-            app:destination="@id/browseFragment"
-            app:enterAnim="@android:anim/fade_in"
-            app:exitAnim="@android:anim/fade_out" />
+            app:destination="@id/browseFragment" />
     </fragment>
 
     <fragment
@@ -50,9 +43,6 @@
         android:label="Search"
         tools:layout="@layout/fragment_search">
         <action
-            android:id="@+id/action_searchFragment_to_aboutFragment"
-            app:destination="@id/aboutFragment" />
-        <action
             android:id="@+id/action_searchFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />
     </fragment>
@@ -63,20 +53,8 @@
         android:label="My shows"
         tools:layout="@layout/fragment_my_shows">
         <action
-            android:id="@+id/action_myShowsFragment_to_aboutFragment"
-            app:destination="@id/aboutFragment" />
-        <action
             android:id="@+id/action_myShowsFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />
-    </fragment>
-    <fragment
-        android:id="@+id/aboutFragment"
-        android:name="zechs.zplex.ui.fragment.about.AboutFragment"
-        android:label="About"
-        tools:layout="@layout/fragment_about">
-        <action
-            android:id="@+id/action_aboutFragment_to_bigImageFragment"
-            app:destination="@id/bigImageFragment" />
     </fragment>
 
     <fragment

@@ -12,10 +12,10 @@ import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentBrowseBinding
-import zechs.zplex.models.FilterArgs
+import zechs.zplex.models.dataclass.FilterArgs
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.FiltersViewModel
-import zechs.zplex.ui.fragment.ShowViewModel
+import zechs.zplex.ui.fragment.viewmodels.FiltersViewModel
+import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Resource
 
 class BrowseFragment : Fragment(R.layout.fragment_browse) {
