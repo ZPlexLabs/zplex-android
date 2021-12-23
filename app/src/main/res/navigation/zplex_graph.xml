@@ -12,6 +12,36 @@
         <action
             android:id="@+id/action_homeFragment_to_aboutFragment"
             app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_fragmentMedia"
+            app:destination="@id/fragmentMedia" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/discoverFragment"
+        android:name="zechs.zplex.ui.fragment.discover.DiscoverFragment"
+        android:label="DiscoverFragment"
+        tools:layout="@layout/fragment_discover">
+        <action
+            android:id="@+id/action_discoverFragment_to_searchFragment"
+            app:destination="@id/searchFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out" />
+        <action
+            android:id="@+id/action_discoverFragment_to_browseFragment"
+            app:destination="@id/browseFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/browseFragment"
+        android:name="zechs.zplex.ui.fragment.browse.BrowseFragment"
+        android:label="Browse"
+        tools:layout="@layout/fragment_browse">
+        <action
+            android:id="@+id/action_browseFragment_to_fragmentMedia"
+            app:destination="@id/fragmentMedia" />
     </fragment>
 
     <fragment
@@ -22,6 +52,9 @@
         <action
             android:id="@+id/action_searchFragment_to_aboutFragment"
             app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_searchFragment_to_fragmentMedia"
+            app:destination="@id/fragmentMedia" />
     </fragment>
 
     <fragment
@@ -32,6 +65,9 @@
         <action
             android:id="@+id/action_myShowsFragment_to_aboutFragment"
             app:destination="@id/aboutFragment" />
+        <action
+            android:id="@+id/action_myShowsFragment_to_fragmentMedia"
+            app:destination="@id/fragmentMedia" />
     </fragment>
     <fragment
         android:id="@+id/aboutFragment"
@@ -43,9 +79,64 @@
             app:destination="@id/bigImageFragment" />
     </fragment>
 
-    <dialog
+    <fragment
         android:id="@+id/bigImageFragment"
         android:name="zechs.zplex.ui.fragment.image.BigImageFragment"
         android:label="BigImageFragment"
         tools:layout="@layout/fragment_big_image" />
+
+    <fragment
+        android:id="@+id/fragmentMedia"
+        android:name="zechs.zplex.ui.fragment.media.FragmentMedia"
+        android:label="Fragment Media"
+        tools:layout="@layout/fragment_media">
+        <action
+            android:id="@+id/action_fragmentMedia_to_episodeListFragment"
+            app:destination="@id/episodesListFragment" />
+        <action
+            android:id="@+id/action_fragmentMedia_to_castsFragment"
+            app:destination="@id/castsFragment" />
+        <action
+            android:id="@+id/action_fragmentMedia_to_bigImageFragment"
+            app:destination="@id/bigImageFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/episodesListFragment"
+        android:name="zechs.zplex.ui.fragment.episodes.EpisodesFragment"
+        android:label="EpisodesFragment"
+        tools:layout="@layout/fragment_episode">
+        <action
+            android:id="@+id/action_episodesListFragment_to_watchFragment"
+            app:destination="@id/watchFragment" />
+        <action
+            android:id="@+id/action_episodesListFragment_to_bigImageFragment"
+            app:destination="@id/bigImageFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/watchFragment"
+        android:name="zechs.zplex.ui.fragment.watch.WatchFragment"
+        android:label="WatchFragment"
+        tools:layout="@layout/fragment_watch">
+        <action
+            android:id="@+id/action_watchFragment_to_castsFragment"
+            app:destination="@id/castsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/castsFragment"
+        android:name="zechs.zplex.ui.fragment.cast.CastsFragment"
+        android:label="CastsFragment"
+        tools:layout="@layout/fragment_cast_details">
+        <action
+            android:id="@+id/action_castsFragment_to_bigImageFragment"
+            app:destination="@id/bigImageFragment" />
+        <action
+            android:id="@+id/action_castsFragment_to_fragmentMedia"
+            app:destination="@id/fragmentMedia"
+            app:popUpTo="@id/homeFragment" />
+    </fragment>
+
+
 </navigation>

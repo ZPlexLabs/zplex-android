@@ -1,35 +1,21 @@
 package zechs.zplex.ui.fragment.home
 
-import android.content.ActivityNotFoundException
-import android.content.ComponentName
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Toast
-import android.widget.Toast.LENGTH_LONG
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
-import com.google.android.material.transition.MaterialFadeThrough
 import zechs.zplex.R
-import zechs.zplex.adapter.FilesAdapter
-import zechs.zplex.adapter.LogsAdapter
+import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentHomeBinding
-import zechs.zplex.models.Args
-import zechs.zplex.models.drive.File
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.ArgsViewModel
-import zechs.zplex.utils.Constants.ZPLEX
-import zechs.zplex.utils.Constants.regexShow
+import zechs.zplex.ui.fragment.ShowViewModel
 import zechs.zplex.utils.Resource
-import java.net.IDN
-import java.net.URI
-import java.net.URL
 
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
@@ -38,11 +24,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val binding get() = _binding!!
 
     private lateinit var homeViewModel: HomeViewModel
-    private val argsModel: ArgsViewModel by activityViewModels()
+    private val showsViewModel by activityViewModels<ShowViewModel>()
 
-    private lateinit var filesAdapter: FilesAdapter
-    private lateinit var filesAdapter2: FilesAdapter
-    private lateinit var logsAdapter: LogsAdapter
+    private val discoverMoviesAdapter by lazy { SearchAdapter() }
+    private val discoverShowsAdapter by lazy { SearchAdapter() }
+    private val discoverAnimeAdapter by lazy { SearchAdapter() }
+    private val trendingAdapter by lazy { SearchAdapter() }
 
     private val thisTAG = "HomeFragment"
 
@@ -53,171 +40,199 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         homeViewModel = (activity as ZPlexActivity).homeViewModel
         setupRecyclerView()
 
-        homeViewModel.homeList.observe(viewLifecycleOwner, { response ->
+        homeViewModel.trending.observe(viewLifecycleOwner, { response ->
             when (response) {
                 is Resource.Success -> {
-                    homeView(visible = true)
-                    response.data?.let { filesResponse ->
-                        filesAdapter.differ.submitList(filesResponse.files.toList())
+                    binding.apply {
+                        textView2.isVisible = true
+                        rvTrending.isVisible = true
+                    }
+                    response.data?.let { moviesResponse ->
+                        trendingAdapter.differ.submitList(moviesResponse.results.toList())
                     }
                 }
                 is Resource.Error -> {
-                    homeView(visible = false)
+                    binding.apply {
+                        textView2.isVisible = false
+                        rvTrending.isVisible = false
+                    }
                     response.message?.let { message ->
                         val errorText =
-                            "Unable to fetch recently added shows. An error occurred: $message"
+                            "Unable to fetch trending. An error occurred: $message"
                         Toast.makeText(context, errorText, Toast.LENGTH_SHORT).show()
                         Log.e(thisTAG, errorText)
                     }
                 }
                 is Resource.Loading -> {
-                    homeView(visible = false)
+                    binding.apply {
+                        textView2.isVisible = false
+                        rvTrending.isVisible = false
+                    }
                 }
             }
         })
 
-        homeViewModel.logsList.observe(viewLifecycleOwner, { response ->
+        homeViewModel.movies.observe(viewLifecycleOwner, { response ->
+            when (response) {
+                is Resource.Success -> {
+                    binding.apply {
+                        textView3.isVisible = true
+                        rvMovies.isVisible = true
+                    }
+                    response.data?.let { moviesResponse ->
+                        discoverMoviesAdapter.differ.submitList(moviesResponse.results.toList())
+                    }
+                }
+                is Resource.Error -> {
+                    binding.apply {
+                        textView3.isVisible = false
+                        rvMovies.isVisible = false
+                    }
+                    response.message?.let { message ->
+                        val errorText =
+                            "Unable to fetch popular movies. An error occurred: $message"
+                        Toast.makeText(context, errorText, Toast.LENGTH_SHORT).show()
+                        Log.e(thisTAG, errorText)
+                    }
+                }
+                is Resource.Loading -> {
+                    binding.apply {
+                        textView3.isVisible = false
+                        rvMovies.isVisible = false
+                    }
+                }
+            }
+        })
+
+        homeViewModel.shows.observe(viewLifecycleOwner, { response ->
             TransitionManager.beginDelayedTransition(binding.root)
             when (response) {
                 is Resource.Success -> {
-                    response.data?.let { logsResponse ->
-                        val newEpisodeList = logsResponse.releasesLog.toList()
-                        logView(visible = newEpisodeList.isNotEmpty())
-                        logsAdapter.differ.submitList(newEpisodeList)
+                    binding.apply {
+                        textView4.isVisible = true
+                        rvShows.isVisible = true
+                    }
+                    response.data?.let { showsResponse ->
+                        discoverShowsAdapter.differ.submitList(showsResponse.results.toList())
                     }
                 }
                 is Resource.Error -> {
-                    logView(visible = false)
+                    binding.apply {
+                        textView4.isVisible = false
+                        rvShows.isVisible = false
+                    }
                     response.message?.let { message ->
                         val errorText =
-                            "Unable to fetch new episodes list. An error occurred: $message"
+                            "Unable to fetch popular shows. An error occurred: $message"
+                        Toast.makeText(context, errorText, Toast.LENGTH_SHORT).show()
+                        Log.e(thisTAG, errorText)
+                    }
+                }
+                is Resource.Loading -> binding.apply {
+                    textView4.isVisible = false
+                    rvShows.isVisible = false
+                }
+
+            }
+        })
+
+        homeViewModel.animes.observe(viewLifecycleOwner, { response ->
+            TransitionManager.beginDelayedTransition(binding.root)
+            when (response) {
+                is Resource.Success -> {
+                    binding.apply {
+                        textView5.isVisible = true
+                        rvAnime.isVisible = true
+                    }
+                    response.data?.let { animeResponse ->
+                        discoverAnimeAdapter.differ.submitList(animeResponse.results.toList())
+                    }
+                }
+                is Resource.Error -> {
+                    binding.apply {
+                        textView5.isVisible = false
+                        rvAnime.isVisible = false
+                    }
+                    response.message?.let { message ->
+                        val errorText =
+                            "Unable to fetch popular animes. An error occurred: $message"
                         Toast.makeText(context, errorText, Toast.LENGTH_SHORT).show()
                         Log.e(thisTAG, errorText)
                     }
                 }
                 is Resource.Loading -> {
-                    logView(visible = false)
+                    binding.apply {
+                        textView5.isVisible = false
+                        rvAnime.isVisible = false
+                    }
                 }
             }
         })
-
-        homeViewModel.getSavedShows().observe(viewLifecycleOwner, { files ->
-            showsView(visible = files.toList().isNotEmpty())
-            if (files.toList().isNotEmpty()) filesAdapter2.differ.submitList(files)
-        })
-    }
-
-    private fun homeView(visible: Boolean) {
-        TransitionManager.beginDelayedTransition(binding.root, MaterialFadeThrough())
-        binding.apply {
-            recentlyAdded.isVisible = visible
-            rvNewEpisodes.isVisible = visible
-        }
-    }
-
-    private fun logView(visible: Boolean) {
-        TransitionManager.beginDelayedTransition(binding.root, MaterialFadeThrough())
-        binding.apply {
-            newEpisodes.isVisible = visible
-            rvHome.isVisible = visible
-        }
-    }
-
-    private fun showsView(visible: Boolean) {
-        binding.apply {
-            myShows.isVisible = visible
-            rvMyShowsHome.isVisible = visible
-        }
     }
 
     private fun setupRecyclerView() {
-        filesAdapter = FilesAdapter()
-        filesAdapter2 = FilesAdapter()
 
-        binding.rvHome.apply {
-            adapter = filesAdapter
-            layoutManager = LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
-        }
-
-        filesAdapter.setOnItemClickListener {
-            getDetails(it)
-        }
-
-        logsAdapter = LogsAdapter()
-        binding.rvNewEpisodes.apply {
-            adapter = logsAdapter
-            layoutManager = LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
-        }
-
-        logsAdapter.setOnItemClickListener {
-            val playUrl = URL("${ZPLEX}${it.folder}/${it.file}")
-            val playURI = URI(
-                playUrl.protocol,
-                playUrl.userInfo,
-                IDN.toASCII(playUrl.host),
-                playUrl.port,
-                playUrl.path,
-                playUrl.query,
-                playUrl.ref
-            ).toASCIIString().replace("?", "%3F")
-
-            try {
-                val vlcIntent = Intent(Intent.ACTION_VIEW)
-                vlcIntent.setPackage("org.videolan.vlc")
-                vlcIntent.component = ComponentName(
-                    "org.videolan.vlc",
-                    "org.videolan.vlc.gui.video.VideoPlayerActivity"
-                )
-                vlcIntent.setDataAndTypeAndNormalize(Uri.parse(playURI), "video/*")
-                vlcIntent.putExtra("title", it.file.dropLast(4))
-                vlcIntent.flags =
-                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK
-                startActivity(vlcIntent)
-            } catch (notFoundException: ActivityNotFoundException) {
-                notFoundException.printStackTrace()
-                Toast.makeText(
-                    context,
-                    "VLC not found, Install VLC from Play Store",
-                    LENGTH_LONG
-                ).show()
-            }
-        }
-
-        binding.rvMyShowsHome.apply {
-            adapter = filesAdapter2
-            layoutManager = LinearLayoutManager(activity, LinearLayoutManager.HORIZONTAL, false)
-            filesAdapter2.setOnItemClickListener {
-                getDetails(it)
-            }
-        }
-    }
-
-    private fun getDetails(it: File) {
-        val nameSplit = regexShow.toRegex().find(it.name)?.destructured?.toList()
-
-        if (nameSplit != null) {
-            val mediaId = nameSplit[0]
-            val mediaName = nameSplit[2]
-            val mediaType = nameSplit[4]
-
-            argsModel.setArg(
-                Args(
-                    file = it,
-                    mediaId = mediaId.toInt(),
-                    type = mediaType,
-                    name = mediaName
-                )
+        binding.rvTrending.apply {
+            adapter = trendingAdapter
+            layoutManager = LinearLayoutManager(
+                activity, LinearLayoutManager.HORIZONTAL, false
             )
-            findNavController().navigate(R.id.action_homeFragment_to_aboutFragment)
+        }
+
+        binding.rvMovies.apply {
+            adapter = discoverMoviesAdapter
+            layoutManager = LinearLayoutManager(
+                activity, LinearLayoutManager.HORIZONTAL, false
+            )
+        }
+
+        binding.rvShows.apply {
+            adapter = discoverShowsAdapter
+            layoutManager = LinearLayoutManager(
+                activity, LinearLayoutManager.HORIZONTAL, false
+            )
+        }
+
+        binding.rvAnime.apply {
+            adapter = discoverAnimeAdapter
+            layoutManager = LinearLayoutManager(
+                activity, LinearLayoutManager.HORIZONTAL, false
+            )
+        }
+
+        trendingAdapter.setOnItemClickListener { show ->
+            showsViewModel.setMedia(show.id, show.media_type ?: "tv")
+            findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
+        }
+
+        discoverMoviesAdapter.setOnItemClickListener { movie ->
+            showsViewModel.setMedia(movie.id, "movie")
+            findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
+        }
+
+        discoverShowsAdapter.setOnItemClickListener { show ->
+            showsViewModel.setMedia(show.id, "tv")
+            findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
+        }
+
+        discoverAnimeAdapter.setOnItemClickListener { show ->
+            showsViewModel.setMedia(show.id, "tv")
+            findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
+        }
+
+        discoverAnimeAdapter.setOnItemClickListener { show ->
+            showsViewModel.setMedia(show.id, "tv")
+            findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
+
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         binding.apply {
-            rvHome.adapter = null
-            rvNewEpisodes.adapter = null
-            rvMyShowsHome.adapter = null
+            rvMovies.adapter = null
+            rvShows.adapter = null
+            rvAnime.adapter = null
         }
         _binding = null
     }

@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -155,12 +154,12 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
                     .placeholder(R.drawable.no_poster)
                     .into(binding.ivPoster)
 
-                binding.ivPoster.setOnClickListener {
-                    bigImageViewModel.setImageUrl(redirectImagePoster.toString())
-                    findNavController().navigate(
-                        R.id.action_aboutFragment_to_bigImageFragment
-                    )
-                }
+//                binding.ivPoster.setOnClickListener {
+//                    bigImageViewModel.setImageUrl(redirectImagePoster.toString())
+//                    findNavController().navigate(
+//                        R.id.action_aboutFragment_to_bigImageFragment
+//                    )
+//                }
 
                 binding.btnDownload.setOnClickListener {
                     Toast.makeText(

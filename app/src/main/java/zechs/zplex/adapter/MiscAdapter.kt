@@ -4,6 +4,7 @@ package zechs.zplex.adapter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -43,6 +44,7 @@ class MiscAdapter : RecyclerView.Adapter<MiscAdapter.MiscViewHolder>() {
         val data = differ.currentList[position]
 
         holder.itemView.apply {
+            if (position == differ.currentList.size - 1) view2.isGone = true
             tv_key.text = data.key
             tv_value.text = data.value
         }

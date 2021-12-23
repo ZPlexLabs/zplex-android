@@ -50,7 +50,7 @@ class InfoFragment : Fragment(R.layout.fragment_info) {
 
         miscAdapter = MiscAdapter()
 
-        binding.listMisc.apply {
+        binding.rvListMisc.apply {
             adapter = miscAdapter
             layoutManager = LinearLayoutManager(activity)
         }

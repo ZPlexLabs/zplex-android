@@ -7,14 +7,13 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.item_media.view.*
 import zechs.zplex.R
 import zechs.zplex.models.drive.File
 import zechs.zplex.utils.Constants.TMDB_API_KEY
 import zechs.zplex.utils.Constants.ZPLEX_IMAGE_REDIRECT
 import zechs.zplex.utils.Constants.regexShow
+import zechs.zplex.utils.GlideApp
 
 
 class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
@@ -65,9 +64,8 @@ class FilesAdapter : RecyclerView.Adapter<FilesAdapter.FilesViewHolder>() {
             }
 
             holder.itemView.apply {
-                Glide.with(this)
+                GlideApp.with(this)
                     .load(redirectImagePoster)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.drawable.no_poster)
                     .into(item_poster)
                 setOnClickListener {

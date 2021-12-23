@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:animateLayoutChanges="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:padding="4dp">
+
+    <TextView
+        android:id="@+id/episode_count"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="4dp"
+        android:elevation="16dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/open_sans"
+        android:maxLines="1"
+        android:textColor="@color/textColor_87"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/episode_title"
+        app:layout_constraintEnd_toEndOf="@+id/thumb_card"
+        app:layout_constraintStart_toStartOf="@+id/thumb_card"
+        app:layout_constraintTop_toTopOf="@+id/thumb_card"
+        app:layout_constraintVertical_bias="1.0"
+        tools:ignore="TextContrastCheck"
+        tools:text="Episode 1" />
+
+    <TextView
+        android:id="@+id/episode_title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:elevation="16dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/open_sans_semibold"
+        android:maxLines="2"
+        android:textColor="@color/textColor"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/episode_plot"
+        app:layout_constraintEnd_toEndOf="@+id/episode_count"
+        app:layout_constraintStart_toStartOf="@+id/episode_count"
+        tools:text="The Storm Dragon, Veldora" />
+
+    <TextView
+        android:id="@+id/episode_plot"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:elevation="16dp"
+        android:ellipsize="end"
+        android:maxLines="3"
+        android:textColor="@color/textColor_74"
+        app:layout_constraintBottom_toBottomOf="@+id/thumb_card"
+        app:layout_constraintEnd_toEndOf="@+id/episode_title"
+        app:layout_constraintStart_toStartOf="@+id/episode_title"
+        tools:text="Mikami Satoru, a businessman, is stabbed by a criminal on the street and killed. When he regains consciousness in the darkness, he finds that he's been reincarnated as a slime! With nothing better to do, he spends his time devouring all the rare herbs and precious ores he comes across. As he does, he encounters the Storm Dragon Veldora, who was sealed in this cave 300 years ago by a hero's 'Unlimited Imprisonment skill. He's frightened at first, but as they talk, he becomes friends with the long-isolated Veldora." />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/thumb_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:foreground="?android:attr/selectableItemBackground"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="8dp"
+        app:cardMaxElevation="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/thumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
+            tools:src="@drawable/no_thumb" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/size_bg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:cardBackgroundColor="#80000000"
+        app:cardCornerRadius="48dp"
+        app:cardElevation="8dp"
+        app:cardMaxElevation="8dp"
+        app:layout_constraintEnd_toEndOf="@+id/thumb_card"
+        app:layout_constraintTop_toTopOf="@+id/thumb_card">
+
+        <TextView
+            android:id="@+id/episode_size"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fontFamily="@font/open_sans"
+            android:maxLines="1"
+            android:padding="8dp"
+            android:textColor="@color/textColor_87"
+            tools:text="250 MB" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <FrameLayout
+        android:id="@+id/frameLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:elevation="12dp"
+        app:layout_constraintBottom_toBottomOf="@+id/thumb_card"
+        app:layout_constraintEnd_toEndOf="@+id/thumb_card"
+        app:layout_constraintStart_toStartOf="@+id/thumb_card"
+        app:layout_constraintTop_toTopOf="@+id/thumb_card">
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:background="@drawable/faded_bg" />
+    </FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
+

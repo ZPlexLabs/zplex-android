@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import zechs.zplex.R
 import zechs.zplex.adapter.ActorsAdapter
@@ -15,7 +14,6 @@ import zechs.zplex.models.tvdb.actors.Data
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.about.AboutViewModel
 import zechs.zplex.ui.fragment.image.BigImageViewModel
-import zechs.zplex.utils.Constants.TVDB_IMAGE_PATH
 import zechs.zplex.utils.Resource
 
 class ActorsFragment : Fragment(R.layout.fragment_casts) {
@@ -36,13 +34,13 @@ class ActorsFragment : Fragment(R.layout.fragment_casts) {
 
         actorsAdapter = ActorsAdapter()
 
-        actorsAdapter.setOnItemClickListener { data ->
-            if (!data.image.isNullOrEmpty()) {
-                Log.d("actorURL", "${TVDB_IMAGE_PATH}${data.image}")
-                bigImageViewModel.setImageUrl("${TVDB_IMAGE_PATH}${data.image}")
-                findNavController().navigate(R.id.action_aboutFragment_to_bigImageFragment)
-            }
-        }
+//        actorsAdapter.setOnItemClickListener { data ->
+//            if (!data.image.isNullOrEmpty()) {
+//                Log.d("actorURL", "${TVDB_IMAGE_PATH}${data.image}")
+//                bigImageViewModel.setImageUrl("${TVDB_IMAGE_PATH}${data.image}")
+//                findNavController().navigate(R.id.action_aboutFragment_to_bigImageFragment)
+//            }
+//        }
 
         binding.rvCasts.apply {
             adapter = actorsAdapter

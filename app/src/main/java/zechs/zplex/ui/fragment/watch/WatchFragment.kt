@@ -1,0 +1,157 @@
+package zechs.zplex.ui.fragment.watch
+
+import android.os.Bundle
+import android.view.View
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.transition.TransitionManager
+import com.google.android.material.transition.MaterialSharedAxis
+import zechs.zplex.R
+import zechs.zplex.adapter.CastAdapter
+import zechs.zplex.adapter.about.AboutDataModel
+import zechs.zplex.databinding.FragmentWatchBinding
+import zechs.zplex.models.tmdb.StillSize
+import zechs.zplex.models.tmdb.episode.EpisodeResponse
+import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.fragment.CastDetailsViewModel
+import zechs.zplex.ui.fragment.EpisodeViewModel
+import zechs.zplex.utils.Constants
+import zechs.zplex.utils.GlideApp
+import zechs.zplex.utils.Resource
+
+class WatchFragment : Fragment(R.layout.fragment_watch) {
+
+    private var _binding: FragmentWatchBinding? = null
+    private val binding get() = _binding!!
+
+    private val castDetailsViewModel by activityViewModels<CastDetailsViewModel>()
+    private val episodeViewModel by activityViewModels<EpisodeViewModel>()
+    private lateinit var watchViewModel: WatchViewModel
+    private val castAdapter by lazy { CastAdapter() }
+
+    private val thisTAG = "WatchFragment"
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        enterTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, true
+        ).apply {
+            duration = 500L
+        }
+
+        exitTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, false
+        ).apply {
+            duration = 500L
+        }
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentWatchBinding.bind(view)
+
+        watchViewModel = (activity as ZPlexActivity).watchViewModel
+        setupRecyclerView()
+
+        episodeViewModel.showEpisode.observe(viewLifecycleOwner, {
+            watchViewModel.getEpisode(
+                it.tmdbId, it.seasonNumber, it.episodeNumber
+            )
+        })
+
+        watchViewModel.episode.observe(viewLifecycleOwner, { responseEpisode ->
+            when (responseEpisode) {
+                is Resource.Success -> {
+                    responseEpisode.data?.let { doOnSuccess(it) }
+                }
+                is Resource.Error -> {
+                }
+                is Resource.Loading -> {
+                }
+            }
+        })
+
+    }
+
+    private fun doOnSuccess(episode: EpisodeResponse) {
+
+        val episodeStillUrl = if (episode.still_path == null) {
+            R.drawable.no_thumb
+        } else {
+            "${Constants.TMDB_IMAGE_PREFIX}/${StillSize.original}${episode.still_path}"
+        }
+
+        val seasonEpisodeText = "Season ${episode.season_number}, Episode ${episode.episode_number}"
+
+        binding.apply {
+            tvSeasonEpisode.text = seasonEpisodeText
+            tvTitle.text = episode.name
+            tvOverview.text = if (episode.overview.isNullOrEmpty()) {
+                "No description"
+            } else episode.overview
+            tvOverview.setOnClickListener {
+                TransitionManager.beginDelayedTransition(binding.root)
+                tvOverview.maxLines = if (tvOverview.lineCount > 4) 4 else 1000
+            }
+        }
+
+        context?.let {
+            GlideApp.with(it)
+                .asBitmap()
+                .load(episodeStillUrl)
+                .placeholder(R.drawable.no_thumb)
+                .into(binding.thumb)
+        }
+
+        val castList = episode.guest_stars?.map {
+            AboutDataModel.Cast(
+                character = it.character,
+                credit_id = it.credit_id,
+                person_id = it.id,
+                name = it.name,
+                profile_path = it.profile_path
+            )
+        } ?: listOf()
+
+        if (castList.isEmpty()) {
+            binding.apply {
+                rvCasts.isInvisible = true
+                textView1.isInvisible = true
+            }
+        } else {
+            binding.apply {
+                rvCasts.isVisible = true
+                textView1.isVisible = true
+            }
+        }
+        castAdapter.differ.submitList(castList)
+    }
+
+    private fun setupRecyclerView() {
+        binding.rvCasts.apply {
+            adapter = castAdapter
+            layoutManager = LinearLayoutManager(
+                activity, LinearLayoutManager.HORIZONTAL, false
+            )
+            itemAnimator = null
+        }
+        castAdapter.setOnItemClickListener {
+            castDetailsViewModel.setCast(
+                it.person_id, it.credit_id
+            )
+            findNavController().navigate(R.id.action_watchFragment_to_castsFragment)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.rvCasts.adapter = null
+        _binding = null
+    }
+}

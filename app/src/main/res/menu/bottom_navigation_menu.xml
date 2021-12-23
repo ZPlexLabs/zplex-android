@@ -7,18 +7,13 @@
         android:title="@string/home" />
 
     <item
-        android:id="@+id/searchFragment"
+        android:id="@+id/discoverFragment"
         android:icon="@drawable/ic_search"
-        android:title="@string/search" />
+        android:title="@string/discover" />
 
     <item
         android:id="@+id/myShowsFragment"
         android:icon="@drawable/ic_my_shows"
         android:title="@string/my_shows" />
-
-    <!--    <item-->
-    <!--        android:id="@+id/releasesFragment"-->
-    <!--        android:icon="@drawable/ic_releases"-->
-    <!--        android:title="Releases" />-->
 
 </menu>

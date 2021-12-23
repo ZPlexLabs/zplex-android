@@ -55,4 +55,9 @@ object ConverterUtils {
         }
         return s
     }
+
+    fun convertMinutes(min: Int): String {
+        if (min <= 60) return "$min min"
+        return "${min / 60} hr ${min % 60} min"
+    }
 }

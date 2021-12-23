@@ -3,13 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/black">
+    android:background="@color/colorPrimary">
 
     <zechs.zplex.utils.view.GestureImageView
         android:id="@+id/big_image_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:background="@android:color/black"
+        android:background="@color/colorPrimary"
         tools:src="@drawable/no_poster" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

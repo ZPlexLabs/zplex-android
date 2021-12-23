@@ -3,79 +3,61 @@ package zechs.zplex.ui.fragment.home
 import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.NetworkCapabilities.*
+import android.net.NetworkCapabilities
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.ThisApp
-import zechs.zplex.models.drive.DriveResponse
-import zechs.zplex.models.witch.ReleasesResponse
-import zechs.zplex.repository.FilesRepository
-import zechs.zplex.repository.ReleasesRepository
-import zechs.zplex.utils.Constants.TEMP_TOKEN
+import zechs.zplex.models.tmdb.search.SearchResponse
+import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.utils.Resource
-import zechs.zplex.utils.SessionManager
 import java.io.IOException
-
+import java.time.Year
 
 class HomeViewModel(
     app: Application,
-    private val filesRepository: FilesRepository,
-    private val releasesRepository: ReleasesRepository
+    private val tmdbRepository: TmdbRepository
 ) : AndroidViewModel(app) {
 
-    val homeList: MutableLiveData<Resource<DriveResponse>> = MutableLiveData()
-    val logsList: MutableLiveData<Resource<ReleasesResponse>> = MutableLiveData()
+    val movies: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
+    val shows: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
+    val animes: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
+    val trending: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
 
-    private val accessToken =
-        SessionManager(getApplication<Application>().applicationContext).fetchAuthToken()
-    private val driveQuery =
-        "(name contains 'TV' or name contains 'Movie') and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false"
-    private val pageSize = 10
-    private val orderBy = "modifiedTime desc"
+    private val currentYear = Year.now().value
 
     init {
-        getHomeList()
-        getReleasesLog()
+        getMovies()
+        getShows()
+        getAnimes()
+        getTrending()
     }
 
-    fun getSavedShows() = filesRepository.getSavedFiles()
-
-    private fun getHomeList() = viewModelScope.launch {
-        homeList.postValue(Resource.Loading())
+    private fun getTrending() = viewModelScope.launch {
+        trending.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
-                val response = filesRepository.getDriveFiles(
-                    pageSize,
-                    if (accessToken == "") TEMP_TOKEN else accessToken,
-                    "", driveQuery, orderBy
-                )
-                homeList.postValue(handleHomeListResponse(response))
+                val response = tmdbRepository.getTrending()
+                trending.postValue(handleTrendingResponse(response))
             } else {
-                homeList.postValue(Resource.Error("No internet connection"))
+                trending.postValue(Resource.Error("No internet connection"))
             }
-
         } catch (t: Throwable) {
             println(t.stackTrace)
             println(t.message)
-
-            if (t is IOException) {
-                homeList.postValue(Resource.Error("Network Failure"))
-            } else {
-                homeList.postValue(
-                    Resource.Error(
-                        t.message ?: "Something went wrong"
-                    )
+            trending.postValue(
+                Resource.Error(
+                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
                 )
-            }
+            )
         }
     }
 
-    private fun handleHomeListResponse(
-        response: Response<DriveResponse>
-    ): Resource<DriveResponse> {
+    private fun handleTrendingResponse(
+        response: Response<SearchResponse>
+    ): Resource<SearchResponse> {
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
                 return Resource.Success(resultResponse)
@@ -84,35 +66,29 @@ class HomeViewModel(
         return Resource.Error(response.message())
     }
 
-    private fun getReleasesLog() =
-        viewModelScope.launch {
-            logsList.postValue(Resource.Loading())
-            try {
-                if (hasInternetConnection()) {
-                    val response = releasesRepository.getReleaseLogs()
-                    logsList.postValue(handleLogsListResponse(response))
-                } else {
-                    logsList.postValue(Resource.Error("No internet connection"))
-                }
-            } catch (t: Throwable) {
-                println(t.stackTrace)
-                println(t.message)
-
-                if (t is IOException) {
-                    logsList.postValue(Resource.Error("Network Failure"))
-                } else {
-                    logsList.postValue(
-                        Resource.Error(
-                            t.message ?: "Something went wrong"
-                        )
-                    )
-                }
+    private fun getMovies() = viewModelScope.launch {
+        movies.postValue(Resource.Loading())
+        try {
+            if (hasInternetConnection()) {
+                val response = tmdbRepository.getPopularMovie(currentYear)
+                movies.postValue(handleMoviesResponse(response))
+            } else {
+                movies.postValue(Resource.Error("No internet connection"))
             }
+        } catch (t: Throwable) {
+            println(t.stackTrace)
+            println(t.message)
+            movies.postValue(
+                Resource.Error(
+                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
+                )
+            )
         }
+    }
 
-    private fun handleLogsListResponse(
-        response: Response<ReleasesResponse>
-    ): Resource<ReleasesResponse> {
+    private fun handleMoviesResponse(
+        response: Response<SearchResponse>
+    ): Resource<SearchResponse> {
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
                 return Resource.Success(resultResponse)
@@ -120,6 +96,58 @@ class HomeViewModel(
         }
         return Resource.Error(response.message())
     }
+
+    private fun getShows() = viewModelScope.launch {
+        shows.postValue(Resource.Loading())
+        try {
+            if (hasInternetConnection()) {
+                val response = tmdbRepository.getPopularShow(currentYear, "")
+                shows.postValue(handleShowsResponse(response))
+            } else {
+                shows.postValue(Resource.Error("No internet connection"))
+            }
+        } catch (t: Throwable) {
+            println(t.stackTrace)
+            println(t.message)
+            shows.postValue(
+                Resource.Error(
+                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
+                )
+            )
+        }
+    }
+
+    private fun getAnimes() = viewModelScope.launch {
+        animes.postValue(Resource.Loading())
+        try {
+            if (hasInternetConnection()) {
+                val response = tmdbRepository.getPopularShow(currentYear, "210024")
+                animes.postValue(handleShowsResponse(response))
+            } else {
+                animes.postValue(Resource.Error("No internet connection"))
+            }
+        } catch (t: Throwable) {
+            println(t.stackTrace)
+            println(t.message)
+            animes.postValue(
+                Resource.Error(
+                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
+                )
+            )
+        }
+    }
+
+    private fun handleShowsResponse(
+        response: Response<SearchResponse>
+    ): Resource<SearchResponse> {
+        if (response.isSuccessful) {
+            response.body()?.let { resultResponse ->
+                return Resource.Success(resultResponse)
+            }
+        }
+        return Resource.Error(response.message())
+    }
+
 
     private fun hasInternetConnection(): Boolean {
         val connectivityManager = getApplication<ThisApp>().getSystemService(
@@ -128,9 +156,9 @@ class HomeViewModel(
         val activeNetwork = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
         return when {
-            capabilities.hasTransport(TRANSPORT_WIFI) -> true
-            capabilities.hasTransport(TRANSPORT_CELLULAR) -> true
-            capabilities.hasTransport(TRANSPORT_ETHERNET) -> true
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
             else -> false
         }
     }

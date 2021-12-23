@@ -21,15 +21,12 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import zechs.zplex.R
-import zechs.zplex.adapter.FilesAdapter
+import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentSearchBinding
-import zechs.zplex.models.Args
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.ArgsViewModel
-import zechs.zplex.utils.Constants.PAGE_TOKEN
+import zechs.zplex.ui.fragment.ShowViewModel
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
 import zechs.zplex.utils.Constants.isLastPage
-import zechs.zplex.utils.Constants.regexShow
 import zechs.zplex.utils.Resource
 
 
@@ -39,9 +36,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     private val binding get() = _binding!!
 
     private lateinit var searchViewModel: SearchViewModel
-    private val argsModel: ArgsViewModel by activityViewModels()
+    private val showsViewModel by activityViewModels<ShowViewModel>()
 
-    private lateinit var filesAdapter: FilesAdapter
+    private val searchAdapter by lazy { SearchAdapter() }
     private val thisTag = "SearchFragment"
     private var queryText = ""
     private var isLoading = true
@@ -55,15 +52,19 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         var job: Job? = null
         binding.searchBox.apply {
+            this.requestFocus()
+            showKeyboard()
             editText?.text = Editable.Factory.getInstance().newEditable(queryText)
             editText?.addTextChangedListener { editable ->
+                binding.rvSearch.isInvisible = editable.toString().isEmpty()
                 job?.cancel()
                 job = MainScope().launch {
                     delay(SEARCH_DELAY_AMOUNT)
                     editable?.let {
-                        PAGE_TOKEN = ""
-                        queryText = editable.toString()
-                        searchViewModel.getSearchList(setDriveQuery(queryText), "")
+                        queryText = it.toString()
+                        if (queryText.isNotEmpty()) {
+                            searchViewModel.getSearchList(queryText)
+                        }
                     }
                 }
             }
@@ -74,16 +75,20 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 is Resource.Success -> {
                     isLoading = false
                     TransitionManager.beginDelayedTransition(binding.root)
-                    binding.loadingSearch.isInvisible = true
-                    response.data?.let { filesResponse ->
-                        if (filesResponse.files.isEmpty()) {
+                    binding.apply {
+                        rvSearch.isVisible = true
+                        pbSearch.isInvisible = true
+                    }
+                    response.data?.let { searchResponse ->
+                        if (searchResponse.results.isEmpty()) {
                             Toast.makeText(
                                 context, "Nothing found", Toast.LENGTH_SHORT
                             ).show()
                         }
-                        filesAdapter.differ.submitList(filesResponse.files.toList())
-                        isLastPage = filesResponse.nextPageToken.isNullOrEmpty()
-                        Log.d("pageToken", PAGE_TOKEN)
+                        val searchList = searchResponse.results.filter {
+                            it.media_type == "tv" || it.media_type == "movie"
+                        }
+                        searchAdapter.differ.submitList(searchList.toList())
                     }
                 }
                 is Resource.Error -> {
@@ -94,23 +99,18 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                         ).show()
                         Log.e(thisTag, "An error occurred: $message")
                     }
-                    binding.loadingSearch.isInvisible = true
+                    binding.pbSearch.isInvisible = true
                 }
                 is Resource.Loading -> {
                     isLoading = true
-                    binding.loadingSearch.isVisible = true
+                    binding.pbSearch.isVisible = true
+                    binding.apply {
+                        rvSearch.isVisible = false
+                    }
                 }
             }
         })
-    }
 
-    private fun setDriveQuery(query: String): String {
-        queryText = query
-        return if (query == "") {
-            "(name contains 'TV' or name contains 'Movie') and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false"
-        } else {
-            "name contains '$query' and (name contains 'TV' or name contains 'Movie') and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false"
-        }
     }
 
 
@@ -128,47 +128,45 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 )
 
                 if (visibleItemCount == itemCount && !isLoading && !isLastPage) {
-                    searchViewModel.getSearchList(setDriveQuery(queryText), PAGE_TOKEN)
+//                    searchViewModel.getSearchList(setDriveQuery(queryText), PAGE_TOKEN)
                 }
             }
         }
     }
 
     private fun setupRecyclerView() {
-        filesAdapter = FilesAdapter()
         binding.rvSearch.apply {
-            adapter = filesAdapter
+            adapter = searchAdapter
             layoutManager = GridLayoutManager(activity, 3)
-            isNestedScrollingEnabled = false
             addOnScrollListener(this@SearchFragment.scrollListener)
         }
 
-        filesAdapter.setOnItemClickListener {
+        searchAdapter.setOnItemClickListener { media ->
             hideKeyboard()
-            val nameSplit = regexShow.toRegex().find(it.name)?.destructured?.toList()
 
-            if (nameSplit != null) {
-                val mediaId = nameSplit[0]
-                val mediaName = nameSplit[2]
-                val mediaType = nameSplit[4]
+            if (media.media_type != null) {
+                showsViewModel.setMedia(media.id, media.media_type)
+            } else showsViewModel.setMedia(media.id, "none")
 
-                argsModel.setArg(
-                    Args(
-                        file = it,
-                        mediaId = mediaId.toInt(),
-                        type = mediaType,
-                        name = mediaName
-                    )
-                )
-                findNavController().navigate(R.id.action_searchFragment_to_aboutFragment)
-            }
+            findNavController().navigate(R.id.action_searchFragment_to_fragmentMedia)
         }
     }
 
     private fun hideKeyboard() {
         activity?.currentFocus.let { view ->
-            val imm = context?.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            val imm = context?.getSystemService(
+                Context.INPUT_METHOD_SERVICE
+            ) as InputMethodManager
             imm.hideSoftInputFromWindow(view?.windowToken, 0)
+        }
+    }
+
+    private fun showKeyboard() {
+        activity?.currentFocus.let { view ->
+            val imm = context?.getSystemService(
+                Context.INPUT_METHOD_SERVICE
+            ) as InputMethodManager
+            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
         }
     }
 

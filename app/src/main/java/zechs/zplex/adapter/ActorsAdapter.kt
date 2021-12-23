@@ -6,11 +6,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_actor.view.*
 import zechs.zplex.R
 import zechs.zplex.models.tvdb.actors.Data
 import zechs.zplex.utils.Constants.TVDB_IMAGE_PATH
+import zechs.zplex.utils.GlideApp
 
 
 class ActorsAdapter : RecyclerView.Adapter<ActorsAdapter.ActorsViewHolder>() {
@@ -50,7 +50,7 @@ class ActorsAdapter : RecyclerView.Adapter<ActorsAdapter.ActorsViewHolder>() {
             "${TVDB_IMAGE_PATH}${data.image}"
         }
         holder.itemView.apply {
-            Glide.with(this)
+            GlideApp.with(this)
                 .load(imageUrl)
                 .placeholder(R.drawable.no_actor)
                 .into(actor_image)

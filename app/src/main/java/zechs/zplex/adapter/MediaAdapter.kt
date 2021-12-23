@@ -8,13 +8,12 @@ import androidx.core.view.isGone
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.item_episode.view.*
 import zechs.zplex.R
 import zechs.zplex.models.drive.File
 import zechs.zplex.utils.Constants.ZPLEX_IMAGE_REDIRECT
 import zechs.zplex.utils.Constants.regexFile
+import zechs.zplex.utils.GlideApp
 
 class MediaAdapter(private val tvdbId: Int) : RecyclerView.Adapter<MediaAdapter.MediaViewHolder>() {
 
@@ -69,10 +68,9 @@ class MediaAdapter(private val tvdbId: Int) : RecyclerView.Adapter<MediaAdapter.
                 episode_count.text = count
                 episode_size.text = file.humanSize
 
-                Glide.with(this)
+                GlideApp.with(this)
                     .asBitmap()
                     .load(redirectImagePoster)
-                    .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.drawable.no_thumb)
                     .into(thumb)
 

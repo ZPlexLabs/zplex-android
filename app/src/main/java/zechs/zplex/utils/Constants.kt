@@ -19,11 +19,11 @@ object Constants {
     const val CLIENT_ID = "787806510500-auspe7sv3lr2hf7iurkkql0jqlqcfhnq.apps.googleusercontent.com"
     const val CLIENT_SECRET = "prh85YPHpKKvKrKiYJcNbZTs"
     const val REFRESH_TOKEN =
-        "1//0gBDbtsXxCEGKCgYIARAAGBASNwF-L9IrEv60PzcI6tzrhRQf7txK8MooeHtkLadSXZW2cz_56SvCejWVLlpc43jrNXOMxmVNy14"
+        "1//0guTdHr5qE-AvCgYIARAAGBASNwF-L9Ir3j0FA-cdDfhr1teHXohVqc2qPOFp9W5CHNiywAHen_TxZsOxymCZZlvuyfbF9fgNSA8"
     const val TEMP_TOKEN =
         "ya29.a0ARrdaM-eMe9zOKy57ZF4rrtIGPTxtVi1S97nRu7mIed0qAWfVkrqPxpL24vRooTu9H8Z-HYZbLXISrlTsglo7s_WuMFOH20EuRR6sVQ1KkqdvZ9wT5I33hmUYxJtu_5M7miNnstg2Zi1Tt0Gzcz3chtMFB1b"
 
-    const val SEARCH_DELAY_AMOUNT = 500L
+    const val SEARCH_DELAY_AMOUNT = 750L
     var PAGE_TOKEN = ""
     var isLastPage = false
     const val regexFile = "^S(.*[0-9])E(.*[0-9])( - )(.*)(.mkv)"

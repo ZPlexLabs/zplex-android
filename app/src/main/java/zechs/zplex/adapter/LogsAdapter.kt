@@ -7,13 +7,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import kotlinx.android.synthetic.main.logs_item.view.*
 import zechs.zplex.R
 import zechs.zplex.models.witch.ReleasesLog
 import zechs.zplex.utils.Constants.ZPLEX_IMAGE_REDIRECT
 import zechs.zplex.utils.ConverterUtils
+import zechs.zplex.utils.GlideApp
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -107,9 +106,8 @@ class LogsAdapter : RecyclerView.Adapter<LogsAdapter.LogsViewHolder>() {
                 tv_time.text = ConverterUtils.toDuration(pstFormat.format(date))
             }
 
-            Glide.with(this)
+            GlideApp.with(this)
                 .load(redirectImagePoster)
-                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .placeholder(R.drawable.no_thumb)
                 .into(iv_thumb)
 

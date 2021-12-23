@@ -6,12 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import kotlinx.android.synthetic.main.item_actor.view.*
 import zechs.zplex.R
-import zechs.zplex.models.tmdb.credits.Cast
 import zechs.zplex.models.tmdb.ProfileSize
+import zechs.zplex.models.tmdb.credits.Cast
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
+import zechs.zplex.utils.GlideApp
 
 class CreditsAdapter : RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder>() {
 
@@ -51,7 +51,7 @@ class CreditsAdapter : RecyclerView.Adapter<CreditsAdapter.CreditsViewHolder>() 
         }
 
         holder.itemView.apply {
-            Glide.with(this)
+            GlideApp.with(this)
                 .load(imageUrl)
                 .placeholder(R.drawable.no_actor)
                 .into(actor_image)

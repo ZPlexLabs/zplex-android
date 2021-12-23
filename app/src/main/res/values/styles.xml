@@ -22,11 +22,33 @@
         <item name="colorControlNormal">@color/textColor</item>
     </style>
 
+
+    <style name="chipTextAppearance" parent="TextAppearance.MaterialComponents.Chip">>
+        <item name="android:textColor">@color/textColor_87</item>
+        <item name="fontFamily">@font/open_sans</item>
+    </style>
+
     <style name="titleTextAppearance">
         <item name="android:textColor">@color/textColor</item>
         <item name="fontFamily">@font/open_sans</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textAllCaps">true</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="seasonTitleTextAppearance" parent="TextAppearance.MaterialComponents.Headline1">
+        <item name="android:textColor">@color/textColor_87</item>
+        <item name="fontFamily">@font/open_sans_semibold</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="seasonSubtitleTextAppearance" parent="TextAppearance.MaterialComponents.Headline1">
+        <item name="android:textColor">@color/textColor_87</item>
+        <item name="fontFamily">@font/open_sans</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textAllCaps">false</item>
         <item name="android:textAlignment">center</item>
     </style>
 
