@@ -20,6 +20,7 @@ import zechs.zplex.adapter.media.adapters.CurationAdapter
 import zechs.zplex.databinding.FragmentCastDetailsBinding
 import zechs.zplex.models.tmdb.ProfileSize
 import zechs.zplex.models.tmdb.credit.CastObject
+import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
@@ -203,8 +204,16 @@ class CastsFragment : Fragment(R.layout.fragment_cast_details) {
         }
         knowForAdapter.setOnItemClickListener {
             if (it is AboutDataModel.Curation) {
+                val media = Media(
+                    id = it.id,
+                    media_type = it.media_type,
+                    name = it.name,
+                    poster_path = it.poster_path,
+                    title = it.title,
+                    vote_average = it.vote_average
+                )
                 if (it.media_type != null) {
-                    showsViewModel.setMedia(it.id, it.media_type)
+                    showsViewModel.setMedia(it.id, it.media_type, media)
                     findNavController().navigate(R.id.action_castsFragment_to_fragmentMedia)
                 }
             }

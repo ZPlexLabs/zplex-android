@@ -1,6 +1,5 @@
 package zechs.zplex.adapter.media
 
-import android.content.Intent
 import android.transition.TransitionManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -46,20 +45,27 @@ sealed class MediaDataViewHolder(
                     mediaDataAdapter.onItemClickListener?.let { it(aboutDataModel) }
                 }
 
-                itemBinding.btnShare.setOnClickListener {
-                    val mediaType = item.mediaType ?: "tv"
-                    val sendIntent = Intent()
-                    sendIntent.action = Intent.ACTION_SEND
-                    sendIntent.putExtra(
-                        Intent.EXTRA_TEXT,
-                        "https://www.themoviedb.org/${mediaType}/${item.tmdbId}"
-                    )
-                    sendIntent.type = "text/plain"
-                    sendIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    val shareIntent = Intent.createChooser(sendIntent, item.title)
-                    shareIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    c.startActivity(shareIntent)
-                }
+//                itemBinding.btnWatchlist.apply {
+//                    setOnClickListener {
+//                        val aboutDataModel = AboutDataModel.Header(heading = this.text.toString())
+//                        mediaDataAdapter.onItemClickListener?.let { it(aboutDataModel) }
+//                    }
+//                }
+//
+//                itemBinding.btnShare.setOnClickListener {
+//                    val mediaType = item.mediaType ?: "tv"
+//                    val sendIntent = Intent()
+//                    sendIntent.action = Intent.ACTION_SEND
+//                    sendIntent.putExtra(
+//                        Intent.EXTRA_TEXT,
+//                        "https://www.themoviedb.org/${mediaType}/${item.tmdbId}"
+//                    )
+//                    sendIntent.type = "text/plain"
+//                    sendIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                    val shareIntent = Intent.createChooser(sendIntent, item.title)
+//                    shareIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//                    c.startActivity(shareIntent)
+//                }
             }
 
             itemBinding.apply {

@@ -3,7 +3,6 @@ package zechs.zplex.ui.fragment.watch
 import android.os.Bundle
 import android.view.View
 import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -19,7 +18,8 @@ import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
 import zechs.zplex.ui.fragment.viewmodels.EpisodeViewModel
-import zechs.zplex.utils.Constants
+import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
+import zechs.zplex.utils.Constants.ZPLEX_SHOWS_ID
 import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
 
@@ -77,6 +77,22 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
             }
         })
 
+        watchViewModel.searchList.observe(viewLifecycleOwner, { responseEpisode ->
+            when (responseEpisode) {
+                is Resource.Success -> {
+                    responseEpisode.data?.let { driveResponse ->
+                        if (driveResponse.files.isNotEmpty()) {
+                            val file = driveResponse.files[0]
+                            println(file)
+                        }
+                    }
+                }
+                is Resource.Error -> {
+                }
+                is Resource.Loading -> {
+                }
+            }
+        })
     }
 
     private fun doOnSuccess(episode: Episode) {
@@ -84,7 +100,7 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
         val episodeStillUrl = if (episode.still_path == null) {
             R.drawable.no_thumb
         } else {
-            "${Constants.TMDB_IMAGE_PREFIX}/${StillSize.original}${episode.still_path}"
+            "${TMDB_IMAGE_PREFIX}/${StillSize.original}${episode.still_path}"
         }
 
         val seasonEpisodeText = "Season ${episode.season_number}, Episode ${episode.episode_number}"
@@ -109,7 +125,7 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
                 .into(binding.thumb)
         }
 
-        val castList = episode.guest_stars?.map {
+        val castList = episode.guest_stars.map {
             AboutDataModel.Cast(
                 character = it.character,
                 credit_id = it.credit_id,
@@ -117,20 +133,16 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
                 name = it.name,
                 profile_path = it.profile_path
             )
-        } ?: listOf()
-
-        if (castList.isEmpty()) {
-            binding.apply {
-                rvCasts.isInvisible = true
-                textView1.isInvisible = true
-            }
-        } else {
-            binding.apply {
-                rvCasts.isVisible = true
-                textView1.isVisible = true
-            }
         }
+
+        binding.apply {
+            rvCasts.isInvisible = castList.isEmpty()
+            textView1.isInvisible = castList.isEmpty()
+        }
+
         castAdapter.differ.submitList(castList)
+
+        watchViewModel.doSearchFor(searchQuery(episode.id))
     }
 
     private fun setupRecyclerView() {
@@ -148,6 +160,10 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
             findNavController().navigate(R.id.action_watchFragment_to_castsFragment)
         }
     }
+
+    private fun searchQuery(
+        tmdbId: Int
+    ) = "name contains '${tmdbId}' and parents in '${ZPLEX_SHOWS_ID}' and trashed = false"
 
     override fun onDestroy() {
         super.onDestroy()

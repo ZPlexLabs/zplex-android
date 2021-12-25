@@ -22,7 +22,7 @@ interface DriveAPI {
         @Query("fields")
         fields: String = "nextPageToken, files(id, name, size)",
         @Query("q")
-        q: String = "(name contains 'TV' or name contains 'Movie') and '0AASFDMjRqUB0Uk9PVA' in parents and trashed = false",
+        q: String,
         @Query("orderBy")
         orderBy: String = "modifiedTime desc"
     ): Response<DriveResponse>

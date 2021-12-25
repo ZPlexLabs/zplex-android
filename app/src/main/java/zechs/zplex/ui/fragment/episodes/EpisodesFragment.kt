@@ -85,7 +85,6 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
                     seasonToolbar.subtitle = showSeason.seasonName
                 }
             }
-
             tmdbId = showSeason.tmdbId
         })
 

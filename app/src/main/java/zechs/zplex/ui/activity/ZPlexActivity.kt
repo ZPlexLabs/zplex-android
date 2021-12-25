@@ -12,6 +12,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.activity_zplex.*
 import zechs.zplex.BuildConfig
 import zechs.zplex.R
+import zechs.zplex.db.WatchlistDatabase
+import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.ui.fragment.browse.BrowseViewModel
 import zechs.zplex.ui.fragment.browse.BrowseViewModelProviderFactory
@@ -23,6 +25,8 @@ import zechs.zplex.ui.fragment.home.HomeViewModel
 import zechs.zplex.ui.fragment.home.HomeViewModelProviderFactory
 import zechs.zplex.ui.fragment.media.MediaViewModel
 import zechs.zplex.ui.fragment.media.MediaViewModelProviderFactory
+import zechs.zplex.ui.fragment.myshows.MyShowsViewModel
+import zechs.zplex.ui.fragment.myshows.MyShowsViewModelProviderFactory
 import zechs.zplex.ui.fragment.search.SearchViewModel
 import zechs.zplex.ui.fragment.search.SearchViewModelProviderFactory
 import zechs.zplex.ui.fragment.watch.WatchViewModel
@@ -34,6 +38,7 @@ class ZPlexActivity : AppCompatActivity() {
     lateinit var homeViewModel: HomeViewModel
     lateinit var browseViewModel: BrowseViewModel
     lateinit var searchViewModel: SearchViewModel
+    lateinit var myShowsViewModel: MyShowsViewModel
     lateinit var mediaViewModel: MediaViewModel
     lateinit var episodesViewModel: EpisodesViewModel
     lateinit var watchViewModel: WatchViewModel
@@ -48,7 +53,8 @@ class ZPlexActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val tmdbRepository = TmdbRepository()
+        val filesRepository = FilesRepository()
+        val tmdbRepository = TmdbRepository(WatchlistDatabase(this))
 
         homeViewModel = ViewModelProvider(
             this,
@@ -65,9 +71,14 @@ class ZPlexActivity : AppCompatActivity() {
             SearchViewModelProviderFactory(application, tmdbRepository)
         )[SearchViewModel::class.java]
 
+        myShowsViewModel = ViewModelProvider(
+            this,
+            MyShowsViewModelProviderFactory(tmdbRepository)
+        )[MyShowsViewModel::class.java]
+
         mediaViewModel = ViewModelProvider(
             this,
-            MediaViewModelProviderFactory(application, tmdbRepository)
+            MediaViewModelProviderFactory(application, filesRepository, tmdbRepository)
         )[MediaViewModel::class.java]
 
         episodesViewModel = ViewModelProvider(
@@ -77,7 +88,7 @@ class ZPlexActivity : AppCompatActivity() {
 
         watchViewModel = ViewModelProvider(
             this,
-            WatchViewModelProviderFactory(application, tmdbRepository)
+            WatchViewModelProviderFactory(application, filesRepository, tmdbRepository)
         )[WatchViewModel::class.java]
 
         castViewModel = ViewModelProvider(

@@ -201,27 +201,27 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
         trendingAdapter.setOnItemClickListener { show ->
-            showsViewModel.setMedia(show.id, show.media_type ?: "tv")
+            showsViewModel.setMedia(show.id, show.media_type ?: "tv", show)
             findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
         }
 
         discoverMoviesAdapter.setOnItemClickListener { movie ->
-            showsViewModel.setMedia(movie.id, "movie")
+            showsViewModel.setMedia(movie.id, "movie", movie)
             findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
         }
 
         discoverShowsAdapter.setOnItemClickListener { show ->
-            showsViewModel.setMedia(show.id, "tv")
+            showsViewModel.setMedia(show.id, "tv", show)
             findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
         }
 
         discoverAnimeAdapter.setOnItemClickListener { show ->
-            showsViewModel.setMedia(show.id, "tv")
+            showsViewModel.setMedia(show.id, "tv", show)
             findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
         }
 
         discoverAnimeAdapter.setOnItemClickListener { show ->
-            showsViewModel.setMedia(show.id, "tv")
+            showsViewModel.setMedia(show.id, "tv", show)
             findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
 
         }

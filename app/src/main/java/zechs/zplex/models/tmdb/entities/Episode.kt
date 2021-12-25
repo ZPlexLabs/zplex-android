@@ -5,8 +5,8 @@ import androidx.annotation.Keep
 @Keep
 data class Episode(
     val episode_number: Int?,
-    val guest_stars: List<Cast>?,
-    val id: Int?,
+    val guest_stars: List<Cast>,
+    val id: Int,
     val name: String?,
     val overview: String?,
     val season_number: Int?,

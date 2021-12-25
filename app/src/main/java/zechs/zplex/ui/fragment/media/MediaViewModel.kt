@@ -10,22 +10,43 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.ThisApp
+import zechs.zplex.models.drive.DriveResponse
 import zechs.zplex.models.tmdb.collection.CollectionsResponse
+import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.models.tmdb.entities.Pair
 import zechs.zplex.models.tmdb.media.MediaResponse
 import zechs.zplex.models.tmdb.media.MovieResponse
 import zechs.zplex.models.tmdb.media.TvResponse
+import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.TmdbRepository
+import zechs.zplex.utils.Constants
 import zechs.zplex.utils.ConverterUtils
 import zechs.zplex.utils.Resource
+import zechs.zplex.utils.SessionManager
 import java.io.IOException
 
 class MediaViewModel(
     app: Application,
+    private val filesRepository: FilesRepository,
     private val tmdbRepository: TmdbRepository
 ) : AndroidViewModel(app) {
 
+    private val accessToken = SessionManager(
+        getApplication<Application>().applicationContext
+    ).fetchAuthToken()
+
+    val searchList: MutableLiveData<Resource<DriveResponse>> = MutableLiveData()
     val media: MutableLiveData<Resource<MediaResponse>> = MutableLiveData()
+
+    fun saveShow(media: Media) = viewModelScope.launch {
+        tmdbRepository.upsertMedia(media)
+    }
+
+    fun deleteShow(media: Media) = viewModelScope.launch {
+        tmdbRepository.deleteMedia(media)
+    }
+
+    fun getShow(id: Int) = tmdbRepository.getMedia(id)
 
     fun getMedia(tmdbId: Int, mediaType: String) = viewModelScope.launch {
         media.postValue(Resource.Loading())
@@ -246,6 +267,45 @@ class MediaViewModel(
                     vote_average = "${resultResponse.vote_average}/10"
                 )
                 return Resource.Success(mediaResponse)
+            }
+        }
+        return Resource.Error(response.message())
+    }
+
+
+    fun doSearchFor(searchQuery: String) =
+        viewModelScope.launch {
+            searchList.postValue(Resource.Loading())
+            try {
+                if (hasInternetConnection()) {
+                    val response = filesRepository.getDriveFiles(
+                        pageSize = 1,
+                        if (accessToken == "") Constants.TEMP_TOKEN else accessToken,
+                        pageToken = "", searchQuery, orderBy = "modifiedTime desc"
+                    )
+                    searchList.postValue(handleSearchListResponse(response))
+                } else {
+                    searchList.postValue(Resource.Error("No internet connection"))
+                }
+            } catch (t: Throwable) {
+                println(t.stackTrace)
+                println(t.message)
+                searchList.postValue(
+                    Resource.Error(
+                        if (t is IOException) {
+                            "Network Failure"
+                        } else t.message ?: "Something went wrong"
+                    )
+                )
+            }
+        }
+
+    private fun handleSearchListResponse(
+        response: Response<DriveResponse>
+    ): Resource<DriveResponse> {
+        if (response.isSuccessful) {
+            response.body()?.let { resultResponse ->
+                return Resource.Success(resultResponse)
             }
         }
         return Resource.Error(response.message())

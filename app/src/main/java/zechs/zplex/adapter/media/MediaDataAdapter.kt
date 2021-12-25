@@ -82,5 +82,4 @@ class MediaDataAdapter : RecyclerView.Adapter<MediaDataViewHolder>() {
             is MediaDataModel.Details -> R.layout.item_detail
         }
     }
-
 }

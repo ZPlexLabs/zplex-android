@@ -27,4 +27,7 @@
     <string name="browse">Browse</string>
     <string name="anime_shows_or_movies">Anime, shows or movies</string>
     <string name="discover">Discover</string>
+    <string name="your_library_is_empty">Your library is empty</string>
+    <string name="watch_now">Watch now</string>
+    <string name="request_this_movie">Request this movie</string>
 </resources>

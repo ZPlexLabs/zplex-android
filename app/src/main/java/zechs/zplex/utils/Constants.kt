@@ -10,6 +10,10 @@ object Constants {
 
     const val GOOGLE_API_URL = "https://www.googleapis.com"
 
+    const val ZPLEX_DRIVE_ID = "0AASFDMjRqUB0Uk9PVA"
+    const val ZPLEX_MOVIES_ID = "1dlsickOtO2EZD2CQDFc4922FyqVVhka-"
+    const val ZPLEX_SHOWS_ID = "1_V3IeF3WCCQyj2X0OOwfHKQwVlRST9YT"
+
     const val GOOGLE_OAUTH_URL = "https://accounts.google.com"
     const val CLIENT_ID = "787806510500-auspe7sv3lr2hf7iurkkql0jqlqcfhnq.apps.googleusercontent.com"
     const val CLIENT_SECRET = "prh85YPHpKKvKrKiYJcNbZTs"

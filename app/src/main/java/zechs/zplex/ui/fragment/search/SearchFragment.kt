@@ -74,7 +74,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             showKeyboard()
             editText?.text = Editable.Factory.getInstance().newEditable(queryText)
             editText?.addTextChangedListener { editable ->
-                binding.rvSearch.isInvisible = editable.toString().isEmpty()
+                binding.rvSearch.isInvisible = true
                 job?.cancel()
                 job = MainScope().launch {
                     delay(SEARCH_DELAY_AMOUNT)
@@ -163,8 +163,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             hideKeyboard()
 
             if (media.media_type != null) {
-                showsViewModel.setMedia(media.id, media.media_type)
-            } else showsViewModel.setMedia(media.id, "none")
+                showsViewModel.setMedia(media.id, media.media_type, media)
+            } else showsViewModel.setMedia(media.id, "none", media)
 
             findNavController().navigate(R.id.action_searchFragment_to_fragmentMedia)
         }

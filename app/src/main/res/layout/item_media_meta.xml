@@ -42,67 +42,20 @@
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/poster_card"
-
         tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/item_misc_list"
         tools:orientation="horizontal" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_watchlist"
-        style="@style/Widget.MaterialComponents.Button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="8dp"
-        android:backgroundTint="@color/colorAccent"
-        android:clickable="true"
-        android:paddingStart="16dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="8dp"
-        android:text="@string/watchlist"
-        android:textColor="@color/textColor_87"
-        app:icon="@drawable/ic_add_24"
-        app:iconGravity="textStart"
-        app:iconTint="@color/textColor_87"
-        app:layout_constraintEnd_toStartOf="@+id/btn_share"
-        app:layout_constraintHorizontal_chainStyle="spread"
-        app:layout_constraintStart_toStartOf="@+id/tv_plot"
-        app:layout_constraintTop_toBottomOf="@+id/rv_listMisc" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btn_share"
-        style="@style/Widget.MaterialComponents.Button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:backgroundTint="@color/cardColor"
-        android:clickable="true"
-        android:paddingStart="16dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="8dp"
-        android:text="@string/share"
-        android:textColor="@color/textColor_87"
-        app:icon="@drawable/ic_share_24"
-        app:iconGravity="textStart"
-        app:iconTint="@color/textColor_87"
-        app:layout_constraintBottom_toBottomOf="@+id/btn_watchlist"
-        app:layout_constraintEnd_toEndOf="@+id/tv_plot"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/btn_watchlist"
-        app:layout_constraintTop_toTopOf="@+id/btn_watchlist" />
 
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:autoSizeTextType="uniform"
         android:ellipsize="end"
         android:fontFamily="@font/open_sans_bold"
         android:maxLines="3"
@@ -111,8 +64,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_watchlist"
-
+        app:layout_constraintTop_toBottomOf="@+id/rv_listMisc"
         tools:text="My Hero Academia" />
 
     <View

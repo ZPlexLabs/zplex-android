@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
     android:background="@color/colorPrimary">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -13,7 +12,7 @@
         android:layout_gravity="center|top"
         android:clipToPadding="false"
         android:paddingTop="8dp"
-        android:paddingBottom="24dp"
+        android:paddingBottom="72dp"
         android:visibility="gone"
         tools:itemCount="5"
         tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
@@ -28,6 +27,16 @@
         android:visibility="invisible"
         tools:indeterminateTint="@color/colorAccent"
         tools:visibility="visible" />
+
+    <include
+        android:id="@+id/toolbar_movie"
+        layout="@layout/item_media_options_movie"
+        android:visibility="visible" />
+
+    <include
+        android:id="@+id/toolbar_tv"
+        layout="@layout/item_media_options_tv"
+        android:visibility="visible" />
 
     <include
         android:id="@+id/errorView"

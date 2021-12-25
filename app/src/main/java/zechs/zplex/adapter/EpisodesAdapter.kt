@@ -62,6 +62,8 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
                 "No description"
             } else episode.overview
 
+            tv_overview.maxLines = if (tv_title.lineCount > 2) 1 else 2
+
             GlideApp.with(this)
                 .asBitmap()
                 .load(episodeStillUrl)

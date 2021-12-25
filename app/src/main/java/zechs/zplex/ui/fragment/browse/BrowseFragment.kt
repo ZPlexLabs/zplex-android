@@ -45,7 +45,8 @@ class BrowseFragment : Fragment(R.layout.fragment_browse) {
             _filters = filter
             browseViewModel.getBrowse(filter)
             browseAdapter.setOnItemClickListener { show ->
-                showsViewModel.setMedia(show.id, show.media_type ?: filter.mediaType)
+
+                showsViewModel.setMedia(show.id, show.media_type ?: filter.mediaType, media = show)
                 findNavController().navigate(R.id.action_browseFragment_to_fragmentMedia)
             }
         })
