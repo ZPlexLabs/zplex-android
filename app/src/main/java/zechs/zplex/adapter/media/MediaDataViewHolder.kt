@@ -13,7 +13,6 @@ import zechs.zplex.models.tmdb.PosterSize
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 
-
 sealed class MediaDataViewHolder(
     binding: ViewBinding,
     val mediaDataAdapter: MediaDataAdapter
@@ -44,28 +43,6 @@ sealed class MediaDataViewHolder(
                     val aboutDataModel = AboutDataModel.Header(heading = item.posterUrl)
                     mediaDataAdapter.onItemClickListener?.let { it(aboutDataModel) }
                 }
-
-//                itemBinding.btnWatchlist.apply {
-//                    setOnClickListener {
-//                        val aboutDataModel = AboutDataModel.Header(heading = this.text.toString())
-//                        mediaDataAdapter.onItemClickListener?.let { it(aboutDataModel) }
-//                    }
-//                }
-//
-//                itemBinding.btnShare.setOnClickListener {
-//                    val mediaType = item.mediaType ?: "tv"
-//                    val sendIntent = Intent()
-//                    sendIntent.action = Intent.ACTION_SEND
-//                    sendIntent.putExtra(
-//                        Intent.EXTRA_TEXT,
-//                        "https://www.themoviedb.org/${mediaType}/${item.tmdbId}"
-//                    )
-//                    sendIntent.type = "text/plain"
-//                    sendIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                    val shareIntent = Intent.createChooser(sendIntent, item.title)
-//                    shareIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//                    c.startActivity(shareIntent)
-//                }
             }
 
             itemBinding.apply {

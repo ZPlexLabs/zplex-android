@@ -16,7 +16,7 @@
         android:layout_margin="8dp"
         android:contentDescription="@string/something_went_wrong"
         app:srcCompat="@drawable/ic_error"
-        app:tint="@color/textColor_87" />
+        app:tint="@color/textColor_74" />
 
     <TextView
         android:id="@+id/error_txt"
@@ -28,9 +28,8 @@
         android:fontFamily="@font/open_sans_semibold"
         android:text="@string/something_went_wrong"
         android:textAlignment="center"
-        android:textColor="@color/textColor_87"
+        android:textColor="@color/textColor_74"
         android:textSize="18sp" />
-
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/retry_btn"
@@ -44,6 +43,5 @@
         android:foreground="?attr/selectableItemBackground"
         android:text="@string/retry"
         android:textColor="@color/colorAccent" />
-
 
 </RelativeLayout>

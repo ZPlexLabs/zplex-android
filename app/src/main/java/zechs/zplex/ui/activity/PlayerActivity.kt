@@ -5,6 +5,8 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
+import android.view.Window
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -18,6 +20,8 @@ import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
+import com.google.android.material.transition.platform.MaterialContainerTransform
+import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import zechs.zplex.R
 import zechs.zplex.databinding.ActivityPlayerBinding
 import zechs.zplex.utils.SessionManager
@@ -30,6 +34,18 @@ class PlayerActivity : AppCompatActivity() {
     private var onStopCalled = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
+        findViewById<View>(android.R.id.content).transitionName = "shared_exoplayer"
+        setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
+        window.sharedElementEnterTransition = MaterialContainerTransform().apply {
+            addTarget(android.R.id.content)
+            duration = 300L
+        }
+        window.sharedElementReturnTransition = MaterialContainerTransform().apply {
+            addTarget(android.R.id.content)
+            duration = 250L
+        }
+
         super.onCreate(savedInstanceState)
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -142,7 +158,9 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun getStreamUrl(fileId: String?): Uri {
         return Uri.parse(
-            "https://www.googleapis.com/drive/v3/files/${fileId}?supportsAllDrives=True&alt=media"
+            "https://www.googleapis.com/drive/v3/files/${
+                fileId
+            }?supportsAllDrives=True&alt=media"
         )
     }
 

@@ -19,14 +19,6 @@ sealed class AboutDataModel {
     ) : AboutDataModel()
 
     @Keep
-    data class Collection(
-        val backdrop_path: String?,
-        val id: Int,
-        val name: String,
-        val poster_path: String?
-    ) : AboutDataModel()
-
-    @Keep
     data class Cast(
         val character: String,
         val credit_id: String,

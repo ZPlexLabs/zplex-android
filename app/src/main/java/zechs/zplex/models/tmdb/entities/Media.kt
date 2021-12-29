@@ -1,13 +1,8 @@
 package zechs.zplex.models.tmdb.entities
 
 import androidx.annotation.Keep
-import androidx.room.Entity
 
 
-@Entity(
-    tableName = "watchlist",
-    primaryKeys = [("id")]
-)
 @Keep
 data class Media(
     val id: Int,

@@ -1,5 +1,6 @@
 package zechs.zplex.ui.fragment.episodes
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -15,6 +16,7 @@ import zechs.zplex.adapter.EpisodesAdapter
 import zechs.zplex.databinding.FragmentEpisodeBinding
 import zechs.zplex.models.tmdb.PosterSize
 import zechs.zplex.models.tmdb.season.SeasonResponse
+import zechs.zplex.ui.activity.PlayerActivity
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.ui.fragment.viewmodels.EpisodeViewModel
@@ -71,6 +73,7 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
 
         seasonViewModel.showId.observe(viewLifecycleOwner, { showSeason ->
             episodesViewModel.getSeason(
+                driveId = showSeason.driveId,
                 tvId = showSeason.tmdbId,
                 seasonNumber = showSeason.seasonNumber
             )
@@ -137,15 +140,6 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
             "${TMDB_IMAGE_PREFIX}/${PosterSize.w500}${seasonResponse.poster_path}"
         }
 
-        episodesAdapter.setOnItemClickListener {
-            episodeViewModel.setShowEpisode(
-                tmdbId = tmdbId,
-                seasonNumber = it.season_number ?: 0,
-                episodeNumber = it.episode_number ?: 0
-            )
-            findNavController().navigate(R.id.action_episodesListFragment_to_watchFragment)
-        }
-
         context?.let { c ->
             GlideApp.with(c)
                 .load(posterUrl)
@@ -162,7 +156,7 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
         episodesAdapter.differ.submitList(episodesList)
 
         if (episodesList.isEmpty()) {
-            val errorMsg = "Episode list is empty..."
+            val errorMsg = getString(R.string.no_episodes_found)
             Log.e(thisTAG, errorMsg)
             binding.apply {
                 appBarLayout.isInvisible = true
@@ -172,6 +166,7 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
             }
             binding.errorView.apply {
                 errorTxt.text = errorMsg
+                retryBtn.isInvisible = true
             }
         } else {
             binding.apply {
@@ -181,7 +176,27 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
                 errorView.root.isVisible = false
             }
         }
+        episodesAdapter.setOnItemClickListener { episode ->
+            if (episode.fileId != null && episode.fileName != null) {
+                playEpisode(episode.fileId, episode.fileName.dropLast(4))
+            } else {
+                episodeViewModel.setShowEpisode(
+                    tmdbId = tmdbId,
+                    seasonNumber = episode.season_number ?: 0,
+                    episodeNumber = episode.episode_number ?: 0
+                )
+                findNavController().navigate(R.id.action_episodesListFragment_to_watchFragment)
+            }
+        }
 
+    }
+
+    private fun playEpisode(fileId: String, title: String) {
+        val intent = Intent(activity, PlayerActivity::class.java)
+        intent.putExtra("fileId", fileId)
+        intent.putExtra("title", title)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        activity?.startActivity(intent)
     }
 
 //    private fun playMedia(it: Episode) {

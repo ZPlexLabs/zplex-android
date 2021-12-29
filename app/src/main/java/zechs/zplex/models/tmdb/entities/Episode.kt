@@ -11,5 +11,7 @@ data class Episode(
     val overview: String?,
     val season_number: Int?,
     val still_path: String?,
-    val vote_average: Double?
+    val fileId: String?,
+    val fileName: String?,
+    val fileSize: String?
 )

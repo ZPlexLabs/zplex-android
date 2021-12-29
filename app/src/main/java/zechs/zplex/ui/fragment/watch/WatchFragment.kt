@@ -19,9 +19,9 @@ import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
 import zechs.zplex.ui.fragment.viewmodels.EpisodeViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.Constants.ZPLEX_SHOWS_ID
 import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
+import java.text.DecimalFormat
 
 class WatchFragment : Fragment(R.layout.fragment_watch) {
 
@@ -32,6 +32,9 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
     private val episodeViewModel by activityViewModels<EpisodeViewModel>()
     private lateinit var watchViewModel: WatchViewModel
     private val castAdapter by lazy { CastAdapter() }
+
+    private var tmdbId: Int? = null
+    private var seasonEpisodeText: String? = null
 
     private val thisTAG = "WatchFragment"
 
@@ -60,6 +63,7 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
         setupRecyclerView()
 
         episodeViewModel.showEpisode.observe(viewLifecycleOwner, {
+            tmdbId = it.tmdbId
             watchViewModel.getEpisode(
                 it.tmdbId, it.seasonNumber, it.episodeNumber
             )
@@ -77,22 +81,6 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
             }
         })
 
-        watchViewModel.searchList.observe(viewLifecycleOwner, { responseEpisode ->
-            when (responseEpisode) {
-                is Resource.Success -> {
-                    responseEpisode.data?.let { driveResponse ->
-                        if (driveResponse.files.isNotEmpty()) {
-                            val file = driveResponse.files[0]
-                            println(file)
-                        }
-                    }
-                }
-                is Resource.Error -> {
-                }
-                is Resource.Loading -> {
-                }
-            }
-        })
     }
 
     private fun doOnSuccess(episode: Episode) {
@@ -103,7 +91,7 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
             "${TMDB_IMAGE_PREFIX}/${StillSize.original}${episode.still_path}"
         }
 
-        val seasonEpisodeText = "Season ${episode.season_number}, Episode ${episode.episode_number}"
+        seasonEpisodeText = "Season ${episode.season_number}, Episode ${episode.episode_number}"
 
         binding.apply {
             tvSeasonEpisode.text = seasonEpisodeText
@@ -142,7 +130,12 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
 
         castAdapter.differ.submitList(castList)
 
-        watchViewModel.doSearchFor(searchQuery(episode.id))
+        val formatter = DecimalFormat("00")
+        val seasonEpisode = "S${
+            formatter.format(
+                episode.season_number
+            )
+        }E${formatter.format(episode.episode_number)}"
     }
 
     private fun setupRecyclerView() {
@@ -161,9 +154,6 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
         }
     }
 
-    private fun searchQuery(
-        tmdbId: Int
-    ) = "name contains '${tmdbId}' and parents in '${ZPLEX_SHOWS_ID}' and trashed = false"
 
     override fun onDestroy() {
         super.onDestroy()

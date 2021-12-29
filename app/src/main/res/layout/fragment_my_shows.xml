@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorPrimary">
@@ -26,7 +25,7 @@
             android:padding="4dp"
             android:theme="@style/MenuTheme"
             app:elevation="0dp"
-            app:title="@string/my_shows"
+            app:title="My library"
             app:titleCentered="true"
             app:titleTextAppearance="@style/titleTextAppearance"
             app:titleTextColor="@color/textColor" />
@@ -41,12 +40,10 @@
         android:paddingStart="16dp"
         android:paddingTop="8dp"
         android:paddingEnd="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
-        tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        tools:listitem="@layout/item_media"
-        tools:spanCount="3" />
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 
     <include
         android:id="@+id/errorView"

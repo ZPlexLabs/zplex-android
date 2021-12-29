@@ -108,10 +108,10 @@
         <entry key="app/src/main/res/layout/fragment_casts.xml" value="0.527367506516073" />
         <entry key="app/src/main/res/layout/fragment_episode.xml" value="0.18287037037037038" />
         <entry key="app/src/main/res/layout/fragment_episodes.xml" value="0.2" />
-        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.42477256822953113" />
+        <entry key="app/src/main/res/layout/fragment_home.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_info.xml" value="0.4" />
         <entry key="app/src/main/res/layout/fragment_main.xml" value="0.28177083333333336" />
-        <entry key="app/src/main/res/layout/fragment_media.xml" value="0.4" />
+        <entry key="app/src/main/res/layout/fragment_media.xml" value="0.264" />
         <entry key="app/src/main/res/layout/fragment_media_backup.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/fragment_media_new.xml" value="0.16" />
         <entry key="app/src/main/res/layout/fragment_movie.xml" value="0.31614583333333335" />
@@ -124,16 +124,16 @@
         <entry key="app/src/main/res/layout/fragment_show.xml" value="0.264" />
         <entry key="app/src/main/res/layout/fragment_temp.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/fragment_tv.xml" value="0.21268395234758233" />
-        <entry key="app/src/main/res/layout/fragment_watch.xml" value="0.176" />
+        <entry key="app/src/main/res/layout/fragment_watch.xml" value="0.264" />
         <entry key="app/src/main/res/layout/fragment_z_plex.xml" value="0.28129829984544047" />
         <entry key="app/src/main/res/layout/frament_cast.xml" value="0.2763023493360572" />
         <entry key="app/src/main/res/layout/ic_rotate.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_actor.xml" value="0.4" />
-        <entry key="app/src/main/res/layout/item_cast.xml" value="0.8" />
+        <entry key="app/src/main/res/layout/item_cast.xml" value="0.6" />
         <entry key="app/src/main/res/layout/item_chip.xml" value="0.3203125" />
         <entry key="app/src/main/res/layout/item_collection.xml" value="0.6" />
         <entry key="app/src/main/res/layout/item_curate.xml" value="0.8" />
-        <entry key="app/src/main/res/layout/item_detail.xml" value="0.26245847176079734" />
+        <entry key="app/src/main/res/layout/item_detail.xml" value="0.264" />
         <entry key="app/src/main/res/layout/item_discord.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_dropdown.xml" value="0.72" />
         <entry key="app/src/main/res/layout/item_episode.xml" value="0.264" />
@@ -142,10 +142,11 @@
         <entry key="app/src/main/res/layout/item_genre.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_genre_list.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_header.xml" value="0.3678516228748068" />
+        <entry key="app/src/main/res/layout/item_list.xml" value="0.315625" />
         <entry key="app/src/main/res/layout/item_media.xml" value="0.264" />
-        <entry key="app/src/main/res/layout/item_media_meta.xml" value="0.39921722113502933" />
+        <entry key="app/src/main/res/layout/item_media_meta.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_media_options.xml" value="0.31614583333333335" />
-        <entry key="app/src/main/res/layout/item_media_options_movie.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/item_media_options_movie.xml" value="0.4" />
         <entry key="app/src/main/res/layout/item_media_options_tv.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_meta.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_misc_list.xml" value="1.0" />
@@ -159,6 +160,7 @@
         <entry key="app/src/main/res/layout/search.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/splash_screen.xml" value="0.2796875" />
         <entry key="app/src/main/res/layout/temp.xml" value="0.8" />
+        <entry key="app/src/main/res/layout/temp_layout.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/temp_media_layout.xml" value="0.2316715542521994" />
         <entry key="app/src/main/res/layout/view_pager_recycler_view.xml" value="0.28177083333333336" />
         <entry key="app/src/main/res/menu/bottom_navigation_menu.xml" value="0.3203125" />

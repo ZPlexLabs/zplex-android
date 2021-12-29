@@ -2,12 +2,14 @@ package zechs.zplex.ui.activity
 
 import android.os.Bundle
 import android.view.View
+import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.activity_zplex.*
 import zechs.zplex.BuildConfig
@@ -51,6 +53,9 @@ class ZPlexActivity : AppCompatActivity() {
 //            ?.first()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
+        setExitSharedElementCallback(MaterialContainerTransformSharedElementCallback())
+        window.sharedElementsUseOverlay = false
         super.onCreate(savedInstanceState)
 
         val filesRepository = FilesRepository()
@@ -83,12 +88,12 @@ class ZPlexActivity : AppCompatActivity() {
 
         episodesViewModel = ViewModelProvider(
             this,
-            EpisodesViewModelProviderFactory(application, tmdbRepository)
+            EpisodesViewModelProviderFactory(application, filesRepository, tmdbRepository)
         )[EpisodesViewModel::class.java]
 
         watchViewModel = ViewModelProvider(
             this,
-            WatchViewModelProviderFactory(application, filesRepository, tmdbRepository)
+            WatchViewModelProviderFactory(application, tmdbRepository)
         )[WatchViewModel::class.java]
 
         castViewModel = ViewModelProvider(

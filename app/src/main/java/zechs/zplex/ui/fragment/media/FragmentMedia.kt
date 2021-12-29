@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
 import android.os.Bundle
+import android.transition.TransitionManager
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -23,6 +24,9 @@ import zechs.zplex.adapter.media.MediaDataAdapter
 import zechs.zplex.adapter.media.MediaDataModel
 import zechs.zplex.databinding.FragmentMediaBinding
 import zechs.zplex.models.dataclass.MediaArgs
+import zechs.zplex.models.dataclass.Movie
+import zechs.zplex.models.dataclass.Show
+import zechs.zplex.models.drive.File
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.models.tmdb.media.MediaResponse
 import zechs.zplex.ui.activity.PlayerActivity
@@ -49,6 +53,7 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
     private val mediaDataAdapter by lazy { MediaDataAdapter() }
 
     private val thisTAG = "FragmentMedia"
+    private var driveId: String? = null
     private var mediaArgs = MediaArgs(0, "none", null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,34 +70,134 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
         _binding = FragmentMediaBinding.bind(view)
 
         mediaViewModel = (activity as ZPlexActivity).mediaViewModel
-        setupRecyclerView()
 
+        setupRecyclerView()
+        setupShowsViewModel()
+        setupMediaViewModel()
+
+    }
+
+    private fun setupSearchObserverForMovie() {
+        mediaViewModel.searchList.observe(viewLifecycleOwner, { responseEpisode ->
+            when (responseEpisode) {
+                is Resource.Success -> {
+                    responseEpisode.data?.let { driveResponse ->
+                        binding.toolbarMovie.apply {
+                            btnWatchNow.isVisible = true
+                            pbWatch.isInvisible = true
+                        }
+                        if (driveResponse.files.isNotEmpty()) {
+                            val file = driveResponse.files[0]
+                            binding.toolbarMovie.btnWatchNow.apply {
+                                text = resources.getString(R.string.watch_now)
+                                icon = ContextCompat.getDrawable(
+                                    context,
+                                    R.drawable.ic_round_play_circle_outline_24
+                                )
+                                setOnClickListener { playMovie(file) }
+                            }
+                        } else {
+                            binding.toolbarMovie.btnWatchNow.apply {
+                                text = resources.getString(R.string.request_this_movie)
+                                icon = ContextCompat.getDrawable(
+                                    context,
+                                    R.drawable.ic_round_queue_play_next_24
+                                )
+                                setOnClickListener {
+                                    Toast.makeText(
+                                        context,
+                                        "Coming soon!", Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        }
+                    }
+                }
+                is Resource.Error -> {
+                    binding.toolbarMovie.apply {
+                        root.isVisible = true
+                        btnWatchNow.isInvisible = true
+                        pbWatch.isVisible = false
+                        btnWatchNow.setOnClickListener(null)
+                        btnShare.setOnClickListener(null)
+                    }
+                }
+                is Resource.Loading -> {
+                    binding.toolbarMovie.apply {
+                        root.isVisible = true
+                        btnWatchNow.isInvisible = true
+                        pbWatch.isVisible = true
+                        btnWatchNow.setOnClickListener(null)
+                    }
+                    binding.toolbarTv.root.isVisible = false
+                }
+            }
+        })
+    }
+
+
+    private fun setupSearchObserverForTV() {
+        mediaViewModel.searchList.observe(viewLifecycleOwner, { response ->
+            when (response) {
+                is Resource.Success -> {
+                    response.data?.let { driveResponse ->
+                        driveId = if (driveResponse.files.isNotEmpty()) {
+                            driveResponse.files[0].id
+                        } else null
+                    }
+                }
+                is Resource.Error -> {
+                    response.message?.let { message ->
+                        val errorMsg = if (message.isEmpty()) {
+                            resources.getString(R.string.something_went_wrong)
+                        } else message
+                        Log.e(thisTAG, errorMsg)
+                        Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
+                    }
+                }
+                is Resource.Loading -> {
+                    binding.toolbarMovie.root.isVisible = false
+                    binding.toolbarTv.root.isVisible = true
+                }
+            }
+        })
+    }
+
+    private fun playMovie(file: File) {
+        val intent = Intent(activity, PlayerActivity::class.java)
+        intent.putExtra("fileId", file.id)
+        intent.putExtra("title", mediaArgs.media?.title)
+        intent.flags = FLAG_ACTIVITY_NEW_TASK
+        activity?.startActivity(intent)
+    }
+
+    private fun setupShowsViewModel() {
         showsViewModel.mediaArgs.observe(viewLifecycleOwner, { media ->
             val mediaType = if (media.mediaType == "none") "tv" else media.mediaType
+            mediaArgs = MediaArgs(media.tmdbId, mediaType, media.media)
+
             if (mediaType == "movie") {
+                setupMovieDatabaseObserver(mediaArgs)
+                setupSearchObserverForMovie()
+                mediaViewModel.doSearchFor(searchQuery(media.tmdbId, mediaType))
                 binding.apply {
-                    toolbarMovie.root.isVisible = true
                     toolbarTv.root.isVisible = false
+                    toolbarMovie.root.isVisible = true
                 }
-                mediaViewModel.doSearchFor(searchQuery(media.tmdbId, media.mediaType))
             } else {
+                setupShowDatabaseObserver(mediaArgs)
+                setupSearchObserverForTV()
+                mediaViewModel.doSearchFor(searchQuery(media.tmdbId, mediaType))
                 binding.apply {
                     toolbarMovie.root.isVisible = false
                     toolbarTv.root.isVisible = true
                 }
             }
 
-            binding.toolbarTv.btnShare.setOnClickListener {
-                shareIntent(media)
-            }
-            binding.toolbarMovie.btnShare.setOnClickListener {
-                shareIntent(media)
-            }
-
             if (mediaType == "tv" || mediaType == "movie") {
-                mediaViewModel.getMedia(media.tmdbId, media.mediaType)
+                mediaViewModel.getMedia(media.tmdbId, mediaType)
                 binding.errorView.retryBtn.setOnClickListener {
-                    mediaViewModel.getMedia(media.tmdbId, media.mediaType)
+                    mediaViewModel.getMedia(media.tmdbId, mediaType)
                 }
             } else {
                 val errorMsg = "Unknown media type..."
@@ -107,72 +212,93 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
                     errorTxt.text = errorMsg
                 }
             }
+        })
+    }
 
-            mediaViewModel.getShow(media.tmdbId).observe(viewLifecycleOwner, { isSaved ->
-                Log.d("getShow", "isSaved=$isSaved")
+    private fun setupShowDatabaseObserver(media: MediaArgs) {
 
-                binding.toolbarTv.btnWatchlist.apply {
-                    icon = ContextCompat.getDrawable(
-                        context,
+        mediaViewModel.getShow(media.tmdbId).observe(viewLifecycleOwner, { isSaved ->
+            Log.d("getShow", "isSaved=$isSaved")
+
+            binding.toolbarTv.btnWatchlist.apply {
+                icon = ContextCompat.getDrawable(
+                    context,
+                    if (isSaved) {
+                        R.drawable.ic_round_library_add_check_24
+                    } else R.drawable.ic_library_add_24dp
+                )
+                setOnClickListener {
+                    media.media?.let { m ->
+                        val finalMedia = Show(
+                            id = m.id,
+                            name = m.name ?: "",
+                            media_type = m.media_type ?: "tv",
+                            poster_path = m.poster_path
+                        )
+
                         if (isSaved) {
-                            R.drawable.ic_round_library_add_check_24
-                        } else R.drawable.ic_library_add_24dp
-                    )
-                    setOnClickListener {
-                        media.media?.let { m ->
-                            val finaMedia = m.copy(media_type = mediaType)
+                            mediaViewModel.deleteShow(finalMedia)
+                        } else mediaViewModel.saveShow(finalMedia)
 
-                            if (isSaved) {
-                                mediaViewModel.deleteShow(finaMedia)
-                            } else mediaViewModel.saveShow(finaMedia)
-
-                            val status = if (isSaved) "removed from" else "added to"
-                            val name = finaMedia.name ?: finaMedia.title
-                            val snackBar = Snackbar.make(
-                                binding.root,
-                                "$name $status your library",
-                                Snackbar.LENGTH_SHORT
-                            )
-                            snackBar.anchorView = binding.toolbarTv.root
-                            snackBar.show()
-                        }
+                        val status = if (isSaved) "removed from" else "added to"
+                        val name = finalMedia.name
+                        val snackBar = Snackbar.make(
+                            binding.root,
+                            "$name $status your library",
+                            Snackbar.LENGTH_SHORT
+                        )
+                        snackBar.anchorView = binding.toolbarTv.root
+                        snackBar.show()
                     }
                 }
-
-                binding.toolbarMovie.btnWatchlist.apply {
-                    icon = ContextCompat.getDrawable(
-                        context,
-                        if (isSaved) {
-                            R.drawable.ic_round_library_add_check_24
-                        } else R.drawable.ic_library_add_24dp
-                    )
-                    setOnClickListener {
-                        media.media?.let { m ->
-                            val finaMedia = m.copy(media_type = mediaType)
-                            if (isSaved) {
-                                mediaViewModel.deleteShow(finaMedia)
-                            } else mediaViewModel.saveShow(finaMedia)
-
-                            val status = if (isSaved) "removed from" else "added to"
-                            val name = finaMedia.name ?: finaMedia.title
-                            val snackBar = Snackbar.make(
-                                binding.root,
-                                "$name $status your library",
-                                Snackbar.LENGTH_SHORT
-                            )
-                            snackBar.anchorView = binding.toolbarMovie.root
-                            snackBar.show()
-                        }
-                    }
-                }
-            })
-
-            mediaArgs = MediaArgs(media.tmdbId, media.mediaType, media.media)
+            }
         })
 
+    }
+
+    private fun setupMovieDatabaseObserver(media: MediaArgs) {
+        mediaViewModel.getMovie(media.tmdbId).observe(viewLifecycleOwner, { isSaved ->
+            Log.d("getMovie", "isSaved=$isSaved")
+            binding.toolbarMovie.btnWatchlist.apply {
+                icon = ContextCompat.getDrawable(
+                    context,
+                    if (isSaved) {
+                        R.drawable.ic_round_library_add_check_24
+                    } else R.drawable.ic_library_add_24dp
+                )
+                setOnClickListener {
+                    media.media?.let { m ->
+                        val finalMovie = Movie(
+                            id = m.id,
+                            title = m.title ?: "",
+                            media_type = m.media_type ?: "movie",
+                            poster_path = m.poster_path
+                        )
+                        if (isSaved) {
+                            mediaViewModel.deleteMovie(finalMovie)
+                        } else mediaViewModel.saveMovie(finalMovie)
+
+                        val status = if (isSaved) "removed from" else "added to"
+                        val name = finalMovie.title
+                        val snackBar = Snackbar.make(
+                            binding.root,
+                            "$name $status your library",
+                            Snackbar.LENGTH_SHORT
+                        )
+                        snackBar.anchorView = binding.toolbarMovie.root
+                        snackBar.show()
+                    }
+                }
+            }
+        })
+
+    }
+
+    private fun setupMediaViewModel() {
         mediaViewModel.media.observe(viewLifecycleOwner, { response ->
             when (response) {
                 is Resource.Success -> {
+                    TransitionManager.beginDelayedTransition(binding.successView)
                     response.data?.let { doOnMediaSuccess(it) }
                 }
                 is Resource.Error -> {
@@ -193,132 +319,32 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
                 }
                 is Resource.Loading -> {
                     binding.apply {
+                        successView.removeAllViews()
                         successView.recycledViewPool.clear()
                         pbTv.isVisible = true
                         successView.isGone = true
                         binding.errorView.root.isGone = true
+                        toolbarTv.apply {
+                            btnShare.setOnClickListener(null)
+                        }
+                        toolbarMovie.apply {
+                            btnShare.setOnClickListener(null)
+                        }
                     }
                 }
             }
         })
-
-        mediaViewModel.searchList.observe(viewLifecycleOwner, { responseEpisode ->
-            when (responseEpisode) {
-                is Resource.Success -> {
-                    responseEpisode.data?.let { driveResponse ->
-                        binding.toolbarMovie.apply {
-                            btnWatchNow.isInvisible = false
-                            pbWatch.isVisible = false
-                        }
-                        if (driveResponse.files.isNotEmpty()) {
-                            val file = driveResponse.files[0]
-                            binding.toolbarMovie.btnWatchNow.apply {
-                                text = resources.getString(R.string.watch_now)
-                                icon = ContextCompat.getDrawable(
-                                    context,
-                                    R.drawable.ic_round_play_circle_outline_24
-                                )
-                                setOnClickListener {
-                                    val intent = Intent(activity, PlayerActivity::class.java)
-                                    intent.putExtra("fileId", file.id)
-                                    intent.putExtra("title", mediaArgs.media?.title)
-                                    intent.flags = FLAG_ACTIVITY_NEW_TASK
-                                    activity?.startActivity(intent)
-                                }
-                            }
-                        } else {
-                            binding.toolbarMovie.btnWatchNow.apply {
-                                text = resources.getString(R.string.request_this_movie)
-                                icon = ContextCompat.getDrawable(
-                                    context,
-                                    R.drawable.ic_round_queue_play_next_24
-                                )
-                                setOnClickListener {
-                                    Toast.makeText(context, "Coming soon!", Toast.LENGTH_SHORT)
-                                        .show()
-                                }
-                            }
-                        }
-                    }
-                }
-                is Resource.Error -> {
-                    binding.toolbarMovie.apply {
-                        btnWatchNow.isInvisible = true
-                        pbWatch.isVisible = false
-                    }
-                }
-                is Resource.Loading -> {
-                    binding.toolbarMovie.apply {
-                        btnWatchNow.isInvisible = true
-                        pbWatch.isVisible = true
-                    }
-                }
-            }
-        })
-
     }
 
-
-    private fun doOnMediaSuccess(response: MediaResponse) {
-
-        mediaDataAdapter.setOnItemClickListener {
-            when (it) {
-                is AboutDataModel.Season -> {
-                    seasonViewModel.setShowSeason(
-                        tmdbId = response.id,
-                        seasonName = it.name,
-                        seasonNumber = it.season_number,
-                        showName = response.name ?: "Unknown"
-                    )
-                    findNavController().navigate(R.id.action_fragmentMedia_to_episodeListFragment)
-                }
-                is AboutDataModel.Curation -> {
-                    val media = Media(
-                        id = it.id,
-                        media_type = it.media_type,
-                        name = it.name,
-                        poster_path = it.poster_path,
-                        title = it.title,
-                        vote_average = it.vote_average
-                    )
-                    if (it.media_type != null) {
-                        showsViewModel.setMedia(it.id, it.media_type, media)
-                    } else showsViewModel.setMedia(it.id, mediaArgs.mediaType, media)
-                }
-                is AboutDataModel.Video -> {
-                    val openVideoIntent = Intent(
-                        Intent.ACTION_VIEW, Uri.parse(it.watchUrl)
-                    )
-                    startActivity(openVideoIntent)
-                }
-                is AboutDataModel.Cast -> {
-                    castDetailsViewModel.setCast(
-                        it.person_id, it.credit_id
-                    )
-                    findNavController().navigate(R.id.action_fragmentMedia_to_castsFragment)
-                }
-                is AboutDataModel.Header -> {
-                    it.heading?.let { text ->
-                        if (text.startsWith("/")) {
-                            bigImageViewModel.setImagePath(it.heading)
-                            findNavController().navigate(R.id.action_fragmentMedia_to_bigImageFragment)
-                        }
-//                        else {
-//                            mediaArgs.media?.let { media ->
-//                                println(media)
-//                                val name = media.name ?: media.title
-//                                Snackbar.make(
-//                                    view, "$name successfully saved.",
-//                                    Snackbar.LENGTH_SHORT
-//                                ).show()
-//                                mediaViewModel.saveShow(media)
-//                            }
-//                        }
-                    }
-                }
-                else -> {}
-            }
+    private fun doOnMediaSuccess(
+        response: MediaResponse
+    ) {
+        binding.apply {
+            toolbarMovie.btnShare.setOnClickListener { shareIntent(mediaArgs) }
+            toolbarTv.btnShare.setOnClickListener { shareIntent(mediaArgs) }
         }
+
+        setupMediaAdapterOnClickListener(response)
 
         val metaData = listOf(
             MediaDataModel.Meta(
@@ -458,6 +484,56 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
 
     }
 
+    private fun setupMediaAdapterOnClickListener(
+        response: MediaResponse
+    ) {
+        mediaDataAdapter.setOnItemClickListener {
+            when (it) {
+                is AboutDataModel.Season -> {
+                    seasonViewModel.setShowSeason(
+                        driveId = driveId,
+                        tmdbId = response.id,
+                        seasonName = it.name,
+                        seasonNumber = it.season_number,
+                        showName = response.name ?: "Unknown"
+                    )
+                    findNavController().navigate(R.id.action_fragmentMedia_to_episodeListFragment)
+                }
+                is AboutDataModel.Curation -> {
+                    val media = Media(
+                        id = it.id,
+                        media_type = it.media_type,
+                        name = it.name,
+                        poster_path = it.poster_path,
+                        title = it.title,
+                        vote_average = it.vote_average
+                    )
+                    if (it.media_type != null) {
+                        showsViewModel.setMedia(it.id, it.media_type, media)
+                    } else showsViewModel.setMedia(it.id, mediaArgs.mediaType, media)
+                }
+                is AboutDataModel.Video -> {
+                    val openVideoIntent = Intent(
+                        Intent.ACTION_VIEW, Uri.parse(it.watchUrl)
+                    )
+                    startActivity(openVideoIntent)
+                }
+                is AboutDataModel.Cast -> {
+                    castDetailsViewModel.setCast(
+                        it.person_id, it.credit_id
+                    )
+                    findNavController().navigate(R.id.action_fragmentMedia_to_castsFragment)
+                }
+                is AboutDataModel.Header -> {
+                    if (it.heading != null && it.heading.startsWith("/")) {
+                        bigImageViewModel.setImagePath(it.heading)
+                        findNavController().navigate(R.id.action_fragmentMedia_to_bigImageFragment)
+                    }
+                }
+            }
+        }
+    }
+
     private fun setupRecyclerView() {
         binding.successView.apply {
             adapter = mediaDataAdapter
@@ -495,6 +571,7 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        driveId = null
         binding.apply {
             successView.recycledViewPool.clear()
             successView.adapter = null

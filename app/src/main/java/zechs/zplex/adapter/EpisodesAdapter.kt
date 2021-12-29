@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -54,6 +55,7 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
         val count = "Episode ${episode.episode_number}"
 
         holder.itemView.apply {
+            frame_not_available.isVisible = episode.fileId == null
             if (episode.name == count) tv_episodeCount.isInvisible = true
 
             tv_title.text = if (episode.name.isNullOrEmpty()) "No title" else episode.name

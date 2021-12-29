@@ -31,12 +31,12 @@
     <include
         android:id="@+id/toolbar_movie"
         layout="@layout/item_media_options_movie"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
     <include
         android:id="@+id/toolbar_tv"
         layout="@layout/item_media_options_tv"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
     <include
         android:id="@+id/errorView"

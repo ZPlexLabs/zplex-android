@@ -10,9 +10,10 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.ThisApp
+import zechs.zplex.models.dataclass.Movie
+import zechs.zplex.models.dataclass.Show
 import zechs.zplex.models.drive.DriveResponse
 import zechs.zplex.models.tmdb.collection.CollectionsResponse
-import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.models.tmdb.entities.Pair
 import zechs.zplex.models.tmdb.media.MediaResponse
 import zechs.zplex.models.tmdb.media.MovieResponse
@@ -38,17 +39,30 @@ class MediaViewModel(
     val searchList: MutableLiveData<Resource<DriveResponse>> = MutableLiveData()
     val media: MutableLiveData<Resource<MediaResponse>> = MutableLiveData()
 
-    fun saveShow(media: Media) = viewModelScope.launch {
-        tmdbRepository.upsertMedia(media)
+    fun saveShow(show: Show) = viewModelScope.launch {
+        tmdbRepository.upsertShow(show)
     }
 
-    fun deleteShow(media: Media) = viewModelScope.launch {
-        tmdbRepository.deleteMedia(media)
+    fun deleteShow(show: Show) = viewModelScope.launch {
+        tmdbRepository.deleteShow(show)
     }
 
-    fun getShow(id: Int) = tmdbRepository.getMedia(id)
+    fun getShow(id: Int) = tmdbRepository.fetchShow(id)
 
-    fun getMedia(tmdbId: Int, mediaType: String) = viewModelScope.launch {
+    fun saveMovie(movie: Movie) = viewModelScope.launch {
+        tmdbRepository.upsertMovie(movie)
+    }
+
+    fun deleteMovie(movie: Movie) = viewModelScope.launch {
+        tmdbRepository.deleteMovie(movie)
+    }
+
+    fun getMovie(id: Int) = tmdbRepository.fetchMovie(id)
+
+    fun getMedia(
+        tmdbId: Int,
+        mediaType: String
+    ) = viewModelScope.launch {
         media.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
@@ -271,7 +285,6 @@ class MediaViewModel(
         }
         return Resource.Error(response.message())
     }
-
 
     fun doSearchFor(searchQuery: String) =
         viewModelScope.launch {

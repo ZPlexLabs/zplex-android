@@ -2,25 +2,40 @@ package zechs.zplex.repository
 
 import zechs.zplex.api.RetrofitInstance
 import zechs.zplex.db.WatchlistDatabase
-import zechs.zplex.models.tmdb.entities.Media
+import zechs.zplex.models.dataclass.Movie
+import zechs.zplex.models.dataclass.Show
 
 class TmdbRepository(
     private val db: WatchlistDatabase
 ) {
 
-    suspend fun upsertMedia(
-        media: Media
-    ) = db.getWatchlistDao().upsertMedia(media)
+    suspend fun upsertMovie(
+        movie: Movie
+    ) = db.getMovieDao().upsertMovie(movie)
 
-    fun getMedia(
+    fun fetchMovie(
         id: Int
-    ) = db.getWatchlistDao().getMedia(id)
+    ) = db.getMovieDao().getMovie(id)
 
-    suspend fun deleteMedia(
-        media: Media
-    ) = db.getWatchlistDao().deleteMedia(media)
+    suspend fun deleteMovie(
+        movie: Movie
+    ) = db.getMovieDao().deleteMovie(movie)
 
-    fun getSavedMedia() = db.getWatchlistDao().getAllMedia()
+    fun getSavedMovies() = db.getMovieDao().getAllMovies()
+
+    suspend fun upsertShow(
+        Show: Show
+    ) = db.getShowDao().upsertShow(Show)
+
+    fun fetchShow(
+        id: Int
+    ) = db.getShowDao().getShow(id)
+
+    suspend fun deleteShow(
+        Show: Show
+    ) = db.getShowDao().deleteShow(Show)
+
+    fun getSavedShows() = db.getShowDao().getAllShows()
 
     suspend fun getShow(
         tvId: Int

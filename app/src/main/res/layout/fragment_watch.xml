@@ -4,25 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
-    android:keepScreenOn="true">
-
-    <com.google.android.exoplayer2.ui.StyledPlayerView
-        android:id="@+id/player_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:visibility="invisible"
-        app:auto_show="true"
-        app:controller_layout_id="@layout/exo_control_view"
-        app:default_artwork="@drawable/no_thumb"
-        app:layout_constraintBottom_toTopOf="@+id/guideline2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        app:show_buffering="when_playing"
-        app:show_subtitle_button="true"
-        app:use_artwork="true" />
+    android:background="@color/colorPrimary">
 
     <ImageView
         android:id="@+id/thumb"
@@ -120,7 +102,6 @@
         app:layout_constraintTop_toBottomOf="@+id/textView2"
         tools:text="Issei Hyodo's first date with his new girlfriend ends poorly when she turns into a monster and stabs him in the stomach. Luckily, he's saved by Rias, the buxom president of his school's Occult Research Club. And then, things really start to get weird..." />
 
-
     <TextView
         android:id="@+id/textView1"
         android:layout_width="0dp"
@@ -152,4 +133,5 @@
         tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/item_cast"
         tools:orientation="horizontal" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

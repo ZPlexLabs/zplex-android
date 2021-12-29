@@ -4,18 +4,20 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import zechs.zplex.models.tmdb.entities.Media
+import zechs.zplex.models.dataclass.Movie
+import zechs.zplex.models.dataclass.Show
 
 
 @Database(
-    entities = [Media::class],
+    entities = [Movie::class, Show::class],
     version = 1,
     exportSchema = false
 )
 
 abstract class WatchlistDatabase : RoomDatabase() {
 
-    abstract fun getWatchlistDao(): WatchlistDao
+    abstract fun getMovieDao(): MovieDao
+    abstract fun getShowDao(): ShowDao
 
     companion object {
         @Volatile

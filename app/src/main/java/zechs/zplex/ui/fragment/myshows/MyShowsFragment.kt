@@ -16,6 +16,8 @@ import com.google.android.material.snackbar.Snackbar
 import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentMyShowsBinding
+import zechs.zplex.models.dataclass.Movie
+import zechs.zplex.models.dataclass.Show
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 
@@ -37,8 +39,8 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
         myShowsViewModel = (activity as ZPlexActivity).myShowsViewModel
         setupRecyclerView()
 
-        myShowsViewModel.getSavedMedia().observe(viewLifecycleOwner, { media ->
-            val isEmpty = media.isEmpty()
+        myShowsViewModel.savedMedia.observe(viewLifecycleOwner, { media ->
+            val isEmpty = media?.isEmpty() ?: true
             binding.rvMyShows.isGone = isEmpty
             binding.errorView.apply {
                 root.isVisible = isEmpty
@@ -71,7 +73,23 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
                 val bottomNavView = activity?.findViewById(
                     R.id.bottomNavigationView
                 ) as BottomNavigationView?
-                myShowsViewModel.deleteShow(media)
+                if (media.media_type == "tv") {
+                    val show = Show(
+                        id = media.id,
+                        name = media.name ?: "",
+                        media_type = media.media_type,
+                        poster_path = media.poster_path
+                    )
+                    myShowsViewModel.deleteShow(show)
+                } else {
+                    val movie = Movie(
+                        id = media.id,
+                        title = media.title ?: "",
+                        media_type = media.media_type,
+                        poster_path = media.poster_path
+                    )
+                    myShowsViewModel.deleteMovie(movie)
+                }
                 val name = media.name ?: media.title
                 val snackBar = Snackbar.make(
                     view, "$name removed from your library",
@@ -84,9 +102,7 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
             }
         }
 
-        ItemTouchHelper(itemTouchHelperCallback).apply {
-            attachToRecyclerView(binding.rvMyShows)
-        }
+        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(binding.rvMyShows)
     }
 
     private fun setupRecyclerView() {
