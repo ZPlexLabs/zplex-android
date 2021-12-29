@@ -56,7 +56,7 @@ class MyShowsViewModel(
                 name = null,
                 poster_path = it.poster_path,
                 title = it.title,
-                vote_average = null
+                vote_average = it.vote_average
             )
         }
 
@@ -67,7 +67,7 @@ class MyShowsViewModel(
                 name = it.name,
                 poster_path = it.poster_path,
                 title = null,
-                vote_average = null
+                vote_average = it.vote_average
             )
         }
         return movie.plus(show).sortedBy { it.name }

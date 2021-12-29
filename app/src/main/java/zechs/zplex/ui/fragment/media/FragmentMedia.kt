@@ -233,7 +233,8 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
                             id = m.id,
                             name = m.name ?: "",
                             media_type = m.media_type ?: "tv",
-                            poster_path = m.poster_path
+                            poster_path = m.poster_path,
+                            vote_average = m.vote_average
                         )
 
                         if (isSaved) {
@@ -272,7 +273,8 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
                             id = m.id,
                             title = m.title ?: "",
                             media_type = m.media_type ?: "movie",
-                            poster_path = m.poster_path
+                            poster_path = m.poster_path,
+                            vote_average = m.vote_average
                         )
                         if (isSaved) {
                             mediaViewModel.deleteMovie(finalMovie)

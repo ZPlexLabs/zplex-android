@@ -78,7 +78,8 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
                         id = media.id,
                         name = media.name ?: "",
                         media_type = media.media_type,
-                        poster_path = media.poster_path
+                        poster_path = media.poster_path,
+                        vote_average = media.vote_average
                     )
                     myShowsViewModel.deleteShow(show)
                 } else {
@@ -86,7 +87,8 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
                         id = media.id,
                         title = media.title ?: "",
                         media_type = media.media_type,
-                        poster_path = media.poster_path
+                        poster_path = media.poster_path,
+                        vote_average = media.vote_average
                     )
                     myShowsViewModel.deleteMovie(movie)
                 }
