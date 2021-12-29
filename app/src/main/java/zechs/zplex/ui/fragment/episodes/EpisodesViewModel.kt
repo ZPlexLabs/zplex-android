@@ -16,6 +16,7 @@ import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.models.tmdb.season.SeasonResponse
 import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.TmdbRepository
+import zechs.zplex.utils.Constants
 import zechs.zplex.utils.Constants.TEMP_TOKEN
 import zechs.zplex.utils.Constants.regexFile
 import zechs.zplex.utils.Resource
@@ -36,98 +37,32 @@ class EpisodesViewModel(
         getApplication<Application>().applicationContext
     ).fetchAuthToken()
 
-    //    val searchList: MutableLiveData<Resource<DriveResponse>> = MutableLiveData()
     val season: MutableLiveData<Resource<SeasonResponse>> = MutableLiveData()
 
-//    fun getSeason(tvId: Int, seasonNumber: Int) =
-//        viewModelScope.launch {
-//            season.postValue(Resource.Loading())
-//            try {
-//                if (hasInternetConnection()) {
-//                    val tmdb = tmdbRepository.getSeason(tvId, seasonNumber)
-//                    season.postValue(handleEpisodesResponse(tmdb))
-//                } else {
-//                    season.postValue(Resource.Error("No internet connection"))
-//                }
-//            } catch (t: Throwable) {
-//                println(t.stackTrace)
-//                println(t.message)
-//                season.postValue(
-//                    Resource.Error(
-//                        if (t is IOException) {
-//                            "Network Failure"
-//                        } else t.message ?: "Something went wrong"
-//                    )
-//                )
-//            }
-//        }
-//
-//    private fun handleEpisodesResponse(
-//        response: Response<SeasonResponse>
-//    ): Resource<SeasonResponse> {
-//        if (response.isSuccessful) {
-//            response.body()?.let { resultResponse ->
-//                return Resource.Success(resultResponse)
-//            }
-//        }
-//        return Resource.Error(response.message())
-//    }
-//
-//    fun doSearchFor(searchQuery: String) =
-//        viewModelScope.launch {
-//            searchList.postValue(Resource.Loading())
-//            try {
-//                if (hasInternetConnection()) {
-//                    val response = filesRepository.getDriveFiles(
-//                        pageSize = 1000,
-//                        if (accessToken == "") TEMP_TOKEN else accessToken,
-//                        pageToken = "", searchQuery, orderBy = "name asc"
-//                    )
-//                    searchList.postValue(handleSearchListResponse(response))
-//                } else {
-//                    searchList.postValue(Resource.Error("No internet connection"))
-//                }
-//            } catch (t: Throwable) {
-//                println(t.stackTrace)
-//                println(t.message)
-//                searchList.postValue(
-//                    Resource.Error(
-//                        if (t is IOException) {
-//                            "Network Failure"
-//                        } else t.message ?: "Something went wrong"
-//                    )
-//                )
-//            }
-//        }
-//
-//    private fun handleSearchListResponse(
-//        response: Response<DriveResponse>
-//    ): Resource<DriveResponse> {
-//        if (response.isSuccessful) {
-//            response.body()?.let { resultResponse ->
-//                return Resource.Success(resultResponse)
-//            }
-//        }
-//        return Resource.Error(response.message())
-//    }
-
-
-    fun getSeason(tvId: Int, seasonNumber: Int, driveId: String?) =
+    fun getSeason(tvId: Int, seasonNumber: Int) =
         viewModelScope.launch {
             season.postValue(Resource.Loading())
             try {
                 if (hasInternetConnection()) {
                     val tmdb = tmdbRepository.getSeason(tvId, seasonNumber)
-                    println("driveId=$driveId")
-                    if (driveId == null) {
-                        season.postValue(handleEpisodesResponse(tmdb))
-                    } else {
+                    val folder = filesRepository.getDriveFiles(
+                        pageSize = 1,
+                        if (accessToken == "") TEMP_TOKEN else accessToken,
+                        pageToken = "", searchQuery(tvId, "tv"), orderBy = "modifiedTime desc"
+                    )
+                    if (folder.isSuccessful
+                        && folder.body() != null
+                        && folder.body()!!.files.isNotEmpty()
+                    ) {
+                        val folderId = folder.body()!!.files[0].id
                         val drive = filesRepository.getDriveFiles(
                             pageSize,
                             if (accessToken == "") TEMP_TOKEN else accessToken,
-                            "", driveQuery(driveId, seasonNumber), orderBy
+                            "", driveQuery(folderId, seasonNumber), orderBy
                         )
                         season.postValue(handleSeasonResponse(tmdb, drive))
+                    } else {
+                        season.postValue(handleEpisodesResponse(tmdb))
                     }
                 } else {
                     season.postValue(Resource.Error("No internet connection"))
@@ -244,6 +179,17 @@ class EpisodesViewModel(
         }' and name contains 'mkv' and '${
             driveId
         }' in parents and trashed = false"
+    }
+
+    private fun searchQuery(
+        tmdbId: Int, mediaType: String
+    ): String {
+        val lookInFolder = when (mediaType) {
+            "tv" -> Constants.ZPLEX_SHOWS_ID
+            "movie" -> Constants.ZPLEX_MOVIES_ID
+            else -> ""
+        }
+        return "name contains '${tmdbId}' and parents in '${lookInFolder}' and trashed = false"
     }
 
     private fun hasInternetConnection(): Boolean {

@@ -73,7 +73,6 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
 
         seasonViewModel.showId.observe(viewLifecycleOwner, { showSeason ->
             episodesViewModel.getSeason(
-                driveId = showSeason.driveId,
                 tvId = showSeason.tmdbId,
                 seasonNumber = showSeason.seasonNumber
             )

@@ -32,7 +32,7 @@ abstract class WatchlistDatabase : RoomDatabase() {
             Room.databaseBuilder(
                 context.applicationContext,
                 WatchlistDatabase::class.java,
-                "watchlist_db.db"
+                "zplex_db.db"
             ).fallbackToDestructiveMigration().build()
     }
 }

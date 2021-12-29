@@ -186,8 +186,8 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
                 }
             } else {
                 setupShowDatabaseObserver(mediaArgs)
-                setupSearchObserverForTV()
-                mediaViewModel.doSearchFor(searchQuery(media.tmdbId, mediaType))
+                //  setupSearchObserverForTV()
+                // mediaViewModel.doSearchFor(searchQuery(media.tmdbId, mediaType))
                 binding.apply {
                     toolbarMovie.root.isVisible = false
                     toolbarTv.root.isVisible = true
