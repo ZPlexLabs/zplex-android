@@ -18,6 +18,7 @@ import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
 import zechs.zplex.adapter.media.adapters.CurationAdapter
 import zechs.zplex.databinding.FragmentCastDetailsBinding
+import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.tmdb.ProfileSize
 import zechs.zplex.models.tmdb.credit.CastObject
 import zechs.zplex.models.tmdb.entities.Media
@@ -213,8 +214,10 @@ class CastsFragment : Fragment(R.layout.fragment_cast_details) {
                     vote_average = it.vote_average
                 )
                 if (it.media_type != null) {
-                    showsViewModel.setMedia(it.id, it.media_type, media)
-                    findNavController().navigate(R.id.action_castsFragment_to_fragmentMedia)
+                    val action = CastsFragmentDirections.actionCastsFragmentToFragmentMedia(
+                        MediaArgs(it.id, it.media_type, media)
+                    )
+                    findNavController().navigate(action)
                 }
             }
         }

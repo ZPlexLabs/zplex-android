@@ -16,6 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentMyShowsBinding
+import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
 import zechs.zplex.ui.activity.ZPlexActivity
@@ -111,12 +112,14 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
         binding.rvMyShows.apply {
             adapter = showsAdapter
             layoutManager = GridLayoutManager(activity, 3)
-            showsAdapter.setOnItemClickListener { media ->
-                if (media.media_type != null) {
-                    showsViewModel.setMedia(media.id, media.media_type, media)
-                } else showsViewModel.setMedia(media.id, "none", media)
-
-                findNavController().navigate(R.id.action_myShowsFragment_to_fragmentMedia)
+            showsAdapter.setOnItemClickListener {
+                val action = MyShowsFragmentDirections.actionMyShowsFragmentToFragmentMedia(
+                    MediaArgs(
+                        it.id,
+                        it.media_type ?: "none", it
+                    )
+                )
+                findNavController().navigate(action)
             }
         }
     }

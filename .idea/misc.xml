@@ -49,6 +49,7 @@
         <entry key="app/src/main/res/drawable/ic_baseline_play_arrow_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_download.xml" value="0.340625" />
         <entry key="app/src/main/res/drawable/ic_explore.xml" value="0.33645833333333336" />
+        <entry key="app/src/main/res/drawable/ic_face_sad_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_favorite_border_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_female_24dp.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_home.xml" value="0.32135416666666666" />
@@ -106,7 +107,7 @@
         <entry key="app/src/main/res/layout/fragment_browse.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_cast_details.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/fragment_casts.xml" value="0.527367506516073" />
-        <entry key="app/src/main/res/layout/fragment_episode.xml" value="0.18287037037037038" />
+        <entry key="app/src/main/res/layout/fragment_episode.xml" value="0.4" />
         <entry key="app/src/main/res/layout/fragment_episodes.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_home.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_info.xml" value="0.4" />
@@ -136,7 +137,7 @@
         <entry key="app/src/main/res/layout/item_detail.xml" value="0.264" />
         <entry key="app/src/main/res/layout/item_discord.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_dropdown.xml" value="0.72" />
-        <entry key="app/src/main/res/layout/item_episode.xml" value="0.264" />
+        <entry key="app/src/main/res/layout/item_episode.xml" value="0.72" />
         <entry key="app/src/main/res/layout/item_episode_linear.xml" value="0.72" />
         <entry key="app/src/main/res/layout/item_episode_wide.xml" value="0.264" />
         <entry key="app/src/main/res/layout/item_genre.xml" value="0.31614583333333335" />
@@ -146,8 +147,8 @@
         <entry key="app/src/main/res/layout/item_media.xml" value="0.264" />
         <entry key="app/src/main/res/layout/item_media_meta.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_media_options.xml" value="0.31614583333333335" />
-        <entry key="app/src/main/res/layout/item_media_options_movie.xml" value="0.4" />
-        <entry key="app/src/main/res/layout/item_media_options_tv.xml" value="0.31614583333333335" />
+        <entry key="app/src/main/res/layout/item_media_options_movie.xml" value="0.72" />
+        <entry key="app/src/main/res/layout/item_media_options_tv.xml" value="0.6" />
         <entry key="app/src/main/res/layout/item_meta.xml" value="0.31614583333333335" />
         <entry key="app/src/main/res/layout/item_misc_list.xml" value="1.0" />
         <entry key="app/src/main/res/layout/item_person_meta.xml" value="0.31614583333333335" />

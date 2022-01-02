@@ -4,7 +4,6 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.net.Uri
 import android.os.Bundle
-import android.transition.TransitionManager
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -15,8 +14,11 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.transition.TransitionManager
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.transition.MaterialFade
 import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
@@ -34,7 +36,6 @@ import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
 import zechs.zplex.ui.fragment.viewmodels.SeasonViewModel
-import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Constants.ZPLEX_MOVIES_ID
 import zechs.zplex.utils.Constants.ZPLEX_SHOWS_ID
 import zechs.zplex.utils.Resource
@@ -44,8 +45,11 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
     private var _binding: FragmentMediaBinding? = null
     private val binding get() = _binding!!
 
+    private val args: FragmentMediaArgs by navArgs()
+
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
-    private val showsViewModel by activityViewModels<ShowViewModel>()
+
+    // private val showsViewModel by activityViewModels<ShowViewModel>()
     private val castDetailsViewModel by activityViewModels<CastDetailsViewModel>()
     private val bigImageViewModel: BigImageViewModel by activityViewModels()
     private lateinit var mediaViewModel: MediaViewModel
@@ -60,6 +64,11 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
         super.onCreate(savedInstanceState)
         enterTransition = MaterialSharedAxis(
             MaterialSharedAxis.Y, true
+        ).apply {
+            duration = 500L
+        }
+        exitTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, false
         ).apply {
             duration = 500L
         }
@@ -135,34 +144,6 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
         })
     }
 
-
-    private fun setupSearchObserverForTV() {
-        mediaViewModel.searchList.observe(viewLifecycleOwner, { response ->
-            when (response) {
-                is Resource.Success -> {
-                    response.data?.let { driveResponse ->
-                        driveId = if (driveResponse.files.isNotEmpty()) {
-                            driveResponse.files[0].id
-                        } else null
-                    }
-                }
-                is Resource.Error -> {
-                    response.message?.let { message ->
-                        val errorMsg = if (message.isEmpty()) {
-                            resources.getString(R.string.something_went_wrong)
-                        } else message
-                        Log.e(thisTAG, errorMsg)
-                        Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
-                    }
-                }
-                is Resource.Loading -> {
-                    binding.toolbarMovie.root.isVisible = false
-                    binding.toolbarTv.root.isVisible = true
-                }
-            }
-        })
-    }
-
     private fun playMovie(file: File) {
         val intent = Intent(activity, PlayerActivity::class.java)
         intent.putExtra("fileId", file.id)
@@ -172,47 +153,45 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
     }
 
     private fun setupShowsViewModel() {
-        showsViewModel.mediaArgs.observe(viewLifecycleOwner, { media ->
-            val mediaType = if (media.mediaType == "none") "tv" else media.mediaType
-            mediaArgs = MediaArgs(media.tmdbId, mediaType, media.media)
+        val media = args.media
+        val mediaType = if (media.mediaType == "none") "tv" else media.mediaType
+        mediaArgs = MediaArgs(media.tmdbId, mediaType, media.media)
 
-            if (mediaType == "movie") {
-                setupMovieDatabaseObserver(mediaArgs)
-                setupSearchObserverForMovie()
-                mediaViewModel.doSearchFor(searchQuery(media.tmdbId, mediaType))
-                binding.apply {
-                    toolbarTv.root.isVisible = false
-                    toolbarMovie.root.isVisible = true
-                }
-            } else {
-                setupShowDatabaseObserver(mediaArgs)
-                //  setupSearchObserverForTV()
-                // mediaViewModel.doSearchFor(searchQuery(media.tmdbId, mediaType))
-                binding.apply {
-                    toolbarMovie.root.isVisible = false
-                    toolbarTv.root.isVisible = true
-                }
+        if (mediaType == "movie") {
+            setupMovieDatabaseObserver(mediaArgs)
+            setupSearchObserverForMovie()
+            mediaViewModel.doSearchFor(searchQuery(media.tmdbId, mediaType))
+            binding.apply {
+                toolbarTv.root.isVisible = false
+                toolbarMovie.root.isVisible = true
             }
+        } else {
+            setupShowDatabaseObserver(mediaArgs)
+            binding.apply {
+                toolbarMovie.root.isVisible = false
+                toolbarTv.root.isVisible = true
+            }
+        }
 
-            if (mediaType == "tv" || mediaType == "movie") {
+        if (mediaType == "tv" || mediaType == "movie") {
+            mediaViewModel.getMedia(media.tmdbId, mediaType)
+            binding.errorView.retryBtn.setOnClickListener {
                 mediaViewModel.getMedia(media.tmdbId, mediaType)
-                binding.errorView.retryBtn.setOnClickListener {
-                    mediaViewModel.getMedia(media.tmdbId, mediaType)
-                }
-            } else {
-                val errorMsg = "Unknown media type..."
-                Log.e(thisTAG, errorMsg + media)
-                Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
-                binding.apply {
-                    pbTv.isGone = true
-                    successView.isVisible = false
-                    errorView.root.isVisible = true
-                }
-                binding.errorView.apply {
-                    errorTxt.text = errorMsg
-                }
             }
-        })
+        } else {
+            val errorMsg = "Unknown media type..."
+            Log.e(thisTAG, errorMsg + media)
+            Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
+            binding.apply {
+                pbTv.isGone = true
+                successView.isVisible = false
+                errorView.root.isVisible = true
+            }
+            binding.errorView.apply {
+                errorTxt.text = errorMsg
+            }
+        }
+
     }
 
     private fun setupShowDatabaseObserver(media: MediaArgs) {
@@ -221,6 +200,9 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
             Log.d("getShow", "isSaved=$isSaved")
 
             binding.toolbarTv.btnWatchlist.apply {
+                setText(
+                    if (isSaved) R.string.watchlisted else R.string.watchlist
+                )
                 icon = ContextCompat.getDrawable(
                     context,
                     if (isSaved) {
@@ -228,6 +210,10 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
                     } else R.drawable.ic_library_add_24dp
                 )
                 setOnClickListener {
+                    val materialFade = MaterialFade().apply {
+                        duration = 150L
+                    }
+                    TransitionManager.beginDelayedTransition(binding.toolbarTv.root, materialFade)
                     media.media?.let { m ->
                         val finalMedia = Show(
                             id = m.id,
@@ -510,9 +496,17 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
                         title = it.title,
                         vote_average = it.vote_average
                     )
-                    if (it.media_type != null) {
-                        showsViewModel.setMedia(it.id, it.media_type, media)
-                    } else showsViewModel.setMedia(it.id, mediaArgs.mediaType, media)
+                    // showsViewModel.setMedia(
+                    //     it.id,
+                    //     it.media_type ?: mediaArgs.mediaType, media
+                    // )
+                    val action = FragmentMediaDirections.actionFragmentMediaSelf(
+                        MediaArgs(
+                            it.id,
+                            it.media_type ?: mediaArgs.mediaType, media
+                        )
+                    )
+                    findNavController().navigate(action)
                 }
                 is AboutDataModel.Video -> {
                     val openVideoIntent = Intent(

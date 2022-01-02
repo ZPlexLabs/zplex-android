@@ -18,7 +18,7 @@ import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.utils.Constants
 import zechs.zplex.utils.Constants.TEMP_TOKEN
-import zechs.zplex.utils.Constants.regexFile
+import zechs.zplex.utils.Constants.seasonEpisode
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.SessionManager
 import java.io.IOException
@@ -129,9 +129,10 @@ class EpisodesViewModel(
 
                     driveResponse.files.let { files ->
                         val filesById: Map<Int, File> = files.associateBy {
-                            val nameSplit = regexFile.toRegex().find(
+                            val nameSplit = seasonEpisode.toRegex().find(
                                 it.name
                             )?.destructured?.toList()
+                            // val seasonCount = nameSplit?.get(0)?.toInt() ?: 0
                             val episodeCount = nameSplit?.get(1)?.toInt() ?: 0
                             episodeCount
                         }

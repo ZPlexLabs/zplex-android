@@ -68,6 +68,9 @@
         android:name="zechs.zplex.ui.fragment.media.FragmentMedia"
         android:label="Fragment Media"
         tools:layout="@layout/fragment_media">
+        <argument
+            android:name="media"
+            app:argType="zechs.zplex.models.dataclass.MediaArgs" />
         <action
             android:id="@+id/action_fragmentMedia_to_episodeListFragment"
             app:destination="@id/episodesListFragment" />
@@ -80,6 +83,13 @@
         <action
             android:id="@+id/action_fragmentMedia_to_watchFragment"
             app:destination="@id/watchFragment" />
+        <action
+            android:id="@+id/action_fragmentMedia_self"
+            app:destination="@id/fragmentMedia">
+            <argument
+                android:name="media"
+                app:argType="zechs.zplex.models.dataclass.MediaArgs" />
+        </action>
     </fragment>
 
     <fragment
@@ -115,8 +125,7 @@
             app:destination="@id/bigImageFragment" />
         <action
             android:id="@+id/action_castsFragment_to_fragmentMedia"
-            app:destination="@id/fragmentMedia"
-            app:popUpTo="@id/homeFragment" />
+            app:destination="@id/fragmentMedia" />
     </fragment>
 
 

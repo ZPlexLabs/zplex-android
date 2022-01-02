@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentSearchBinding
+import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
@@ -159,14 +160,15 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             addOnScrollListener(this@SearchFragment.scrollListener)
         }
 
-        searchAdapter.setOnItemClickListener { media ->
+        searchAdapter.setOnItemClickListener {
             hideKeyboard()
-
-            if (media.media_type != null) {
-                showsViewModel.setMedia(media.id, media.media_type, media)
-            } else showsViewModel.setMedia(media.id, "none", media)
-
-            findNavController().navigate(R.id.action_searchFragment_to_fragmentMedia)
+            val action = SearchFragmentDirections.actionSearchFragmentToFragmentMedia(
+                MediaArgs(
+                    it.id,
+                    it.media_type ?: "none", it
+                )
+            )
+            findNavController().navigate(action)
         }
     }
 

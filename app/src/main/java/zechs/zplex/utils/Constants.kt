@@ -23,6 +23,7 @@ object Constants {
         "ya29.a0ARrdaM-eMe9zOKy57ZF4rrtIGPTxtVi1S97nRu7mIed0qAWfVkrqPxpL24vRooTu9H8Z-HYZbLXISrlTsglo7s_WuMFOH20EuRR6sVQ1KkqdvZ9wT5I33hmUYxJtu_5M7miNnstg2Zi1Tt0Gzcz3chtMFB1b"
 
     const val regexFile = "^S(.*[0-9])E(.*[0-9])( - )(.*)(.mkv)"
+    const val seasonEpisode = "^.*S(.*[0-9])E(.S*[0-9])"
     const val SEARCH_DELAY_AMOUNT = 750L
     var PAGE_TOKEN = ""
     var isLastPage = false

@@ -15,6 +15,7 @@ import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 
+
 class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>() {
 
     inner class EpisodesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
@@ -46,7 +47,7 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
     override fun onBindViewHolder(holder: EpisodesViewHolder, position: Int) {
         val episode = differ.currentList[position]
 
-        val episodeStillUrl = if (episode.still_path == null) {
+        val episodeStillUrl = if (episode.still_path.isNullOrEmpty()) {
             R.drawable.no_thumb
         } else {
             "${TMDB_IMAGE_PREFIX}/${StillSize.w300}${episode.still_path}"
@@ -64,8 +65,6 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
                 "No description"
             } else episode.overview
 
-            tv_overview.maxLines = if (tv_title.lineCount > 2) 1 else 2
-
             GlideApp.with(this)
                 .asBitmap()
                 .load(episodeStillUrl)
@@ -75,6 +74,8 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
             setOnClickListener {
                 onItemClickListener?.let { it(episode) }
             }
+            if (tv_title.lineCount >= 2) tv_overview.tag = position
+            if (tv_overview.tag == position) tv_overview.maxLines = 1
         }
 
     }

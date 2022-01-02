@@ -13,9 +13,9 @@ import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentBrowseBinding
 import zechs.zplex.models.dataclass.FilterArgs
+import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.viewmodels.FiltersViewModel
-import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Resource
 
 class BrowseFragment : Fragment(R.layout.fragment_browse) {
@@ -24,7 +24,8 @@ class BrowseFragment : Fragment(R.layout.fragment_browse) {
     private val binding get() = _binding!!
 
     private val filterModel by activityViewModels<FiltersViewModel>()
-    private val showsViewModel by activityViewModels<ShowViewModel>()
+
+    // private val showsViewModel by activityViewModels<ShowViewModel>()
     private lateinit var browseViewModel: BrowseViewModel
 
     private val browseAdapter by lazy { SearchAdapter() }
@@ -44,10 +45,11 @@ class BrowseFragment : Fragment(R.layout.fragment_browse) {
         filterModel.filterArgs.observe(viewLifecycleOwner, { filter ->
             _filters = filter
             browseViewModel.getBrowse(filter)
-            browseAdapter.setOnItemClickListener { show ->
-
-                showsViewModel.setMedia(show.id, show.media_type ?: filter.mediaType, media = show)
-                findNavController().navigate(R.id.action_browseFragment_to_fragmentMedia)
+            browseAdapter.setOnItemClickListener {
+                val action = BrowseFragmentDirections.actionBrowseFragmentToFragmentMedia(
+                    MediaArgs(it.id, it.media_type ?: filter.mediaType, it)
+                )
+                findNavController().navigate(action)
             }
         })
 

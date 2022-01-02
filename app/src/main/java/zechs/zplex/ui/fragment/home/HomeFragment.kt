@@ -13,6 +13,8 @@ import androidx.transition.TransitionManager
 import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentHomeBinding
+import zechs.zplex.models.dataclass.MediaArgs
+import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Resource
@@ -200,31 +202,18 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             )
         }
 
-        trendingAdapter.setOnItemClickListener { show ->
-            showsViewModel.setMedia(show.id, show.media_type ?: "tv", show)
-            findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
-        }
+        trendingAdapter.setOnItemClickListener { navigateToMedia(it, it.media_type ?: "tv") }
+        discoverMoviesAdapter.setOnItemClickListener { navigateToMedia(it, "movie") }
+        discoverShowsAdapter.setOnItemClickListener { navigateToMedia(it, "tv") }
+        discoverAnimeAdapter.setOnItemClickListener { navigateToMedia(it, "tv") }
+        discoverAnimeAdapter.setOnItemClickListener { navigateToMedia(it, "tv") }
+    }
 
-        discoverMoviesAdapter.setOnItemClickListener { movie ->
-            showsViewModel.setMedia(movie.id, "movie", movie)
-            findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
-        }
-
-        discoverShowsAdapter.setOnItemClickListener { show ->
-            showsViewModel.setMedia(show.id, "tv", show)
-            findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
-        }
-
-        discoverAnimeAdapter.setOnItemClickListener { show ->
-            showsViewModel.setMedia(show.id, "tv", show)
-            findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
-        }
-
-        discoverAnimeAdapter.setOnItemClickListener { show ->
-            showsViewModel.setMedia(show.id, "tv", show)
-            findNavController().navigate(R.id.action_homeFragment_to_fragmentMedia)
-
-        }
+    private fun navigateToMedia(media: Media, mediaType: String) {
+        val action = HomeFragmentDirections.actionHomeFragmentToFragmentMedia(
+            MediaArgs(media.id, mediaType, media)
+        )
+        findNavController().navigate(action)
     }
 
     override fun onDestroyView() {
