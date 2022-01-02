@@ -34,7 +34,8 @@ class MediaDataAdapter : RecyclerView.Adapter<MediaDataViewHolder>() {
         }
 
         override fun areContentsTheSame(
-            oldItem: MediaDataModel, newItem: MediaDataModel
+            oldItem: MediaDataModel,
+            newItem: MediaDataModel
         ) = oldItem == newItem
 
     }

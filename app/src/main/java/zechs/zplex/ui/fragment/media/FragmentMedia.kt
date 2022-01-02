@@ -16,6 +16,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFade
@@ -40,6 +41,7 @@ import zechs.zplex.utils.Constants.ZPLEX_MOVIES_ID
 import zechs.zplex.utils.Constants.ZPLEX_SHOWS_ID
 import zechs.zplex.utils.Resource
 
+
 class FragmentMedia : Fragment(R.layout.fragment_media) {
 
     private var _binding: FragmentMediaBinding? = null
@@ -49,7 +51,6 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
 
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
 
-    // private val showsViewModel by activityViewModels<ShowViewModel>()
     private val castDetailsViewModel by activityViewModels<CastDetailsViewModel>()
     private val bigImageViewModel: BigImageViewModel by activityViewModels()
     private lateinit var mediaViewModel: MediaViewModel
@@ -287,6 +288,8 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
             when (response) {
                 is Resource.Success -> {
                     TransitionManager.beginDelayedTransition(binding.successView)
+                    binding.successView.recycledViewPool.clear()
+                    binding.successView.setRecycledViewPool(RecyclerView.RecycledViewPool())
                     response.data?.let { doOnMediaSuccess(it) }
                 }
                 is Resource.Error -> {
@@ -307,8 +310,6 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
                 }
                 is Resource.Loading -> {
                     binding.apply {
-                        successView.removeAllViews()
-                        successView.recycledViewPool.clear()
                         pbTv.isVisible = true
                         successView.isGone = true
                         binding.errorView.root.isGone = true

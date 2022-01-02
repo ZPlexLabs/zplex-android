@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.activity_zplex.*
 import zechs.zplex.BuildConfig
@@ -45,12 +46,6 @@ class ZPlexActivity : AppCompatActivity() {
     lateinit var episodesViewModel: EpisodesViewModel
     lateinit var watchViewModel: WatchViewModel
     lateinit var castViewModel: CastViewModel
-
-//    private val currentNavigationFragment: Fragment?
-//        get() = supportFragmentManager.findFragmentById(R.id.mainNavHostFragment)
-//            ?.childFragmentManager
-//            ?.fragments
-//            ?.first()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
@@ -140,7 +135,13 @@ class ZPlexActivity : AppCompatActivity() {
             }
         }
 
-        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
+        FirebaseCrashlytics.getInstance().apply {
+            setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
+        }
+        FirebaseAnalytics.getInstance(applicationContext).apply {
+            setAnalyticsCollectionEnabled(!BuildConfig.DEBUG)
+        }
+
     }
 
     override fun onSupportNavigateUp(): Boolean {

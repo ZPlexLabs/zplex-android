@@ -135,10 +135,10 @@ sealed class MediaDataViewHolder(
                                 itemAnimator = null
                             }
                         }
+                        castAdapter.differ.submitList(castsList)
                         castAdapter.setOnItemClickListener { aboutDataModel ->
                             mediaDataAdapter.onItemClickListener?.let { it(aboutDataModel) }
                         }
-                        castAdapter.differ.submitList(castsList)
                     }
                 }
                 "Similar" -> {

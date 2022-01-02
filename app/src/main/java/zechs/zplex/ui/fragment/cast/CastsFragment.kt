@@ -25,7 +25,6 @@ import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
-import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
@@ -36,7 +35,6 @@ class CastsFragment : Fragment(R.layout.fragment_cast_details) {
     private val binding get() = _binding!!
 
     private val castArgsViewModel by activityViewModels<CastDetailsViewModel>()
-    private val showsViewModel by activityViewModels<ShowViewModel>()
     private val bigImageViewModel: BigImageViewModel by activityViewModels()
     private lateinit var castViewModel: CastViewModel
 

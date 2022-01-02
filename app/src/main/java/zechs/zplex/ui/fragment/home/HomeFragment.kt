@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
@@ -16,7 +15,6 @@ import zechs.zplex.databinding.FragmentHomeBinding
 import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Resource
 
 
@@ -26,7 +24,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private val binding get() = _binding!!
 
     private lateinit var homeViewModel: HomeViewModel
-    private val showsViewModel by activityViewModels<ShowViewModel>()
 
     private val discoverMoviesAdapter by lazy { SearchAdapter() }
     private val discoverShowsAdapter by lazy { SearchAdapter() }

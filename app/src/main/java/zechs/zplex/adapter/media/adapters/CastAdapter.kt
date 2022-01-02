@@ -22,7 +22,7 @@ class CastAdapter : RecyclerView.Adapter<CastAdapter.CastViewHolder>() {
             oldItem: AboutDataModel.Cast,
             newItem: AboutDataModel.Cast
         ): Boolean {
-            return oldItem.credit_id == newItem.credit_id
+            return oldItem.person_id == newItem.person_id
         }
 
         override fun areContentsTheSame(
@@ -43,9 +43,7 @@ class CastAdapter : RecyclerView.Adapter<CastAdapter.CastViewHolder>() {
         )
     }
 
-    override fun getItemCount(): Int {
-        return differ.currentList.size
-    }
+    override fun getItemCount() = differ.currentList.size
 
     override fun onBindViewHolder(holder: CastViewHolder, position: Int) {
         val cast = differ.currentList[position]

@@ -12,7 +12,6 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,7 +25,6 @@ import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentSearchBinding
 import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
 import zechs.zplex.utils.Constants.isLastPage
 import zechs.zplex.utils.Resource
@@ -38,7 +36,6 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     private val binding get() = _binding!!
 
     private lateinit var searchViewModel: SearchViewModel
-    private val showsViewModel by activityViewModels<ShowViewModel>()
 
     private val searchAdapter by lazy { SearchAdapter() }
     private val thisTag = "SearchFragment"
@@ -146,9 +143,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     "visibleItemCount=$visibleItemCount, itemCount=$itemCount, isLoading=$isLoading"
                 )
 
-                if (visibleItemCount == itemCount && !isLoading && !isLastPage) {
+//                if (visibleItemCount == itemCount && !isLoading && !isLastPage) {
 //                    searchViewModel.getSearchList(setDriveQuery(queryText), PAGE_TOKEN)
-                }
+//                }
             }
         }
     }

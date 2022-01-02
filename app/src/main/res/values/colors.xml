@@ -11,6 +11,7 @@
     <color name="textColor_87">#DEFFFFFF</color>
     <color name="dark_tint">#40000000</color>
     <color name="ui_controls_background">#98000000</color>
+    <color name="exo_black_opacity_75">#BF000000</color>
     <color name="exo_bottom_bar_background" tools:keep="@color/exo_bottom_bar_background">
         @color/ui_controls_background
     </color>

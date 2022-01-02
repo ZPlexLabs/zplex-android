@@ -34,6 +34,7 @@ class PlayerActivity : AppCompatActivity() {
     private var onStopCalled = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
         findViewById<View>(android.R.id.content).transitionName = "shared_exoplayer"
         setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
@@ -47,6 +48,7 @@ class PlayerActivity : AppCompatActivity() {
         }
 
         super.onCreate(savedInstanceState)
+
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -114,14 +116,11 @@ class PlayerActivity : AppCompatActivity() {
                 .build()
         }
 
-
-
         binding.playerView.apply {
             player = exoPlayer
             setShowFastForwardButton(true)
             setShowRewindButton(true)
-            controllerHideOnTouch = true
-            controllerAutoShow = true
+            controllerShowTimeoutMs = 0
 
             setControllerVisibilityListener {
                 if (it == 0) showSystemUI() else hideSystemUI()

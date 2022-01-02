@@ -142,7 +142,6 @@ class MediaViewModel(
                     v.site == "YouTube"
                 } ?: listOf()
 
-
                 val mediaResponse = MediaResponse(
                     id = resultResponse.id,
                     name = resultResponse.title,

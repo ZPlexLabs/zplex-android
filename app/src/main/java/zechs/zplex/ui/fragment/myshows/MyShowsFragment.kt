@@ -6,7 +6,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -20,7 +19,6 @@ import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.viewmodels.ShowViewModel
 
 
 class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
@@ -29,7 +27,6 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
     private val binding get() = _binding!!
 
     private lateinit var myShowsViewModel: MyShowsViewModel
-    private val showsViewModel by activityViewModels<ShowViewModel>()
 
     private val showsAdapter by lazy { SearchAdapter() }
 
