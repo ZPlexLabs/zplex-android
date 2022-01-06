@@ -34,4 +34,7 @@
     <string name="enter_fullscreen_mode">Enter fullscreen mode</string>
     <string name="not_available">Not available</string>
     <string name="no_episodes_found">No episodes found…</string>
+    <string name="reverse_list">Reverse list</string>
+    <string name="chronological_order">Chronological order</string>
+    <string name="newest_first">Newest first</string>
 </resources>

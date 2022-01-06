@@ -1,8 +1,10 @@
 package zechs.zplex.ui.fragment.discover
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -11,7 +13,7 @@ import zechs.zplex.R
 import zechs.zplex.adapter.browse.BrowseDataAdapter
 import zechs.zplex.adapter.browse.BrowseDataModel
 import zechs.zplex.databinding.FragmentDiscoverBinding
-import zechs.zplex.models.tmdb.entities.Genre
+import zechs.zplex.models.dataclass.GenreList
 import zechs.zplex.ui.fragment.viewmodels.FiltersViewModel
 
 class DiscoverFragment : Fragment(R.layout.fragment_discover) {
@@ -46,49 +48,51 @@ class DiscoverFragment : Fragment(R.layout.fragment_discover) {
         browseAdapter.differ.submitList(dataList)
     }
 
-    private fun movieGenreList(): List<Genre> {
+    private fun movieGenreList(): List<GenreList> {
         return listOf(
-            Genre(id = 28, name = "Action", mediaType = "movie"),
-            Genre(id = 12, name = "Adventure", mediaType = "movie"),
-            Genre(id = 16, name = "Animation", mediaType = "movie"),
-            Genre(id = 35, name = "Comedy", mediaType = "movie"),
-            Genre(id = 80, name = "Crime", mediaType = "movie"),
-            Genre(id = 99, name = "Documentary", mediaType = "movie"),
-            Genre(id = 18, name = "Drama", mediaType = "movie"),
-            Genre(id = 10751, name = "Family", mediaType = "movie"),
-            Genre(id = 14, name = "Fantasy", mediaType = "movie"),
-            Genre(id = 36, name = "History", mediaType = "movie"),
-            Genre(id = 27, name = "Horror", mediaType = "movie"),
-            Genre(id = 10402, name = "Music", mediaType = "movie"),
-            Genre(id = 9648, name = "Mystery", mediaType = "movie"),
-            Genre(id = 10749, name = "Romance", mediaType = "movie"),
-            Genre(id = 878, name = "Sci-Fi", mediaType = "movie"),
-            Genre(id = 10770, name = "TV Movie", mediaType = "movie"),
-            Genre(id = 53, name = "Thriller", mediaType = "movie"),
-            Genre(id = 10752, name = "War", mediaType = "movie"),
-            Genre(id = 37, name = "Western", mediaType = "movie")
+            GenreList(28, "Action", "movie", getIcon(R.drawable.ic_action)),
+            GenreList(12, "Adventure", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(16, "Animation", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(35, "Comedy", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(80, "Crime", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(99, "Documentary", "movie", getIcon(R.drawable.ic_documentary)),
+            GenreList(18, "Drama", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(10751, "Family", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(14, "Fantasy", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(36, "History", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(27, "Horror", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(10402, "Music", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(9648, "Mystery", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(10749, "Romance", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(878, "Sci-Fi", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(10770, "TV Movie", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(53, "Thriller", "movie", getIcon(R.drawable.ic_thriller)),
+            GenreList(10752, "War", "movie", getIcon(R.drawable.ic_theater)),
+            GenreList(37, "Western", "movie", getIcon(R.drawable.ic_theater))
         )
     }
 
-    private fun tvGenreList(): List<Genre> {
+    private fun tvGenreList(): List<GenreList> {
         return listOf(
-            Genre(id = 10759, name = "Action", mediaType = "tv"),
-            Genre(id = 16, name = "Animation", mediaType = "tv"),
-            Genre(id = 35, name = "Comedy", mediaType = "tv"),
-            Genre(id = 80, name = "Crime", mediaType = "tv"),
-            Genre(id = 99, name = "Documentary", mediaType = "tv"),
-            Genre(id = 18, name = "Drama", mediaType = "tv"),
-            Genre(id = 10751, name = "Family", mediaType = "tv"),
-            Genre(id = 10762, name = "Kids", mediaType = "tv"),
-            Genre(id = 9648, name = "Mystery", mediaType = "tv"),
-            Genre(id = 10763, name = "News", mediaType = "tv"),
-            Genre(id = 10764, name = "Reality", mediaType = "tv"),
-            Genre(id = 10765, name = "Sci-Fi", mediaType = "tv"),
-            Genre(id = 10766, name = "Soap", mediaType = "tv"),
-            Genre(id = 10767, name = "Talk", mediaType = "tv"),
-            Genre(id = 10768, name = "War & Politics", mediaType = "tv"),
-            Genre(id = 37, name = "Western", mediaType = "tv")
+            GenreList(10759, "Action", "tv", getIcon(R.drawable.ic_action)),
+            GenreList(16, "Animation", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(35, "Comedy", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(80, "Crime", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(99, "Documentary", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(18, "Drama", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(10751, "Family", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(10762, "Kids", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(9648, "Mystery", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(10763, "News", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(10764, "Reality", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(10765, "Sci-Fi", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(10768, "War & Politics", "tv", getIcon(R.drawable.ic_theater)),
+            GenreList(37, "Western", "tv", getIcon(R.drawable.ic_theater))
         )
+    }
+
+    private fun getIcon(icon: Int): Drawable? {
+        return ContextCompat.getDrawable(requireContext(), icon)
     }
 
     private fun setupRecyclerView() {

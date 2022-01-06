@@ -5,8 +5,6 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
-import android.view.Window
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -20,8 +18,6 @@ import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import com.google.android.material.transition.platform.MaterialContainerTransform
-import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import zechs.zplex.R
 import zechs.zplex.databinding.ActivityPlayerBinding
 import zechs.zplex.utils.SessionManager
@@ -34,19 +30,6 @@ class PlayerActivity : AppCompatActivity() {
     private var onStopCalled = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        findViewById<View>(android.R.id.content).transitionName = "shared_exoplayer"
-        setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
-        window.sharedElementEnterTransition = MaterialContainerTransform().apply {
-            addTarget(android.R.id.content)
-            duration = 300L
-        }
-        window.sharedElementReturnTransition = MaterialContainerTransform().apply {
-            addTarget(android.R.id.content)
-            duration = 250L
-        }
-
         super.onCreate(savedInstanceState)
 
         binding = ActivityPlayerBinding.inflate(layoutInflater)
@@ -122,10 +105,6 @@ class PlayerActivity : AppCompatActivity() {
             setShowRewindButton(true)
             controllerShowTimeoutMs = 0
 
-            setControllerVisibilityListener {
-                if (it == 0) showSystemUI() else hideSystemUI()
-            }
-
             val titleText = findViewById<TextView>(R.id.exo_video_title)
             titleText.text = title
             findViewById<ImageButton>(R.id.exo_aspect_button).setOnClickListener {
@@ -172,13 +151,6 @@ class PlayerActivity : AppCompatActivity() {
         }
     }
 
-    private fun showSystemUI() {
-        WindowCompat.setDecorFitsSystemWindows(window, true)
-        WindowInsetsControllerCompat(
-            window, window.decorView
-        ).show(WindowInsetsCompat.Type.systemBars())
-    }
-
     private fun enterPIPMode() {
         this.enterPictureInPictureMode(
             PictureInPictureParams.Builder()
@@ -199,6 +171,11 @@ class PlayerActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         onStopCalled = false
+    }
+
+    override fun onPause() {
+        exoPlayer.pause()
+        super.onPause()
     }
 
     override fun onDestroy() {

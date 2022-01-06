@@ -7,9 +7,15 @@ import android.net.NetworkCapabilities
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.ThisApp
+import zechs.zplex.models.dataclass.ConstantsResult
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
 import zechs.zplex.models.drive.DriveResponse
@@ -20,7 +26,14 @@ import zechs.zplex.models.tmdb.media.MovieResponse
 import zechs.zplex.models.tmdb.media.TvResponse
 import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.TmdbRepository
-import zechs.zplex.utils.Constants
+import zechs.zplex.utils.Constants.CLIENT_ID
+import zechs.zplex.utils.Constants.CLIENT_SECRET
+import zechs.zplex.utils.Constants.REFRESH_TOKEN
+import zechs.zplex.utils.Constants.TEMP_TOKEN
+import zechs.zplex.utils.Constants.ZPLEX
+import zechs.zplex.utils.Constants.ZPLEX_DRIVE_ID
+import zechs.zplex.utils.Constants.ZPLEX_MOVIES_ID
+import zechs.zplex.utils.Constants.ZPLEX_SHOWS_ID
 import zechs.zplex.utils.ConverterUtils
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.SessionManager
@@ -31,6 +44,8 @@ class MediaViewModel(
     private val filesRepository: FilesRepository,
     private val tmdbRepository: TmdbRepository
 ) : AndroidViewModel(app) {
+
+    private val database = Firebase.firestore
 
     private val accessToken = SessionManager(
         getApplication<Application>().applicationContext
@@ -285,32 +300,55 @@ class MediaViewModel(
         return Resource.Error(response.message())
     }
 
-    fun doSearchFor(searchQuery: String) =
-        viewModelScope.launch {
-            searchList.postValue(Resource.Loading())
-            try {
-                if (hasInternetConnection()) {
-                    val response = filesRepository.getDriveFiles(
-                        pageSize = 1,
-                        if (accessToken == "") Constants.TEMP_TOKEN else accessToken,
-                        pageToken = "", searchQuery, orderBy = "modifiedTime desc"
-                    )
-                    searchList.postValue(handleSearchListResponse(response))
-                } else {
-                    searchList.postValue(Resource.Error("No internet connection"))
-                }
-            } catch (t: Throwable) {
-                println(t.stackTrace)
-                println(t.message)
-                searchList.postValue(
-                    Resource.Error(
-                        if (t is IOException) {
-                            "Network Failure"
-                        } else t.message ?: "Something went wrong"
-                    )
-                )
+    fun doSearchFor(tmdbId: Int) = viewModelScope.launch {
+        searchList.postValue(Resource.Loading())
+        try {
+            if (hasInternetConnection()) {
+                getCredentials(tmdbId)
+            } else {
+                searchList.postValue(Resource.Error("No internet connection"))
             }
+        } catch (t: Throwable) {
+            println(t.stackTrace)
+            println(t.message)
+            searchList.postValue(
+                Resource.Error(
+                    if (t is IOException) {
+                        "Network Failure"
+                    } else t.message ?: "Something went wrong"
+                )
+            )
         }
+    }
+
+    private fun getCredentials(tmdbId: Int) {
+        database.collection("constants")
+            .document("eQvhagfVy6IgH2Hcx1Kk")
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                val constantsResult = documentSnapshot.toObject<ConstantsResult>()
+                constantsResult?.let {
+                    ZPLEX = it.zplex
+                    ZPLEX_DRIVE_ID = it.zplex_drive_id
+                    ZPLEX_MOVIES_ID = it.zplex_movies_id
+                    ZPLEX_SHOWS_ID = it.zplex_shows_id
+                    CLIENT_ID = it.client_id
+                    CLIENT_SECRET = it.client_secret
+                    REFRESH_TOKEN = it.refresh_token
+                    TEMP_TOKEN = it.temp_token
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val response = filesRepository.getDriveFiles(
+                            pageSize = 1,
+                            if (accessToken == "") it.temp_token else accessToken,
+                            pageToken = "",
+                            driveQuery = searchQuery(tmdbId, it.zplex_movies_id),
+                            orderBy = "modifiedTime desc"
+                        )
+                        searchList.postValue(handleSearchListResponse(response))
+                    }
+                }
+            }
+    }
 
     private fun handleSearchListResponse(
         response: Response<DriveResponse>
@@ -322,6 +360,10 @@ class MediaViewModel(
         }
         return Resource.Error(response.message())
     }
+
+    private fun searchQuery(
+        tmdbId: Int, movieId: String
+    ) = "name contains '${tmdbId}' and parents in '${movieId}' and trashed = false"
 
     private fun hasInternetConnection(): Boolean {
         val connectivityManager = getApplication<ThisApp>().getSystemService(

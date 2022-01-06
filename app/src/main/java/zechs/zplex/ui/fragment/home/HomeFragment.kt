@@ -8,7 +8,6 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.TransitionManager
 import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentHomeBinding
@@ -38,7 +37,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         homeViewModel = (activity as ZPlexActivity).homeViewModel
         setupRecyclerView()
-
         homeViewModel.trending.observe(viewLifecycleOwner, { response ->
             when (response) {
                 is Resource.Success -> {
@@ -56,8 +54,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                         rvTrending.isVisible = false
                     }
                     response.message?.let { message ->
-                        val errorText =
-                            "Unable to fetch trending. An error occurred: $message"
+                        val errorText = "Unable to fetch trending. An error occurred: $message"
                         Toast.makeText(context, errorText, Toast.LENGTH_SHORT).show()
                         Log.e(thisTAG, errorText)
                     }
@@ -104,7 +101,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         })
 
         homeViewModel.shows.observe(viewLifecycleOwner, { response ->
-            TransitionManager.beginDelayedTransition(binding.root)
             when (response) {
                 is Resource.Success -> {
                     binding.apply {
@@ -136,7 +132,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         })
 
         homeViewModel.animes.observe(viewLifecycleOwner, { response ->
-            TransitionManager.beginDelayedTransition(binding.root)
             when (response) {
                 is Resource.Success -> {
                     binding.apply {

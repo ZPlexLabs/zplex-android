@@ -9,7 +9,6 @@ import zechs.zplex.models.tmdb.entities.Network
 data class MovieResponse(
     val title: String?,
     val runtime: Int?,
-    val status: String?,
     val release_date: String?,
     val genres: List<Genre>?,
     val id: Int,

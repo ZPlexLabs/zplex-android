@@ -2,14 +2,12 @@ package zechs.zplex.ui.activity
 
 import android.os.Bundle
 import android.view.View
-import android.view.Window
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.android.synthetic.main.activity_zplex.*
@@ -48,10 +46,6 @@ class ZPlexActivity : AppCompatActivity() {
     lateinit var castViewModel: CastViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        setExitSharedElementCallback(MaterialContainerTransformSharedElementCallback())
-        window.sharedElementsUseOverlay = false
-        super.onCreate(savedInstanceState)
 
         val filesRepository = FilesRepository()
         val tmdbRepository = TmdbRepository(WatchlistDatabase(this))
@@ -95,6 +89,8 @@ class ZPlexActivity : AppCompatActivity() {
             this,
             CastViewModelProviderFactory(application, tmdbRepository)
         )[CastViewModel::class.java]
+
+        super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_zplex)
 
@@ -141,7 +137,6 @@ class ZPlexActivity : AppCompatActivity() {
         FirebaseAnalytics.getInstance(applicationContext).apply {
             setAnalyticsCollectionEnabled(!BuildConfig.DEBUG)
         }
-
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -151,4 +146,16 @@ class ZPlexActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
+
+//    companion object {
+//        var ZPLEX = ""
+//        var TMDB_API_KEY = ""
+//        var ZPLEX_DRIVE_ID = ""
+//        var ZPLEX_MOVIES_ID = ""
+//        var ZPLEX_SHOWS_ID = ""
+//        var CLIENT_ID = ""
+//        var CLIENT_SECRET = "s"
+//        var REFRESH_TOKEN = ""
+//        var TEMP_TOKEN = ""
+//    }
 }

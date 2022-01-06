@@ -8,19 +8,19 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_genre.view.*
 import zechs.zplex.R
-import zechs.zplex.models.tmdb.entities.Genre
+import zechs.zplex.models.dataclass.GenreList
 
 
 class GenreAdapter : RecyclerView.Adapter<GenreAdapter.GenreViewHolder>() {
 
     inner class GenreViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-    private val differCallback = object : DiffUtil.ItemCallback<Genre>() {
-        override fun areItemsTheSame(oldItem: Genre, newItem: Genre): Boolean {
+    private val differCallback = object : DiffUtil.ItemCallback<GenreList>() {
+        override fun areItemsTheSame(oldItem: GenreList, newItem: GenreList): Boolean {
             return oldItem.id == newItem.id
         }
 
-        override fun areContentsTheSame(oldItem: Genre, newItem: Genre): Boolean {
+        override fun areContentsTheSame(oldItem: GenreList, newItem: GenreList): Boolean {
             return oldItem == newItem
         }
     }
@@ -39,15 +39,19 @@ class GenreAdapter : RecyclerView.Adapter<GenreAdapter.GenreViewHolder>() {
 
     override fun onBindViewHolder(holder: GenreViewHolder, position: Int) {
         val genre = differ.currentList[position]
-        holder.itemView.tv_genre.text = genre.name
-        holder.itemView.setOnClickListener {
-            onItemClickListener?.let { it(genre) }
+
+        holder.itemView.apply {
+            tv_genre.text = genre.name
+            iv_icon.setImageDrawable(genre.icon)
+            setOnClickListener {
+                onItemClickListener?.let { it(genre) }
+            }
         }
     }
 
-    private var onItemClickListener: ((Genre) -> Unit)? = null
+    private var onItemClickListener: ((GenreList) -> Unit)? = null
 
-    fun setOnItemClickListener(listener: (Genre) -> Unit) {
+    fun setOnItemClickListener(listener: (GenreList) -> Unit) {
         onItemClickListener = listener
     }
 }

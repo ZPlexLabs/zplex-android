@@ -26,7 +26,6 @@ import zechs.zplex.databinding.FragmentSearchBinding
 import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
-import zechs.zplex.utils.Constants.isLastPage
 import zechs.zplex.utils.Resource
 
 
@@ -44,19 +43,11 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         enterTransition = MaterialSharedAxis(
             MaterialSharedAxis.Y, true
         ).apply {
             duration = 500L
         }
-
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, false
-        ).apply {
-            duration = 500L
-        }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -92,8 +83,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     isLoading = false
                     TransitionManager.beginDelayedTransition(binding.root)
                     binding.apply {
-                        rvSearch.isVisible = true
                         pbSearch.isInvisible = true
+                        rvSearch.isInvisible = queryText.isEmpty()
                     }
                     response.data?.let { searchResponse ->
                         if (searchResponse.results.isEmpty()) {
@@ -189,7 +180,9 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.rvSearch.adapter = null
+        binding.apply {
+            rvSearch.adapter = null
+        }
         _binding = null
     }
 }

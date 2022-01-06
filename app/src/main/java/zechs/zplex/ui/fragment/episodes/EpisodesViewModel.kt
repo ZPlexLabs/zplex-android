@@ -7,18 +7,29 @@ import android.net.NetworkCapabilities
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.ThisApp
+import zechs.zplex.models.dataclass.ConstantsResult
 import zechs.zplex.models.drive.DriveResponse
 import zechs.zplex.models.drive.File
 import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.models.tmdb.season.SeasonResponse
 import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.TmdbRepository
-import zechs.zplex.utils.Constants
+import zechs.zplex.utils.Constants.CLIENT_ID
+import zechs.zplex.utils.Constants.CLIENT_SECRET
+import zechs.zplex.utils.Constants.REFRESH_TOKEN
+import zechs.zplex.utils.Constants.SEASON_EPISODE_REGEX
 import zechs.zplex.utils.Constants.TEMP_TOKEN
-import zechs.zplex.utils.Constants.seasonEpisode
+import zechs.zplex.utils.Constants.ZPLEX
+import zechs.zplex.utils.Constants.ZPLEX_DRIVE_ID
+import zechs.zplex.utils.Constants.ZPLEX_SHOWS_ID
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.SessionManager
 import java.io.IOException
@@ -29,6 +40,8 @@ class EpisodesViewModel(
     private val filesRepository: FilesRepository,
     private val tmdbRepository: TmdbRepository
 ) : AndroidViewModel(app) {
+
+    private val database = Firebase.firestore
 
     private val pageSize = 1000
     private val orderBy = "name"
@@ -44,26 +57,7 @@ class EpisodesViewModel(
             season.postValue(Resource.Loading())
             try {
                 if (hasInternetConnection()) {
-                    val tmdb = tmdbRepository.getSeason(tvId, seasonNumber)
-                    val folder = filesRepository.getDriveFiles(
-                        pageSize = 1,
-                        if (accessToken == "") TEMP_TOKEN else accessToken,
-                        pageToken = "", searchQuery(tvId, "tv"), orderBy = "modifiedTime desc"
-                    )
-                    if (folder.isSuccessful
-                        && folder.body() != null
-                        && folder.body()!!.files.isNotEmpty()
-                    ) {
-                        val folderId = folder.body()!!.files[0].id
-                        val drive = filesRepository.getDriveFiles(
-                            pageSize,
-                            if (accessToken == "") TEMP_TOKEN else accessToken,
-                            "", driveQuery(folderId, seasonNumber), orderBy
-                        )
-                        season.postValue(handleSeasonResponse(tmdb, drive))
-                    } else {
-                        season.postValue(handleEpisodesResponse(tmdb))
-                    }
+                    getCredentials(tvId, seasonNumber)
                 } else {
                     season.postValue(Resource.Error("No internet connection"))
                 }
@@ -79,6 +73,49 @@ class EpisodesViewModel(
                 )
             }
         }
+
+    private fun getCredentials(tvId: Int, seasonNumber: Int) {
+        database.collection("constants")
+            .document("eQvhagfVy6IgH2Hcx1Kk")
+            .get()
+            .addOnSuccessListener { documentSnapshot ->
+                val constantsResult = documentSnapshot.toObject<ConstantsResult>()
+                constantsResult?.let {
+                    ZPLEX = it.zplex
+                    ZPLEX_DRIVE_ID = it.zplex_drive_id
+                    ZPLEX_SHOWS_ID = it.zplex_shows_id
+                    CLIENT_ID = it.client_id
+                    CLIENT_SECRET = it.client_secret
+                    REFRESH_TOKEN = it.refresh_token
+                    TEMP_TOKEN = it.temp_token
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val tmdb = tmdbRepository.getSeason(tvId, seasonNumber)
+
+                        val folder = filesRepository.getDriveFiles(
+                            pageSize = 1,
+                            if (accessToken == "") it.temp_token else accessToken,
+                            pageToken = "",
+                            searchQuery(tvId, it.zplex_shows_id),
+                            orderBy = "modifiedTime desc"
+                        )
+                        if (folder.isSuccessful
+                            && folder.body() != null
+                            && folder.body()!!.files.isNotEmpty()
+                        ) {
+                            val folderId = folder.body()!!.files[0].id
+                            val drive = filesRepository.getDriveFiles(
+                                pageSize,
+                                if (accessToken == "") it.temp_token else accessToken,
+                                "", driveQuery(folderId, seasonNumber), orderBy
+                            )
+                            season.postValue(handleSeasonResponse(tmdb, drive))
+                        } else {
+                            season.postValue(handleEpisodesResponse(tmdb))
+                        }
+                    }
+                }
+            }
+    }
 
     private fun handleEpisodesResponse(
         tmdb: Response<SeasonResponse>
@@ -129,7 +166,7 @@ class EpisodesViewModel(
 
                     driveResponse.files.let { files ->
                         val filesById: Map<Int, File> = files.associateBy {
-                            val nameSplit = seasonEpisode.toRegex().find(
+                            val nameSplit = SEASON_EPISODE_REGEX.toRegex().find(
                                 it.name
                             )?.destructured?.toList()
                             // val seasonCount = nameSplit?.get(0)?.toInt() ?: 0
@@ -183,15 +220,8 @@ class EpisodesViewModel(
     }
 
     private fun searchQuery(
-        tmdbId: Int, mediaType: String
-    ): String {
-        val lookInFolder = when (mediaType) {
-            "tv" -> Constants.ZPLEX_SHOWS_ID
-            "movie" -> Constants.ZPLEX_MOVIES_ID
-            else -> ""
-        }
-        return "name contains '${tmdbId}' and parents in '${lookInFolder}' and trashed = false"
-    }
+        tmdbId: Int, showId: String
+    ) = "name contains '${tmdbId}' and parents in '${showId}' and trashed = false"
 
     private fun hasInternetConnection(): Boolean {
         val connectivityManager = getApplication<ThisApp>().getSystemService(

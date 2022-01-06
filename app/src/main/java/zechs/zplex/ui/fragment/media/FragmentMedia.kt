@@ -37,8 +37,6 @@ import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
 import zechs.zplex.ui.fragment.viewmodels.SeasonViewModel
-import zechs.zplex.utils.Constants.ZPLEX_MOVIES_ID
-import zechs.zplex.utils.Constants.ZPLEX_SHOWS_ID
 import zechs.zplex.utils.Resource
 
 
@@ -161,7 +159,7 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
         if (mediaType == "movie") {
             setupMovieDatabaseObserver(mediaArgs)
             setupSearchObserverForMovie()
-            mediaViewModel.doSearchFor(searchQuery(media.tmdbId, mediaType))
+            mediaViewModel.doSearchFor(media.tmdbId)
             binding.apply {
                 toolbarTv.root.isVisible = false
                 toolbarMovie.root.isVisible = true
@@ -555,16 +553,6 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
         startActivity(shareIntent)
     }
 
-    private fun searchQuery(
-        tmdbId: Int, mediaType: String
-    ): String {
-        val lookInFolder = when (mediaType) {
-            "tv" -> ZPLEX_SHOWS_ID
-            "movie" -> ZPLEX_MOVIES_ID
-            else -> ""
-        }
-        return "name contains '${tmdbId}' and parents in '${lookInFolder}' and trashed = false"
-    }
 
     override fun onDestroyView() {
         super.onDestroyView()

@@ -1,7 +1,7 @@
 package zechs.zplex.adapter.browse
 
 import androidx.annotation.Keep
-import zechs.zplex.models.tmdb.entities.Genre
+import zechs.zplex.models.dataclass.GenreList
 
 sealed class BrowseDataModel {
 
@@ -13,7 +13,7 @@ sealed class BrowseDataModel {
     @Keep
     data class Browse(
         val header: String,
-        val genres: List<Genre>
+        val genres: List<GenreList>
     ) : BrowseDataModel()
 
 }
