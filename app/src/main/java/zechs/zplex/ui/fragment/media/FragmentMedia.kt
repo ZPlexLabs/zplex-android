@@ -105,15 +105,6 @@ class FragmentMedia : BaseFragment() {
     private var tmdbId: Int? = null
     private var showName: String? = null
 
-    @SuppressLint("HardwareIds")
-    val deviceId: String = if (BuildConfig.DEBUG) {
-        "ZPLEX_TEST_CHANNEL"
-    } else {
-        Settings.Secure.getString(
-            context?.contentResolver, Settings.Secure.ANDROID_ID
-        )
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -805,6 +796,14 @@ class FragmentMedia : BaseFragment() {
 
 
     private fun btnYesListener() {
+        @SuppressLint("HardwareIds")
+        val deviceId: String = if (BuildConfig.DEBUG) {
+            "ZPLEX_TEST_CHANNEL"
+        } else {
+            Settings.Secure.getString(
+                context?.contentResolver, Settings.Secure.ANDROID_ID
+            )
+        }
         movieDialog.changeLayouts(loading = true, request = false, message = false)
         imdbId?.let { it -> mediaViewModel.requestMovie(it, tmdbId!!.toString(), deviceId) }
         Log.d("btnYesListener", "imdbId=$imdbId")

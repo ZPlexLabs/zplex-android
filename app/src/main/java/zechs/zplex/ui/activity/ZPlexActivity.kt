@@ -69,14 +69,6 @@ class ZPlexActivity : AppCompatActivity() {
     lateinit var collectionViewModel: CollectionViewModel
     lateinit var upcomingViewModel: UpcomingViewModel
 
-    @SuppressLint("HardwareIds")
-    val deviceId: String = if (BuildConfig.DEBUG) {
-        "ZPLEX_TEST_CHANNEL"
-    } else {
-        Settings.Secure.getString(
-            applicationContext.contentResolver, Settings.Secure.ANDROID_ID
-        )
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -185,6 +177,16 @@ class ZPlexActivity : AppCompatActivity() {
                 }
             }
         }
+
+        @SuppressLint("HardwareIds")
+        val deviceId: String = if (BuildConfig.DEBUG) {
+            "ZPLEX_TEST_CHANNEL"
+        } else {
+            Settings.Secure.getString(
+                this.contentResolver, Settings.Secure.ANDROID_ID
+            )
+        }
+
 
         Firebase.apply {
             crashlytics.apply { setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG) }
