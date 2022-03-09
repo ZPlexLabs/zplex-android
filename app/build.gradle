@@ -58,7 +58,8 @@ android {
             'armeabi-v7a': 6,
             'arm64-v8a'  : 7,
             'x86'        : 8,
-            'x86_64'     : 9]
+            'x86_64'     : 9
+    ]
 
     android.applicationVariants.all { variant ->
         variant.outputs.each { output ->

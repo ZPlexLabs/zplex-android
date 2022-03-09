@@ -458,11 +458,13 @@ class MediaViewModel(
         return Resource.Error(response.message())
     }
 
-    fun requestMovie(imdbId: String) = viewModelScope.launch {
+    fun requestMovie(imdbId: String, tmdbId: String, deviceId: String) = viewModelScope.launch {
 
         try {
             if (hasInternetConnection()) {
-                val response = witchRepository.requestMovie(imdbId)
+                val response = witchRepository.requestMovie(
+                    imdbId, tmdbId, deviceId
+                )
                 _witchMessage.value = Event(handleWitchResponse(response))
             } else {
                 _witchMessage.value = Event("No internet connection")

@@ -1,5 +1,6 @@
 package zechs.zplex.ui.fragment.media
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
@@ -10,6 +11,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
@@ -38,11 +40,11 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import zechs.zplex.BuildConfig
 import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
 import zechs.zplex.adapter.media.MediaDataAdapter
 import zechs.zplex.adapter.media.MediaDataModel
-import zechs.zplex.adapter.streams.StreamsDataAdapter
 import zechs.zplex.adapter.streams.StreamsDataModel
 import zechs.zplex.databinding.FragmentTempBinding
 import zechs.zplex.models.dataclass.CastArgs
@@ -102,6 +104,15 @@ class FragmentMedia : BaseFragment() {
     private var castsList: List<Cast>? = null
     private var tmdbId: Int? = null
     private var showName: String? = null
+
+    @SuppressLint("HardwareIds")
+    val deviceId: String = if (BuildConfig.DEBUG) {
+        "ZPLEX_TEST_CHANNEL"
+    } else {
+        Settings.Secure.getString(
+            context?.contentResolver, Settings.Secure.ANDROID_ID
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -795,7 +806,7 @@ class FragmentMedia : BaseFragment() {
 
     private fun btnYesListener() {
         movieDialog.changeLayouts(loading = true, request = false, message = false)
-        imdbId?.let { it -> mediaViewModel.requestMovie(it) }
+        imdbId?.let { it -> mediaViewModel.requestMovie(it, tmdbId!!.toString(), deviceId) }
         Log.d("btnYesListener", "imdbId=$imdbId")
     }
 

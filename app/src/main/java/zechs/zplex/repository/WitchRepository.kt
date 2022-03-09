@@ -5,8 +5,10 @@ import zechs.zplex.api.RetrofitInstance
 class WitchRepository {
 
     suspend fun requestMovie(
-        imdbId: String
-    ) = RetrofitInstance.api_witch.requestMovie(imdbId)
+        imdbId: String,
+        tmdbId: String,
+        deviceId: String
+    ) = RetrofitInstance.api_witch.requestMovie(imdbId, tmdbId, deviceId)
 
     suspend fun getDashVideos(
         fileId: String
