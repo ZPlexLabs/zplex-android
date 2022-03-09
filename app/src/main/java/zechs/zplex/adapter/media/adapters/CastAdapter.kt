@@ -38,7 +38,7 @@ class CastAdapter : RecyclerView.Adapter<CastAdapter.CastViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CastViewHolder {
         return CastViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_cast, parent, false
+                R.layout.item_cast_linear, parent, false
             )
         )
     }
@@ -61,7 +61,7 @@ class CastAdapter : RecyclerView.Adapter<CastAdapter.CastViewHolder>() {
                 .into(actor_image)
 
             actor_name.text = cast.name
-            role.text = cast.character
+            role.text = cast.character.split("/")[0]
             setOnClickListener {
                 onItemClickListener?.let { it(cast) }
             }

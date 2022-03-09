@@ -1,218 +1,681 @@
 package zechs.zplex.ui.fragment.media
 
+import android.content.Context
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.res.ColorStateList
+import android.content.res.Configuration
+import android.graphics.Color
+import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
+import android.text.style.StyleSpan
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
+import androidx.constraintlayout.widget.Constraints
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Transition
 import androidx.transition.TransitionManager
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.transition.MaterialFade
-import com.google.android.material.transition.MaterialSharedAxis
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
 import zechs.zplex.adapter.media.MediaDataAdapter
 import zechs.zplex.adapter.media.MediaDataModel
-import zechs.zplex.databinding.FragmentMediaBinding
+import zechs.zplex.adapter.streams.StreamsDataAdapter
+import zechs.zplex.adapter.streams.StreamsDataModel
+import zechs.zplex.databinding.FragmentTempBinding
+import zechs.zplex.models.dataclass.CastArgs
 import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
+import zechs.zplex.models.drive.DriveResponse
 import zechs.zplex.models.drive.File
+import zechs.zplex.models.tmdb.BackdropSize
+import zechs.zplex.models.tmdb.PosterSize
+import zechs.zplex.models.tmdb.entities.Cast
 import zechs.zplex.models.tmdb.entities.Media
+import zechs.zplex.models.tmdb.entities.Season
+import zechs.zplex.models.tmdb.entities.Video
 import zechs.zplex.models.tmdb.media.MediaResponse
-import zechs.zplex.ui.activity.PlayerActivity
+import zechs.zplex.models.witch.DashVideoResponseItem
+import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.activity.player.PlayerActivity
+import zechs.zplex.ui.dialog.LookupMovieDialog
+import zechs.zplex.ui.dialog.StreamsDialog
 import zechs.zplex.ui.fragment.image.BigImageViewModel
-import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
+import zechs.zplex.ui.fragment.list.ListViewModel
 import zechs.zplex.ui.fragment.viewmodels.SeasonViewModel
+import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
+import zechs.zplex.utils.ConverterUtils
+import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
 
 
-class FragmentMedia : Fragment(R.layout.fragment_media) {
+class FragmentMedia : BaseFragment() {
 
-    private var _binding: FragmentMediaBinding? = null
+    private var _binding: FragmentTempBinding? = null
     private val binding get() = _binding!!
 
-    private val args: FragmentMediaArgs by navArgs()
-
-    private val seasonViewModel by activityViewModels<SeasonViewModel>()
-
-    private val castDetailsViewModel by activityViewModels<CastDetailsViewModel>()
-    private val bigImageViewModel: BigImageViewModel by activityViewModels()
-    private lateinit var mediaViewModel: MediaViewModel
-
-    private val mediaDataAdapter by lazy { MediaDataAdapter() }
-
     private val thisTAG = "FragmentMedia"
-    private var driveId: String? = null
-    private var mediaArgs = MediaArgs(0, "none", null)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enterTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, true
-        ).apply {
-            duration = 500L
-        }
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, false
-        ).apply {
-            duration = 500L
-        }
+    private lateinit var movieDialog: LookupMovieDialog
+    private lateinit var streamsDialog: StreamsDialog
+
+    private lateinit var mediaViewModel: MediaViewModel
+    private val seasonViewModel by activityViewModels<SeasonViewModel>()
+    private val bigImageViewModel by activityViewModels<BigImageViewModel>()
+    private val listViewModel by activityViewModels<ListViewModel>()
+    private val args by navArgs<FragmentMediaArgs>()
+
+    private val streamsDataAdapter by lazy { StreamsDataAdapter() }
+    private val mediaDataAdapter by lazy {
+        MediaDataAdapter() { castsList?.let { setCastsList(it) } }
+    }
+
+    private var hasTransitionEnded = false
+    private var isSuccess = false
+    private var collectionName: String? = null
+    private var extractedColor: Int? = null
+    private var imdbId: String? = null
+    private var isLastSeasonVisible = false
+    private var castsList: List<Cast>? = null
+    private var tmdbId: Int? = null
+    private var showName: String? = null
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentTempBinding.inflate(inflater, container, false)
+        binding.ivPoster.transitionName = args.media.media?.poster_path
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentMediaBinding.bind(view)
 
         mediaViewModel = (activity as ZPlexActivity).mediaViewModel
-
         setupRecyclerView()
-        setupShowsViewModel()
-        setupMediaViewModel()
+        setDominantColorObserver()
+        setupDashStreamsObserver()
+        setupMediaViewModel(args.media.tmdbId, args.media.mediaType)
+
+        val mediaArgs = MediaArgs(args.media.tmdbId, args.media.mediaType, args.media.media, null)
+        when (args.media.mediaType) {
+            "movie" -> {
+                movieOnClick()
+                setupMovieDatabaseObserver(mediaArgs)
+                setupSearchObserverForMovie()
+                setupWitchMessageObserver()
+            }
+            "tv" -> {
+                setupShowDatabaseObserver(mediaArgs)
+                tvOnClick()
+            }
+            else -> {}
+        }
+
+        val media = args.media.media
+
+        val posterUrl = if (media?.poster_path == null) {
+            R.drawable.no_poster
+        } else {
+            "$TMDB_IMAGE_PREFIX/${PosterSize.w500}${media.poster_path}"
+        }
+
+        binding.apply {
+            GlideApp.with(ivPoster)
+                .load(posterUrl)
+                .placeholder(R.drawable.no_poster)
+                .addListener(glideRequestListener)
+                .into(ivPoster)
+
+            tvTitle.text = media?.let { media.name ?: media.title }
+            media?.overview?.let { plot ->
+                spannablePlotText(tvPlot, plot, 160, "...more")
+            }
+            toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+            btnShare.setOnClickListener {
+                // shareIntent()
+                shareIntent(mediaArgs)
+            }
+            ivPoster.setOnClickListener {
+                media?.poster_path?.let { it1 -> openImageFullSize(it1, binding.ivPoster) }
+            }
+            ivBackdrop.setOnClickListener {
+                media?.backdrop_path?.let { it1 -> openImageFullSize(it1, binding.ivBackdrop) }
+            }
+        }
+    }
+
+    private fun openImageFullSize(posterPath: String, imageView: ImageView) {
+        imageView.transitionName = posterPath
+        this.exitTransition = null
+        bigImageViewModel.setImagePath(posterPath)
+
+        val action = FragmentMediaDirections.actionFragmentMediaToBigImageFragment()
+        val extras = FragmentNavigatorExtras(
+            imageView to imageView.transitionName
+        )
+        findNavController().navigate(action, extras)
+        Log.d("navigateToMedia", imageView.transitionName)
+    }
+
+    private val glideRequestListener = object : RequestListener<Drawable> {
+        override fun onLoadFailed(
+            e: GlideException?,
+            model: Any?,
+            target: Target<Drawable>?,
+            isFirstResource: Boolean
+        ): Boolean {
+            parentFragment?.startPostponedEnterTransition()
+            return false
+        }
+
+        override fun onResourceReady(
+            resource: Drawable?,
+            model: Any?,
+            target: Target<Drawable>?,
+            dataSource: DataSource?,
+            isFirstResource: Boolean
+        ): Boolean {
+            parentFragment?.startPostponedEnterTransition()
+            resource?.let {
+                mediaViewModel.calcDominantColor(it) { color ->
+                    mediaViewModel.setDominantColor(color)
+                }
+            }
+            return false
+        }
+    }
+
+    override val enterTransitionListener = object : Transition.TransitionListener {
+        override fun onTransitionStart(transition: Transition) {
+        }
+
+        override fun onTransitionEnd(transition: Transition) {
+            if (!hasTransitionEnded && isSuccess) {
+                isLoading(false)
+                if (extractedColor != null && collectionName != null) {
+                    spannableCollectionText(
+                        binding.tvCollection,
+                        collectionName!!,
+                        extractedColor!!
+                    )
+                }
+            }
+            hasTransitionEnded = true
+            transition.removeListener(this)
+        }
+
+        override fun onTransitionCancel(transition: Transition) {
+            hasTransitionEnded = true
+        }
+
+        override fun onTransitionPause(transition: Transition) {
+        }
+
+        override fun onTransitionResume(transition: Transition) {
+        }
+    }
+
+    private fun setupWitchMessageObserver() {
+        mediaViewModel.witchMessage.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { message ->
+                witchDialogResponse(message)
+            }
+        }
+    }
+
+    private fun witchDialogResponse(message: String) {
+        movieDialog.apply {
+            changeLayouts(
+                loading = false, request = false, message = true
+            )
+            findViewById<TextView>(R.id.tv_witch_message).text = message
+        }
+    }
+
+    private fun setupMediaViewModel(tmdbId: Int, mediaType: String) {
+        mediaViewModel.getMediaFlow(tmdbId, mediaType)
+            .observe(viewLifecycleOwner) { response ->
+                when (response) {
+                    is Resource.Success -> response.data?.let { doOnMediaSuccess(it) }
+                    is Resource.Error -> {}
+                    is Resource.Loading -> {
+                        isLoading(true)
+                        binding.tvCollection.isGone = true
+                    }
+                }
+            }
+    }
+
+    private fun isLoading(hide: Boolean) {
+        binding.apply {
+            loading.isInvisible = !hide
+            rvList.isInvisible = hide
+            groupUiElements.isInvisible = hide
+        }
+        if (!hide) hideLastSeason(isLastSeasonVisible)
+    }
+
+    private fun doOnMediaSuccess(response: MediaResponse) {
+
+        setupMediaAdapterOnClickListener()
+
+        val backdropUrl = if (response.backdrop_path == null) {
+            R.drawable.no_thumb
+        } else {
+            "${TMDB_IMAGE_PREFIX}/${BackdropSize.w780}${response.backdrop_path}"
+        }
+
+        binding.apply {
+            if (args.media.media?.poster_path == null) {
+                val posterUrl = "${TMDB_IMAGE_PREFIX}/${PosterSize.w500}${response.poster_path}"
+                GlideApp.with(ivPoster)
+                    .load(posterUrl)
+                    .placeholder(R.drawable.no_poster)
+                    .addListener(glideRequestListener)
+                    .into(ivPoster)
+            }
+
+            GlideApp.with(ivBackdrop)
+                .load(backdropUrl)
+                .placeholder(R.drawable.no_poster)
+                .into(ivBackdrop)
+
+            tvTitle.text = response.name
+
+            response.overview?.let { plot ->
+                spannablePlotText(tvPlot, plot, 160, "...more")
+            }
+
+            rbRating.rating = response.vote_average?.toFloat() ?: 0F
+            tvRatingText.text = (response.vote_average?.toFloat() ?: 0F).toString()
+
+            tvGenre.text = response.genres?.take(3)?.joinToString(
+                truncated = "",
+                separator = ", ",
+            ) { it.name }
+
+            var runtime = "${response.runtime ?: 0} min"
+            runtime += if (response.year != null) {
+                "  \u2022  ${response.year}"
+            } else ""
+            tvRuntime.text = runtime
+        }
+
+        tmdbId = response.id
+        showName = response.name
+        imdbId = response.imdb_id
+
+        response.belongs_to_collection?.let {
+            collectionName = it.name
+
+            val collectionMedia = Media(
+                id = it.id,
+                media_type = null,
+                name = it.name,
+                poster_path = it.poster_path,
+                title = it.title,
+                vote_average = it.vote_average,
+                backdrop_path = it.backdrop_path,
+                overview = it.overview,
+                release_date = it.release_date
+            )
+            binding.tvCollection.setOnClickListener {
+                navigateToCollection(collectionMedia)
+            }
+        }
+
+        val detailsList = mutableListOf<MediaDataModel.Details>()
+
+        if (response.seasons.isNotEmpty()) {
+            val lastEpisode = response.last_episode_to_air?.season_number
+            lastEpisode?.let {
+                val season = response.seasons.firstOrNull {
+                    it.season_number == lastEpisode
+                }
+                season?.let {
+                    val seasonPosterUrl = if (it.poster_path == null) {
+                        R.drawable.no_poster
+                    } else {
+                        "$TMDB_IMAGE_PREFIX/${PosterSize.w342}${it.poster_path}"
+                    }
+
+                    binding.itemLastSeason.apply {
+                        GlideApp.with(ivSeasonPoster)
+                            .load(seasonPosterUrl)
+                            .placeholder(R.drawable.no_poster)
+                            .into(ivSeasonPoster)
+
+                        val seasonName = "Season ${it.season_number}"
+                        tvSeasonNumber.text = seasonName
+
+                        var premiered = "$seasonName of ${response.name}"
+                        var yearSeason = ""
+
+                        val formattedDate = it.air_date?.let { date ->
+                            yearSeason += "${date.take(4)} | "
+                            ConverterUtils.parseDate(date)
+                        }
+
+                        yearSeason += "${it.episode_count} episodes"
+                        tvYearEpisode.text = yearSeason
+
+                        formattedDate?.let {
+                            premiered += " premiered on $formattedDate."
+                        }
+                        val seasonPlot = if (it.overview.toString() == "") {
+                            premiered
+                        } else it.overview
+                        tvSeasonPlot.text = seasonPlot
+                        root.setOnClickListener { _ ->
+                            navigateToSeason(
+                                tmdbId = response.id,
+                                seasonName = it.name,
+                                seasonNumber = it.season_number,
+                                showName = response.name,
+                                posterPath = it.poster_path
+                            )
+                        }
+                    }
+                }
+
+                binding.btnWatchNow.setOnClickListener {
+                    setSeasonsList(response.seasons)
+                }
+                isLastSeasonVisible = false
+            }
+        } else {
+            isLastSeasonVisible = true
+        }
+
+        castsList = response.cast
+        if (response.cast.isNotEmpty()) {
+            val castsList = response.cast.map {
+                AboutDataModel.Cast(
+                    character = it.character,
+                    credit_id = it.credit_id,
+                    person_id = it.id,
+                    name = it.name,
+                    profile_path = it.profile_path
+                )
+            }.take(8)
+
+            detailsList.add(
+                MediaDataModel.Details(
+                    header = resources.getString(R.string.cast),
+                    items = castsList
+                )
+            )
+        }
+
+        if (response.recommendations.isNotEmpty()) {
+            val recommendationsList = response.recommendations
+                .filter { it.backdrop_path != null }
+                .map {
+                    AboutDataModel.Curation(
+                        id = it.id,
+                        media_type = it.media_type,
+                        name = it.name,
+                        poster_path = it.poster_path,
+                        title = it.title,
+                        vote_average = it.vote_average,
+                        backdrop_path = it.backdrop_path,
+                        overview = it.overview,
+                        release_date = it.release_date
+                    )
+                }.take(8)
+
+            detailsList.add(
+                MediaDataModel.Details(
+                    header = resources.getString(R.string.recommendations),
+                    items = recommendationsList
+                )
+            )
+        }
+
+        if (response.videos.isNotEmpty()) {
+            val trailer = response.videos.firstOrNull() {
+                it.site == "YouTube" && it.official && it.type == "Trailer"
+            }
+            trailer?.let { setupTrailer(it) }
+        }
+
+        mediaDataAdapter.differ.submitList(detailsList.toList())
+
+        if (extractedColor != null && collectionName != null && hasTransitionEnded) {
+            spannableCollectionText(binding.tvCollection, collectionName!!, extractedColor!!)
+        }
+
+        if (hasTransitionEnded) isLoading(false)
+        isSuccess = true
 
     }
 
-    private fun setupSearchObserverForMovie() {
-        mediaViewModel.searchList.observe(viewLifecycleOwner, { responseEpisode ->
-            when (responseEpisode) {
-                is Resource.Success -> {
-                    responseEpisode.data?.let { driveResponse ->
-                        binding.toolbarMovie.apply {
-                            btnWatchNow.isVisible = true
-                            pbWatch.isInvisible = true
-                        }
-                        if (driveResponse.files.isNotEmpty()) {
-                            val file = driveResponse.files[0]
-                            binding.toolbarMovie.btnWatchNow.apply {
-                                text = resources.getString(R.string.watch_now)
-                                icon = ContextCompat.getDrawable(
-                                    context,
-                                    R.drawable.ic_round_play_circle_outline_24
-                                )
-                                setOnClickListener { playMovie(file) }
-                            }
-                        } else {
-                            binding.toolbarMovie.btnWatchNow.apply {
-                                text = resources.getString(R.string.request_this_movie)
-                                icon = ContextCompat.getDrawable(
-                                    context,
-                                    R.drawable.ic_round_queue_play_next_24
-                                )
-                                setOnClickListener {
-                                    Toast.makeText(
-                                        context,
-                                        "Coming soon!", Toast.LENGTH_SHORT
-                                    ).show()
-                                }
-                            }
-                        }
-                    }
+    private fun setupTrailer(trailer: Video) {
+        binding.itemTrailer.apply {
+            GlideApp.with(ivThumbnail)
+                .load(trailer.thumbUrl)
+                .placeholder(R.drawable.no_thumb)
+                .into(ivThumbnail)
+
+
+            root.isGone = false
+            root.setOnClickListener { openWebLink(trailer.watchUrl) }
+
+            tvVideoName.text = trailer.name
+            tvSource.text = trailer.site
+        }
+    }
+
+    private fun openWebLink(webUrl: String) {
+        val launchWebIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
+        startActivity(launchWebIntent)
+    }
+
+    private fun setupRecyclerView() {
+        binding.rvList.apply {
+            adapter = mediaDataAdapter
+            layoutManager = LinearLayoutManager(
+                activity, LinearLayoutManager.VERTICAL, false
+            )
+            itemAnimator = null
+            setItemViewCacheSize(0)
+            setHasFixedSize(false)
+        }
+    }
+
+    private fun setupMediaAdapterOnClickListener() {
+        mediaDataAdapter.setOnItemClickListener {
+            when (it) {
+                is AboutDataModel.Curation -> {
+                    val media = Media(
+                        id = it.id,
+                        media_type = it.media_type,
+                        name = it.name,
+                        poster_path = it.poster_path,
+                        title = it.title,
+                        vote_average = it.vote_average,
+                        backdrop_path = it.backdrop_path,
+                        overview = it.overview,
+                        release_date = it.release_date
+                    )
+
+                    val action = FragmentMediaDirections.actionFragmentMediaSelf(
+                        MediaArgs(
+                            it.id, it.media_type ?: args.media.mediaType, media, null
+                        )
+                    )
+                    findNavController().navigate(action)
                 }
-                is Resource.Error -> {
-                    binding.toolbarMovie.apply {
-                        root.isVisible = true
-                        btnWatchNow.isInvisible = true
-                        pbWatch.isVisible = false
-                        btnWatchNow.setOnClickListener(null)
-                        btnShare.setOnClickListener(null)
-                    }
+                is AboutDataModel.Cast -> {
+                    val action = FragmentMediaDirections.actionFragmentMediaToCastsFragment(
+                        CastArgs(it.credit_id, it.person_id, it.name, it.profile_path)
+                    )
+                    findNavController().navigate(action)
                 }
-                is Resource.Loading -> {
-                    binding.toolbarMovie.apply {
-                        root.isVisible = true
-                        btnWatchNow.isInvisible = true
-                        pbWatch.isVisible = true
-                        btnWatchNow.setOnClickListener(null)
-                    }
-                    binding.toolbarTv.root.isVisible = false
-                }
+                else -> {}
             }
+        }
+    }
+
+    override fun onDestroy() {
+        mediaDataAdapter.differ.submitList(listOf())
+        binding.rvList.adapter = null
+        super.onDestroy()
+    }
+
+    private fun setDominantColorObserver() {
+        mediaViewModel.dominantColor.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { c ->
+                context?.let { onDominantColor(c) }
+            }
+        }
+    }
+
+    private fun onDominantColor(c: Int) {
+        binding.apply {
+            val color = if (isDark(c)) lightUpColor(c) else c
+            val tintColor = ColorStateList.valueOf(color)
+            btnWatchNow.backgroundTintList = tintColor
+            btnWatchNow.iconTint = ColorStateList.valueOf(getContrastColor(color))
+            btnWatchNow.setTextColor(getContrastColor(color))
+            rbRating.progressTintList = tintColor
+            rbRating.progressBackgroundTintList = tintColor
+            rbRating.secondaryProgressTintList = tintColor
+            loading.indeterminateTintList = tintColor
+            if (hasTransitionEnded && collectionName != null) {
+                spannableCollectionText(tvCollection, collectionName!!, color)
+            }
+            extractedColor = color
+        }
+    }
+
+    private fun getContrastColor(color: Int): Int {
+        val y = (299 * Color.red(color) + 587 * Color.green(color) + 114 * Color.blue(color)) / 1000
+        return if (y >= 128) Color.parseColor("#151515") else Color.parseColor("#DEFFFFFF")
+    }
+
+    private fun isDark(color: Int): Boolean {
+        val luminance = ("%.5f".format(ColorUtils.calculateLuminance(color))).toFloat()
+        val threshold = 0.09000
+        val isDark = luminance < threshold
+        Log.d(thisTAG, "luminance=$luminance, threshold=$threshold, isDark=$isDark")
+        return isDark
+    }
+
+    private fun lightUpColor(color: Int): Int {
+        return Color.HSVToColor(FloatArray(3).apply {
+            Color.colorToHSV(color, this)
+            this[2] *= 2.0f
         })
     }
 
-    private fun playMovie(file: File) {
-        val intent = Intent(activity, PlayerActivity::class.java)
-        intent.putExtra("fileId", file.id)
-        intent.putExtra("title", mediaArgs.media?.title)
-        intent.flags = FLAG_ACTIVITY_NEW_TASK
-        activity?.startActivity(intent)
+    private fun spannablePlotText(
+        textView: TextView, plot: String,
+        limit: Int, suffixText: String
+    ) {
+        val textColor = ForegroundColorSpan(Color.parseColor("#BDFFFFFF"))
+        val suffixColor = ForegroundColorSpan(Color.parseColor("#DEFFFFFF"))
+
+        if (plot.length > 200) {
+            val stringBuilder = SpannableStringBuilder()
+
+            val plotText = SpannableString(plot.substring(0, limit)).apply {
+                setSpan(textColor, 0, limit, 0)
+            }
+
+            val readMore = SpannableString(suffixText).apply {
+                setSpan(
+                    StyleSpan(Typeface.BOLD),
+                    0, suffixText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                setSpan(suffixColor, 0, suffixText.length, 0)
+            }
+
+            stringBuilder.append(plotText)
+            stringBuilder.append(readMore)
+
+            textView.apply {
+                setText(stringBuilder, TextView.BufferType.SPANNABLE)
+                setOnClickListener {
+                    TransitionManager.beginDelayedTransition(binding.root)
+                    if (text.length > (limit + suffixText.length)) {
+                        setText(stringBuilder, TextView.BufferType.SPANNABLE)
+                    } else text = plot
+                }
+            }
+        } else {
+            textView.text = plot
+            textView.setOnClickListener(null)
+        }
     }
 
-    private fun setupShowsViewModel() {
-        val media = args.media
-        val mediaType = if (media.mediaType == "none") "tv" else media.mediaType
-        mediaArgs = MediaArgs(media.tmdbId, mediaType, media.media)
+    private fun spannableCollectionText(
+        textView: TextView, collectionName: String, tintColor: Int
+    ) {
+        val prefixText = "Part of the "
+        val textColor = ForegroundColorSpan(Color.parseColor("#BDFFFFFF"))
+        val accentColor = ForegroundColorSpan(tintColor)
+        val stringBuilder = SpannableStringBuilder()
 
-        if (mediaType == "movie") {
-            setupMovieDatabaseObserver(mediaArgs)
-            setupSearchObserverForMovie()
-            mediaViewModel.doSearchFor(media.tmdbId)
-            binding.apply {
-                toolbarTv.root.isVisible = false
-                toolbarMovie.root.isVisible = true
-            }
-        } else {
-            setupShowDatabaseObserver(mediaArgs)
-            binding.apply {
-                toolbarMovie.root.isVisible = false
-                toolbarTv.root.isVisible = true
-            }
+        val prefix = SpannableString(prefixText).apply {
+            setSpan(textColor, 0, prefixText.length, 0)
         }
 
-        if (mediaType == "tv" || mediaType == "movie") {
-            mediaViewModel.getMedia(media.tmdbId, mediaType)
-            binding.errorView.retryBtn.setOnClickListener {
-                mediaViewModel.getMedia(media.tmdbId, mediaType)
-            }
-        } else {
-            val errorMsg = "Unknown media type..."
-            Log.e(thisTAG, errorMsg + media)
-            Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
-            binding.apply {
-                pbTv.isGone = true
-                successView.isVisible = false
-                errorView.root.isVisible = true
-            }
-            binding.errorView.apply {
-                errorTxt.text = errorMsg
-            }
+        val collection = SpannableString(collectionName).apply {
+            setSpan(
+                StyleSpan(Typeface.BOLD),
+                0, collectionName.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            setSpan(accentColor, 0, collectionName.length, 0)
         }
 
+        stringBuilder.append(prefix)
+        stringBuilder.append(collection)
+
+        textView.apply {
+            setText(stringBuilder, TextView.BufferType.SPANNABLE)
+            isGone = false
+        }
     }
 
     private fun setupShowDatabaseObserver(media: MediaArgs) {
-
-        mediaViewModel.getShow(media.tmdbId).observe(viewLifecycleOwner, { isSaved ->
+        mediaViewModel.getShow(media.tmdbId).observe(viewLifecycleOwner) { isSaved ->
             Log.d("getShow", "isSaved=$isSaved")
-
-            binding.toolbarTv.btnWatchlist.apply {
-                setText(
-                    if (isSaved) R.string.watchlisted else R.string.watchlist
-                )
+            binding.btnSave.apply {
                 icon = ContextCompat.getDrawable(
                     context,
                     if (isSaved) {
-                        R.drawable.ic_round_library_add_check_24
-                    } else R.drawable.ic_library_add_24dp
+                        R.drawable.ic_round_playlist_add_check_24
+                    } else R.drawable.ic_add_24
                 )
                 setOnClickListener {
-                    val materialFade = MaterialFade().apply {
-                        duration = 150L
-                    }
-                    TransitionManager.beginDelayedTransition(binding.toolbarTv.root, materialFade)
                     media.media?.let { m ->
                         val finalMedia = Show(
                             id = m.id,
@@ -225,32 +688,21 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
                         if (isSaved) {
                             mediaViewModel.deleteShow(finalMedia)
                         } else mediaViewModel.saveShow(finalMedia)
-
-                        val status = if (isSaved) "removed from" else "added to"
-                        val name = finalMedia.name
-                        val snackBar = Snackbar.make(
-                            binding.root,
-                            "$name $status your library",
-                            Snackbar.LENGTH_SHORT
-                        )
-                        snackBar.anchorView = binding.toolbarTv.root
-                        snackBar.show()
                     }
                 }
             }
-        })
-
+        }
     }
 
     private fun setupMovieDatabaseObserver(media: MediaArgs) {
-        mediaViewModel.getMovie(media.tmdbId).observe(viewLifecycleOwner, { isSaved ->
+        mediaViewModel.getMovie(media.tmdbId).observe(viewLifecycleOwner) { isSaved ->
             Log.d("getMovie", "isSaved=$isSaved")
-            binding.toolbarMovie.btnWatchlist.apply {
+            binding.btnSave.apply {
                 icon = ContextCompat.getDrawable(
                     context,
                     if (isSaved) {
-                        R.drawable.ic_round_library_add_check_24
-                    } else R.drawable.ic_library_add_24dp
+                        R.drawable.ic_round_playlist_add_check_24
+                    } else R.drawable.ic_add_24
                 )
                 setOnClickListener {
                     media.media?.let { m ->
@@ -264,279 +716,15 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
                         if (isSaved) {
                             mediaViewModel.deleteMovie(finalMovie)
                         } else mediaViewModel.saveMovie(finalMovie)
-
-                        val status = if (isSaved) "removed from" else "added to"
-                        val name = finalMovie.title
-                        val snackBar = Snackbar.make(
-                            binding.root,
-                            "$name $status your library",
-                            Snackbar.LENGTH_SHORT
-                        )
-                        snackBar.anchorView = binding.toolbarMovie.root
-                        snackBar.show()
-                    }
-                }
-            }
-        })
-
-    }
-
-    private fun setupMediaViewModel() {
-        mediaViewModel.media.observe(viewLifecycleOwner, { response ->
-            when (response) {
-                is Resource.Success -> {
-                    TransitionManager.beginDelayedTransition(binding.successView)
-                    binding.successView.recycledViewPool.clear()
-                    binding.successView.setRecycledViewPool(RecyclerView.RecycledViewPool())
-                    response.data?.let { doOnMediaSuccess(it) }
-                }
-                is Resource.Error -> {
-                    response.message?.let { message ->
-                        val errorMsg = if (message.isEmpty()) {
-                            resources.getString(R.string.something_went_wrong)
-                        } else message
-                        Log.e(thisTAG, errorMsg)
-                        binding.apply {
-                            pbTv.isGone = true
-                            successView.isGone = true
-                            errorView.root.isVisible = true
-                        }
-                        binding.errorView.apply {
-                            errorTxt.text = errorMsg
-                        }
-                    }
-                }
-                is Resource.Loading -> {
-                    binding.apply {
-                        pbTv.isVisible = true
-                        successView.isGone = true
-                        binding.errorView.root.isGone = true
-                        toolbarTv.apply {
-                            btnShare.setOnClickListener(null)
-                        }
-                        toolbarMovie.apply {
-                            btnShare.setOnClickListener(null)
-                        }
-                    }
-                }
-            }
-        })
-    }
-
-    private fun doOnMediaSuccess(
-        response: MediaResponse
-    ) {
-        binding.apply {
-            toolbarMovie.btnShare.setOnClickListener { shareIntent(mediaArgs) }
-            toolbarTv.btnShare.setOnClickListener { shareIntent(mediaArgs) }
-        }
-
-        setupMediaAdapterOnClickListener(response)
-
-        val metaData = listOf(
-            MediaDataModel.Meta(
-                title = response.name ?: "",
-                mediaType = mediaArgs.mediaType,
-                overview = response.overview,
-                posterUrl = response.poster_path,
-                tmdbId = response.id,
-                misc = response.misc,
-            )
-        )
-
-        val detailsList = mutableListOf<MediaDataModel.Details>()
-
-        if (response.seasons.isNotEmpty()) {
-            val seasonsList = response.seasons.map {
-                AboutDataModel.Season(
-                    episode_count = it.episode_count,
-                    id = it.id,
-                    name = it.name,
-                    poster_path = it.poster_path,
-                    season_number = it.season_number
-                )
-            }
-            detailsList.add(
-                MediaDataModel.Details(
-                    header = resources.getString(R.string.seasons),
-                    items = seasonsList
-                )
-            )
-        }
-
-        if (response.related_media.isNotEmpty()) {
-            val relatedList = response.related_media.map {
-                AboutDataModel.Curation(
-                    id = it.id,
-                    media_type = it.media_type,
-                    name = it.name,
-                    poster_path = it.poster_path,
-                    title = it.title,
-                    vote_average = it.vote_average
-                )
-            }
-            detailsList.add(
-                MediaDataModel.Details(
-                    header = resources.getString(R.string.related_movies),
-                    items = relatedList
-                )
-            )
-        }
-
-
-        if (response.cast.isNotEmpty()) {
-            val castsList = response.cast.map {
-                AboutDataModel.Cast(
-                    character = it.character,
-                    credit_id = it.credit_id,
-                    person_id = it.id,
-                    name = it.name,
-                    profile_path = it.profile_path
-                )
-            }
-
-            detailsList.add(
-                MediaDataModel.Details(
-                    header = resources.getString(R.string.cast),
-                    items = castsList
-                )
-            )
-        }
-
-
-        if (response.similar.isNotEmpty()) {
-            val similarList = response.similar.map {
-                AboutDataModel.Curation(
-                    id = it.id,
-                    media_type = it.media_type,
-                    name = it.name,
-                    poster_path = it.poster_path,
-                    title = it.title,
-                    vote_average = it.vote_average
-                )
-            }
-            detailsList.add(
-                MediaDataModel.Details(
-                    header = resources.getString(R.string.similar),
-                    items = similarList
-                )
-            )
-        }
-
-        if (response.recommendations.isNotEmpty()) {
-            val recommendationsList = response.recommendations.map {
-                AboutDataModel.Curation(
-                    id = it.id,
-                    media_type = it.media_type,
-                    name = it.name,
-                    poster_path = it.poster_path,
-                    title = it.title,
-                    vote_average = it.vote_average
-                )
-            }
-            detailsList.add(
-                MediaDataModel.Details(
-                    header = resources.getString(R.string.recommendations),
-                    items = recommendationsList
-                )
-            )
-        }
-
-        if (response.videos.isNotEmpty()) {
-            val videosList = response.videos.map {
-                AboutDataModel.Video(
-                    name = it.name,
-                    key = it.key,
-                    site = it.site,
-                    thumbUrl = it.thumbUrl,
-                    watchUrl = it.watchUrl
-                )
-            }
-            detailsList.add(
-                MediaDataModel.Details(
-                    header = resources.getString(R.string.related_videos),
-                    items = videosList
-                )
-            )
-        }
-
-        val finalList = metaData + detailsList
-        mediaDataAdapter.differ.submitList(finalList.toList())
-
-        binding.apply {
-            pbTv.isVisible = false
-            successView.isGone = false
-            binding.errorView.root.isGone = true
-        }
-
-    }
-
-    private fun setupMediaAdapterOnClickListener(
-        response: MediaResponse
-    ) {
-        mediaDataAdapter.setOnItemClickListener {
-            when (it) {
-                is AboutDataModel.Season -> {
-                    seasonViewModel.setShowSeason(
-                        driveId = driveId,
-                        tmdbId = response.id,
-                        seasonName = it.name,
-                        seasonNumber = it.season_number,
-                        showName = response.name ?: "Unknown"
-                    )
-                    findNavController().navigate(R.id.action_fragmentMedia_to_episodeListFragment)
-                }
-                is AboutDataModel.Curation -> {
-                    val media = Media(
-                        id = it.id,
-                        media_type = it.media_type,
-                        name = it.name,
-                        poster_path = it.poster_path,
-                        title = it.title,
-                        vote_average = it.vote_average
-                    )
-                    // showsViewModel.setMedia(
-                    //     it.id,
-                    //     it.media_type ?: mediaArgs.mediaType, media
-                    // )
-                    val action = FragmentMediaDirections.actionFragmentMediaSelf(
-                        MediaArgs(
-                            it.id,
-                            it.media_type ?: mediaArgs.mediaType, media
-                        )
-                    )
-                    findNavController().navigate(action)
-                }
-                is AboutDataModel.Video -> {
-                    val openVideoIntent = Intent(
-                        Intent.ACTION_VIEW, Uri.parse(it.watchUrl)
-                    )
-                    startActivity(openVideoIntent)
-                }
-                is AboutDataModel.Cast -> {
-                    castDetailsViewModel.setCast(
-                        it.person_id, it.credit_id
-                    )
-                    findNavController().navigate(R.id.action_fragmentMedia_to_castsFragment)
-                }
-                is AboutDataModel.Header -> {
-                    if (it.heading != null && it.heading.startsWith("/")) {
-                        bigImageViewModel.setImagePath(it.heading)
-                        findNavController().navigate(R.id.action_fragmentMedia_to_bigImageFragment)
                     }
                 }
             }
         }
     }
 
-    private fun setupRecyclerView() {
-        binding.successView.apply {
-            adapter = mediaDataAdapter
-            layoutManager = LinearLayoutManager(
-                activity, LinearLayoutManager.VERTICAL, false
-            )
-            itemAnimator = null
-        }
+    private fun shareIntent() {
+        val action = FragmentMediaDirections.actionFragmentMediaToShareBottomSheet()
+        findNavController().navigate(action)
     }
 
     private fun shareIntent(media: MediaArgs) {
@@ -553,14 +741,242 @@ class FragmentMedia : Fragment(R.layout.fragment_media) {
         startActivity(shareIntent)
     }
 
+    private fun showMovieDialog(context: Context) {
+        movieDialog = LookupMovieDialog(context, extractedColor) { btnYesListener() }
+        movieDialog.show()
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        driveId = null
-        binding.apply {
-            successView.recycledViewPool.clear()
-            successView.adapter = null
+        movieDialog.window?.apply {
+            attributes.windowAnimations = R.style.DialogAnimation
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setLayout(
+                Constraints.LayoutParams.MATCH_PARENT,
+                Constraints.LayoutParams.WRAP_CONTENT
+            )
         }
-        _binding = null
+
+        mediaViewModel.doSearchFor(args.media.tmdbId)
+    }
+
+    private fun showStreamsDialog(context: Context, file: File) {
+        streamsDialog = StreamsDialog(context)
+        streamsDialog.show()
+
+        streamsDialog.window?.apply {
+
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setLayout(
+                Constraints.LayoutParams.MATCH_PARENT,
+                Constraints.LayoutParams.WRAP_CONTENT
+            )
+        }
+        val streamsList = mutableListOf<StreamsDataModel>()
+        streamsList.add(
+            StreamsDataModel.Original(
+                title = "Original (${file.humanSize})",
+                id = file.id
+            )
+        )
+
+        streamsList.add(StreamsDataModel.Loading)
+
+        streamsDialog.streamsDataAdapter.differ.submitList(streamsList.toList())
+        streamsDialog.streamsDataAdapter.setOnItemClickListener {
+            when (it) {
+                is StreamsDataModel.Original -> playMovie(file, null, null)
+                is StreamsDataModel.Stream -> {
+                    playMovie(file, it.cookie, it.url)
+                }
+                else -> {}
+            }
+        }
+
+        mediaViewModel.getDashVideos(file.id)
+    }
+
+
+    private fun btnYesListener() {
+        movieDialog.changeLayouts(loading = true, request = false, message = false)
+        imdbId?.let { it -> mediaViewModel.requestMovie(it) }
+        Log.d("btnYesListener", "imdbId=$imdbId")
+    }
+
+    private fun movieOnClick() {
+        binding.apply {
+            context?.let { c ->
+                btnWatchNow.setOnClickListener { showMovieDialog(c) }
+            }
+        }
+    }
+
+    private fun tvOnClick() {
+        binding.btnWatchNow.apply {
+            context?.let {
+                text = it.getString(R.string.view_all_seasons)
+                icon = ContextCompat.getDrawable(it, R.drawable.ic_video_24)
+            }
+        }
+    }
+
+    private fun setupSearchObserverForMovie() {
+        mediaViewModel.searchList.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { responseEpisode ->
+                handleSearchResponse(responseEpisode)
+            }
+        }
+    }
+
+    private fun setupDashStreamsObserver() {
+        mediaViewModel.dashVideo.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { streamsResponse ->
+                handleDashStreamsResponse(streamsResponse)
+            }
+        }
+    }
+
+    private fun handleDashStreamsResponse(
+        streamsResponse: Resource<List<DashVideoResponseItem>>
+    ) {
+        if (this::streamsDialog.isInitialized) {
+            when (streamsResponse) {
+                is Resource.Success -> {
+                    streamsResponse.data?.let {
+                        handleStreamsSuccess(it)
+                    }
+                }
+                else -> {
+                    val adapterDiff = streamsDialog.streamsDataAdapter.differ
+                    val currentList = adapterDiff.currentList
+                    val streamsList = mutableListOf<StreamsDataModel>()
+                    streamsList.add(currentList.filterIsInstance<StreamsDataModel.Original>()[0])
+                    adapterDiff.submitList(streamsList.toList())
+                }
+            }
+        }
+
+    }
+
+    private fun handleStreamsSuccess(streams: List<DashVideoResponseItem>) {
+        val adapterDiff = streamsDialog.streamsDataAdapter.differ
+        val currentList = adapterDiff.currentList
+
+        val streamsList = mutableListOf<StreamsDataModel>()
+        streamsList.add(currentList.filterIsInstance<StreamsDataModel.Original>()[0])
+
+        for (stream in streams) {
+            streamsList.add(
+                StreamsDataModel.Stream(
+                    name = "${stream.quality} (${stream.humanSize})",
+                    url = stream.url,
+                    cookie = stream.drive_stream
+                )
+            )
+
+        }
+        adapterDiff.submitList(streamsList.toList())
+
+    }
+
+    private fun handleSearchResponse(responseEpisode: Resource<DriveResponse>) {
+        when (responseEpisode) {
+            is Resource.Success -> handleMovieSearchSuccess(responseEpisode.data)
+            is Resource.Error -> handleMovieSearchError(responseEpisode.message)
+            is Resource.Loading -> {
+                movieDialog.changeLayouts(loading = true, request = false, message = false)
+            }
+        }
+    }
+
+    private fun handleMovieSearchError(message: String?) {
+        if (message != null) {
+            witchDialogResponse(message)
+        } else {
+            movieDialog.dismiss()
+            Toast.makeText(
+                context, R.string.something_went_wrong, Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun handleMovieSearchSuccess(responseEpisode: DriveResponse?) {
+        responseEpisode?.let { driveResponse ->
+            if (driveResponse.files.isNotEmpty()) {
+                val file = driveResponse.files[0]
+                movieDialog.dismiss()
+                // playMovie(file)
+                context?.let { showStreamsDialog(it, file) }
+            } else {
+                movieDialog.changeLayouts(
+                    loading = false,
+                    request = true,
+                    message = false
+                )
+            }
+        }
+    }
+
+
+    private fun playMovie(file: File, cookie: String?, stream: String?) {
+        val media = args.media.media
+        val intent = Intent(activity, PlayerActivity::class.java)
+        intent.putExtra("fileId", file.id)
+        intent.putExtra("title", media?.let { media.name ?: media.title })
+        cookie?.let { intent.putExtra("cookie", it) }
+        stream?.let { intent.putExtra("dash_url", it) }
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        activity?.startActivity(intent)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        hasTransitionEnded = true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        hasTransitionEnded = true
+        Log.d(thisTAG, "hasTransitionEnded=$hasTransitionEnded")
+    }
+
+    private fun hideLastSeason(hide: Boolean) {
+        binding.apply {
+            itemLastSeason.root.isGone = hide
+            tvSeasonHeader.isGone = hide
+        }
+    }
+
+    private fun navigateToSeason(
+        tmdbId: Int,
+        seasonName: String,
+        seasonNumber: Int,
+        showName: String?,
+        posterPath: String?
+    ) {
+        seasonViewModel.setShowSeason(
+            tmdbId = tmdbId,
+            seasonName = seasonName,
+            seasonNumber = seasonNumber,
+            showName = showName ?: "Unknown",
+            posterPath = posterPath
+        )
+        findNavController().navigate(R.id.action_fragmentMedia_to_episodeListFragment)
+    }
+
+    private fun setSeasonsList(seasons: List<Season>) {
+        if (tmdbId != null && showName != null) {
+            listViewModel.setListArgs(tmdbId!!, showName!!, casts = null, seasons = seasons)
+            findNavController().navigate(R.id.action_fragmentMedia_to_fragmentList)
+        }
+    }
+
+    private fun setCastsList(casts: List<Cast>) {
+        if (tmdbId != null && showName != null) {
+            listViewModel.setListArgs(tmdbId!!, showName!!, casts = casts, seasons = null)
+            findNavController().navigate(R.id.action_fragmentMedia_to_fragmentList)
+        }
+    }
+
+    private fun navigateToCollection(media: Media) {
+        val action = FragmentMediaDirections.actionFragmentMediaToFragmentCollection(media)
+        findNavController().navigate(action)
     }
 }

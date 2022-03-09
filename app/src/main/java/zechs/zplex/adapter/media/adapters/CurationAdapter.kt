@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_curate.view.*
+import kotlinx.android.synthetic.main.item_recom.view.*
 import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
-import zechs.zplex.models.tmdb.PosterSize
+import zechs.zplex.models.tmdb.BackdropSize
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 
@@ -39,7 +39,7 @@ class CurationAdapter : RecyclerView.Adapter<CurationAdapter.CurationViewHolder>
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CurationViewHolder {
         return CurationViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_curate, parent, false
+                R.layout.item_recom, parent, false
             )
         )
     }
@@ -47,26 +47,24 @@ class CurationAdapter : RecyclerView.Adapter<CurationAdapter.CurationViewHolder>
     override fun getItemCount() = differ.currentList.size
 
     override fun onBindViewHolder(holder: CurationViewHolder, position: Int) {
-        val curation = differ.currentList[position]
+        val media = differ.currentList[position]
 
-        val seasonPosterUrl = if (curation.poster_path == null) {
-            R.drawable.no_poster
+        val backdropUrl = if (media.backdrop_path == null) {
+            R.drawable.no_thumb
         } else {
-            "${TMDB_IMAGE_PREFIX}/${PosterSize.w342}${curation.poster_path}"
+            "$TMDB_IMAGE_PREFIX/${BackdropSize.w300}${media.backdrop_path}"
         }
-        val rating = curation.vote_average ?: 0.0
 
         holder.itemView.apply {
-            tv_showName.text = curation.name ?: curation.title
-            tv_rating.text = rating.toString().take(3)
+            tv_title.text = media.name ?: media.title
 
             GlideApp.with(this)
-                .load(seasonPosterUrl)
+                .load(backdropUrl)
                 .placeholder(R.drawable.no_poster)
-                .into(item_poster)
+                .into(ivBackdrop)
 
             setOnClickListener {
-                onItemClickListener?.let { it(curation) }
+                onItemClickListener?.let { it(media) }
             }
         }
     }

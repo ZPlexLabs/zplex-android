@@ -40,9 +40,7 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
         )
     }
 
-    override fun getItemCount(): Int {
-        return differ.currentList.size
-    }
+    override fun getItemCount() = differ.currentList.size
 
     override fun onBindViewHolder(holder: EpisodesViewHolder, position: Int) {
         val episode = differ.currentList[position]
@@ -69,13 +67,13 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
                 .asBitmap()
                 .load(episodeStillUrl)
                 .placeholder(R.drawable.no_thumb)
-                .into(thumb)
+                .into(iv_backdrop)
 
-            setOnClickListener {
-                onItemClickListener?.let { it(episode) }
+            if (episode.fileId != null) {
+                setOnClickListener {
+                    onItemClickListener?.let { it(episode) }
+                }
             }
-            if (tv_title.lineCount >= 2) tv_overview.tag = position
-            if (tv_overview.tag == position) tv_overview.maxLines = 1
         }
 
     }

@@ -7,13 +7,13 @@ class FilesRepository {
     suspend fun getDriveFiles(
         pageSize: Int,
         accessToken: String,
-        pageToken: String,
+        pageToken: String?,
         driveQuery: String,
         orderBy: String
     ) =
         RetrofitInstance.api.getDriveFiles(
             pageSize = pageSize,
-            accessToken = accessToken,
+            accessToken = "Bearer $accessToken",
             pageToken = pageToken,
             q = driveQuery,
             orderBy = orderBy

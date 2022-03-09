@@ -56,7 +56,7 @@ class VideosAdapter : RecyclerView.Adapter<VideosAdapter.VideoViewHolder>() {
             GlideApp.with(this)
                 .load(video.thumbUrl)
                 .placeholder(R.drawable.no_thumb)
-                .into(thumb)
+                .into(iv_backdrop)
 
             setOnClickListener {
                 onItemClickListener?.let { it(video) }

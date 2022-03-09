@@ -1,220 +1,123 @@
 package zechs.zplex.ui.fragment.home
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
-import android.widget.Toast
-import androidx.core.view.isVisible
+import android.view.animation.LinearInterpolator
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.transition.Fade
+import androidx.transition.TransitionManager
+import androidx.transition.TransitionSet
+import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentHomeBinding
 import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.tmdb.entities.Media
+import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.utils.Resource
 
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
 
+    private val thisTAG = "HomeFragment"
+
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var homeViewModel: HomeViewModel
-
-    private val discoverMoviesAdapter by lazy { SearchAdapter() }
-    private val discoverShowsAdapter by lazy { SearchAdapter() }
-    private val discoverAnimeAdapter by lazy { SearchAdapter() }
     private val trendingAdapter by lazy { SearchAdapter() }
 
-    private val thisTAG = "HomeFragment"
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        enterTransition = TransitionSet().apply {
+            addTransition(
+                MaterialSharedAxis(
+                    MaterialSharedAxis.Y, true
+                ).apply {
+                    interpolator = LinearInterpolator()
+                    duration = 500
+                })
+
+            addTransition(Fade().apply {
+                interpolator = LinearInterpolator()
+            })
+        }
+
+        exitTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, true
+        ).apply {
+            interpolator = LinearInterpolator()
+            duration = 500
+        }
+
+        returnTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, false
+        ).apply {
+            interpolator = LinearInterpolator()
+            duration = 220
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentHomeBinding.bind(view)
 
         homeViewModel = (activity as ZPlexActivity).homeViewModel
+
+        binding.btnGoSearch.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_searchFragment)
+        }
+
         setupRecyclerView()
-        homeViewModel.trending.observe(viewLifecycleOwner, { response ->
+        setupTrendingObserver()
+    }
+
+    private fun setupTrendingObserver() {
+        homeViewModel.trending.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Resource.Success -> {
-                    binding.apply {
-                        textView2.isVisible = true
-                        rvTrending.isVisible = true
-                    }
-                    response.data?.let { moviesResponse ->
-                        trendingAdapter.differ.submitList(moviesResponse.results.toList())
+                    response.data?.let { trendingResponse ->
+                        trendingSuccess(trendingResponse)
                     }
                 }
-                is Resource.Error -> {
-                    binding.apply {
-                        textView2.isVisible = false
-                        rvTrending.isVisible = false
-                    }
-                    response.message?.let { message ->
-                        val errorText = "Unable to fetch trending. An error occurred: $message"
-                        Toast.makeText(context, errorText, Toast.LENGTH_SHORT).show()
-                        Log.e(thisTAG, errorText)
-                    }
-                }
-                is Resource.Loading -> {
-                    binding.apply {
-                        textView2.isVisible = false
-                        rvTrending.isVisible = false
-                    }
-                }
+                is Resource.Error -> {}
+                is Resource.Loading -> {}
             }
-        })
+        }
 
-        homeViewModel.movies.observe(viewLifecycleOwner, { response ->
-            when (response) {
-                is Resource.Success -> {
-                    binding.apply {
-                        textView3.isVisible = true
-                        rvMovies.isVisible = true
-                    }
-                    response.data?.let { moviesResponse ->
-                        discoverMoviesAdapter.differ.submitList(moviesResponse.results.toList())
-                    }
-                }
-                is Resource.Error -> {
-                    binding.apply {
-                        textView3.isVisible = false
-                        rvMovies.isVisible = false
-                    }
-                    response.message?.let { message ->
-                        val errorText =
-                            "Unable to fetch popular movies. An error occurred: $message"
-                        Toast.makeText(context, errorText, Toast.LENGTH_SHORT).show()
-                        Log.e(thisTAG, errorText)
-                    }
-                }
-                is Resource.Loading -> {
-                    binding.apply {
-                        textView3.isVisible = false
-                        rvMovies.isVisible = false
-                    }
-                }
-            }
-        })
+    }
 
-        homeViewModel.shows.observe(viewLifecycleOwner, { response ->
-            when (response) {
-                is Resource.Success -> {
-                    binding.apply {
-                        textView4.isVisible = true
-                        rvShows.isVisible = true
-                    }
-                    response.data?.let { showsResponse ->
-                        discoverShowsAdapter.differ.submitList(showsResponse.results.toList())
-                    }
-                }
-                is Resource.Error -> {
-                    binding.apply {
-                        textView4.isVisible = false
-                        rvShows.isVisible = false
-                    }
-                    response.message?.let { message ->
-                        val errorText =
-                            "Unable to fetch popular shows. An error occurred: $message"
-                        Toast.makeText(context, errorText, Toast.LENGTH_SHORT).show()
-                        Log.e(thisTAG, errorText)
-                    }
-                }
-                is Resource.Loading -> binding.apply {
-                    textView4.isVisible = false
-                    rvShows.isVisible = false
-                }
-
-            }
-        })
-
-        homeViewModel.animes.observe(viewLifecycleOwner, { response ->
-            when (response) {
-                is Resource.Success -> {
-                    binding.apply {
-                        textView5.isVisible = true
-                        rvAnime.isVisible = true
-                    }
-                    response.data?.let { animeResponse ->
-                        discoverAnimeAdapter.differ.submitList(animeResponse.results.toList())
-                    }
-                }
-                is Resource.Error -> {
-                    binding.apply {
-                        textView5.isVisible = false
-                        rvAnime.isVisible = false
-                    }
-                    response.message?.let { message ->
-                        val errorText =
-                            "Unable to fetch popular animes. An error occurred: $message"
-                        Toast.makeText(context, errorText, Toast.LENGTH_SHORT).show()
-                        Log.e(thisTAG, errorText)
-                    }
-                }
-                is Resource.Loading -> {
-                    binding.apply {
-                        textView5.isVisible = false
-                        rvAnime.isVisible = false
-                    }
-                }
-            }
-        })
+    private fun trendingSuccess(listResponse: SearchResponse) {
+        TransitionManager.beginDelayedTransition(binding.root)
+        trendingAdapter.differ.submitList(listResponse.results.take(9).toList())
     }
 
     private fun setupRecyclerView() {
 
         binding.rvTrending.apply {
             adapter = trendingAdapter
-            layoutManager = LinearLayoutManager(
-                activity, LinearLayoutManager.HORIZONTAL, false
-            )
+            layoutManager = GridLayoutManager(activity, 3)
         }
 
-        binding.rvMovies.apply {
-            adapter = discoverMoviesAdapter
-            layoutManager = LinearLayoutManager(
-                activity, LinearLayoutManager.HORIZONTAL, false
-            )
+        trendingAdapter.setOnItemClickListener { media, view, position ->
+            navigateToMedia(media, media.media_type ?: "tv", view, position)
         }
 
-        binding.rvShows.apply {
-            adapter = discoverShowsAdapter
-            layoutManager = LinearLayoutManager(
-                activity, LinearLayoutManager.HORIZONTAL, false
-            )
-        }
-
-        binding.rvAnime.apply {
-            adapter = discoverAnimeAdapter
-            layoutManager = LinearLayoutManager(
-                activity, LinearLayoutManager.HORIZONTAL, false
-            )
-        }
-
-        trendingAdapter.setOnItemClickListener { navigateToMedia(it, it.media_type ?: "tv") }
-        discoverMoviesAdapter.setOnItemClickListener { navigateToMedia(it, "movie") }
-        discoverShowsAdapter.setOnItemClickListener { navigateToMedia(it, "tv") }
-        discoverAnimeAdapter.setOnItemClickListener { navigateToMedia(it, "tv") }
-        discoverAnimeAdapter.setOnItemClickListener { navigateToMedia(it, "tv") }
     }
 
-    private fun navigateToMedia(media: Media, mediaType: String) {
+    private fun navigateToMedia(media: Media, mediaType: String, view: View, position: Int) {
         val action = HomeFragmentDirections.actionHomeFragmentToFragmentMedia(
-            MediaArgs(media.id, mediaType, media)
+            MediaArgs(media.id, mediaType, media, position)
         )
         findNavController().navigate(action)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.apply {
-            rvMovies.adapter = null
-            rvShows.adapter = null
-            rvAnime.adapter = null
-        }
         _binding = null
     }
 

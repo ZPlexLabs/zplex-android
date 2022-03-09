@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/exo_styled_controls_play">
+    <item android:drawable="@drawable/controls_gradient" />
+    <item
+        android:bottom="3dp"
+        android:drawable="@drawable/exo_ic_play_circle_filled"
+        android:left="3dp"
+        android:right="3dp"
+        android:top="3dp" />
+</layer-list>

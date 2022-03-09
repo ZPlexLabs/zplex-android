@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_season.view.*
+import kotlinx.android.synthetic.main.item_season_linear.view.*
 import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
 import zechs.zplex.models.tmdb.PosterSize
@@ -39,20 +39,18 @@ class SeasonsAdapter : RecyclerView.Adapter<SeasonsAdapter.SeasonsViewHolder>() 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SeasonsViewHolder {
         return SeasonsViewHolder(
             LayoutInflater.from(parent.context).inflate(
-                R.layout.item_season, parent, false
+                R.layout.item_season_linear, parent, false
             )
         )
     }
 
-    override fun getItemCount(): Int {
-        return differ.currentList.size
-    }
+    override fun getItemCount() = differ.currentList.size
 
     override fun onBindViewHolder(holder: SeasonsViewHolder, position: Int) {
         val season = differ.currentList[position]
 
         val seasonPosterUrl = if (season.poster_path != null) {
-            "${TMDB_IMAGE_PREFIX}/${PosterSize.w342}${season.poster_path}"
+            "${TMDB_IMAGE_PREFIX}/${PosterSize.w154}${season.poster_path}"
         } else {
             R.drawable.no_poster
         }
@@ -61,13 +59,13 @@ class SeasonsAdapter : RecyclerView.Adapter<SeasonsAdapter.SeasonsViewHolder>() 
         val episodeCount = "${season.episode_count} episodes"
 
         holder.itemView.apply {
-            season_number.text = seasonName
-            episode_count.text = episodeCount
+            tv_season.text = seasonName
+            tv_episode.text = episodeCount
 
             GlideApp.with(this)
                 .load(seasonPosterUrl)
                 .placeholder(R.drawable.no_poster)
-                .into(item_poster)
+                .into(iv_season)
             setOnClickListener {
                 onItemClickListener?.let { it(season) }
             }

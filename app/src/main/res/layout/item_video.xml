@@ -16,7 +16,7 @@
         android:layout_margin="8dp"
         android:foreground="?android:attr/selectableItemBackground"
         app:cardBackgroundColor="@android:color/transparent"
-        app:cardCornerRadius="8dp"
+        app:cardCornerRadius="16dp"
         app:cardElevation="8dp"
         app:cardMaxElevation="8dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -24,7 +24,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/thumb"
+            android:id="@+id/iv_backdrop"
             android:layout_width="256dp"
             android:layout_height="144dp"
             android:adjustViewBounds="true"

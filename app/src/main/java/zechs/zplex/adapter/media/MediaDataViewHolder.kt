@@ -1,6 +1,7 @@
 package zechs.zplex.adapter.media
 
 import android.transition.TransitionManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
@@ -26,7 +27,6 @@ sealed class MediaDataViewHolder(
         private val miscAdapter by lazy { MiscAdapter() }
 
         fun bind(item: MediaDataModel.Meta) {
-
             val posterUrl = if (item.posterUrl == null) {
                 R.drawable.no_poster
             } else {
@@ -39,6 +39,7 @@ sealed class MediaDataViewHolder(
                     .placeholder(R.drawable.no_poster)
                     .into(itemBinding.ivPoster)
 
+                itemBinding.posterCard.transitionName = "SHARED_${item.tmdbId}"
                 itemBinding.ivPoster.setOnClickListener {
                     val aboutDataModel = AboutDataModel.Header(heading = item.posterUrl)
                     mediaDataAdapter.onItemClickListener?.let { it(aboutDataModel) }
@@ -78,9 +79,9 @@ sealed class MediaDataViewHolder(
         private val seasonsAdapter by lazy { SeasonsAdapter() }
         private val castAdapter by lazy { CastAdapter() }
         private val relatedAdapter by lazy { CurationAdapter() }
-        private val similarAdapter by lazy { CurationAdapter() }
         private val recommendationAdapter by lazy { CurationAdapter() }
         private val videosAdapter by lazy { VideosAdapter() }
+
 
         fun bind(item: MediaDataModel.Details) {
             when (item.header) {
@@ -94,7 +95,9 @@ sealed class MediaDataViewHolder(
                                 layoutManager = LinearLayoutManager(
                                     c, LinearLayoutManager.HORIZONTAL, false
                                 )
-                                itemAnimator = null
+                                // itemAnimator = null
+                                setItemViewCacheSize(0)
+                                setHasFixedSize(false)
                             }
                         }
                         seasonsAdapter.differ.submitList(seasonsList)
@@ -113,7 +116,9 @@ sealed class MediaDataViewHolder(
                                 layoutManager = LinearLayoutManager(
                                     c, LinearLayoutManager.HORIZONTAL, false
                                 )
-                                itemAnimator = null
+                                // itemAnimator = null
+                                setItemViewCacheSize(0)
+                                setHasFixedSize(false)
                             }
                         }
                         relatedAdapter.differ.submitList(relatedList)
@@ -129,33 +134,20 @@ sealed class MediaDataViewHolder(
                             tvHeader.text = c.resources.getString(R.string.cast)
                             rvList.apply {
                                 adapter = castAdapter
-                                layoutManager = LinearLayoutManager(
-                                    c, LinearLayoutManager.HORIZONTAL, false
+                                layoutManager = GridLayoutManager(
+                                    c, 2, LinearLayoutManager.HORIZONTAL, false
                                 )
-                                itemAnimator = null
+                                // itemAnimator = null
+                                setItemViewCacheSize(0)
+                                setHasFixedSize(false)
                             }
+                        }
+                        // btnHeader.isInvisible = false
+                        btnHeader.setOnClickListener {
+                            mediaDataAdapter.viewAllOnClick("click")
                         }
                         castAdapter.differ.submitList(castsList)
                         castAdapter.setOnItemClickListener { aboutDataModel ->
-                            mediaDataAdapter.onItemClickListener?.let { it(aboutDataModel) }
-                        }
-                    }
-                }
-                "Similar" -> {
-                    val similarList = item.items.filterIsInstance<AboutDataModel.Curation>()
-                    itemBinding.apply {
-                        context?.let { c ->
-                            tvHeader.text = c.resources.getString(R.string.similar)
-                            rvList.apply {
-                                adapter = similarAdapter
-                                layoutManager = LinearLayoutManager(
-                                    c, LinearLayoutManager.HORIZONTAL, false
-                                )
-                                itemAnimator = null
-                            }
-                        }
-                        similarAdapter.differ.submitList(similarList)
-                        similarAdapter.setOnItemClickListener { aboutDataModel ->
                             mediaDataAdapter.onItemClickListener?.let { it(aboutDataModel) }
                         }
                     }
@@ -170,7 +162,9 @@ sealed class MediaDataViewHolder(
                                 layoutManager = LinearLayoutManager(
                                     c, LinearLayoutManager.HORIZONTAL, false
                                 )
-                                itemAnimator = null
+                                // itemAnimator = null
+                                setItemViewCacheSize(0)
+                                setHasFixedSize(false)
                             }
                         }
                         recommendationAdapter.differ.submitList(recommendationsList)
@@ -189,7 +183,9 @@ sealed class MediaDataViewHolder(
                                 layoutManager = LinearLayoutManager(
                                     c, LinearLayoutManager.HORIZONTAL, false
                                 )
-                                itemAnimator = null
+                                // itemAnimator = null
+                                setItemViewCacheSize(0)
+                                setHasFixedSize(false)
                             }
                         }
                         videosAdapter.differ.submitList(videosList)

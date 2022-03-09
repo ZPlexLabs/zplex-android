@@ -5,8 +5,6 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
-import android.widget.ImageButton
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
@@ -15,24 +13,24 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource
-import zechs.zplex.R
-import zechs.zplex.databinding.ActivityPlayerBinding
+import zechs.zplex.databinding.ActivityPlayerZechsBinding
 import zechs.zplex.utils.SessionManager
 
 
 class PlayerActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityPlayerBinding
+    private lateinit var binding: ActivityPlayerZechsBinding
+
     private lateinit var exoPlayer: ExoPlayer
     private var onStopCalled = false
+    private var _isInPip = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityPlayerBinding.inflate(layoutInflater)
+        binding = ActivityPlayerZechsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         hideSystemUI()
@@ -105,18 +103,18 @@ class PlayerActivity : AppCompatActivity() {
             setShowRewindButton(true)
             controllerShowTimeoutMs = 0
 
-            val titleText = findViewById<TextView>(R.id.exo_video_title)
-            titleText.text = title
-            findViewById<ImageButton>(R.id.exo_aspect_button).setOnClickListener {
-                if (binding.playerView.resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FIT) {
-                    binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-                } else {
-                    binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-                }
-            }
-            findViewById<ImageButton>(R.id.exo_pip_button).setOnClickListener {
-                enterPIPMode()
-            }
+//            val titleText = findViewById<TextView>(R.id.exo_video_title)
+//            titleText.text = title
+//            findViewById<ImageButton>(R.id.exo_aspect_button).setOnClickListener {
+//                if (binding.playerView.resizeMode == AspectRatioFrameLayout.RESIZE_MODE_FIT) {
+//                    binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+//                } else {
+//                    binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+//                }
+//            }
+//            findViewById<ImageButton>(R.id.po).setOnClickListener {
+//                enterPIPMode()
+//            }
         }
     }
 
@@ -127,6 +125,7 @@ class PlayerActivity : AppCompatActivity() {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
         binding.playerView.apply {
             controllerAutoShow = !isInPictureInPictureMode
+            _isInPip = isInPictureInPictureMode
             if (isInPictureInPictureMode) hideController() else showController()
         }
         if (onStopCalled) {
@@ -152,6 +151,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun enterPIPMode() {
+        _isInPip = true
         this.enterPictureInPictureMode(
             PictureInPictureParams.Builder()
                 .build()
@@ -174,7 +174,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
-        exoPlayer.pause()
+        if (!_isInPip) exoPlayer.pause()
         super.onPause()
     }
 

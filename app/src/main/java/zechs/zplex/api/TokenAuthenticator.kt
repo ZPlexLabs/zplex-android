@@ -1,6 +1,5 @@
 package zechs.zplex.api
 
-import android.net.Uri
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.Authenticator
@@ -17,7 +16,6 @@ import zechs.zplex.utils.Constants.CLIENT_ID
 import zechs.zplex.utils.Constants.CLIENT_SECRET
 import zechs.zplex.utils.Constants.REFRESH_TOKEN
 import zechs.zplex.utils.SessionManager
-import java.io.IOException
 
 
 class TokenAuthenticator : Authenticator {
@@ -25,7 +23,6 @@ class TokenAuthenticator : Authenticator {
     private val appContext = ThisApp.context
     private val sessionManager = appContext?.let { SessionManager(it) }
 
-    @Throws(IOException::class)
     override fun authenticate(route: Route?, response: Response): Request? {
 
         val moshi = Moshi.Builder()
@@ -39,39 +36,25 @@ class TokenAuthenticator : Authenticator {
 
         val tokenAPI = service.create(TokenAPI::class.java)
 
-        val call = tokenAPI.getAccessToken(
+        val tokenResponse = tokenAPI.getAccessToken(
             TokenRequest(
                 CLIENT_ID,
                 CLIENT_SECRET,
                 REFRESH_TOKEN
             )
-        )
-        val tokenResponse = call.execute()
+        ).execute()
+
         if (tokenResponse.isSuccessful) {
             tokenResponse.body()?.let { res ->
                 val newAccessToken = res.access_token
                 sessionManager?.saveAuthToken(newAccessToken)
-                val currentRequestUrl: Uri = Uri.parse(response.request.url.toString())
-                val newRequestUrl =
-                    addNewTokenInQuery(currentRequestUrl, newAccessToken)
-                println("newRequestUrl:  $newRequestUrl")
                 return response.request.newBuilder()
-                    .url(newRequestUrl.toString())
+                    .removeHeader("Authorization")
+                    .addHeader("Authorization", "Bearer $newAccessToken")
+                    .url(response.request.url.toString())
                     .build()
             }
         }
         return null
     }
-
-    private fun addNewTokenInQuery(uri: Uri, newValue: String): Uri? {
-        val newUri = uri.buildUpon().clearQuery()
-        uri.queryParameterNames.map {
-            newUri.appendQueryParameter(
-                it,
-                if (it == "access_token") newValue else uri.getQueryParameter(it)
-            )
-        }
-        return newUri.build()
-    }
-
 }

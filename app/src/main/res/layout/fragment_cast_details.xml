@@ -3,7 +3,21 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary">
+
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/dark_faded_top"
+        android:backgroundTint="@color/colorPrimary"
+        android:elevation="1dp"
+        android:gravity="top"
+        android:theme="@style/MenuTheme"
+        app:navigationIcon="@drawable/ic_round_keyboard_backspace_24"
+        app:navigationIconTint="@color/textColor" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/successView"
@@ -12,15 +26,20 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/colorPrimary">
+            android:layout_height="match_parent">
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/group_ui_elements"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="textView1, tv_biography, chipGroup_actorMeta, textView2, rv_knowFor" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/image_card"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="56dp"
                 android:layout_marginEnd="24dp"
                 app:cardBackgroundColor="@android:color/transparent"
                 app:cardCornerRadius="24dp"
@@ -70,9 +89,7 @@
                 android:textSize="14sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/chipGroup_actorMeta"
-                app:layout_scrollFlags="scroll" />
-
+                app:layout_constraintTop_toBottomOf="@+id/chipGroup_actorMeta" />
 
             <TextView
                 android:id="@+id/tv_biography"
@@ -93,9 +110,9 @@
                 android:id="@+id/chipGroup_actorMeta"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="24dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="24dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/actor_name"
@@ -168,6 +185,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:clipToPadding="false"
                 android:paddingStart="8dp"
                 android:paddingEnd="0dp"
@@ -176,7 +194,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView2"
                 tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_curate"
+                tools:listitem="@layout/item_recom"
                 tools:orientation="horizontal" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -189,7 +207,8 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center"
-        android:elevation="24dp"
+        android:layout_marginTop="72dp"
+        android:elevation="16dp"
         android:visibility="invisible"
         tools:indeterminateTint="@color/colorAccent"
         tools:visibility="visible" />

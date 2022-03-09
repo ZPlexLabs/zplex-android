@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/black"
-    android:keepScreenOn="true"
-    tools:context=".ui.activity.PlayerActivity">
+    android:layout_height="match_parent">
 
-    <com.google.android.exoplayer2.ui.StyledPlayerView
-        android:id="@+id/player_view"
+    <zechs.zplex.ui.activity.player.dtpv.DoubleTapPlayerView
+        android:id="@+id/video_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:transitionName="shared_exoplayer"
-        app:controller_layout_id="@layout/exo_control_view"
-        app:show_buffering="when_playing"
+        app:dtpv_controller="@id/youtube_overlay"
         app:show_subtitle_button="true" />
 
-</FrameLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -4,6 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import zechs.zplex.models.dataclass.FilterArgs
+import zechs.zplex.models.enum.MediaType
+import zechs.zplex.models.enum.Order
+import zechs.zplex.models.enum.SortBy
 
 
 class FiltersViewModel : ViewModel() {
@@ -13,41 +16,27 @@ class FiltersViewModel : ViewModel() {
 
     init {
         setFilter(
-            mediaType = "tv",
-            sortBy = "popularity.desc",
+            mediaType = MediaType.movie,
+            sortBy = SortBy.popularity,
+            order = Order.desc,
             page = 1,
-            withKeyword = 0,
-            withGenres = 0
+            withKeyword = null,
+            withGenres = null
         )
     }
 
     fun setFilter(
-        mediaType: String,
-        sortBy: String,
+        mediaType: MediaType,
+        sortBy: SortBy,
+        order: Order,
         page: Int,
         withKeyword: Int?,
-        withGenres: Int
+        withGenres: Int?
     ) {
-        val update = FilterArgs(mediaType, sortBy, page, withKeyword, withGenres)
+        val update = FilterArgs(mediaType, sortBy, order, page, withKeyword, withGenres)
         if (_filterArgs.value == update) return
         _filterArgs.value = update
     }
 
-
-// TODO: Try out Shared flow
-//
-//    private val _filterArgs = MutableSharedFlow<FilterArgs>()
-//    val filterArgs: SharedFlow<FilterArgs> = _filterArgs
-//
-//    fun setFilter(
-//        mediaType: String,
-//        sortBy: String,
-//        page: Int,
-//        withKeyword: String,
-//        withGenres: String
-//    ) {
-//        val update = FilterArgs(mediaType, sortBy, page, withKeyword, withGenres)
-//        if (_filterArgs. == update) return
-//        _filterArgs.value = update
-//    }
+    fun getFilter() = _filterArgs.value
 }

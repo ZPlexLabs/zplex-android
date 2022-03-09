@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/textView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:ellipsize="end"
+    android:fontFamily="@font/open_sans_semibold"
+    android:maxLines="1"
+    android:padding="16dp"
+    android:textColor="@color/textColor_87"
+    android:textSize="14sp"
+    app:layout_constraintEnd_toEndOf="@+id/tv_title"
+    app:layout_constraintStart_toStartOf="@+id/poster_card"
+    app:layout_constraintTop_toBottomOf="@+id/tv_title"
+    tools:text="Action" />

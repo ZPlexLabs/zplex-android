@@ -12,13 +12,13 @@ class SeasonViewModel : ViewModel() {
     val showId: LiveData<ShowSeason> get() = _showSeason
 
     fun setShowSeason(
-        driveId: String?,
         tmdbId: Int,
         seasonName: String,
         seasonNumber: Int,
-        showName: String
+        showName: String,
+        posterPath: String?
     ) {
-        val update = ShowSeason(driveId, tmdbId, seasonName, seasonNumber, showName)
+        val update = ShowSeason(tmdbId, seasonName, seasonNumber, showName, posterPath)
         if (_showSeason.value == update) return
         _showSeason.value = update
     }

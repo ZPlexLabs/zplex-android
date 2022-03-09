@@ -34,7 +34,10 @@ sealed class AboutDataModel {
         val name: String?,
         val poster_path: String?,
         val title: String?,
-        val vote_average: Double?
+        val vote_average: Double?,
+        val backdrop_path: String?,
+        val overview: String?,
+        val release_date: String?
     ) : AboutDataModel()
 
     @Keep
@@ -44,6 +47,20 @@ sealed class AboutDataModel {
         val site: String,
         val thumbUrl: String,
         val watchUrl: String
+    ) : AboutDataModel()
+
+    @Keep
+    data class Collection(
+        val id: Int,
+        val name: String?,
+        val poster_path: String?,
+        val backdrop_path: String?
+    ) : AboutDataModel()
+
+    @Keep
+    data class Media(
+        val plot: String,
+        val partOf: String?
     ) : AboutDataModel()
 
 }

@@ -23,12 +23,11 @@
 
         <ImageView
             android:id="@+id/iv_poster"
-            android:layout_width="195dp"
-            android:layout_height="310dp"
+            android:layout_width="173dp"
+            android:layout_height="263dp"
             android:layout_gravity="center"
             android:contentDescription="@null"
-            android:scaleType="centerCrop"
-
+            android:scaleType="fitXY"
             tools:srcCompat="@drawable/no_poster" />
 
     </com.google.android.material.card.MaterialCardView>

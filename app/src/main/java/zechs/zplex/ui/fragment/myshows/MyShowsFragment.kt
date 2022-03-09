@@ -1,16 +1,22 @@
 package zechs.zplex.ui.fragment.myshows
 
+import android.content.res.ColorStateList
 import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Transition
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.Snackbar
 import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
@@ -18,26 +24,39 @@ import zechs.zplex.databinding.FragmentMyShowsBinding
 import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
+import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.activity.ZPlexActivity
 
 
-class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
+class MyShowsFragment : BaseFragment() {
+
+    override val enterTransitionListener: Transition.TransitionListener? = null
 
     private var _binding: FragmentMyShowsBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var myShowsViewModel: MyShowsViewModel
-
     private val showsAdapter by lazy { SearchAdapter() }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentMyShowsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentMyShowsBinding.bind(view)
 
+
         myShowsViewModel = (activity as ZPlexActivity).myShowsViewModel
         setupRecyclerView()
 
-        myShowsViewModel.savedMedia.observe(viewLifecycleOwner, { media ->
+        myShowsViewModel.savedMedia.observe(viewLifecycleOwner) { media ->
             val isEmpty = media?.isEmpty() ?: true
             binding.rvMyShows.isGone = isEmpty
             binding.errorView.apply {
@@ -51,7 +70,7 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
                 )
             }
             showsAdapter.differ.submitList(media)
-        })
+        }
 
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
@@ -66,11 +85,16 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.absoluteAdapterPosition
+                val position = viewHolder.adapterPosition
                 val media = showsAdapter.differ.currentList[position]
                 val bottomNavView = activity?.findViewById(
                     R.id.bottomNavigationView
                 ) as BottomNavigationView?
+                val name = media.name ?: media.title
+                val snackBar = Snackbar.make(
+                    view, "$name removed from your library",
+                    Snackbar.LENGTH_SHORT
+                )
                 if (media.media_type == "tv") {
                     val show = Show(
                         id = media.id,
@@ -80,6 +104,11 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
                         vote_average = media.vote_average
                     )
                     myShowsViewModel.deleteShow(show)
+                    snackBar.setAction(
+                        R.string.undo
+                    ) {
+                        myShowsViewModel.saveShow(show)
+                    }
                 } else {
                     val movie = Movie(
                         id = media.id,
@@ -89,15 +118,22 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
                         vote_average = media.vote_average
                     )
                     myShowsViewModel.deleteMovie(movie)
+                    snackBar.setAction(R.string.undo) {
+                        myShowsViewModel.saveMovie(movie)
+                    }
                 }
-                val name = media.name ?: media.title
-                val snackBar = Snackbar.make(
-                    view, "$name removed from your library",
-                    Snackbar.LENGTH_SHORT
-                )
+
                 bottomNavView?.let {
                     snackBar.anchorView = it
                 }
+                val accentColor = ColorStateList.valueOf(
+                    ContextCompat.getColor(
+                        requireContext(),
+                        R.color.colorAccent
+                    )
+                )
+
+                snackBar.setActionTextColor(accentColor)
                 snackBar.show()
             }
         }
@@ -105,18 +141,22 @@ class MyShowsFragment : Fragment(R.layout.fragment_my_shows) {
         ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(binding.rvMyShows)
     }
 
+
     private fun setupRecyclerView() {
         binding.rvMyShows.apply {
             adapter = showsAdapter
             layoutManager = GridLayoutManager(activity, 3)
-            showsAdapter.setOnItemClickListener {
+            showsAdapter.setOnItemClickListener { media, view, position ->
                 val action = MyShowsFragmentDirections.actionMyShowsFragmentToFragmentMedia(
-                    MediaArgs(
-                        it.id,
-                        it.media_type ?: "none", it
-                    )
+                    MediaArgs(media.id, media.media_type ?: "none", media, position)
                 )
-                findNavController().navigate(action)
+
+                val posterView = view.findViewById<MaterialCardView>(R.id.image_card)
+                val extras = FragmentNavigatorExtras(posterView to posterView.transitionName)
+
+                Log.d("showsAdapter", posterView.transitionName)
+
+                findNavController().navigate(action, extras)
             }
         }
     }

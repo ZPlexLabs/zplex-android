@@ -25,17 +25,23 @@ class BrowseViewModel(
     private var browseResponse: SearchResponse? = null
     private var page = 1
 
-    private var newSearchQuery: String? = null
-    private var oldSearchQuery: String? = null
+    private var newSearchQuery: FilterArgs? = null
+    private var oldSearchQuery: FilterArgs? = null
 
     fun getBrowse(filterArgs: FilterArgs) = viewModelScope.launch {
-        newSearchQuery = filterArgs.withGenres.toString()
+        newSearchQuery = filterArgs
+        println(
+            "usedPage=${if (newSearchQuery != oldSearchQuery) 1 else page}, " +
+                    "oldSearchQuery=$oldSearchQuery, " +
+                    "newSearchQuery=$newSearchQuery, " + "page=$page, "
+        )
         browse.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
                 val response = tmdbRepository.getBrowse(
                     mediaType = filterArgs.mediaType,
                     sortBy = filterArgs.sortBy,
+                    order = filterArgs.order,
                     page = if (newSearchQuery != oldSearchQuery) 1 else page,
                     withKeyword = filterArgs.withKeyword,
                     withGenres = filterArgs.withGenres

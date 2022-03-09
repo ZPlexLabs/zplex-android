@@ -14,32 +14,27 @@ import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.utils.Resource
 import java.io.IOException
-import java.time.Year
 
 class HomeViewModel(
     app: Application,
     private val tmdbRepository: TmdbRepository
 ) : AndroidViewModel(app) {
 
-    val movies: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
-    val shows: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
-    val animes: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
+    private val timeWindow = "day"
+
+    val streamingTheatres: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
     val trending: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
 
-    private val currentYear = Year.now().value
-
     init {
-        getMovies()
-        getShows()
-        getAnimes()
         getTrending()
+        getStreamingAndInTheatres(0)
     }
 
     private fun getTrending() = viewModelScope.launch {
         trending.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
-                val response = tmdbRepository.getTrending()
+                val response = tmdbRepository.getTrending(timeWindow)
                 trending.postValue(handleTrendingResponse(response))
             } else {
                 trending.postValue(Resource.Error("No internet connection"))
@@ -55,89 +50,29 @@ class HomeViewModel(
         }
     }
 
+    fun getStreamingAndInTheatres(index: Int) = viewModelScope.launch {
+        streamingTheatres.postValue(Resource.Loading())
+        try {
+            if (hasInternetConnection()) {
+                val response = if (index == 0) {
+                    tmdbRepository.getInTheatres()
+                } else tmdbRepository.getStreaming()
+                streamingTheatres.postValue(handleTrendingResponse(response))
+            } else {
+                streamingTheatres.postValue(Resource.Error("No internet connection"))
+            }
+        } catch (t: Throwable) {
+            println(t.stackTrace)
+            println(t.message)
+            streamingTheatres.postValue(
+                Resource.Error(
+                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
+                )
+            )
+        }
+    }
+
     private fun handleTrendingResponse(
-        response: Response<SearchResponse>
-    ): Resource<SearchResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
-            }
-        }
-        return Resource.Error(response.message())
-    }
-
-    private fun getMovies() = viewModelScope.launch {
-        movies.postValue(Resource.Loading())
-        try {
-            if (hasInternetConnection()) {
-                val response = tmdbRepository.getPopularMovie(currentYear)
-                movies.postValue(handleMoviesResponse(response))
-            } else {
-                movies.postValue(Resource.Error("No internet connection"))
-            }
-        } catch (t: Throwable) {
-            println(t.stackTrace)
-            println(t.message)
-            movies.postValue(
-                Resource.Error(
-                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
-                )
-            )
-        }
-    }
-
-    private fun handleMoviesResponse(
-        response: Response<SearchResponse>
-    ): Resource<SearchResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
-            }
-        }
-        return Resource.Error(response.message())
-    }
-
-    private fun getShows() = viewModelScope.launch {
-        shows.postValue(Resource.Loading())
-        try {
-            if (hasInternetConnection()) {
-                val response = tmdbRepository.getPopularShow(currentYear, null)
-                shows.postValue(handleShowsResponse(response))
-            } else {
-                shows.postValue(Resource.Error("No internet connection"))
-            }
-        } catch (t: Throwable) {
-            println(t.stackTrace)
-            println(t.message)
-            shows.postValue(
-                Resource.Error(
-                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
-                )
-            )
-        }
-    }
-
-    private fun getAnimes() = viewModelScope.launch {
-        animes.postValue(Resource.Loading())
-        try {
-            if (hasInternetConnection()) {
-                val response = tmdbRepository.getPopularShow(currentYear, 210024)
-                animes.postValue(handleShowsResponse(response))
-            } else {
-                animes.postValue(Resource.Error("No internet connection"))
-            }
-        } catch (t: Throwable) {
-            println(t.stackTrace)
-            println(t.message)
-            animes.postValue(
-                Resource.Error(
-                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
-                )
-            )
-        }
-    }
-
-    private fun handleShowsResponse(
         response: Response<SearchResponse>
     ): Resource<SearchResponse> {
         if (response.isSuccessful) {

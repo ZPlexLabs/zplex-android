@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="_certs">
+        <item>@array/_certs_dev</item>
+        <item>@array/_certs_prod</item>
+    </array>
+    <string-array name="_certs_dev">
+        <item>
+            
+        </item>
+    </string-array>
+    <string-array name="_certs_prod">
+        <item>
+            
+        </item>
+    </string-array>
+</resources>

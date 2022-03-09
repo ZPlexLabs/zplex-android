@@ -1,15 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary">
+    android:background="@android:color/black">
 
     <zechs.zplex.utils.view.GestureImageView
         android:id="@+id/big_image_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="@color/colorPrimary"
         tools:src="@drawable/no_poster" />
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/dark_faded_top"
+        android:backgroundTint="@color/colorPrimary"
+        android:elevation="1dp"
+        android:gravity="top"
+        android:theme="@style/MenuTheme"
+        app:navigationIcon="@drawable/ic_round_keyboard_backspace_24"
+        app:navigationIconTint="@color/textColor" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

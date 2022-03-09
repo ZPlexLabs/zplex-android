@@ -2,6 +2,8 @@ package zechs.zplex.utils
 
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -59,5 +61,12 @@ object ConverterUtils {
     fun convertMinutes(min: Int): String {
         if (min <= 60) return "$min min"
         return "${min / 60} hr ${min % 60} min"
+    }
+
+    fun parseDate(date: String, pattern: String = "EEEE dd, yyyy"): String {
+        val srcFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val dstFormat = DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH)
+        val datetime = LocalDate.parse(date, srcFormat)
+        return datetime.format(dstFormat)
     }
 }

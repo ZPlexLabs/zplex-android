@@ -7,7 +7,7 @@
     android:background="@color/colorPrimary">
 
     <ImageView
-        android:id="@+id/thumb"
+        android:id="@+id/iv_backdrop"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:adjustViewBounds="true"
@@ -40,7 +40,7 @@
         app:layout_constraintEnd_toEndOf="@+id/tv_title"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/tv_title"
-        app:layout_constraintTop_toBottomOf="@+id/thumb"
+        app:layout_constraintTop_toBottomOf="@+id/iv_backdrop"
         tools:text="Season 1, Episode 1" />
 
     <TextView

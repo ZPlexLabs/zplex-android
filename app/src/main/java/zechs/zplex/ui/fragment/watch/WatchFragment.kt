@@ -13,10 +13,10 @@ import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
 import zechs.zplex.adapter.media.adapters.CastAdapter
 import zechs.zplex.databinding.FragmentWatchBinding
+import zechs.zplex.models.dataclass.CastArgs
 import zechs.zplex.models.tmdb.StillSize
 import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
 import zechs.zplex.ui.fragment.viewmodels.EpisodeViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
@@ -28,7 +28,6 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
     private var _binding: FragmentWatchBinding? = null
     private val binding get() = _binding!!
 
-    private val castDetailsViewModel by activityViewModels<CastDetailsViewModel>()
     private val episodeViewModel by activityViewModels<EpisodeViewModel>()
     private lateinit var watchViewModel: WatchViewModel
     private val castAdapter by lazy { CastAdapter() }
@@ -62,14 +61,14 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
         watchViewModel = (activity as ZPlexActivity).watchViewModel
         setupRecyclerView()
 
-        episodeViewModel.showEpisode.observe(viewLifecycleOwner, {
+        episodeViewModel.showEpisode.observe(viewLifecycleOwner) {
             tmdbId = it.tmdbId
             watchViewModel.getEpisode(
                 it.tmdbId, it.seasonNumber, it.episodeNumber
             )
-        })
+        }
 
-        watchViewModel.episode.observe(viewLifecycleOwner, { responseEpisode ->
+        watchViewModel.episode.observe(viewLifecycleOwner) { responseEpisode ->
             when (responseEpisode) {
                 is Resource.Success -> {
                     responseEpisode.data?.let { doOnSuccess(it) }
@@ -79,7 +78,7 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
                 is Resource.Loading -> {
                 }
             }
-        })
+        }
 
     }
 
@@ -110,10 +109,10 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
                 .asBitmap()
                 .load(episodeStillUrl)
                 .placeholder(R.drawable.no_thumb)
-                .into(binding.thumb)
+                .into(binding.ivBackdrop)
         }
 
-        val castList = episode.guest_stars.map {
+        val castList = episode.guest_stars?.map {
             AboutDataModel.Cast(
                 character = it.character,
                 credit_id = it.credit_id,
@@ -121,7 +120,7 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
                 name = it.name,
                 profile_path = it.profile_path
             )
-        }
+        } ?: listOf()
 
         binding.apply {
             rvCasts.isInvisible = castList.isEmpty()
@@ -147,10 +146,10 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
             itemAnimator = null
         }
         castAdapter.setOnItemClickListener {
-            castDetailsViewModel.setCast(
-                it.person_id, it.credit_id
+            val action = WatchFragmentDirections.actionWatchFragmentToCastsFragment(
+                CastArgs(it.credit_id, it.person_id, it.name, it.profile_path)
             )
-            findNavController().navigate(R.id.action_watchFragment_to_castsFragment)
+            findNavController().navigate(action)
         }
     }
 

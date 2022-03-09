@@ -4,6 +4,9 @@ import zechs.zplex.api.RetrofitInstance
 import zechs.zplex.db.WatchlistDatabase
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
+import zechs.zplex.models.enum.MediaType
+import zechs.zplex.models.enum.Order
+import zechs.zplex.models.enum.SortBy
 
 class TmdbRepository(
     private val db: WatchlistDatabase
@@ -96,21 +99,26 @@ class TmdbRepository(
         person_id: Int
     ) = RetrofitInstance.api_tmdb.getPeople(person_id = person_id)
 
+    suspend fun getTrending(
+        time_window: String
+    ) = RetrofitInstance.api_tmdb.getTrending(time_window)
+
+    suspend fun getStreaming() = RetrofitInstance.api_tmdb.getStreaming()
+    suspend fun getInTheatres() = RetrofitInstance.api_tmdb.getInTheatres()
+    suspend fun getUpcoming(page: Int) = RetrofitInstance.api_tmdb.getUpcoming(page = page)
+
     suspend fun getBrowse(
-        mediaType: String,
-        sortBy: String,
+        mediaType: MediaType,
+        sortBy: SortBy,
+        order: Order,
         page: Int,
         withKeyword: Int?,
         withGenres: Int?,
-    ) = RetrofitInstance.api_tmdb.getDiscover(
+    ) = RetrofitInstance.api_tmdb.getBrowse(
         media_type = mediaType,
-        sort_by = sortBy,
+        sort_by = "${sortBy.name}.${order.name}",
         page = page,
         with_keywords = withKeyword,
         with_genres = withGenres,
-        first_air_date_year = null
     )
-
-    suspend fun getTrending() = RetrofitInstance.api_tmdb.getTrendingToday()
-
 }

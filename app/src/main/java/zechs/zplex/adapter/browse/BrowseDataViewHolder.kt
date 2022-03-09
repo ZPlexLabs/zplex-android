@@ -51,7 +51,7 @@ sealed class BrowseDataViewHolder(
             genreAdapter.differ.submitList(item.genres)
             genreAdapter.setOnItemClickListener { genre ->
                 browseDataAdapter.onItemClickListener?.let {
-                    it(Genre(genre.id, genre.name, genre.mediaType))
+                    it(Genre(genre.id, genre.name, genre.mediaType, genre.keyword))
                 }
             }
         }

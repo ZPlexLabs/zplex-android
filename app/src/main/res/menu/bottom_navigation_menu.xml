@@ -3,17 +3,27 @@
 
     <item
         android:id="@+id/homeFragment"
-        android:icon="@drawable/ic_home"
+        android:icon="@drawable/ic_round_home_24"
         android:title="@string/home" />
 
     <item
         android:id="@+id/discoverFragment"
-        android:icon="@drawable/ic_search"
+        android:icon="@drawable/ic_browse_filled_24dp"
         android:title="@string/discover" />
 
     <item
+        android:id="@+id/upcomingFragment"
+        android:icon="@drawable/ic_upcoming_black_24dp"
+        android:title="@string/upcoming" />
+
+    <item
         android:id="@+id/myShowsFragment"
-        android:icon="@drawable/ic_my_shows"
-        android:title="@string/my_shows" />
+        android:icon="@drawable/ic_library_filled_24dp"
+        android:title="@string/library" />
+
+    <!--    <item-->
+    <!--        android:id="@+id/musicFragment"-->
+    <!--        android:icon="@drawable/ic_round_music_note_24"-->
+    <!--        android:title="@string/music" />-->
 
 </menu>

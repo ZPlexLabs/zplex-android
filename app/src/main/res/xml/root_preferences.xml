@@ -1,0 +1,40 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/pref_general_header">
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="frameRateMatching"
+            app:summaryOff="@string/pref_framerate_matching_off"
+            app:summaryOn="@string/pref_framerate_matching_on"
+            app:title="@string/pref_framerate_matching" />
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="tunneling"
+            app:summary="@string/pref_tunneling_summary"
+            app:title="@string/pref_tunneling" />
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="autoPiP"
+            app:summaryOff="@string/pref_auto_pip_off"
+            app:summaryOn="@string/pref_auto_pip_on"
+            app:title="@string/pref_auto_pip" />
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="skipSilence"
+            app:summaryOff="@string/pref_skip_silence_off"
+            app:summaryOn="@string/pref_skip_silence_on"
+            app:title="@string/pref_skip_silence" />
+
+        <SwitchPreferenceCompat
+            app:defaultValue="false"
+            app:key="repeatToggle"
+            app:summary="@string/pref_repeat_toggle_summary"
+            app:title="@string/pref_repeat_toggle" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

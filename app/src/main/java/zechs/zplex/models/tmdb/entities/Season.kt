@@ -8,5 +8,7 @@ data class Season(
     val id: Int,
     val name: String,
     val poster_path: String?,
-    val season_number: Int
+    val season_number: Int,
+    val overview: String?,
+    val air_date: String?
 )

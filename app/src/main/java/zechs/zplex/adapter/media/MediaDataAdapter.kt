@@ -1,5 +1,6 @@
 package zechs.zplex.adapter.media
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
@@ -9,7 +10,9 @@ import zechs.zplex.R
 import zechs.zplex.databinding.ItemDetailBinding
 import zechs.zplex.databinding.ItemMediaMetaBinding
 
-class MediaDataAdapter : RecyclerView.Adapter<MediaDataViewHolder>() {
+class MediaDataAdapter(
+    val viewAllOnClick: (String) -> Unit
+) : RecyclerView.Adapter<MediaDataViewHolder>() {
 
     @JvmField
     var onItemClickListener: ((AboutDataModel) -> Unit)? = null
@@ -75,12 +78,20 @@ class MediaDataAdapter : RecyclerView.Adapter<MediaDataViewHolder>() {
         }
     }
 
-    override fun getItemCount(): Int = differ.currentList.size
+    override fun getItemCount() = differ.currentList.size
 
     override fun getItemViewType(position: Int): Int {
         return when (differ.currentList[position]) {
             is MediaDataModel.Meta -> R.layout.item_media_meta
             is MediaDataModel.Details -> R.layout.item_detail
         }
+    }
+
+    override fun onViewRecycled(holder: MediaDataViewHolder) {
+        super.onViewRecycled(holder)
+        Log.d(
+            "onViewRecycled",
+            "position=${holder.adapterPosition}, viewType=${holder.itemViewType} "
+        )
     }
 }

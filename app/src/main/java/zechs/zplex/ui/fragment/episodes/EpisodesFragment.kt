@@ -1,23 +1,35 @@
 package zechs.zplex.ui.fragment.episodes
 
+import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.constraintlayout.widget.Constraints
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.transition.MaterialSharedAxis
+import androidx.transition.Transition
 import zechs.zplex.R
 import zechs.zplex.adapter.EpisodesAdapter
+import zechs.zplex.adapter.streams.StreamsDataModel
 import zechs.zplex.databinding.FragmentEpisodeBinding
 import zechs.zplex.models.tmdb.PosterSize
+import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.models.tmdb.season.SeasonResponse
-import zechs.zplex.ui.activity.PlayerActivity
+import zechs.zplex.models.witch.DashVideoResponseItem
+import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.activity.player.PlayerActivity
+import zechs.zplex.ui.dialog.StreamsDialog
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.ui.fragment.viewmodels.SeasonViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
@@ -25,35 +37,31 @@ import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
 
 
-class EpisodesFragment : Fragment(R.layout.fragment_episode) {
+class EpisodesFragment : BaseFragment() {
+
+    override val enterTransitionListener: Transition.TransitionListener? = null
 
     private var _binding: FragmentEpisodeBinding? = null
     private val binding get() = _binding!!
 
-    // private val episodeViewModel by activityViewModels<EpisodeViewModel>()
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
     private val bigImageViewModel: BigImageViewModel by activityViewModels()
     private lateinit var episodesViewModel: EpisodesViewModel
-    private val episodesAdapter: EpisodesAdapter by lazy { EpisodesAdapter() }
+    private val episodesAdapter by lazy { EpisodesAdapter() }
+
+    private lateinit var streamsDialog: StreamsDialog
 
     private val thisTAG = "EpisodesFragment"
     private var tmdbId = 0
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
 
-        enterTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, true
-        ).apply {
-            duration = 500L
-        }
-
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, false
-        ).apply {
-            duration = 500L
-        }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentEpisodeBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -70,13 +78,22 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
             itemAnimator = null
         }
 
-        seasonViewModel.showId.observe(viewLifecycleOwner, { showSeason ->
+        binding.seasonToolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+
+        seasonViewModel.showId.observe(viewLifecycleOwner) { showSeason ->
             episodesViewModel.getSeason(
                 tvId = showSeason.tmdbId,
                 seasonNumber = showSeason.seasonNumber
             )
 
+            val posterUrl = if (showSeason?.posterPath == null) {
+                R.drawable.no_poster
+            } else {
+                "$TMDB_IMAGE_PREFIX/${PosterSize.w500}${showSeason.posterPath}"
+            }
+
             val seasonText = "Season ${showSeason.seasonNumber}"
+
             binding.apply {
                 if (showSeason.seasonName == seasonText) {
                     seasonToolbar.title = seasonText
@@ -85,11 +102,23 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
                     seasonToolbar.title = seasonText
                     seasonToolbar.subtitle = showSeason.seasonName
                 }
-            }
-            tmdbId = showSeason.tmdbId
-        })
 
-        episodesViewModel.season.observe(viewLifecycleOwner, { responseMedia ->
+                GlideApp.with(ivPoster)
+                    .load(posterUrl)
+                    .placeholder(R.drawable.no_poster)
+                    .into(ivPoster)
+
+                ivPoster.setOnClickListener {
+                    openImageFullSize(showSeason?.posterPath, binding.ivPoster)
+                }
+
+            }
+
+            tmdbId = showSeason.tmdbId
+        }
+
+        setupDashStreamsObserver()
+        episodesViewModel.season.observe(viewLifecycleOwner) { responseMedia ->
             when (responseMedia) {
                 is Resource.Success -> {
                     responseMedia.data?.let { seasonResponse ->
@@ -99,9 +128,9 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
 
                 is Resource.Error -> {
                     responseMedia.message?.let { message ->
-                        val errorMsg = if (message.isEmpty()) {
+                        val errorMsg = message.ifEmpty {
                             resources.getString(R.string.something_went_wrong)
-                        } else message
+                        }
                         Log.e(thisTAG, errorMsg)
                         binding.apply {
                             appBarLayout.isInvisible = true
@@ -117,7 +146,6 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
 
                 is Resource.Loading -> {
                     binding.apply {
-                        appBarLayout.isInvisible = true
                         rvEpisodes.isInvisible = true
                         pbEpisodes.isVisible = true
                         errorView.root.isVisible = false
@@ -125,30 +153,25 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
                     episodesAdapter.setOnItemClickListener { }
                 }
             }
-        })
+        }
 
+    }
+
+    private fun openImageFullSize(posterPath: String?, imageView: ImageView) {
+        imageView.transitionName = posterPath
+        this.exitTransition = null
+        bigImageViewModel.setImagePath(posterPath)
+
+        val action = EpisodesFragmentDirections.actionEpisodesListFragmentToBigImageFragment()
+        val extras = FragmentNavigatorExtras(
+            imageView to imageView.transitionName
+        )
+        findNavController().navigate(action, extras)
+        Log.d("navigateToMedia", imageView.transitionName)
     }
 
 
     private fun doOnSuccess(seasonResponse: SeasonResponse) {
-
-        val posterUrl = if (seasonResponse.poster_path == null) {
-            R.drawable.no_poster
-        } else {
-            "${TMDB_IMAGE_PREFIX}/${PosterSize.w500}${seasonResponse.poster_path}"
-        }
-
-        context?.let { c ->
-            GlideApp.with(c)
-                .load(posterUrl)
-                .placeholder(R.drawable.no_poster)
-                .into(binding.ivPoster)
-        }
-
-        binding.ivPoster.setOnClickListener {
-            bigImageViewModel.setImagePath(seasonResponse.poster_path)
-            findNavController().navigate(R.id.action_episodesListFragment_to_bigImageFragment)
-        }
 
         val episodesList = seasonResponse.episodes?.toList() ?: listOf()
         episodesAdapter.differ.submitList(episodesList)
@@ -157,7 +180,6 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
             val errorMsg = getString(R.string.no_episodes_found)
             Log.e(thisTAG, errorMsg)
             binding.apply {
-                appBarLayout.isInvisible = true
                 rvEpisodes.isInvisible = true
                 pbEpisodes.isInvisible = true
                 errorView.root.isVisible = true
@@ -168,29 +190,121 @@ class EpisodesFragment : Fragment(R.layout.fragment_episode) {
             }
         } else {
             binding.apply {
-                appBarLayout.isVisible = true
                 rvEpisodes.isVisible = true
                 pbEpisodes.isInvisible = true
                 errorView.root.isVisible = false
             }
         }
-        episodesAdapter.setOnItemClickListener { episode ->
-            episode.fileId?.let {
-                playEpisode(
-                    it,
-                    if (episode.name.isNullOrEmpty()) "No title" else "Episode ${episode.episode_number} - ${episode.name}"
+        episodesAdapter.setOnItemClickListener {
+            context?.let { c -> showStreamsDialog(c, it) }
+        }
+    }
+
+
+    private fun showStreamsDialog(context: Context, episode: Episode) {
+        streamsDialog = StreamsDialog(context)
+        streamsDialog.show()
+
+        streamsDialog.window?.apply {
+
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setLayout(
+                Constraints.LayoutParams.MATCH_PARENT,
+                Constraints.LayoutParams.WRAP_CONTENT
+            )
+        }
+        val streamsList = mutableListOf<StreamsDataModel>()
+        episode.fileId?.let { id ->
+            streamsList.add(
+                StreamsDataModel.Original(
+                    title = "Original (${episode.fileSize!!})",
+                    id = id
                 )
+            )
+            episodesViewModel.getDashVideos(episode.fileId)
+        }
+
+        streamsList.add(StreamsDataModel.Loading)
+
+        streamsDialog.streamsDataAdapter.differ.submitList(streamsList.toList())
+        streamsDialog.streamsDataAdapter.setOnItemClickListener {
+            when (it) {
+                is StreamsDataModel.Original -> playEpisode(episode, null, null)
+                is StreamsDataModel.Stream -> {
+                    playEpisode(episode, it.cookie, it.url)
+                }
+                else -> {}
             }
         }
 
     }
 
-    private fun playEpisode(fileId: String, title: String) {
-        val intent = Intent(activity, PlayerActivity::class.java)
-        intent.putExtra("fileId", fileId)
-        intent.putExtra("title", title)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        activity?.startActivity(intent)
+
+    private fun playEpisode(episode: Episode, cookie: String?, stream: String?) {
+        episode.fileId?.let { id ->
+            val title = if (episode.name.isNullOrEmpty()) {
+                "No title"
+            } else "Episode ${episode.episode_number} - ${episode.name}"
+            val intent = Intent(activity, PlayerActivity::class.java)
+            intent.putExtra("fileId", id)
+            intent.putExtra("title", title)
+            cookie?.let { intent.putExtra("cookie", it) }
+            stream?.let { intent.putExtra("dash_url", it) }
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            activity?.startActivity(intent)
+        }
+    }
+
+
+    private fun setupDashStreamsObserver() {
+        episodesViewModel.dashVideo.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { streamsResponse ->
+                handleDashStreamsResponse(streamsResponse)
+            }
+        }
+    }
+
+    private fun handleDashStreamsResponse(
+        streamsResponse: Resource<List<DashVideoResponseItem>>
+    ) {
+        if (this::streamsDialog.isInitialized) {
+            when (streamsResponse) {
+                is Resource.Success -> {
+                    streamsResponse.data?.let {
+                        handleStreamsSuccess(it)
+                    }
+                }
+                else -> {
+                    val adapterDiff = streamsDialog.streamsDataAdapter.differ
+                    val currentList = adapterDiff.currentList
+                    val streamsList = mutableListOf<StreamsDataModel>()
+                    streamsList.add(currentList.filterIsInstance<StreamsDataModel.Original>()[0])
+                    adapterDiff.submitList(streamsList.toList())
+                }
+            }
+        }
+
+    }
+
+    private fun handleStreamsSuccess(streams: List<DashVideoResponseItem>) {
+        val adapterDiff = streamsDialog.streamsDataAdapter.differ
+        val currentList = adapterDiff.currentList
+
+        val streamsList = mutableListOf<StreamsDataModel>()
+        streamsList.add(currentList.filterIsInstance<StreamsDataModel.Original>()[0])
+
+        for (stream in streams) {
+            streamsList.add(
+                StreamsDataModel.Stream(
+                    name = "${stream.quality} (${stream.humanSize})",
+                    url = stream.url,
+                    cookie = stream.drive_stream
+                )
+            )
+
+        }
+        adapterDiff.submitList(streamsList.toList())
+
     }
 
     override fun onDestroy() {

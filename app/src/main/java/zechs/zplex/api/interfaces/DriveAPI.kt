@@ -2,6 +2,7 @@ package zechs.zplex.api.interfaces
 
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Query
 import zechs.zplex.models.drive.DriveResponse
 
@@ -9,7 +10,7 @@ interface DriveAPI {
 
     @GET("drive/v3/files")
     suspend fun getDriveFiles(
-        @Query("access_token")
+        @Header("Authorization")
         accessToken: String,
         @Query("supportsAllDrives")
         supportsAllDrives: Boolean = true,
@@ -18,7 +19,7 @@ interface DriveAPI {
         @Query("pageSize")
         pageSize: Int,
         @Query("pageToken")
-        pageToken: String = "",
+        pageToken: String? = null,
         @Query("fields")
         fields: String = "nextPageToken, files(id, name, size)",
         @Query("q")

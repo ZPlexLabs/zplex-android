@@ -12,28 +12,18 @@
         <action
             android:id="@+id/action_homeFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />
+        <action
+            android:id="@+id/action_homeFragment_to_searchFragment"
+            app:destination="@id/searchFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/discoverFragment"
-        android:name="zechs.zplex.ui.fragment.discover.DiscoverFragment"
-        android:label="DiscoverFragment"
-        tools:layout="@layout/fragment_discover">
-        <action
-            android:id="@+id/action_discoverFragment_to_searchFragment"
-            app:destination="@id/searchFragment" />
-        <action
-            android:id="@+id/action_discoverFragment_to_browseFragment"
-            app:destination="@id/browseFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/browseFragment"
         android:name="zechs.zplex.ui.fragment.browse.BrowseFragment"
-        android:label="Browse"
+        android:label="Discover"
         tools:layout="@layout/fragment_browse">
         <action
-            android:id="@+id/action_browseFragment_to_fragmentMedia"
+            android:id="@+id/action_discoverFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />
     </fragment>
 
@@ -67,7 +57,7 @@
         android:id="@+id/fragmentMedia"
         android:name="zechs.zplex.ui.fragment.media.FragmentMedia"
         android:label="Fragment Media"
-        tools:layout="@layout/fragment_media">
+        tools:layout="@layout/fragment_temp">
         <argument
             android:name="media"
             app:argType="zechs.zplex.models.dataclass.MediaArgs" />
@@ -90,6 +80,15 @@
                 android:name="media"
                 app:argType="zechs.zplex.models.dataclass.MediaArgs" />
         </action>
+        <action
+            android:id="@+id/action_fragmentMedia_to_shareBottomSheet"
+            app:destination="@id/shareBottomSheet" />
+        <action
+            android:id="@+id/action_fragmentMedia_to_fragmentList"
+            app:destination="@id/fragmentList" />
+        <action
+            android:id="@+id/action_fragmentMedia_to_fragmentCollection"
+            app:destination="@id/fragmentCollection" />
     </fragment>
 
     <fragment
@@ -120,6 +119,9 @@
         android:name="zechs.zplex.ui.fragment.cast.CastsFragment"
         android:label="CastsFragment"
         tools:layout="@layout/fragment_cast_details">
+        <argument
+            android:name="castArgs"
+            app:argType="zechs.zplex.models.dataclass.CastArgs" />
         <action
             android:id="@+id/action_castsFragment_to_bigImageFragment"
             app:destination="@id/bigImageFragment" />
@@ -127,6 +129,67 @@
             android:id="@+id/action_castsFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />
     </fragment>
-
+    <fragment
+        android:id="@+id/musicFragment"
+        android:name="zechs.zplex.ui.fragment.music.FragmentMusic"
+        android:label="FragmentMusic"
+        tools:layout="@layout/fragment_music">
+        <argument
+            android:name="folderId"
+            android:defaultValue="null"
+            app:argType="string" />
+        <argument
+            android:name="folderName"
+            android:defaultValue="null"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_musicFragment_self"
+            app:destination="@id/musicFragment">
+            <argument
+                android:name="folderId"
+                app:argType="string" />
+            <argument
+                android:name="folderName"
+                app:argType="string" />
+        </action>
+    </fragment>
+    <dialog
+        android:id="@+id/shareBottomSheet"
+        android:name="zechs.zplex.ui.sheet.ShareBottomSheet"
+        android:label="ShareBottomSheet"
+        tools:layout="@layout/sheet_share" />
+    <fragment
+        android:id="@+id/fragmentList"
+        android:name="zechs.zplex.ui.fragment.list.FragmentList"
+        android:label="FragmentList"
+        tools:layout="@layout/fragment_list">
+        <action
+            android:id="@+id/action_fragmentList_to_episodesListFragment"
+            app:destination="@id/episodesListFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragmentCollection"
+        android:name="zechs.zplex.ui.fragment.collection.FragmentCollection"
+        android:label="FragmentCollection"
+        tools:layout="@layout/fragment_collection">
+        <argument
+            android:name="media"
+            app:argType="zechs.zplex.models.tmdb.entities.Media" />
+        <action
+            android:id="@+id/action_fragmentCollection_to_bigImageFragment"
+            app:destination="@id/bigImageFragment" />
+        <action
+            android:id="@+id/action_fragmentCollection_to_fragmentMedia"
+            app:destination="@id/fragmentMedia" />
+    </fragment>
+    <fragment
+        android:id="@+id/upcomingFragment"
+        android:name="zechs.zplex.ui.fragment.upcoming.UpcomingFragment"
+        android:label="UpcomingFragment"
+        tools:layout="@layout/fragment_upcoming">
+        <action
+            android:id="@+id/action_upcomingFragment_to_fragmentMedia"
+            app:destination="@id/fragmentMedia" />
+    </fragment>
 
 </navigation>

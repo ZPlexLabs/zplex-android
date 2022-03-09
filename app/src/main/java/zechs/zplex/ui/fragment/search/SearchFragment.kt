@@ -6,6 +6,7 @@ import android.text.Editable
 import android.transition.TransitionManager
 import android.util.Log
 import android.view.View
+import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.isInvisible
@@ -15,6 +16,8 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.Fade
+import androidx.transition.TransitionSet
 import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
@@ -43,10 +46,33 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enterTransition = MaterialSharedAxis(
+
+        enterTransition = TransitionSet().apply {
+            addTransition(
+                MaterialSharedAxis(
+                    MaterialSharedAxis.Y, true
+                ).apply {
+                    interpolator = LinearInterpolator()
+                    duration = 500
+                })
+
+            addTransition(Fade().apply {
+                interpolator = LinearInterpolator()
+            })
+        }
+
+        exitTransition = MaterialSharedAxis(
             MaterialSharedAxis.Y, true
         ).apply {
-            duration = 500L
+            interpolator = LinearInterpolator()
+            duration = 500
+        }
+
+        returnTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, false
+        ).apply {
+            interpolator = LinearInterpolator()
+            duration = 220
         }
     }
 
@@ -56,6 +82,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         searchViewModel = (activity as ZPlexActivity).searchViewModel
         setupRecyclerView()
+        binding.topAppBar.setNavigationOnClickListener { findNavController().navigateUp() }
 
         var job: Job? = null
         binding.searchBox.apply {
@@ -77,7 +104,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             }
         }
 
-        searchViewModel.searchList.observe(viewLifecycleOwner, { response ->
+        searchViewModel.searchList.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Resource.Success -> {
                     isLoading = false
@@ -116,7 +143,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                     }
                 }
             }
-        })
+        }
 
     }
 
@@ -148,12 +175,11 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             addOnScrollListener(this@SearchFragment.scrollListener)
         }
 
-        searchAdapter.setOnItemClickListener {
+        searchAdapter.setOnItemClickListener { media, _, position ->
             hideKeyboard()
             val action = SearchFragmentDirections.actionSearchFragmentToFragmentMedia(
                 MediaArgs(
-                    it.id,
-                    it.media_type ?: "none", it
+                    media.id, media.media_type ?: "none", media, position
                 )
             )
             findNavController().navigate(action)

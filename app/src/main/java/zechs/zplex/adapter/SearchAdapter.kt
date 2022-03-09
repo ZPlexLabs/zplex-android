@@ -12,7 +12,6 @@ import zechs.zplex.models.tmdb.PosterSize
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
-import java.text.DecimalFormat
 
 
 class SearchAdapter : RecyclerView.Adapter<SearchAdapter.SearchViewHolder>() {
@@ -39,9 +38,7 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.SearchViewHolder>() {
         )
     }
 
-    override fun getItemCount(): Int {
-        return differ.currentList.size
-    }
+    override fun getItemCount() = differ.currentList.size
 
     override fun onBindViewHolder(holder: SearchViewHolder, position: Int) {
         val media = differ.currentList[position]
@@ -52,27 +49,30 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.SearchViewHolder>() {
             "${TMDB_IMAGE_PREFIX}/${PosterSize.w342}${media.poster_path}"
         }
 
-        val round = DecimalFormat("#.#")
-        val rating = media.vote_average ?: 0.0
-        val ratingText = "${round.format(rating)}/10"
+        val rating = "${media.vote_average?.div(2) ?: 0.0}"
 
         holder.itemView.apply {
             season_number.text = media.name ?: media.title
-            episode_count.text = ratingText
+            episode_count.text = rating.take(3)
 
             GlideApp.with(this)
                 .load(mediaPosterUrl)
                 .placeholder(R.drawable.no_poster)
                 .into(item_poster)
-            setOnClickListener {
-                onItemClickListener?.let { it(media) }
+
+            image_card.transitionName = "SHARED_${media.id}"
+
+            setOnClickListener { view ->
+                onItemClickListener?.let {
+                    it(media, view, position)
+                }
             }
         }
     }
 
-    private var onItemClickListener: ((Media) -> Unit)? = null
+    private var onItemClickListener: ((Media, View, Int) -> Unit)? = null
 
-    fun setOnItemClickListener(listener: (Media) -> Unit) {
+    fun setOnItemClickListener(listener: (Media, View, Int) -> Unit) {
         onItemClickListener = listener
     }
 }

@@ -5,11 +5,11 @@ import androidx.annotation.Keep
 @Keep
 data class Episode(
     val episode_number: Int?,
-    val guest_stars: List<Cast>,
+    val guest_stars: List<Cast>?,
     val id: Int,
     val name: String?,
     val overview: String?,
-    val season_number: Int?,
+    val season_number: Int,
     val still_path: String?,
     val fileId: String?,
     val fileName: String?,

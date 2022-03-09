@@ -8,7 +8,7 @@ data class CollectionsResponse(
     val backdrop_path: String?,
     val id: Int,
     val name: String,
-    val overview: String,
+    val overview: String?,
     val parts: List<Media>,
     val poster_path: String?
 )

@@ -4,9 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
+    android:layout_margin="2dp"
     android:animateLayoutChanges="true"
-    android:background="@android:color/transparent">
+    android:background="@android:color/transparent"
+    android:transitionGroup="true">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/image_card"
@@ -23,8 +24,8 @@
 
         <ImageView
             android:id="@+id/actor_image"
-            android:layout_width="116dp"
-            android:layout_height="116dp"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
             android:contentDescription="@null"
             android:scaleType="centerCrop"
             tools:src="@drawable/no_actor" />

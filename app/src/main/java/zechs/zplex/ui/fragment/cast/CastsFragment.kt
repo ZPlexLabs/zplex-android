@@ -2,17 +2,27 @@ package zechs.zplex.ui.fragment.cast
 
 import android.content.Context
 import android.os.Bundle
-import android.transition.TransitionManager
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
+import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.transition.Fade
+import androidx.transition.TransitionManager
+import androidx.transition.TransitionSet
 import com.google.android.material.chip.Chip
+import com.google.android.material.transition.MaterialFade
 import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
@@ -24,97 +34,132 @@ import zechs.zplex.models.tmdb.credit.CastObject
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.activity.ZPlexActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
-import zechs.zplex.ui.fragment.viewmodels.CastDetailsViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
 
-class CastsFragment : Fragment(R.layout.fragment_cast_details) {
+class CastsFragment : Fragment() {
 
     private var _binding: FragmentCastDetailsBinding? = null
     private val binding get() = _binding!!
 
-    private val castArgsViewModel by activityViewModels<CastDetailsViewModel>()
+    private val args: CastsFragmentArgs by navArgs()
+
     private val bigImageViewModel: BigImageViewModel by activityViewModels()
     private lateinit var castViewModel: CastViewModel
 
-    private val knowForAdapter by lazy { CurationAdapter() }
+    private val knowForAdapter by lazy {
+        CurationAdapter().apply { setHasStableIds(true) }
+    }
 
     private val thisTAG = "CastsFragment"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enterTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, true
-        ).apply {
-            duration = 500L
+        enterTransition = TransitionSet().apply {
+            addTransition(
+                MaterialSharedAxis(
+                    MaterialSharedAxis.Y, true
+                ).apply {
+                    interpolator = LinearInterpolator()
+                    duration = 500
+                })
+
+            addTransition(Fade().apply {
+                interpolator = LinearInterpolator()
+            })
         }
 
         exitTransition = MaterialSharedAxis(
+            MaterialSharedAxis.Y, true
+        ).apply {
+            interpolator = LinearInterpolator()
+            duration = 500
+        }
+
+        returnTransition = MaterialSharedAxis(
             MaterialSharedAxis.Y, false
         ).apply {
-            duration = 500L
+            interpolator = LinearInterpolator()
+            duration = 220
         }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentCastDetailsBinding.inflate(inflater, container, false)
+        binding.actorImage.transitionName = args.castArgs.profile_path
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentCastDetailsBinding.bind(view)
 
         castViewModel = (activity as ZPlexActivity).castViewModel
         setupRecyclerView()
+        setupCastObserver()
 
-        castArgsViewModel.castArgs.observe(viewLifecycleOwner, { castArgs ->
-            castViewModel.getCredit(castArgs.personId, castArgs.creditId)
-        })
+        val castArgs = args.castArgs
 
-        castViewModel.cast.observe(viewLifecycleOwner, { response ->
-            when (response) {
-                is Resource.Success -> {
-                    response.data?.let { doOnMediaSuccess(it) }
-                }
-                is Resource.Error -> {
-                    response.message?.let { message ->
-                        val errorMsg = if (message.isEmpty()) {
-                            resources.getString(R.string.something_went_wrong)
-                        } else message
-                        Log.e(thisTAG, errorMsg)
-                        binding.apply {
-                            pbDetails.isGone = true
-                            successView.isGone = true
-                            errorView.root.isVisible = true
-                        }
-                        binding.errorView.apply {
-                            errorTxt.text = errorMsg
-                        }
-                    }
-                }
-                is Resource.Loading -> {
-                    binding.apply {
-                        chipGroupActorMeta.removeAllViews()
-                        pbDetails.isVisible = true
-                        successView.isGone = true
-                        binding.errorView.root.isGone = true
-                    }
-                }
-            }
-        })
-    }
-
-    private fun doOnMediaSuccess(cast: CastObject) {
-        val profileUrl = if (cast.profile_path != null) {
-            "${TMDB_IMAGE_PREFIX}/${ProfileSize.h632}${cast.profile_path}"
+        val profileUrl = if (castArgs.profile_path != null) {
+            "${TMDB_IMAGE_PREFIX}/${ProfileSize.h632}${castArgs.profile_path}"
         } else {
             R.drawable.no_actor
         }
 
-        context?.let { c ->
-            GlideApp.with(c)
+        binding.apply {
+            GlideApp.with(actorImage)
                 .load(profileUrl)
                 .placeholder(R.drawable.no_actor)
-                .into(binding.actorImage)
+                .into(actorImage)
+            actorName.text = castArgs.name
+            toolbar.setNavigationOnClickListener {
+                findNavController().navigateUp()
+            }
+            actorImage.setOnClickListener {
+                openImageFullSize(castArgs.profile_path, binding.actorImage)
+            }
+        }
+        castViewModel.getCredit(castArgs.personId, castArgs.creditId)
+    }
+
+    private fun openImageFullSize(posterPath: String?, imageView: ImageView) {
+        imageView.transitionName = posterPath
+        this.exitTransition = null
+        bigImageViewModel.setImagePath(posterPath)
+
+        val action = CastsFragmentDirections.actionCastsFragmentToBigImageFragment()
+        val extras = FragmentNavigatorExtras(
+            imageView to imageView.transitionName
+        )
+        findNavController().navigate(action, extras)
+        Log.d("navigateToMedia", imageView.transitionName)
+    }
+
+    private fun doOnMediaSuccess(cast: CastObject) {
+
+        val knownForList = cast.known_for.map {
+            AboutDataModel.Curation(
+                id = it.id,
+                media_type = it.media_type,
+                name = it.name,
+                poster_path = it.poster_path,
+                title = it.title,
+                vote_average = it.vote_average,
+                backdrop_path = it.backdrop_path,
+                overview = it.overview,
+                release_date = it.release_date
+            )
+        }
+
+        val hideKnown = knownForList.isEmpty()
+
+        context?.let { c ->
 
             cast.job?.let {
                 addChip(it, c, R.drawable.ic_work_24)
@@ -141,44 +186,19 @@ class CastsFragment : Fragment(R.layout.fragment_cast_details) {
             }
         }
         binding.apply {
-            actorName.text = cast.name
             tvBiography.text = if (cast.biography.isNullOrEmpty()) {
                 "No biography available"
             } else cast.biography
             tvBiography.setOnClickListener {
-                TransitionManager.beginDelayedTransition(binding.root)
+                TransitionManager.beginDelayedTransition(binding.root, MaterialFade())
                 tvBiography.maxLines = if (tvBiography.lineCount > 4) 4 else 1000
             }
-            actorImage.setOnClickListener {
-                bigImageViewModel.setImagePath(cast.profile_path)
-                findNavController().navigate(R.id.action_castsFragment_to_bigImageFragment)
-            }
-        }
-
-        val knownForList = cast.known_for.map {
-            AboutDataModel.Curation(
-                id = it.id,
-                media_type = it.media_type,
-                name = it.name,
-                poster_path = it.poster_path,
-                title = it.title,
-                vote_average = it.vote_average
-            )
-        }
-
-        val hideKnown = knownForList.isEmpty()
-        binding.apply {
             textView2.isGone = hideKnown
             rvKnowFor.isGone = hideKnown
         }
-        knowForAdapter.differ.submitList(knownForList)
 
-        binding.apply {
-            pbDetails.isGone = true
-            successView.isVisible = true
-            binding.errorView.root.isGone = true
-        }
-        TransitionManager.beginDelayedTransition(binding.root)
+        knowForAdapter.differ.submitList(knownForList)
+        isLoading(false)
     }
 
     private fun addChip(name: String, context: Context, drawable: Int) {
@@ -201,25 +221,73 @@ class CastsFragment : Fragment(R.layout.fragment_cast_details) {
             )
             itemAnimator = null
         }
+
         knowForAdapter.setOnItemClickListener {
-            if (it is AboutDataModel.Curation) {
-                val media = Media(
-                    id = it.id,
-                    media_type = it.media_type,
-                    name = it.name,
-                    poster_path = it.poster_path,
-                    title = it.title,
-                    vote_average = it.vote_average
+            castOnClickListener(it)
+        }
+    }
+
+    private fun castOnClickListener(it: AboutDataModel) {
+        if (it is AboutDataModel.Curation) {
+            val media = Media(
+                id = it.id,
+                media_type = it.media_type,
+                name = it.name,
+                poster_path = it.poster_path,
+                title = it.title,
+                vote_average = it.vote_average,
+                backdrop_path = it.backdrop_path,
+                overview = it.overview,
+                release_date = it.release_date
+            )
+            if (it.media_type != null) {
+                val action = CastsFragmentDirections.actionCastsFragmentToFragmentMedia(
+                    MediaArgs(it.id, it.media_type, media, null)
                 )
-                if (it.media_type != null) {
-                    val action = CastsFragmentDirections.actionCastsFragmentToFragmentMedia(
-                        MediaArgs(it.id, it.media_type, media)
-                    )
-                    findNavController().navigate(action)
-                }
+                findNavController().navigate(action)
             }
         }
     }
+
+    private fun isLoading(loading: Boolean) {
+        binding.groupUiElements.isInvisible = loading
+        binding.pbDetails.isInvisible = !loading
+    }
+
+
+    private fun setupCastObserver() {
+        castViewModel.cast.observe(viewLifecycleOwner) { response ->
+            when (response) {
+                is Resource.Success -> {
+                    response.data?.let { doOnMediaSuccess(it) }
+                }
+                is Resource.Error -> {
+                    response.message?.let { message ->
+                        val errorMsg = message.ifEmpty {
+                            resources.getString(R.string.something_went_wrong)
+                        }
+                        Log.e(thisTAG, errorMsg)
+                        binding.apply {
+                            pbDetails.isGone = true
+                            successView.isGone = true
+                            errorView.root.isVisible = true
+                        }
+                        binding.errorView.apply {
+                            errorTxt.text = errorMsg
+                        }
+                    }
+                }
+                is Resource.Loading -> {
+                    binding.apply {
+                        chipGroupActorMeta.removeAllViews()
+                        isLoading(true)
+                    }
+                }
+            }
+        }
+
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()

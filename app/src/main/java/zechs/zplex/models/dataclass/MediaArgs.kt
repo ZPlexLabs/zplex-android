@@ -8,5 +8,6 @@ import java.io.Serializable
 data class MediaArgs(
     val tmdbId: Int,
     val mediaType: String,
-    val media: Media?
+    val media: Media?,
+    val position: Int?
 ) : Serializable
