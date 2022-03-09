@@ -79,6 +79,7 @@
         <entry key="app/src/main/res/drawable/ic_library_add_24dp.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_library_filled_24dp.xml" value="0.284" />
         <entry key="app/src/main/res/drawable/ic_male_24dp.xml" value="0.33645833333333336" />
+        <entry key="app/src/main/res/drawable/ic_new_releases_24dp.xml" value="0.288" />
         <entry key="app/src/main/res/drawable/ic_no_shows_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_outline_new_releases_24.xml" value="0.33645833333333336" />
         <entry key="app/src/main/res/drawable/ic_person_24.xml" value="0.33645833333333336" />
@@ -234,6 +235,8 @@
         <entry key="app/src/main/res/layout/yt_seconds_view.xml" value="0.28802083333333334" />
         <entry key="app/src/main/res/menu/bottom_navigation_menu.xml" value="0.3203125" />
         <entry key="app/src/main/res/menu/episode_menu.xml" value="0.31614583333333335" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.288" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/shortcut_videos.xml" value="0.288" />
         <entry key="doubletapplayerview/src/main/res/drawable/ic_play_triangle.xml" value="0.30833333333333335" />
         <entry key="player/src/main/res/layout/activity_player.xml" value="0.2875" />
         <entry key="player/src/main/res/layout/activity_player_textureview.xml" value="0.2875" />

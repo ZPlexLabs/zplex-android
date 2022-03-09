@@ -89,7 +89,6 @@ class FragmentMedia : BaseFragment() {
     private val listViewModel by activityViewModels<ListViewModel>()
     private val args by navArgs<FragmentMediaArgs>()
 
-    private val streamsDataAdapter by lazy { StreamsDataAdapter() }
     private val mediaDataAdapter by lazy {
         MediaDataAdapter() { castsList?.let { setCastsList(it) } }
     }

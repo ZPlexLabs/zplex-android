@@ -110,7 +110,7 @@ dependencies {
     }
     implementation "com.getkeepsafe.taptargetview:taptargetview:1.13.3"
 
-    implementation "androidx.preference:preference-ktx:1.2.0"
+
     implementation project(path: ":doubletapplayerview")
     implementation fileTree(dir: "libs", include: ["extension-*.aar"])
     implementation fileTree(dir: "libs", include: ["library-*.aar"])
@@ -160,6 +160,7 @@ dependencies {
     implementation "com.google.firebase:firebase-firestore-ktx"
     implementation "com.google.firebase:firebase-analytics-ktx"
     implementation "com.google.firebase:firebase-crashlytics-ktx"
+    implementation "com.google.firebase:firebase-messaging-ktx"
 
     //Kotlin
     implementation "androidx.core:core-ktx:1.7.0"

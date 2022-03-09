@@ -1,8 +1,10 @@
 package zechs.zplex.ui.activity
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -12,8 +14,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 import kotlinx.android.synthetic.main.activity_zplex.*
 import zechs.zplex.BuildConfig
 import zechs.zplex.R
@@ -64,6 +68,15 @@ class ZPlexActivity : AppCompatActivity() {
     // lateinit var musicViewModel: MusicViewModel
     lateinit var collectionViewModel: CollectionViewModel
     lateinit var upcomingViewModel: UpcomingViewModel
+
+    @SuppressLint("HardwareIds")
+    val deviceId: String = if (BuildConfig.DEBUG) {
+        "ZPLEX_TEST_CHANNEL"
+    } else {
+        Settings.Secure.getString(
+            applicationContext.contentResolver, Settings.Secure.ANDROID_ID
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -173,11 +186,10 @@ class ZPlexActivity : AppCompatActivity() {
             }
         }
 
-        FirebaseCrashlytics.getInstance().apply {
-            setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
-        }
-        FirebaseAnalytics.getInstance(applicationContext).apply {
-            setAnalyticsCollectionEnabled(!BuildConfig.DEBUG)
+        Firebase.apply {
+            crashlytics.apply { setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG) }
+            analytics.apply { setAnalyticsCollectionEnabled(!BuildConfig.DEBUG) }
+            messaging.apply { subscribeToTopic(deviceId) }
         }
 
         doOnIntent(intent)
