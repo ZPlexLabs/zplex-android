@@ -26,6 +26,7 @@
             android:exported="true"
             android:keepScreenOn="true"
             android:label="@string/title_activity_player"
+            android:launchMode="singleTask"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
             android:theme="@style/AppTheme.Fullscreen" />
@@ -33,6 +34,7 @@
             android:name=".ui.activity.ZPlexActivity"
             android:configChanges="orientation"
             android:exported="true"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="adjustPan"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>

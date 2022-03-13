@@ -44,11 +44,12 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             Log.d(tag, "Notification Title: $title")
             Log.d(tag, "Notification Body: $tmdbId")
 
-
             val requestCode = Random().nextInt()
 
             val intent = Intent(this, ZPlexActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                flags = (Intent.FLAG_ACTIVITY_NEW_TASK
+                        or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 setData("movie/$tmdbId".toUri())
             }
 
