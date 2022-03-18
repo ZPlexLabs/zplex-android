@@ -66,7 +66,7 @@ interface TmdbAPI {
         @Query("page")
         page: Int = 1,
         @Query("include_adult")
-        include_adult: Boolean = true
+        include_adult: Boolean = false
     ): Response<SearchResponse>
 
     @GET("3/movie/{movie_id}")
@@ -138,7 +138,7 @@ interface TmdbAPI {
         @Query("with_genres")
         with_genres: Int?,
         @Query("first_air_date_year")
-        first_air_date_year: Int?,
+        first_air_date_year: Int?
     ): Response<SearchResponse>
 
     @GET("3/discover/movie")

@@ -128,12 +128,10 @@ class FragmentMedia : BaseFragment() {
         when (args.media.mediaType) {
             "movie" -> {
                 movieOnClick()
-                setupMovieDatabaseObserver(mediaArgs)
                 setupSearchObserverForMovie()
                 setupWitchMessageObserver()
             }
             "tv" -> {
-                setupShowDatabaseObserver(mediaArgs)
                 tvOnClick()
             }
             else -> {}
@@ -252,11 +250,13 @@ class FragmentMedia : BaseFragment() {
     }
 
     private fun witchDialogResponse(message: String) {
-        movieDialog.apply {
-            changeLayouts(
-                loading = false, request = false, message = true
-            )
-            findViewById<TextView>(R.id.tv_witch_message).text = message
+        if (this::movieDialog.isInitialized) {
+            movieDialog.apply {
+                changeLayouts(
+                    loading = false, request = false, message = true
+                )
+                findViewById<TextView>(R.id.tv_witch_message).text = message
+            }
         }
     }
 
@@ -280,12 +280,37 @@ class FragmentMedia : BaseFragment() {
             rvList.isInvisible = hide
             groupUiElements.isInvisible = hide
         }
-        if (!hide) hideLastSeason(isLastSeasonVisible)
+        if (!hide) showLastSeason(isLastSeasonVisible)
     }
 
     private fun doOnMediaSuccess(response: MediaResponse) {
 
         setupMediaAdapterOnClickListener()
+
+        when (args.media.mediaType) {
+            "movie" -> {
+                val movie = Movie(
+                    id = response.id,
+                    title = response.name ?: "",
+                    media_type = "movie",
+                    poster_path = response.poster_path,
+                    vote_average = response.vote_average
+                )
+                setupMovieDatabaseObserver(movie)
+
+            }
+            "tv" -> {
+                val show = Show(
+                    id = response.id,
+                    name = response.name ?: "",
+                    media_type = "tv",
+                    poster_path = response.poster_path,
+                    vote_average = response.vote_average
+                )
+                setupShowDatabaseObserver(show)
+            }
+            else -> {}
+        }
 
         val backdropUrl = if (response.backdrop_path == null) {
             R.drawable.no_thumb
@@ -366,7 +391,6 @@ class FragmentMedia : BaseFragment() {
                     } else {
                         "$TMDB_IMAGE_PREFIX/${PosterSize.w342}${it.poster_path}"
                     }
-
                     binding.itemLastSeason.apply {
                         GlideApp.with(ivSeasonPoster)
                             .load(seasonPosterUrl)
@@ -403,16 +427,17 @@ class FragmentMedia : BaseFragment() {
                                 posterPath = it.poster_path
                             )
                         }
+
                     }
                 }
+                isLastSeasonVisible = true
+            }
 
-                binding.btnWatchNow.setOnClickListener {
-                    setSeasonsList(response.seasons)
-                }
-                isLastSeasonVisible = false
+            binding.btnWatchNow.setOnClickListener {
+                setSeasonsList(response.seasons)
             }
         } else {
-            isLastSeasonVisible = true
+            isLastSeasonVisible = false
         }
 
         castsList = response.cast
@@ -545,10 +570,11 @@ class FragmentMedia : BaseFragment() {
         }
     }
 
-    override fun onDestroy() {
+    override fun onDestroyView() {
+        super.onDestroyView()
         mediaDataAdapter.differ.submitList(listOf())
         binding.rvList.adapter = null
-        super.onDestroy()
+        _binding = null
     }
 
     private fun setDominantColorObserver() {
@@ -666,8 +692,8 @@ class FragmentMedia : BaseFragment() {
         }
     }
 
-    private fun setupShowDatabaseObserver(media: MediaArgs) {
-        mediaViewModel.getShow(media.tmdbId).observe(viewLifecycleOwner) { isSaved ->
+    private fun setupShowDatabaseObserver(show: Show) {
+        mediaViewModel.getShow(show.id).observe(viewLifecycleOwner) { isSaved ->
             Log.d("getShow", "isSaved=$isSaved")
             binding.btnSave.apply {
                 icon = ContextCompat.getDrawable(
@@ -677,26 +703,16 @@ class FragmentMedia : BaseFragment() {
                     } else R.drawable.ic_add_24
                 )
                 setOnClickListener {
-                    media.media?.let { m ->
-                        val finalMedia = Show(
-                            id = m.id,
-                            name = m.name ?: "",
-                            media_type = m.media_type ?: "tv",
-                            poster_path = m.poster_path,
-                            vote_average = m.vote_average
-                        )
-
-                        if (isSaved) {
-                            mediaViewModel.deleteShow(finalMedia)
-                        } else mediaViewModel.saveShow(finalMedia)
-                    }
+                    if (isSaved) {
+                        mediaViewModel.deleteShow(show)
+                    } else mediaViewModel.saveShow(show)
                 }
             }
         }
     }
 
-    private fun setupMovieDatabaseObserver(media: MediaArgs) {
-        mediaViewModel.getMovie(media.tmdbId).observe(viewLifecycleOwner) { isSaved ->
+    private fun setupMovieDatabaseObserver(movie: Movie) {
+        mediaViewModel.getMovie(movie.id).observe(viewLifecycleOwner) { isSaved ->
             Log.d("getMovie", "isSaved=$isSaved")
             binding.btnSave.apply {
                 icon = ContextCompat.getDrawable(
@@ -706,18 +722,9 @@ class FragmentMedia : BaseFragment() {
                     } else R.drawable.ic_add_24
                 )
                 setOnClickListener {
-                    media.media?.let { m ->
-                        val finalMovie = Movie(
-                            id = m.id,
-                            title = m.title ?: "",
-                            media_type = m.media_type ?: "movie",
-                            poster_path = m.poster_path,
-                            vote_average = m.vote_average
-                        )
-                        if (isSaved) {
-                            mediaViewModel.deleteMovie(finalMovie)
-                        } else mediaViewModel.saveMovie(finalMovie)
-                    }
+                    if (isSaved) {
+                        mediaViewModel.deleteMovie(movie)
+                    } else mediaViewModel.saveMovie(movie)
                 }
             }
         }
@@ -783,9 +790,13 @@ class FragmentMedia : BaseFragment() {
         streamsDialog.streamsDataAdapter.differ.submitList(streamsList.toList())
         streamsDialog.streamsDataAdapter.setOnItemClickListener {
             when (it) {
-                is StreamsDataModel.Original -> playMovie(file, null, null)
+                is StreamsDataModel.Original -> {
+                    playMovie(file, null, null)
+                    streamsDialog.dismiss()
+                }
                 is StreamsDataModel.Stream -> {
                     playMovie(file, it.cookie, it.url)
+                    streamsDialog.dismiss()
                 }
                 else -> {}
             }
@@ -946,10 +957,10 @@ class FragmentMedia : BaseFragment() {
         Log.d(thisTAG, "hasTransitionEnded=$hasTransitionEnded")
     }
 
-    private fun hideLastSeason(hide: Boolean) {
+    private fun showLastSeason(hide: Boolean) {
         binding.apply {
-            itemLastSeason.root.isGone = hide
-            tvSeasonHeader.isGone = hide
+            itemLastSeason.root.isGone = !hide
+            tvSeasonHeader.isGone = !hide
         }
     }
 
