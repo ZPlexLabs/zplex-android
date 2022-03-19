@@ -104,4 +104,6 @@
     <string name="sort">Sort</string>
     <string name="trailer">Trailer</string>
     <string name="select_genre">Select genre</string>
+    <string name="storage_permission_request">Please allow storage permission</string>
+    <string name="download_started">Download started, check notification area for more information</string>
 </resources>

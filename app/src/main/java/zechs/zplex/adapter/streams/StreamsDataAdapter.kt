@@ -11,14 +11,10 @@ import zechs.zplex.databinding.ItemLoadingBinding
 import zechs.zplex.databinding.ItemTextBinding
 import zechs.zplex.databinding.ItemTextBoldBinding
 
-class StreamsDataAdapter : RecyclerView.Adapter<StreamsDataViewHolder>() {
-
-    @JvmField
-    var onItemClickListener: ((StreamsDataModel) -> Unit)? = null
-
-    fun setOnItemClickListener(listener: (StreamsDataModel) -> Unit) {
-        onItemClickListener = listener
-    }
+class StreamsDataAdapter(
+    val setOnStreamClickListener: (StreamsDataModel) -> Unit,
+    val setOnDownloadClickListener: (StreamsDataModel) -> Unit
+) : RecyclerView.Adapter<StreamsDataViewHolder>() {
 
     private val differCallback = object : DiffUtil.ItemCallback<StreamsDataModel>() {
 

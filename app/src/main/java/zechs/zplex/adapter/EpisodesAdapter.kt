@@ -55,7 +55,11 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
 
         holder.itemView.apply {
             frame_not_available.isVisible = episode.fileId == null
-            if (episode.name == count) tv_episodeCount.isInvisible = true
+            if (episode.name == count) {
+                tv_episodeCount.tag = position
+            }
+
+            tv_episodeCount.isInvisible = tv_episodeCount.tag == position
 
             tv_title.text = if (episode.name.isNullOrEmpty()) "No title" else episode.name
             tv_episodeCount.text = count

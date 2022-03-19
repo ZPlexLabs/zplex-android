@@ -16,9 +16,14 @@ sealed class StreamsDataViewHolder(
         streamsDataAdapter: StreamsDataAdapter
     ) : StreamsDataViewHolder(itemBinding, streamsDataAdapter) {
         fun bind(item: StreamsDataModel.Original) {
-            itemBinding.tvText.text = item.title
-            itemBinding.root.setOnClickListener {
-                streamsDataAdapter.onItemClickListener?.let { it(item) }
+            itemBinding.tvText.apply {
+                text = item.title
+                setOnClickListener {
+                    streamsDataAdapter.setOnStreamClickListener.invoke(item)
+                }
+            }
+            itemBinding.btnDownload.setOnClickListener {
+                streamsDataAdapter.setOnDownloadClickListener.invoke(item)
             }
         }
     }
@@ -28,9 +33,15 @@ sealed class StreamsDataViewHolder(
         streamsDataAdapter: StreamsDataAdapter
     ) : StreamsDataViewHolder(itemBinding, streamsDataAdapter) {
         fun bind(item: StreamsDataModel.Stream) {
-            itemBinding.tvText.text = item.name
-            itemBinding.root.setOnClickListener {
-                streamsDataAdapter.onItemClickListener?.let { it(item) }
+            itemBinding.tvText.apply {
+                text = item.name
+                setOnClickListener {
+                    streamsDataAdapter.setOnStreamClickListener.invoke(item)
+                }
+            }
+
+            itemBinding.btnDownload.setOnClickListener {
+                streamsDataAdapter.setOnDownloadClickListener.invoke(item)
             }
         }
     }

@@ -1,8 +1,12 @@
 package zechs.zplex.ui.fragment.media
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.content.Context
+import android.content.Context.DOWNLOAD_SERVICE
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Color
@@ -11,6 +15,7 @@ import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.provider.Settings
 import android.text.Spannable
 import android.text.SpannableString
@@ -25,6 +30,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.Constraints
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isGone
@@ -34,6 +40,7 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.bumptech.glide.load.DataSource
@@ -45,6 +52,7 @@ import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
 import zechs.zplex.adapter.media.MediaDataAdapter
 import zechs.zplex.adapter.media.MediaDataModel
+import zechs.zplex.adapter.streams.StreamsDataAdapter
 import zechs.zplex.adapter.streams.StreamsDataModel
 import zechs.zplex.databinding.FragmentTempBinding
 import zechs.zplex.models.dataclass.CastArgs
@@ -73,6 +81,7 @@ import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.ConverterUtils
 import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
+import zechs.zplex.utils.SessionManager
 
 
 class FragmentMedia : BaseFragment() {
@@ -82,14 +91,20 @@ class FragmentMedia : BaseFragment() {
 
     private val thisTAG = "FragmentMedia"
 
-    private lateinit var movieDialog: LookupMovieDialog
-    private lateinit var streamsDialog: StreamsDialog
+    private var _movieDialog: LookupMovieDialog? = null
+    private val movieDialog get() = _movieDialog!!
+
+    private var _streamsDialog: StreamsDialog? = null
+    private val streamsDialog get() = _streamsDialog!!
 
     private lateinit var mediaViewModel: MediaViewModel
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
     private val bigImageViewModel by activityViewModels<BigImageViewModel>()
     private val listViewModel by activityViewModels<ListViewModel>()
     private val args by navArgs<FragmentMediaArgs>()
+
+    private var _streamsDataAdapter: StreamsDataAdapter? = null
+    private val streamsDataAdapter get() = _streamsDataAdapter!!
 
     private val mediaDataAdapter by lazy {
         MediaDataAdapter() { castsList?.let { setCastsList(it) } }
@@ -250,13 +265,11 @@ class FragmentMedia : BaseFragment() {
     }
 
     private fun witchDialogResponse(message: String) {
-        if (this::movieDialog.isInitialized) {
-            movieDialog.apply {
-                changeLayouts(
-                    loading = false, request = false, message = true
-                )
-                findViewById<TextView>(R.id.tv_witch_message).text = message
-            }
+        movieDialog.apply {
+            changeLayouts(
+                loading = false, request = false, message = true
+            )
+            findViewById<TextView>(R.id.tv_witch_message).text = message
         }
     }
 
@@ -750,7 +763,9 @@ class FragmentMedia : BaseFragment() {
     }
 
     private fun showMovieDialog(context: Context) {
-        movieDialog = LookupMovieDialog(context, extractedColor) { btnYesListener() }
+        if (_movieDialog == null) {
+            _movieDialog = LookupMovieDialog(context, extractedColor) { btnYesListener() }
+        }
         movieDialog.show()
 
         movieDialog.window?.apply {
@@ -765,18 +780,88 @@ class FragmentMedia : BaseFragment() {
         mediaViewModel.doSearchFor(args.media.tmdbId)
     }
 
+    private fun getDriveDownloadUrl(fileId: String): String {
+        return "https://www.googleapis.com/drive/v3/files/${fileId}?supportAllDrives=True&alt=media"
+    }
+
+    private fun onDownloadClick(it: StreamsDataModel, file: File, context: Context) {
+        when (it) {
+            is StreamsDataModel.Original -> {
+                val outputPath = "$showName${file.name.takeLast(4)}"
+                queueDownload(
+                    context,
+                    getDriveDownloadUrl(file.id), outputPath,
+                    "Authorization",
+                    "Bearer ${SessionManager(context).fetchAuthToken()}"
+                )
+                streamsDialog.dismiss()
+            }
+            is StreamsDataModel.Stream -> {
+                val outputPath = "$showName${file.name.takeLast(4)}"
+                queueDownload(
+                    context, it.url, outputPath,
+                    "Cookie",
+                    "DRIVE_STREAM=${it.cookie}"
+                )
+                streamsDialog.dismiss()
+            }
+            else -> {}
+        }
+    }
+
+    private fun onStreamClick(it: StreamsDataModel, file: File) {
+        when (it) {
+            is StreamsDataModel.Original -> {
+                playMovie(file, null, null)
+                streamsDialog.dismiss()
+            }
+            is StreamsDataModel.Stream -> {
+                playMovie(file, it.cookie, it.url)
+                streamsDialog.dismiss()
+            }
+            else -> {}
+        }
+    }
+
     private fun showStreamsDialog(context: Context, file: File) {
-        streamsDialog = StreamsDialog(context)
+        if (_streamsDataAdapter == null) {
+            _streamsDataAdapter = StreamsDataAdapter(
+                setOnStreamClickListener = {
+                    onStreamClick(it, file)
+                },
+                setOnDownloadClickListener = {
+                    onDownloadClick(it, file, context)
+                }
+            )
+        }
+
+        if (_streamsDialog == null) {
+            _streamsDialog = StreamsDialog(context)
+        }
         streamsDialog.show()
 
         streamsDialog.window?.apply {
-
             setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
             setLayout(
                 Constraints.LayoutParams.MATCH_PARENT,
                 Constraints.LayoutParams.WRAP_CONTENT
             )
         }
+
+        val streamsView = streamsDialog.findViewById<RecyclerView>(R.id.rv_streams)
+        streamsDialog.setOnDismissListener {
+            streamsView.adapter = null
+            _streamsDialog = null
+            _streamsDataAdapter = null
+        }
+
+        streamsView.apply {
+            adapter = streamsDataAdapter
+            layoutManager = LinearLayoutManager(
+                context, LinearLayoutManager.VERTICAL, false
+            )
+        }
+
         val streamsList = mutableListOf<StreamsDataModel>()
         streamsList.add(
             StreamsDataModel.Original(
@@ -787,24 +872,9 @@ class FragmentMedia : BaseFragment() {
 
         streamsList.add(StreamsDataModel.Loading)
 
-        streamsDialog.streamsDataAdapter.differ.submitList(streamsList.toList())
-        streamsDialog.streamsDataAdapter.setOnItemClickListener {
-            when (it) {
-                is StreamsDataModel.Original -> {
-                    playMovie(file, null, null)
-                    streamsDialog.dismiss()
-                }
-                is StreamsDataModel.Stream -> {
-                    playMovie(file, it.cookie, it.url)
-                    streamsDialog.dismiss()
-                }
-                else -> {}
-            }
-        }
-
+        streamsDataAdapter.differ.submitList(streamsList.toList())
         mediaViewModel.getDashVideos(file.id)
     }
-
 
     private fun btnYesListener() {
         @SuppressLint("HardwareIds")
@@ -856,27 +926,24 @@ class FragmentMedia : BaseFragment() {
     private fun handleDashStreamsResponse(
         streamsResponse: Resource<List<DashVideoResponseItem>>
     ) {
-        if (this::streamsDialog.isInitialized) {
-            when (streamsResponse) {
-                is Resource.Success -> {
-                    streamsResponse.data?.let {
-                        handleStreamsSuccess(it)
-                    }
-                }
-                else -> {
-                    val adapterDiff = streamsDialog.streamsDataAdapter.differ
-                    val currentList = adapterDiff.currentList
-                    val streamsList = mutableListOf<StreamsDataModel>()
-                    streamsList.add(currentList.filterIsInstance<StreamsDataModel.Original>()[0])
-                    adapterDiff.submitList(streamsList.toList())
+        when (streamsResponse) {
+            is Resource.Success -> {
+                streamsResponse.data?.let {
+                    handleStreamsSuccess(it)
                 }
             }
+            else -> {
+                val adapterDiff = streamsDataAdapter.differ
+                val currentList = adapterDiff.currentList
+                val streamsList = mutableListOf<StreamsDataModel>()
+                streamsList.add(currentList.filterIsInstance<StreamsDataModel.Original>()[0])
+                adapterDiff.submitList(streamsList.toList())
+            }
         }
-
     }
 
     private fun handleStreamsSuccess(streams: List<DashVideoResponseItem>) {
-        val adapterDiff = streamsDialog.streamsDataAdapter.differ
+        val adapterDiff = streamsDataAdapter.differ
         val currentList = adapterDiff.currentList
 
         val streamsList = mutableListOf<StreamsDataModel>()
@@ -934,12 +1001,10 @@ class FragmentMedia : BaseFragment() {
         }
     }
 
-
     private fun playMovie(file: File, cookie: String?, stream: String?) {
-        val media = args.media.media
         val intent = Intent(activity, PlayerActivity::class.java)
         intent.putExtra("fileId", file.id)
-        intent.putExtra("title", media?.let { media.name ?: media.title })
+        intent.putExtra("title", showName!!)
         cookie?.let { intent.putExtra("cookie", it) }
         stream?.let { intent.putExtra("dash_url", it) }
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -999,4 +1064,46 @@ class FragmentMedia : BaseFragment() {
         val action = FragmentMediaDirections.actionFragmentMediaToFragmentCollection(media)
         findNavController().navigate(action)
     }
+
+    private fun queueDownload(
+        context: Context,
+        downloadUrl: String,
+        outputPath: String,
+        headerKey: String,
+        headerValue: String
+    ) {
+        if (hasPermission()) {
+            val request = DownloadManager.Request(Uri.parse(downloadUrl))
+                .addRequestHeader(headerKey, headerValue)
+                .setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                .setDestinationInExternalPublicDir(Environment.DIRECTORY_MOVIES, outputPath)
+
+            val dm = context.getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+            dm.enqueue(request)
+            Toast.makeText(context, getString(R.string.download_started), Toast.LENGTH_SHORT).show()
+        } else {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ), 1
+            )
+            Toast.makeText(
+                context,
+                resources.getString(R.string.storage_permission_request),
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun hasPermission(): Boolean = ActivityCompat.checkSelfPermission(
+        requireContext(),
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    ) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(
+        requireContext(),
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    ) == PackageManager.PERMISSION_GRANTED
+
 }

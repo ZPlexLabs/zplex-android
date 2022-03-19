@@ -61,7 +61,6 @@ public class CustomStyledPlayerView extends StyledPlayerView implements GestureD
     private boolean isHandledLongPress = false;
     private float mScaleFactor = 1.f;
     private float mScaleFactorFit;
-    private BrightnessControl brightnessControl;
 
     public CustomStyledPlayerView(Context context) {
         this(context, null);
@@ -257,9 +256,7 @@ public class CustomStyledPlayerView extends StyledPlayerView implements GestureD
                 }
                 gestureOrientation = Orientation.VERTICAL;
 
-                if (motionEvent.getX() < (float) (getWidth() / 2)) {
-                    brightnessControl.changeBrightness(this, gestureScrollY > 0, canSetAutoBrightness);
-                } else {
+                if (motionEvent.getX() > (float) (getWidth() / 2)) {
                     Utils.Companion.adjustVolume(mAudioManager, this, gestureScrollY > 0);
                 }
 
@@ -406,10 +403,6 @@ public class CustomStyledPlayerView extends StyledPlayerView implements GestureD
             systemGestureExclusionRect.right = right;
             setSystemGestureExclusionRects(Collections.singletonList(systemGestureExclusionRect));
         }
-    }
-
-    public void setBrightnessControl(BrightnessControl brightnessControl) {
-        this.brightnessControl = brightnessControl;
     }
 
     private enum Orientation {

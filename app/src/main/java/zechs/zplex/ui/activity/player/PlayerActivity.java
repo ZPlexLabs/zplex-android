@@ -56,17 +56,13 @@ import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SeekParameters;
-import com.google.android.exoplayer2.TracksInfo;
 import com.google.android.exoplayer2.audio.AudioAttributes;
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ts.DefaultTsPayloadReaderFactory;
 import com.google.android.exoplayer2.extractor.ts.TsExtractor;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
-import com.google.android.exoplayer2.source.TrackGroup;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
-import com.google.android.exoplayer2.trackselection.TrackSelectionOverrides;
-import com.google.android.exoplayer2.trackselection.TrackSelectionParameters;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.google.android.exoplayer2.ui.StyledPlayerControlView;
@@ -77,8 +73,6 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import zechs.zplex.R;
@@ -109,11 +103,7 @@ public class PlayerActivity extends Activity {
     final Rational rationalLimitWide = new Rational(239, 100);
     final Rational rationalLimitTall = new Rational(100, 239);
     private final int RESIZE_MODE = AspectRatioFrameLayout.RESIZE_MODE_FIT;
-    private final float SCALE = 1.f;
-    private final float SPEED = 1.f;
-    private final int BRIGHTNESS = -1;
     public CustomStyledPlayerView playerView;
-    public BrightnessControl mBrightnessControl;
     public boolean frameRendered;
     public long[] chapterStarts;
     boolean apiAccess;
@@ -147,15 +137,14 @@ public class PlayerActivity extends Activity {
     private boolean isScrubbing;
     private boolean scrubbingNoticeable;
     private long scrubbingStart;
-    private boolean alive;
     private long lastScrubbingPosition;
     private Utils.Orientation orientation = Utils.Orientation.VIDEO;
+
     private Uri mediaUri;
     private String title;
-    private String subtitleTrackId;
-    private String audioTrackId;
-
     private String driveStreamCookie = "DRIVE_STREAM=";
+
+    private Boolean _isInPip = false;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -169,22 +158,7 @@ public class PlayerActivity extends Activity {
             setContentView(R.layout.activity_player);
         }
 
-        final Intent launchIntent = getIntent();
-        String fileId = launchIntent.getStringExtra("fileId");
-        String cookie = launchIntent.getStringExtra("cookie");
-        String dashStream = launchIntent.getStringExtra("dash_url");
-
-        title = launchIntent.getStringExtra("title");
-        if (cookie != null && dashStream != null) {
-            driveStreamCookie += cookie;
-            mediaUri = Uri.parse(dashStream);
-        } else {
-            mediaUri = getStreamUrl(fileId);
-        }
-        if (titleView != null) titleView.setText(title);
-
         focusPlay = true;
-
 
         coordinatorLayout = findViewById(R.id.coordinatorLayout);
         mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
@@ -227,7 +201,8 @@ public class PlayerActivity extends Activity {
             public void onScrubMove(TimeBar timeBar, long position) {
                 reportScrubbing(position);
                 for (long start : chapterStarts) {
-                    if ((lastScrubbingPosition < start && position >= start) || (lastScrubbingPosition > start && position <= start)) {
+                    if ((lastScrubbingPosition < start && position >= start)
+                            || (lastScrubbingPosition > start && position <= start)) {
                         playerView.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK);
                     }
                 }
@@ -359,10 +334,6 @@ public class PlayerActivity extends Activity {
 
         playerListener = new PlayerListener();
 
-        mBrightnessControl = new BrightnessControl(this);
-        mBrightnessControl.setCurrentBrightnessLevel(mBrightnessControl.getScreenBrightness());
-        playerView.setBrightnessControl(mBrightnessControl);
-
         final LinearLayout exoBasicControls = playerView.findViewById(R.id.exo_basic_controls);
         final ImageButton exoSubtitle = exoBasicControls.findViewById(R.id.exo_subtitle);
         exoBasicControls.removeView(exoSubtitle);
@@ -438,43 +409,21 @@ public class PlayerActivity extends Activity {
                         });
             }
         });
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        alive = true;
         initializePlayer();
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-        alive = false;
+    protected void onDestroy() {
+        super.onDestroy();
         releasePlayer();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction()) && intent.getData() != null) {
-            String fileId = intent.getStringExtra("fileId");
-            String cookie = intent.getStringExtra("cookie");
-            String dashStream = intent.getStringExtra("dash_url");
+        initializePlayer();
 
-            title = intent.getStringExtra("title");
-            if (cookie != null && dashStream != null) {
-                driveStreamCookie += cookie;
-                mediaUri = Uri.parse(dashStream);
-            } else {
-                mediaUri = getStreamUrl(fileId);
-            }
-            if (titleView != null) titleView.setText(title);
-
-            focusPlay = true;
-
-            initializePlayer();
-        }
     }
 
     private Uri getStreamUrl(String fileId) {
@@ -688,6 +637,21 @@ public class PlayerActivity extends Activity {
 
     public void initializePlayer() {
 
+        Intent intent = getIntent();
+        String fileId = intent.getStringExtra("fileId");
+        String cookie = intent.getStringExtra("cookie");
+        String dashStream = intent.getStringExtra("dash_url");
+
+        title = intent.getStringExtra("title");
+        if (cookie != null && dashStream != null) {
+            driveStreamCookie += cookie;
+            mediaUri = Uri.parse(dashStream);
+        } else {
+            mediaUri = getStreamUrl(fileId);
+        }
+        if (titleView != null) titleView.setText(title);
+
+        focusPlay = true;
         haveMedia = mediaUri != null;
 
         if (player != null) {
@@ -834,56 +798,6 @@ public class PlayerActivity extends Activity {
         updateButtons(false);
     }
 
-
-    private TrackGroup getTrackGroupFromFormatId(int trackType, String id) {
-        if ((id == null && trackType == C.TRACK_TYPE_AUDIO) || player == null) {
-            return null;
-        }
-        for (TracksInfo.TrackGroupInfo groupInfo : player.getCurrentTracksInfo().getTrackGroupInfos()) {
-            if (groupInfo.getTrackType() == trackType) {
-                final TrackGroup trackGroup = groupInfo.getTrackGroup();
-                final Format format = trackGroup.getFormat(0);
-                if (Objects.equals(id, format.id)) {
-                    return trackGroup;
-                }
-            }
-        }
-        return null;
-    }
-
-    public void setSelectedTracks(final String subtitleId, final String audioId) {
-        if ("#none".equals(subtitleId)) {
-            if (trackSelector == null) {
-                return;
-            }
-            trackSelector.setParameters(
-                    trackSelector.buildUponParameters().setDisabledTextTrackSelectionFlags(
-                            C.SELECTION_FLAG_DEFAULT | C.SELECTION_FLAG_FORCED
-                    )
-            );
-        }
-
-        TrackGroup subtitleGroup = getTrackGroupFromFormatId(C.TRACK_TYPE_TEXT, subtitleId);
-        TrackGroup audioGroup = getTrackGroupFromFormatId(C.TRACK_TYPE_AUDIO, audioId);
-
-        TrackSelectionOverrides.Builder overridesBuilder = new TrackSelectionOverrides.Builder();
-        final List<Integer> tracks = new ArrayList<>();
-        tracks.add(0);
-        if (subtitleGroup != null) {
-            overridesBuilder.addOverride(new TrackSelectionOverrides.TrackSelectionOverride(subtitleGroup, tracks));
-        }
-        if (audioGroup != null) {
-            overridesBuilder.addOverride(new TrackSelectionOverrides.TrackSelectionOverride(audioGroup, tracks));
-        }
-
-        if (player != null) {
-            TrackSelectionParameters.Builder trackSelectionParametersBuilder = player.getTrackSelectionParameters().buildUpon();
-            trackSelectionParametersBuilder.setTrackSelectionOverrides(overridesBuilder.build());
-            player.setTrackSelectionParameters(trackSelectionParametersBuilder.build());
-        }
-    }
-
-
     boolean updatePictureInPictureActions(final int iconId, final int resTitle, final int controlType, final int requestCode) {
         try {
             final ArrayList<RemoteAction> actions = new ArrayList<>();
@@ -978,6 +892,8 @@ public class PlayerActivity extends Activity {
     }
 
     private void enterPiP() {
+        _isInPip = true;
+
         final AppOpsManager appOpsManager = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
         if (AppOpsManager.MODE_ALLOWED != appOpsManager.checkOpNoThrow(AppOpsManager.OPSTR_PICTURE_IN_PICTURE, android.os.Process.myUid(), getPackageName())) {
             final Intent intent = new Intent("android.settings.PICTURE_IN_PICTURE_SETTINGS", Uri.fromParts("package", getPackageName(), null));
@@ -1062,6 +978,12 @@ public class PlayerActivity extends Activity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (!_isInPip && player != null) player.pause();
+    }
+
     private class PlayerListener implements Player.Listener {
         @Override
         public void onIsPlayingChanged(boolean isPlaying) {
@@ -1133,7 +1055,6 @@ public class PlayerActivity extends Activity {
                     }
 
                     updateLoading(false);
-                    setSelectedTracks(subtitleTrackId, audioTrackId);
                 }
             } else if (state == Player.STATE_ENDED) {
                 playbackFinished = true;
@@ -1156,4 +1077,5 @@ public class PlayerActivity extends Activity {
             }
         }
     }
+
 }
