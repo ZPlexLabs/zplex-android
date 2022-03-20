@@ -8,7 +8,7 @@ plugins {
     id "com.google.firebase.crashlytics"
 }
 
-def gitCommitHash = 'git rev-parse --verify --short HEAD'.execute().text.trim()
+def gitCommitHash = "git rev-parse --verify --short HEAD".execute().text.trim()
 
 android {
 
@@ -31,7 +31,7 @@ android {
         applicationId "zechs.zplex"
         minSdkVersion 26
         targetSdkVersion 32
-        versionCode 17
+        versionCode 18
         versionName "v4-$gitCommitHash"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -49,16 +49,16 @@ android {
         abi {
             enable true
             reset()
-            include 'arm64-v8a'
+            include "arm64-v8a"
             universalApk true
         }
     }
 
     project.ext.versionCodes = [
-            'armeabi-v7a': 6,
-            'arm64-v8a'  : 7,
-            'x86'        : 8,
-            'x86_64'     : 9
+            "armeabi-v7a": 6,
+            "arm64-v8a"  : 7,
+            "x86"        : 8,
+            "x86_64"     : 9
     ]
 
     android.applicationVariants.all { variant ->
@@ -161,6 +161,7 @@ dependencies {
     implementation "com.google.firebase:firebase-analytics-ktx"
     implementation "com.google.firebase:firebase-crashlytics-ktx"
     implementation "com.google.firebase:firebase-messaging-ktx"
+    implementation 'com.google.firebase:firebase-config-ktx'
 
     //Kotlin
     implementation "androidx.core:core-ktx:1.7.0"

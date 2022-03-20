@@ -28,4 +28,7 @@ object Constants {
     const val SEARCH_DELAY_AMOUNT = 750L
 
     const val DOCUMENT_PATH = "p79WGSgB7RXlTAIQgxjx"
+    const val VERSION_CODE_KEY = "latest_app_version"
+    const val DRIVE_ZPLEX_RELEASES =
+        "https://drive.google.com/drive/folders/1ZMnIVlpJPjGNNfXDFANMVOYQYTVlvFZ4"
 }

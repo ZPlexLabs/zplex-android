@@ -2,22 +2,29 @@ package zechs.zplex.ui.activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.Constraints
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.android.material.button.MaterialButton
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
+import com.google.firebase.remoteconfig.ktx.remoteConfig
+import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import kotlinx.android.synthetic.main.activity_zplex.*
 import zechs.zplex.BuildConfig
 import zechs.zplex.R
@@ -27,6 +34,7 @@ import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.repository.WitchRepository
+import zechs.zplex.ui.dialog.UpdateDialog
 import zechs.zplex.ui.fragment.browse.BrowseViewModel
 import zechs.zplex.ui.fragment.browse.BrowseViewModelProviderFactory
 import zechs.zplex.ui.fragment.cast.CastViewModel
@@ -47,7 +55,9 @@ import zechs.zplex.ui.fragment.upcoming.UpcomingViewModel
 import zechs.zplex.ui.fragment.upcoming.UpcomingViewModelProviderFactory
 import zechs.zplex.ui.fragment.watch.WatchViewModel
 import zechs.zplex.ui.fragment.watch.WatchViewModelProviderFactory
+import zechs.zplex.utils.Constants.DRIVE_ZPLEX_RELEASES
 import zechs.zplex.utils.Constants.THEMOVIEDB_ID_REGEX
+import zechs.zplex.utils.Constants.VERSION_CODE_KEY
 
 
 class ZPlexActivity : AppCompatActivity() {
@@ -69,6 +79,8 @@ class ZPlexActivity : AppCompatActivity() {
     lateinit var collectionViewModel: CollectionViewModel
     lateinit var upcomingViewModel: UpcomingViewModel
 
+    private var _updateDialog: UpdateDialog? = null
+    private val updateDialog get() = _updateDialog!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -187,14 +199,57 @@ class ZPlexActivity : AppCompatActivity() {
             )
         }
 
+        val firebaseDefaultMap = HashMap<String, Any>()
+        firebaseDefaultMap[VERSION_CODE_KEY] = BuildConfig.VERSION_CODE
 
         Firebase.apply {
             crashlytics.apply { setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG) }
             analytics.apply { setAnalyticsCollectionEnabled(!BuildConfig.DEBUG) }
             messaging.apply { subscribeToTopic(deviceId) }
+
+            remoteConfig.apply {
+                remoteConfigSettings {
+                    minimumFetchIntervalInSeconds = 3600
+                }
+                setDefaultsAsync(firebaseDefaultMap)
+                fetch(0)
+                fetchAndActivate().addOnCompleteListener(firebaseOnCompleteListener)
+            }
         }
 
         doOnIntent(intent)
+    }
+
+    private val firebaseOnCompleteListener = OnCompleteListener<Boolean> {
+        if (it.isSuccessful) {
+            val latestAppVersion = Firebase.remoteConfig.getDouble(VERSION_CODE_KEY).toInt()
+            if (latestAppVersion > BuildConfig.VERSION_CODE) {
+                showUpdateDialog()
+            }
+        }
+    }
+
+    private fun showUpdateDialog() {
+        if (_updateDialog == null) {
+            _updateDialog = UpdateDialog(this)
+        }
+        updateDialog.show()
+        updateDialog.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setLayout(
+                Constraints.LayoutParams.MATCH_PARENT,
+                Constraints.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        val updateButton = updateDialog.findViewById<MaterialButton>(R.id.update_btn)
+        updateButton.setOnClickListener {
+            val updateFolder = Intent(Intent.ACTION_VIEW).apply {
+                data = Uri.parse(DRIVE_ZPLEX_RELEASES)
+            }
+            startActivity(updateFolder)
+            updateDialog.dismiss()
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {
