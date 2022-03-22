@@ -71,7 +71,7 @@ class BrowseDataAdapter : RecyclerView.Adapter<BrowseDataViewHolder>() {
         }
     }
 
-    override fun getItemCount(): Int = differ.currentList.size
+    override fun getItemCount() = differ.currentList.size
 
     override fun getItemViewType(position: Int): Int {
         return when (differ.currentList[position]) {

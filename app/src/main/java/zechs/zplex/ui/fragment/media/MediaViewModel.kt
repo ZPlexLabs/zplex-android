@@ -24,7 +24,6 @@ import zechs.zplex.models.dataclass.Show
 import zechs.zplex.models.drive.DriveResponse
 import zechs.zplex.models.tmdb.collection.CollectionsResponse
 import zechs.zplex.models.tmdb.entities.Episode
-import zechs.zplex.models.tmdb.entities.Pair
 import zechs.zplex.models.tmdb.media.MediaResponse
 import zechs.zplex.models.tmdb.media.MovieResponse
 import zechs.zplex.models.tmdb.media.TvResponse
@@ -42,7 +41,6 @@ import zechs.zplex.utils.Constants.ZPLEX
 import zechs.zplex.utils.Constants.ZPLEX_DRIVE_ID
 import zechs.zplex.utils.Constants.ZPLEX_MOVIES_ID
 import zechs.zplex.utils.Constants.ZPLEX_SHOWS_ID
-import zechs.zplex.utils.ConverterUtils
 import zechs.zplex.utils.Event
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.SessionManager
@@ -149,33 +147,8 @@ class MediaViewModel(
                 val resultResponse = response.body()!!
                 val collectionsResult = collectionsResponse.body()!!
 
-                val ratingText = "${resultResponse.vote_average}/10"
-                val durationText = if (resultResponse.runtime == null) {
-                    "Unknown"
-                } else ConverterUtils.convertMinutes(resultResponse.runtime)
-
-                val genreResponse = if (resultResponse.genres?.isEmpty() == true) {
-                    "Unknown"
-                } else resultResponse.genres?.get(0)?.name ?: "Unknown"
-
-                val genreText = if (genreResponse == "Science Fiction") {
-                    "Sci-Fi"
-                } else genreResponse.substringBefore(" ")
-
-                val pairsArray: MutableList<Pair> = mutableListOf()
-                pairsArray.add(Pair("Genre", genreText))
-                pairsArray.add(Pair("Rating", ratingText))
-                pairsArray.add(Pair("Duration", durationText))
-
-                resultResponse.production_companies?.let { company ->
-                    if (company.isNotEmpty()) company[0].name?.let {
-                        Pair("Studio", it)
-                    }?.let { pairsArray.add(it) }
-                }
-
                 val year = resultResponse.release_date?.let { firstAired ->
                     if (firstAired.isNotBlank()) {
-                        pairsArray.add(Pair("Released", firstAired.take(4)))
                         firstAired.take(4).toInt()
                     } else 0
                 } ?: 0
@@ -192,7 +165,6 @@ class MediaViewModel(
                     poster_path = resultResponse.poster_path,
                     backdrop_path = resultResponse.backdrop_path,
                     related_media = collectionsResult.parts,
-                    misc = pairsArray,
                     seasons = listOf(),
                     cast = resultResponse.credits.cast?.toList() ?: listOf(),
                     recommendations = resultResponse.recommendations?.results?.toList() ?: listOf(),
@@ -215,37 +187,6 @@ class MediaViewModel(
     ): Resource<MediaResponse> {
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
-                val ratingText = "${resultResponse.vote_average}/10"
-                val durationText = if (resultResponse.episode_run_time?.isEmpty() == true) {
-                    "Unknown"
-                } else ConverterUtils.convertMinutes(resultResponse.episode_run_time?.get(0) ?: 0)
-
-                val genreResponse = if (resultResponse.genres?.isEmpty() == true) {
-                    "Unknown"
-                } else resultResponse.genres?.get(0)?.name ?: "Unknown"
-
-                val genreText = if (genreResponse == "Science Fiction") {
-                    "Sci-Fi"
-                } else genreResponse.substringBefore(" ")
-
-                val pairsArray: MutableList<Pair> = mutableListOf()
-                pairsArray.add(Pair("Genre", genreText))
-                pairsArray.add(Pair("Rating", ratingText))
-                pairsArray.add(Pair("Duration", durationText))
-
-                resultResponse.networks?.let { network ->
-                    if (network.isNotEmpty())
-                        network[0].name?.let { Pair("Network", it) }?.let { pairsArray.add(it) }
-                }
-
-                resultResponse.first_air_date?.let { firstAired ->
-                    if (firstAired.isNotEmpty())
-                        pairsArray.add(
-                            Pair(
-                                "Released", firstAired.take(4)
-                            )
-                        )
-                }
 
                 val seasonList = resultResponse.seasons?.toList() ?: listOf()
                 val videosList = resultResponse.videos?.results?.filter { v ->
@@ -278,7 +219,6 @@ class MediaViewModel(
                     poster_path = resultResponse.poster_path,
                     backdrop_path = resultResponse.backdrop_path,
                     related_media = listOf(),
-                    misc = pairsArray,
                     seasons = seasonList,
                     cast = resultResponse.credits.cast?.toList() ?: listOf(),
                     recommendations = resultResponse.recommendations?.results?.toList() ?: listOf(),
@@ -302,36 +242,6 @@ class MediaViewModel(
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
 
-                val ratingText = "${resultResponse.vote_average}/10"
-                val durationText = if (resultResponse.runtime == null) {
-                    "Unknown"
-                } else ConverterUtils.convertMinutes(resultResponse.runtime)
-
-                val genreResponse = if (resultResponse.genres?.isEmpty() == true) {
-                    "Unknown"
-                } else resultResponse.genres?.get(0)?.name ?: "Unknown"
-
-                val genreText = if (genreResponse == "Science Fiction") {
-                    "Sci-Fi"
-                } else genreResponse.substringBefore(" ")
-
-                val pairsArray: MutableList<Pair> = mutableListOf()
-                pairsArray.add(Pair("Genre", genreText))
-                pairsArray.add(Pair("Rating", ratingText))
-                pairsArray.add(Pair("Duration", durationText))
-
-                resultResponse.production_companies?.let { company ->
-                    if (company.isNotEmpty()) company[0].name?.let {
-                        Pair("Studio", it)
-                    }?.let { pairsArray.add(it) }
-                }
-
-                resultResponse.release_date?.let { firstAired ->
-                    if (firstAired.isNotEmpty()) pairsArray.add(
-                        Pair("Released", firstAired.take(4))
-                    )
-                }
-
                 val videosList = resultResponse.videos?.results?.filter { v ->
                     v.site == "YouTube"
                 } ?: listOf()
@@ -344,7 +254,6 @@ class MediaViewModel(
                     poster_path = resultResponse.poster_path,
                     backdrop_path = resultResponse.backdrop_path,
                     related_media = listOf(),
-                    misc = pairsArray,
                     seasons = listOf(),
                     cast = resultResponse.credits.cast?.toList() ?: listOf(),
                     recommendations = resultResponse.recommendations?.results?.toList() ?: listOf(),

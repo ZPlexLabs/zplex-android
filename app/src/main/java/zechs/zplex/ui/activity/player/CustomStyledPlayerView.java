@@ -54,8 +54,6 @@ public class CustomStyledPlayerView extends StyledPlayerView implements GestureD
     private long seekStart;
     private long seekChange;
     private long seekMax;
-    private boolean canBoostVolume = false;
-    private boolean canSetAutoBrightness = false;
     private boolean restorePlayState;
     private boolean canScale = true;
     private boolean isHandledLongPress = false;
@@ -250,16 +248,10 @@ public class CustomStyledPlayerView extends StyledPlayerView implements GestureD
         if (gestureOrientation == Orientation.VERTICAL || gestureOrientation == Orientation.UNKNOWN) {
             gestureScrollY += distanceY;
             if (Math.abs(gestureScrollY) > SCROLL_STEP) {
-                if (gestureOrientation == Orientation.UNKNOWN) {
-                    canBoostVolume = Utils.Companion.isVolumeMax(mAudioManager);
-                    // canSetAutoBrightness = brightnessControl.getCurrentBrightnessLevel() <= 0;
-                }
                 gestureOrientation = Orientation.VERTICAL;
-
                 if (motionEvent.getX() > (float) (getWidth() / 2)) {
                     Utils.Companion.adjustVolume(mAudioManager, this, gestureScrollY > 0);
                 }
-
                 gestureScrollY = 0.0001f;
             }
         }
@@ -369,13 +361,6 @@ public class CustomStyledPlayerView extends StyledPlayerView implements GestureD
             exoErrorMessage.getBackground().setTintList(null);
     }
 
-    public void setIconBrightness() {
-        exoErrorMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_brightness_medium_24, 0, 0, 0);
-    }
-
-    public void setIconBrightnessAuto() {
-        exoErrorMessage.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_brightness_auto_24dp, 0, 0, 0);
-    }
 
     public void setIconLock(boolean locked) {
         exoErrorMessage.setCompoundDrawablesWithIntrinsicBounds(locked ? R.drawable.ic_lock_24dp : R.drawable.ic_lock_open_24dp, 0, 0, 0);
@@ -391,7 +376,6 @@ public class CustomStyledPlayerView extends StyledPlayerView implements GestureD
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
-        //videoSurfaceView.animate().setStartDelay(0).setDuration(0).scaleX(scale).scaleY(scale).start();
     }
 
     @Override

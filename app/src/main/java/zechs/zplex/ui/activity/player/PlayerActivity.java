@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Icon;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
@@ -23,15 +24,12 @@ import android.media.audiofx.AudioEffect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Rational;
 import android.util.TypedValue;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
@@ -45,6 +43,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -57,7 +56,6 @@ import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.RenderersFactory;
 import com.google.android.exoplayer2.SeekParameters;
 import com.google.android.exoplayer2.audio.AudioAttributes;
-import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.extractor.ts.DefaultTsPayloadReaderFactory;
 import com.google.android.exoplayer2.extractor.ts.TsExtractor;
@@ -66,6 +64,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.google.android.exoplayer2.ui.StyledPlayerControlView;
+import com.google.android.exoplayer2.ui.SubtitleView;
 import com.google.android.exoplayer2.ui.TimeBar;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
@@ -102,7 +101,6 @@ public class PlayerActivity extends Activity {
     public static int boostLevel = 0;
     final Rational rationalLimitWide = new Rational(239, 100);
     final Rational rationalLimitTall = new Rational(100, 239);
-    private final int RESIZE_MODE = AspectRatioFrameLayout.RESIZE_MODE_FIT;
     public CustomStyledPlayerView playerView;
     public boolean frameRendered;
     public long[] chapterStarts;
@@ -113,14 +111,10 @@ public class PlayerActivity extends Activity {
     private PlayerListener playerListener;
     private BroadcastReceiver mReceiver;
     private AudioManager mAudioManager;
-    private MediaSessionCompat mediaSession;
-    private DefaultTrackSelector trackSelector;
     private YouTubeOverlay youTubeOverlay;
     private Object mPictureInPictureParamsBuilder;
     private boolean videoLoading;
     private ExoPlaybackException errorToShow;
-    private boolean isScaling = false;
-    private boolean isScaleStarting = false;
     private float scaleFactor = 1.0f;
     private CoordinatorLayout coordinatorLayout;
     private TextView titleView;
@@ -129,7 +123,6 @@ public class PlayerActivity extends Activity {
     private ImageButton exoSettings;
     private ImageButton exoPlayPause;
     private ProgressBar loadingProgressBar;
-    private StyledPlayerControlView controlView;
     private CustomDefaultTimeBar timeBar;
 
     private boolean restorePlayState;
@@ -140,8 +133,6 @@ public class PlayerActivity extends Activity {
     private long lastScrubbingPosition;
     private Utils.Orientation orientation = Utils.Orientation.VIDEO;
 
-    private Uri mediaUri;
-    private String title;
     private String driveStreamCookie = "DRIVE_STREAM=";
 
     private Boolean _isInPip = false;
@@ -263,6 +254,7 @@ public class PlayerActivity extends Activity {
         });
 
         int titleViewPadding = getResources().getDimensionPixelOffset(R.dimen.exo_styled_bottom_bar_time_padding);
+        Typeface typeface = ResourcesCompat.getFont(getApplicationContext(), R.font.open_sans_semibold);
         FrameLayout centerView = playerView.findViewById(R.id.exo_controls_background);
         titleView = new TextView(this);
         titleView.setTextColor(Color.WHITE);
@@ -273,9 +265,10 @@ public class PlayerActivity extends Activity {
         titleView.setMaxLines(1);
         titleView.setEllipsize(TextUtils.TruncateAt.END);
         titleView.setTextDirection(View.TEXT_DIRECTION_LOCALE);
+        titleView.setTypeface(typeface);
         centerView.addView(titleView);
 
-        controlView = playerView.findViewById(R.id.exo_controller);
+        StyledPlayerControlView controlView = playerView.findViewById(R.id.exo_controller);
         controlView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
             if (windowInsets != null) {
                 view.setPadding(0, windowInsets.getSystemWindowInsetTop(),
@@ -423,149 +416,10 @@ public class PlayerActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         initializePlayer();
-
     }
 
     private Uri getStreamUrl(String fileId) {
         return Uri.parse("https://www.googleapis.com/drive/v3/files/" + fileId + "?supportsAllDrives=True&alt=media");
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_MEDIA_PLAY:
-            case KeyEvent.KEYCODE_MEDIA_PAUSE:
-            case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                break;
-            case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-                Utils.Companion.adjustVolume(
-                        mAudioManager,
-                        playerView,
-                        keyCode == KeyEvent.KEYCODE_VOLUME_UP
-                );
-                return true;
-            case KeyEvent.KEYCODE_BUTTON_SELECT:
-            case KeyEvent.KEYCODE_BUTTON_START:
-            case KeyEvent.KEYCODE_BUTTON_A:
-            case KeyEvent.KEYCODE_ENTER:
-            case KeyEvent.KEYCODE_DPAD_CENTER:
-            case KeyEvent.KEYCODE_NUMPAD_ENTER:
-            case KeyEvent.KEYCODE_SPACE:
-                if (player == null)
-                    break;
-                if (!controllerVisibleFully) {
-                    if (player.isPlaying()) {
-                        player.pause();
-                    } else {
-                        player.play();
-                    }
-                    return true;
-                }
-                break;
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-            case KeyEvent.KEYCODE_BUTTON_L2:
-            case KeyEvent.KEYCODE_MEDIA_REWIND:
-                if (!controllerVisibleFully || keyCode == KeyEvent.KEYCODE_MEDIA_REWIND) {
-                    if (player == null)
-                        break;
-                    playerView.removeCallbacks(playerView.textClearRunnable);
-                    long pos = player.getCurrentPosition();
-                    if (playerView.keySeekStart == -1) {
-                        playerView.keySeekStart = pos;
-                    }
-                    long seekTo = pos - 10_000;
-                    if (seekTo < 0)
-                        seekTo = 0;
-                    player.setSeekParameters(SeekParameters.PREVIOUS_SYNC);
-                    player.seekTo(seekTo);
-                    final String message = Utils.Companion.formatMillisSign(seekTo - playerView.keySeekStart) + "\n" + Utils.Companion.formatMillis(seekTo);
-                    playerView.setCustomErrorMessage(message);
-                    return true;
-                }
-                break;
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-            case KeyEvent.KEYCODE_BUTTON_R2:
-            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                if (!controllerVisibleFully || keyCode == KeyEvent.KEYCODE_MEDIA_FAST_FORWARD) {
-                    if (player == null)
-                        break;
-                    playerView.removeCallbacks(playerView.textClearRunnable);
-                    long pos = player.getCurrentPosition();
-                    if (playerView.keySeekStart == -1) {
-                        playerView.keySeekStart = pos;
-                    }
-                    long seekTo = pos + 10_000;
-                    long seekMax = player.getDuration();
-                    if (seekMax != C.TIME_UNSET && seekTo > seekMax)
-                        seekTo = seekMax;
-                    PlayerActivity.player.setSeekParameters(SeekParameters.NEXT_SYNC);
-                    player.seekTo(seekTo);
-                    final String message = Utils.Companion.formatMillisSign(seekTo - playerView.keySeekStart) + "\n" + Utils.Companion.formatMillis(seekTo);
-                    playerView.setCustomErrorMessage(message);
-                    return true;
-                }
-                break;
-            default:
-                if (!controllerVisibleFully) {
-                    playerView.showController();
-                    return true;
-                }
-                break;
-        }
-        return super.onKeyDown(keyCode, event);
-    }
-
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event) {
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_VOLUME_UP:
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-                playerView.postDelayed(playerView.textClearRunnable, CustomStyledPlayerView.MESSAGE_TIMEOUT_KEY);
-                return true;
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-            case KeyEvent.KEYCODE_BUTTON_L2:
-            case KeyEvent.KEYCODE_MEDIA_REWIND:
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-            case KeyEvent.KEYCODE_BUTTON_R2:
-            case KeyEvent.KEYCODE_MEDIA_FAST_FORWARD:
-                if (!isScrubbing) {
-                    playerView.postDelayed(playerView.textClearRunnable, 1000);
-                }
-                break;
-        }
-        return super.onKeyUp(keyCode, event);
-    }
-
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if (isScaling) {
-            final int keyCode = event.getKeyCode();
-            if (event.getAction() == KeyEvent.ACTION_DOWN) {
-                switch (keyCode) {
-                    case KeyEvent.KEYCODE_DPAD_UP:
-                        scale(true);
-                        break;
-                    case KeyEvent.KEYCODE_DPAD_DOWN:
-                        scale(false);
-                        break;
-                }
-            } else if (event.getAction() == KeyEvent.ACTION_UP) {
-                switch (keyCode) {
-                    case KeyEvent.KEYCODE_DPAD_UP:
-                    case KeyEvent.KEYCODE_DPAD_DOWN:
-                        break;
-                    default:
-                        if (isScaleStarting) {
-                            isScaleStarting = false;
-                        } else {
-                            scaleEnd();
-                        }
-                }
-            }
-            return true;
-        }
-        return super.dispatchKeyEvent(event);
     }
 
     @Override
@@ -575,19 +429,6 @@ public class PlayerActivity extends Activity {
                 final float value = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
                 Utils.Companion.adjustVolume(mAudioManager, playerView, value > 0.0f);
                 return true;
-            }
-        } else if ((event.getSource() & InputDevice.SOURCE_JOYSTICK) == InputDevice.SOURCE_JOYSTICK &&
-                event.getAction() == MotionEvent.ACTION_MOVE) {
-            // TODO: This somehow works, but it would use better filtering
-            float value = event.getAxisValue(MotionEvent.AXIS_RZ);
-            for (int i = 0; i < event.getHistorySize(); i++) {
-                float historical = event.getHistoricalAxisValue(MotionEvent.AXIS_RZ, i);
-                if (Math.abs(historical) > value) {
-                    value = historical;
-                }
-            }
-            if (Math.abs(value) == 1.0f) {
-                Utils.Companion.adjustVolume(mAudioManager, playerView, value < 0);
             }
         }
         return super.onGenericMotionEvent(event);
@@ -642,7 +483,8 @@ public class PlayerActivity extends Activity {
         String cookie = intent.getStringExtra("cookie");
         String dashStream = intent.getStringExtra("dash_url");
 
-        title = intent.getStringExtra("title");
+        String title = intent.getStringExtra("title");
+        Uri mediaUri;
         if (cookie != null && dashStream != null) {
             driveStreamCookie += cookie;
             mediaUri = Uri.parse(dashStream);
@@ -661,7 +503,7 @@ public class PlayerActivity extends Activity {
             player = null;
         }
 
-        trackSelector = new DefaultTrackSelector(this);
+        DefaultTrackSelector trackSelector = new DefaultTrackSelector(this);
         trackSelector.setParameters(trackSelector.buildUponParameters()
                 .setPreferredAudioLanguages(Utils.Companion.getDeviceLanguages())
         );
@@ -693,9 +535,11 @@ public class PlayerActivity extends Activity {
             return dataSource;
         };
 
-        playerBuilder.setMediaSourceFactory(new DefaultMediaSourceFactory(dataSourceFactory, extractorsFactory));
-
-
+        playerBuilder.setMediaSourceFactory(
+                new DefaultMediaSourceFactory(
+                        dataSourceFactory, extractorsFactory
+                )
+        );
         player = playerBuilder.build();
 
         AudioAttributes audioAttributes = new AudioAttributes.Builder()
@@ -703,25 +547,14 @@ public class PlayerActivity extends Activity {
                 .setContentType(C.CONTENT_TYPE_MOVIE)
                 .build();
         player.setAudioAttributes(audioAttributes, true);
-
+        final SubtitleView subtitleView = playerView.getSubtitleView();
+        if (subtitleView != null) {
+            subtitleView.setApplyEmbeddedFontSizes(false);
+            subtitleView.setApplyEmbeddedStyles(false);
+        }
         youTubeOverlay.player(player);
         playerView.setPlayer(player);
 
-        mediaSession = new MediaSessionCompat(this, getString(R.string.app_name));
-        MediaSessionConnector mediaSessionConnector = new MediaSessionConnector(mediaSession);
-        mediaSessionConnector.setPlayer(player);
-
-        mediaSessionConnector.setMediaMetadataProvider(player -> {
-            if (mediaUri == null)
-                return null;
-            if (title == null)
-                return null;
-            else
-                return new MediaMetadataCompat.Builder()
-                        .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title)
-                        .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
-                        .build();
-        });
 
         playerView.setControllerShowTimeoutMs(-1);
 
@@ -732,6 +565,7 @@ public class PlayerActivity extends Activity {
         if (haveMedia) {
             timeBar.setBufferedColor(DefaultTimeBar.DEFAULT_BUFFERED_COLOR);
 
+            int RESIZE_MODE = AspectRatioFrameLayout.RESIZE_MODE_FIT;
             playerView.setResizeMode(RESIZE_MODE);
 
             playerView.setScale(1.f);
@@ -762,7 +596,6 @@ public class PlayerActivity extends Activity {
             // Utils.Companion.markChapters(this, mPrefs.mediaUri, controlView);
 
             player.setHandleAudioBecomingNoisy(true);
-            mediaSession.setActive(true);
         } else {
             playerView.showController();
         }
@@ -782,9 +615,6 @@ public class PlayerActivity extends Activity {
 
         if (player != null) {
             notifyAudioSessionUpdate(false);
-
-            mediaSession.setActive(false);
-            mediaSession.release();
 
             if (player.isPlaying()) {
                 restorePlayState = true;
@@ -968,14 +798,6 @@ public class PlayerActivity extends Activity {
         scaleFactor = Utils.Companion.normalizeScaleFactor(scaleFactor);
         playerView.setScale(scaleFactor);
         playerView.setCustomErrorMessage((int) (scaleFactor * 100) + "%");
-    }
-
-    private void scaleEnd() {
-        isScaling = false;
-        playerView.postDelayed(playerView.textClearRunnable, 200);
-        if (!player.isPlaying()) {
-            playerView.showController();
-        }
     }
 
     @Override

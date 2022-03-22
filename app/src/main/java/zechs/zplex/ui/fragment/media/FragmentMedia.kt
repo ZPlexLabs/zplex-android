@@ -52,7 +52,6 @@ import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
 import zechs.zplex.adapter.media.MediaDataAdapter
 import zechs.zplex.adapter.media.MediaDataModel
-import zechs.zplex.adapter.streams.StreamsDataAdapter
 import zechs.zplex.adapter.streams.StreamsDataModel
 import zechs.zplex.databinding.FragmentTempBinding
 import zechs.zplex.models.dataclass.CastArgs
@@ -94,18 +93,24 @@ class FragmentMedia : BaseFragment() {
     private var _movieDialog: LookupMovieDialog? = null
     private val movieDialog get() = _movieDialog!!
 
-    private var _streamsDialog: StreamsDialog? = null
-    private val streamsDialog get() = _streamsDialog!!
-
     private lateinit var mediaViewModel: MediaViewModel
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
     private val bigImageViewModel by activityViewModels<BigImageViewModel>()
     private val listViewModel by activityViewModels<ListViewModel>()
     private val args by navArgs<FragmentMediaArgs>()
 
-    private var _streamsDataAdapter: StreamsDataAdapter? = null
-    private val streamsDataAdapter get() = _streamsDataAdapter!!
-
+    private var file: File? = null
+    private val streamsDialog by lazy {
+        StreamsDialog(
+            requireContext(),
+            onStreamClick = {
+                file?.let { f -> onStreamClick(it, f) }
+            },
+            onDownloadClick = {
+                file?.let { f -> onDownloadClick(it, f, requireContext()) }
+            }
+        )
+    }
     private val mediaDataAdapter by lazy {
         MediaDataAdapter() { castsList?.let { setCastsList(it) } }
     }
@@ -175,12 +180,6 @@ class FragmentMedia : BaseFragment() {
             btnShare.setOnClickListener {
                 // shareIntent()
                 shareIntent(mediaArgs)
-            }
-            ivPoster.setOnClickListener {
-                media?.poster_path?.let { it1 -> openImageFullSize(it1, binding.ivPoster) }
-            }
-            ivBackdrop.setOnClickListener {
-                media?.backdrop_path?.let { it1 -> openImageFullSize(it1, binding.ivBackdrop) }
             }
         }
     }
@@ -307,10 +306,9 @@ class FragmentMedia : BaseFragment() {
                     title = response.name ?: "",
                     media_type = "movie",
                     poster_path = response.poster_path,
-                    vote_average = response.vote_average
+                    vote_average = response.vote_average?.times(2)
                 )
                 setupMovieDatabaseObserver(movie)
-
             }
             "tv" -> {
                 val show = Show(
@@ -318,7 +316,7 @@ class FragmentMedia : BaseFragment() {
                     name = response.name ?: "",
                     media_type = "tv",
                     poster_path = response.poster_path,
-                    vote_average = response.vote_average
+                    vote_average = response.vote_average?.times(2)
                 )
                 setupShowDatabaseObserver(show)
             }
@@ -365,6 +363,13 @@ class FragmentMedia : BaseFragment() {
                 "  \u2022  ${response.year}"
             } else ""
             tvRuntime.text = runtime
+
+            ivPoster.setOnClickListener {
+                response.poster_path?.let { it1 -> openImageFullSize(it1, binding.ivPoster) }
+            }
+            ivBackdrop.setOnClickListener {
+                response.backdrop_path?.let { it1 -> openImageFullSize(it1, binding.ivBackdrop) }
+            }
         }
 
         tmdbId = response.id
@@ -823,21 +828,8 @@ class FragmentMedia : BaseFragment() {
         }
     }
 
-    private fun showStreamsDialog(context: Context, file: File) {
-        if (_streamsDataAdapter == null) {
-            _streamsDataAdapter = StreamsDataAdapter(
-                setOnStreamClickListener = {
-                    onStreamClick(it, file)
-                },
-                setOnDownloadClickListener = {
-                    onDownloadClick(it, file, context)
-                }
-            )
-        }
-
-        if (_streamsDialog == null) {
-            _streamsDialog = StreamsDialog(context)
-        }
+    private fun showStreamsDialog(context: Context, f: File) {
+        file = f
         streamsDialog.show()
 
         streamsDialog.window?.apply {
@@ -849,14 +841,9 @@ class FragmentMedia : BaseFragment() {
         }
 
         val streamsView = streamsDialog.findViewById<RecyclerView>(R.id.rv_streams)
-        streamsDialog.setOnDismissListener {
-            streamsView.adapter = null
-            _streamsDialog = null
-            _streamsDataAdapter = null
-        }
 
         streamsView.apply {
-            adapter = streamsDataAdapter
+            adapter = streamsDialog.streamsDataAdapter
             layoutManager = LinearLayoutManager(
                 context, LinearLayoutManager.VERTICAL, false
             )
@@ -865,15 +852,15 @@ class FragmentMedia : BaseFragment() {
         val streamsList = mutableListOf<StreamsDataModel>()
         streamsList.add(
             StreamsDataModel.Original(
-                title = "Original (${file.humanSize})",
-                id = file.id
+                title = "Original (${f.humanSize})",
+                id = f.id
             )
         )
 
         streamsList.add(StreamsDataModel.Loading)
 
-        streamsDataAdapter.differ.submitList(streamsList.toList())
-        mediaViewModel.getDashVideos(file.id)
+        streamsDialog.streamsDataAdapter.differ.submitList(streamsList.toList())
+        mediaViewModel.getDashVideos(f.id)
     }
 
     private fun btnYesListener() {
@@ -933,7 +920,7 @@ class FragmentMedia : BaseFragment() {
                 }
             }
             else -> {
-                val adapterDiff = streamsDataAdapter.differ
+                val adapterDiff = streamsDialog.streamsDataAdapter.differ
                 val currentList = adapterDiff.currentList
                 val streamsList = mutableListOf<StreamsDataModel>()
                 streamsList.add(currentList.filterIsInstance<StreamsDataModel.Original>()[0])
@@ -943,7 +930,7 @@ class FragmentMedia : BaseFragment() {
     }
 
     private fun handleStreamsSuccess(streams: List<DashVideoResponseItem>) {
-        val adapterDiff = streamsDataAdapter.differ
+        val adapterDiff = streamsDialog.streamsDataAdapter.differ
         val currentList = adapterDiff.currentList
 
         val streamsList = mutableListOf<StreamsDataModel>()

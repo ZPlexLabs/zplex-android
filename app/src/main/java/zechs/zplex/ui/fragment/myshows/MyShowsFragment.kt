@@ -52,7 +52,6 @@ class MyShowsFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentMyShowsBinding.bind(view)
 
-
         myShowsViewModel = (activity as ZPlexActivity).myShowsViewModel
         setupRecyclerView()
 

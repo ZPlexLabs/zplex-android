@@ -28,9 +28,9 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.Transition
 import zechs.zplex.R
 import zechs.zplex.adapter.EpisodesAdapter
-import zechs.zplex.adapter.streams.StreamsDataAdapter
 import zechs.zplex.adapter.streams.StreamsDataModel
 import zechs.zplex.databinding.FragmentEpisodeBinding
+import zechs.zplex.models.drive.File
 import zechs.zplex.models.tmdb.PosterSize
 import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.models.tmdb.season.SeasonResponse
@@ -59,11 +59,18 @@ class EpisodesFragment : BaseFragment() {
     private lateinit var episodesViewModel: EpisodesViewModel
     private val episodesAdapter by lazy { EpisodesAdapter() }
 
-    private var _streamsDialog: StreamsDialog? = null
-    private val streamsDialog get() = _streamsDialog!!
-
-    private var _streamsDataAdapter: StreamsDataAdapter? = null
-    private val streamsDataAdapter get() = _streamsDataAdapter!!
+    private var episode: Episode? = null
+    private val streamsDialog by lazy {
+        StreamsDialog(
+            requireContext(),
+            onStreamClick = {
+                episode?.let { e -> onStreamClick(it, e) }
+            },
+            onDownloadClick = {
+                episode?.let { e -> onDownloadClick(it, e, requireContext()) }
+            }
+        )
+    }
 
     private val thisTAG = "EpisodesFragment"
     private var tmdbId = 0
@@ -216,20 +223,8 @@ class EpisodesFragment : BaseFragment() {
         }
     }
 
-    private fun showStreamsDialog(context: Context, episode: Episode) {
-        if (_streamsDataAdapter == null) {
-            _streamsDataAdapter = StreamsDataAdapter(
-                setOnStreamClickListener = {
-                    onStreamClick(it, episode)
-                },
-                setOnDownloadClickListener = {
-                    onDownloadClick(it, episode, context)
-                }
-            )
-        }
-        if (_streamsDialog == null) {
-            _streamsDialog = StreamsDialog(context)
-        }
+    private fun showStreamsDialog(context: Context, e: Episode) {
+        episode = e
         streamsDialog.show()
 
         streamsDialog.window?.apply {
@@ -241,33 +236,28 @@ class EpisodesFragment : BaseFragment() {
         }
 
         val streamsView = streamsDialog.findViewById<RecyclerView>(R.id.rv_streams)
-        streamsDialog.setOnDismissListener {
-            streamsView.adapter = null
-            _streamsDialog = null
-            _streamsDataAdapter = null
-        }
 
         streamsView.apply {
-            adapter = streamsDataAdapter
+            adapter = streamsDialog.streamsDataAdapter
             layoutManager = LinearLayoutManager(
                 context, LinearLayoutManager.VERTICAL, false
             )
         }
 
         val streamsList = mutableListOf<StreamsDataModel>()
-        episode.fileId?.let { id ->
+        e.fileId?.let { id ->
             streamsList.add(
                 StreamsDataModel.Original(
-                    title = "Original (${episode.fileSize!!})",
+                    title = "Original (${e.fileSize!!})",
                     id = id
                 )
             )
-            episodesViewModel.getDashVideos(episode.fileId)
+            episodesViewModel.getDashVideos(e.fileId)
         }
 
         streamsList.add(StreamsDataModel.Loading)
 
-        streamsDataAdapter.differ.submitList(streamsList.toList())
+        streamsDialog.streamsDataAdapter.differ.submitList(streamsList.toList())
     }
 
     private fun onStreamClick(it: StreamsDataModel, episode: Episode) {
@@ -346,7 +336,7 @@ class EpisodesFragment : BaseFragment() {
                 }
             }
             else -> {
-                val adapterDiff = streamsDataAdapter.differ
+                val adapterDiff = streamsDialog.streamsDataAdapter.differ
                 val currentList = adapterDiff.currentList
                 val streamsList = mutableListOf<StreamsDataModel>()
                 streamsList.add(currentList.filterIsInstance<StreamsDataModel.Original>()[0])
@@ -356,7 +346,7 @@ class EpisodesFragment : BaseFragment() {
     }
 
     private fun handleStreamsSuccess(streams: List<DashVideoResponseItem>) {
-        val adapterDiff = streamsDataAdapter.differ
+        val adapterDiff = streamsDialog.streamsDataAdapter.differ
         val currentList = adapterDiff.currentList
 
         val streamsList = mutableListOf<StreamsDataModel>()
