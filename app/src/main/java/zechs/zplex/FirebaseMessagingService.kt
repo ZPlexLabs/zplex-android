@@ -50,7 +50,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                 flags = (Intent.FLAG_ACTIVITY_NEW_TASK
                         or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                setData("movie/$tmdbId".toUri())
+                setData("$tmdbId".toUri())
             }
 
             val pendingIntent = PendingIntent.getActivity(
@@ -61,10 +61,12 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                 RingtoneManager.TYPE_NOTIFICATION
             )
 
-            val notificationBuilder = NotificationCompat.Builder(this, NotificationKeys.CHANNEL_ID)
+            val notificationBuilder = NotificationCompat.Builder(this, NotificationKeys.RELEASES_CHANNEL_ID)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(R.drawable.ic_new_releases_24dp)
                 .setContentTitle("New release")
                 .setContentText(title)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(title))
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setContentIntent(pendingIntent)
@@ -74,8 +76,8 @@ class FirebaseMessagingService : FirebaseMessagingService() {
             ) as NotificationManager
 
             val channel = NotificationChannel(
-                NotificationKeys.CHANNEL_ID,
-                NotificationKeys.CHANNEL_NAME,
+                NotificationKeys.RELEASES_CHANNEL_ID,
+                NotificationKeys.RELEASES_CHANNEL_NAME,
                 NotificationManager.IMPORTANCE_DEFAULT
             )
 

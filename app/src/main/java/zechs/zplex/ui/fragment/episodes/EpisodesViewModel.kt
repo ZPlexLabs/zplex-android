@@ -57,8 +57,8 @@ class EpisodesViewModel(
 
     val season: MutableLiveData<Resource<SeasonResponse>> = MutableLiveData()
 
-    private val _dashVideo = MutableLiveData<Event<Resource<List<DashVideoResponseItem>>>>()
-    val dashVideo: LiveData<Event<Resource<List<DashVideoResponseItem>>>>
+    private val _dashVideo = MutableLiveData<Event<Resource<List<DashVideoResponseItem>?>>>()
+    val dashVideo: LiveData<Event<Resource<List<DashVideoResponseItem>?>>>
         get() = _dashVideo
 
     fun getSeason(tvId: Int, seasonNumber: Int) =
@@ -256,8 +256,8 @@ class EpisodesViewModel(
     }
 
     private fun handleDashVideoResponse(
-        response: Response<List<DashVideoResponseItem>>
-    ): Resource<List<DashVideoResponseItem>> {
+        response: Response<List<DashVideoResponseItem>?>
+    ): Resource<List<DashVideoResponseItem>?> {
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
                 return Resource.Success(resultResponse)
@@ -265,7 +265,6 @@ class EpisodesViewModel(
         }
         return Resource.Error(response.message())
     }
-
 
     private fun driveQuery(
         driveId: String

@@ -1,16 +1,19 @@
 package zechs.zplex.ui.activity
 
 import android.annotation.SuppressLint
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.Constraints
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -18,7 +21,6 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.gms.tasks.OnCompleteListener
-import com.google.android.material.button.MaterialButton
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
@@ -34,7 +36,6 @@ import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.repository.WitchRepository
-import zechs.zplex.ui.dialog.UpdateDialog
 import zechs.zplex.ui.fragment.browse.BrowseViewModel
 import zechs.zplex.ui.fragment.browse.BrowseViewModelProviderFactory
 import zechs.zplex.ui.fragment.cast.CastViewModel
@@ -58,6 +59,8 @@ import zechs.zplex.ui.fragment.watch.WatchViewModelProviderFactory
 import zechs.zplex.utils.Constants.DRIVE_ZPLEX_RELEASES
 import zechs.zplex.utils.Constants.THEMOVIEDB_ID_REGEX
 import zechs.zplex.utils.Constants.VERSION_CODE_KEY
+import zechs.zplex.utils.NotificationKeys
+import java.util.*
 
 
 class ZPlexActivity : AppCompatActivity() {
@@ -79,8 +82,6 @@ class ZPlexActivity : AppCompatActivity() {
     lateinit var collectionViewModel: CollectionViewModel
     lateinit var upcomingViewModel: UpcomingViewModel
 
-    private var _updateDialog: UpdateDialog? = null
-    private val updateDialog get() = _updateDialog!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -224,32 +225,57 @@ class ZPlexActivity : AppCompatActivity() {
         if (it.isSuccessful) {
             val latestAppVersion = Firebase.remoteConfig.getDouble(VERSION_CODE_KEY).toInt()
             if (latestAppVersion > BuildConfig.VERSION_CODE) {
-                showUpdateDialog()
+                showUpdateNotification()
             }
+            Log.d(
+                "firebaseOnCompleteListener",
+                "Update=${latestAppVersion > BuildConfig.VERSION_CODE}"
+            )
         }
     }
 
-    private fun showUpdateDialog() {
-        if (_updateDialog == null) {
-            _updateDialog = UpdateDialog(this)
-        }
-        updateDialog.show()
-        updateDialog.window?.apply {
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            setLayout(
-                Constraints.LayoutParams.MATCH_PARENT,
-                Constraints.LayoutParams.WRAP_CONTENT
-            )
+    private fun showUpdateNotification() {
+        val requestCode = Random().nextInt()
+
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse(DRIVE_ZPLEX_RELEASES)
         }
 
-        val updateButton = updateDialog.findViewById<MaterialButton>(R.id.update_btn)
-        updateButton.setOnClickListener {
-            val updateFolder = Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse(DRIVE_ZPLEX_RELEASES)
-            }
-            startActivity(updateFolder)
-            updateDialog.dismiss()
-        }
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val defaultSoundUri = RingtoneManager.getDefaultUri(
+            RingtoneManager.TYPE_NOTIFICATION
+        )
+
+        val notificationBuilder = NotificationCompat.Builder(
+            this,
+            NotificationKeys.UPDATE_CHANNEL_ID
+        ).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setSmallIcon(R.drawable.ic_zplex)
+            .setContentTitle(getString(R.string.new_version_available))
+            .setContentText(getString(R.string.update_msg))
+            .setStyle(
+                NotificationCompat
+                    .BigTextStyle()
+                    .bigText(getString(R.string.update_msg))
+            ).setAutoCancel(true)
+            .setSound(defaultSoundUri)
+            .addAction(R.drawable.ic_update_24dp, getString(R.string.update), pendingIntent)
+
+        val notificationManager = getSystemService(
+            Context.NOTIFICATION_SERVICE
+        ) as NotificationManager
+
+        val channel = NotificationChannel(
+            NotificationKeys.UPDATE_CHANNEL_ID,
+            NotificationKeys.UPDATE_CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_HIGH
+        )
+
+        notificationManager.createNotificationChannel(channel)
+        notificationManager.notify(requestCode, notificationBuilder.build())
     }
 
     override fun onNewIntent(intent: Intent?) {

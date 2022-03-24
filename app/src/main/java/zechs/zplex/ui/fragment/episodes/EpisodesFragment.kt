@@ -30,7 +30,6 @@ import zechs.zplex.R
 import zechs.zplex.adapter.EpisodesAdapter
 import zechs.zplex.adapter.streams.StreamsDataModel
 import zechs.zplex.databinding.FragmentEpisodeBinding
-import zechs.zplex.models.drive.File
 import zechs.zplex.models.tmdb.PosterSize
 import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.models.tmdb.season.SeasonResponse
@@ -327,12 +326,12 @@ class EpisodesFragment : BaseFragment() {
     }
 
     private fun handleDashStreamsResponse(
-        streamsResponse: Resource<List<DashVideoResponseItem>>
+        streamsResponse: Resource<List<DashVideoResponseItem>?>
     ) {
         when (streamsResponse) {
             is Resource.Success -> {
-                streamsResponse.data?.let {
-                    handleStreamsSuccess(it)
+                if (streamsResponse.data != null && streamsResponse.data.isNotEmpty()) {
+                    handleStreamsSuccess(streamsResponse.data)
                 }
             }
             else -> {

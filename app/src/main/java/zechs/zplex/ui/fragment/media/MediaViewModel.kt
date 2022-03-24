@@ -73,8 +73,8 @@ class MediaViewModel(
     val witchMessage: LiveData<Event<String>>
         get() = _witchMessage
 
-    private val _dashVideo = MutableLiveData<Event<Resource<List<DashVideoResponseItem>>>>()
-    val dashVideo: LiveData<Event<Resource<List<DashVideoResponseItem>>>>
+    private val _dashVideo = MutableLiveData<Event<Resource<List<DashVideoResponseItem>?>>>()
+    val dashVideo: LiveData<Event<Resource<List<DashVideoResponseItem>?>>>
         get() = _dashVideo
 
     fun saveShow(show: Show) = viewModelScope.launch {
@@ -357,8 +357,8 @@ class MediaViewModel(
     }
 
     private fun handleDashVideoResponse(
-        response: Response<List<DashVideoResponseItem>>
-    ): Resource<List<DashVideoResponseItem>> {
+        response: Response<List<DashVideoResponseItem>?>
+    ): Resource<List<DashVideoResponseItem>?> {
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
                 return Resource.Success(resultResponse)

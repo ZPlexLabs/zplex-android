@@ -911,12 +911,12 @@ class FragmentMedia : BaseFragment() {
     }
 
     private fun handleDashStreamsResponse(
-        streamsResponse: Resource<List<DashVideoResponseItem>>
+        streamsResponse: Resource<List<DashVideoResponseItem>?>
     ) {
         when (streamsResponse) {
             is Resource.Success -> {
-                streamsResponse.data?.let {
-                    handleStreamsSuccess(it)
+                if (streamsResponse.data != null && streamsResponse.data.isNotEmpty()) {
+                    handleStreamsSuccess(streamsResponse.data)
                 }
             }
             else -> {

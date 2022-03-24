@@ -23,6 +23,6 @@ interface WitchAPI {
     suspend fun getDashVideos(
         @Path("file_id")
         fileId: String
-    ): Response<List<DashVideoResponseItem>>
+    ): Response<List<DashVideoResponseItem>?>
 
 }
