@@ -31,7 +31,7 @@ android {
         applicationId "zechs.zplex"
         minSdkVersion 26
         targetSdkVersion 32
-        versionCode 18
+        versionCode 19
         versionName "v4-$gitCommitHash"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
