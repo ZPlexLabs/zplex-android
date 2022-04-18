@@ -77,7 +77,6 @@ import java.util.concurrent.TimeUnit;
 import zechs.zplex.R;
 import zechs.zplex.ui.activity.player.dtpv.DoubleTapPlayerView;
 import zechs.zplex.ui.activity.player.dtpv.youtube.YouTubeOverlay;
-import zechs.zplex.utils.SessionManager;
 
 public class PlayerActivity extends Activity {
 
@@ -479,18 +478,13 @@ public class PlayerActivity extends Activity {
     public void initializePlayer() {
 
         Intent intent = getIntent();
-        String fileId = intent.getStringExtra("fileId");
-        String cookie = intent.getStringExtra("cookie");
-        String dashStream = intent.getStringExtra("dash_url");
 
+        String fileId = intent.getStringExtra("fileId");
         String title = intent.getStringExtra("title");
-        Uri mediaUri;
-        if (cookie != null && dashStream != null) {
-            driveStreamCookie += cookie;
-            mediaUri = Uri.parse(dashStream);
-        } else {
-            mediaUri = getStreamUrl(fileId);
-        }
+        String accessToken = intent.getStringExtra("accessToken");
+
+        Uri mediaUri = getStreamUrl(fileId);
+
         if (titleView != null) titleView.setText(title);
 
         focusPlay = true;
@@ -529,16 +523,14 @@ public class PlayerActivity extends Activity {
             } else {
                 dataSource.setRequestProperty(
                         "Authorization",
-                        "Bearer " + new SessionManager(getApplicationContext()).fetchAuthToken()
+                        "Bearer " + accessToken
                 );
             }
             return dataSource;
         };
 
         playerBuilder.setMediaSourceFactory(
-                new DefaultMediaSourceFactory(
-                        dataSourceFactory, extractorsFactory
-                )
+                new DefaultMediaSourceFactory(dataSourceFactory, extractorsFactory)
         );
         player = playerBuilder.build();
 
@@ -570,8 +562,8 @@ public class PlayerActivity extends Activity {
 
             playerView.setScale(1.f);
 
-            MediaItem.Builder mediaItemBuilder = new MediaItem.Builder()
-                    .setUri(mediaUri);
+            MediaItem.Builder mediaItemBuilder = new MediaItem.Builder().setUri(mediaUri);
+            assert mediaUri != null;
             Log.d("mediaUri", mediaUri.toString());
             player.setMediaItem(mediaItemBuilder.build());
             player.play();

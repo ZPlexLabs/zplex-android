@@ -1,81 +1,45 @@
 package zechs.zplex.ui.fragment.media
 
 import android.app.Application
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 import retrofit2.Response
-import zechs.zplex.ThisApp
-import zechs.zplex.models.dataclass.ConstantsResult
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
-import zechs.zplex.models.drive.DriveResponse
 import zechs.zplex.models.tmdb.collection.CollectionsResponse
 import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.models.tmdb.media.MediaResponse
-import zechs.zplex.models.tmdb.media.MovieResponse
 import zechs.zplex.models.tmdb.media.TvResponse
-import zechs.zplex.models.witch.DashVideoResponseItem
-import zechs.zplex.models.witch.MessageResponse
-import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.TmdbRepository
-import zechs.zplex.repository.WitchRepository
-import zechs.zplex.utils.Constants.CLIENT_ID
-import zechs.zplex.utils.Constants.CLIENT_SECRET
-import zechs.zplex.utils.Constants.DOCUMENT_PATH
-import zechs.zplex.utils.Constants.REFRESH_TOKEN
-import zechs.zplex.utils.Constants.TEMP_TOKEN
-import zechs.zplex.utils.Constants.ZPLEX
-import zechs.zplex.utils.Constants.ZPLEX_DRIVE_ID
-import zechs.zplex.utils.Constants.ZPLEX_MOVIES_ID
-import zechs.zplex.utils.Constants.ZPLEX_SHOWS_ID
+import zechs.zplex.repository.ZPlexRepository
+import zechs.zplex.ui.BaseAndroidViewModel
+import zechs.zplex.ui.movieResponseTmdb
+import zechs.zplex.ui.movieResponseZplex
 import zechs.zplex.utils.Event
 import zechs.zplex.utils.Resource
-import zechs.zplex.utils.SessionManager
 import java.io.IOException
 
 class MediaViewModel(
     app: Application,
-    private val filesRepository: FilesRepository,
     private val tmdbRepository: TmdbRepository,
-    private val witchRepository: WitchRepository
-) : AndroidViewModel(app) {
+    private val zplexRepository: ZPlexRepository
+) : BaseAndroidViewModel(app) {
 
-    private val database = Firebase.firestore
-
-    private val accessToken = SessionManager(
-        getApplication<Application>().applicationContext
-    ).fetchAuthToken()
-
-    private val _searchList = MutableLiveData<Event<Resource<DriveResponse>>>()
-    val searchList: LiveData<Event<Resource<DriveResponse>>>
-        get() = _searchList
-
-    val media: MutableLiveData<Resource<MediaResponse>> = MutableLiveData()
+    private val _movieZplex = MutableLiveData<Event<Resource<movieResponseZplex>>>()
+    val movieZplex: LiveData<Event<Resource<movieResponseZplex>>>
+        get() = _movieZplex
 
     private val _dominantColor = MutableLiveData(Event(6770852))
     val dominantColor: LiveData<Event<Int>>
         get() = _dominantColor
-
-    private val _witchMessage = MutableLiveData<Event<String>>()
-    val witchMessage: LiveData<Event<String>>
-        get() = _witchMessage
-
-    private val _dashVideo = MutableLiveData<Event<Resource<List<DashVideoResponseItem>?>>>()
-    val dashVideo: LiveData<Event<Resource<List<DashVideoResponseItem>?>>>
-        get() = _dashVideo
 
     fun saveShow(show: Show) = viewModelScope.launch {
         tmdbRepository.upsertShow(show)
@@ -102,24 +66,49 @@ class MediaViewModel(
         _dominantColor.value = Event(color)
     }
 
+    fun zplexGetMovie(tmdbId: Int) = viewModelScope.launch {
+        _movieZplex.postValue(Event(Resource.Loading()))
+        try {
+            if (hasInternetConnection()) {
+                val zplexMovie = zplexRepository.getMovie(tmdbId)
+                _movieZplex.postValue(Event(handleZPlexMovieResponse(zplexMovie)))
+            } else {
+                _movieZplex.postValue(Event(Resource.Error("No internet connection")))
+            }
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            println("zplexGetMovie :  Message=${t.message}")
+            _movieZplex.postValue(
+                Event(
+                    Resource.Error(
+                        if (t is IOException) {
+                            "Network Failure"
+                        } else t.message ?: "Something went wrong"
+                    )
+                )
+            )
+        }
+    }
+
+    private fun handleZPlexMovieResponse(
+        response: Response<movieResponseZplex>
+    ): Resource<movieResponseZplex> {
+        if (response.isSuccessful) {
+            return Resource.Success(response.body()!!)
+        }
+        return Resource.Error(response.message())
+    }
+
     fun getMediaFlow(tmdbId: Int, mediaType: String) = channelFlow {
         send(Resource.Loading())
         try {
             if (hasInternetConnection()) {
                 if (mediaType == "movie") {
                     val response = tmdbRepository.getMovie(tmdbId)
-                    if (response.body()?.belongs_to_collection != null) {
-                        val collectionsResponse = tmdbRepository.getCollection(
-                            collectionId = response.body()?.belongs_to_collection!!.id
-                        )
-                        send(
-                            handleMovieResponseWithCollection(
-                                response, collectionsResponse
-                            )
-                        )
-                    } else {
-                        send(handleMovieResponse(response))
-                    }
+                    response.body()?.belongs_to_collection?.let {
+                        val collectionsResponse = tmdbRepository.getCollection(it.id)
+                        send(handleMovieResponseWithCollection(response, collectionsResponse))
+                    } ?: send(handleMovieResponse(response))
                 } else {
                     val response = tmdbRepository.getShow(tmdbId)
                     send(handleTvResponse(response))
@@ -132,14 +121,16 @@ class MediaViewModel(
             println("getMediaFlow :  Message=${t.message}")
             send(
                 Resource.Error(
-                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
+                    if (t is IOException) {
+                        "Network Failure"
+                    } else t.message ?: "Something went wrong"
                 )
             )
         }
     }.asLiveData()
 
     private fun handleMovieResponseWithCollection(
-        response: Response<MovieResponse>,
+        response: Response<movieResponseTmdb>,
         collectionsResponse: Response<CollectionsResponse>
     ): Resource<MediaResponse> {
         if (response.isSuccessful && collectionsResponse.isSuccessful) {
@@ -237,7 +228,7 @@ class MediaViewModel(
     }
 
     private fun handleMovieResponse(
-        response: Response<MovieResponse>
+        response: Response<movieResponseTmdb>
     ): Resource<MediaResponse> {
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
@@ -271,150 +262,6 @@ class MediaViewModel(
         return Resource.Error(response.message())
     }
 
-    private fun getCredentials(tmdbId: Int) {
-        database.collection("constants")
-            .document(DOCUMENT_PATH)
-            .get()
-            .addOnSuccessListener { documentSnapshot ->
-                val constantsResult = documentSnapshot.toObject<ConstantsResult>()
-                constantsResult?.let {
-                    ZPLEX = it.zplex
-                    ZPLEX_DRIVE_ID = it.zplex_drive_id
-                    ZPLEX_MOVIES_ID = it.zplex_movies_id
-                    ZPLEX_SHOWS_ID = it.zplex_shows_id
-                    CLIENT_ID = it.client_id
-                    CLIENT_SECRET = it.client_secret
-                    REFRESH_TOKEN = it.refresh_token
-                    TEMP_TOKEN = it.temp_token
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val response = filesRepository.getDriveFiles(
-                            pageSize = 1,
-                            if (accessToken == "") it.temp_token else accessToken,
-                            pageToken = null,
-                            driveQuery = searchQuery(tmdbId, it.zplex_movies_id),
-                            orderBy = "modifiedTime desc"
-                        )
-                        _searchList.postValue(Event(handleSearchListResponse(response)))
-                    }
-                }
-            }
-    }
-
-    fun doSearchFor(tmdbId: Int) = viewModelScope.launch {
-        _searchList.postValue(Event(Resource.Loading()))
-        try {
-            if (hasInternetConnection()) {
-                getCredentials(tmdbId)
-            } else {
-                _searchList.postValue(Event(Resource.Error("No internet connection")))
-            }
-        } catch (t: Throwable) {
-            println(t.stackTrace)
-            println(t.message)
-            _searchList.postValue(
-                Event(
-                    Resource.Error(
-                        if (t is IOException) {
-                            "Network Failure"
-                        } else t.message ?: "Something went wrong"
-                    )
-                )
-            )
-        }
-    }
-
-
-    private fun handleSearchListResponse(
-        response: Response<DriveResponse>
-    ): Resource<DriveResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
-            }
-        }
-        return Resource.Error(response.message())
-    }
-
-    fun getDashVideos(fileId: String) = viewModelScope.launch {
-        try {
-            if (hasInternetConnection()) {
-                val response = witchRepository.getDashVideos(fileId)
-                _dashVideo.value = Event(handleDashVideoResponse(response))
-            } else {
-                _dashVideo.value = Event(Resource.Error("No internet connection"))
-            }
-        } catch (t: Throwable) {
-            println(t)
-            println(t.message)
-            _dashVideo.value = Event(
-                Resource.Error(
-                    if (t is IOException) {
-                        "Network Failure"
-                    } else t.message ?: "Something went wrong"
-                )
-            )
-        }
-    }
-
-    private fun handleDashVideoResponse(
-        response: Response<List<DashVideoResponseItem>?>
-    ): Resource<List<DashVideoResponseItem>?> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
-            }
-        }
-        return Resource.Error(response.message())
-    }
-
-    fun requestMovie(imdbId: String, tmdbId: String, deviceId: String) = viewModelScope.launch {
-
-        try {
-            if (hasInternetConnection()) {
-                val response = witchRepository.requestMovie(
-                    imdbId, tmdbId, deviceId
-                )
-                _witchMessage.value = Event(handleWitchResponse(response))
-            } else {
-                _witchMessage.value = Event("No internet connection")
-            }
-        } catch (t: Throwable) {
-            println(t)
-            println(t.message)
-            _witchMessage.value = Event(
-                if (t is IOException) {
-                    "Network Failure"
-                } else t.message ?: "Something went wrong"
-            )
-        }
-    }
-
-    private fun handleWitchResponse(
-        response: Response<MessageResponse>
-    ): String {
-        if (response.isSuccessful) {
-            return response.body()?.message ?: "Something went wrong"
-        }
-        return response.message()
-    }
-
-    private fun searchQuery(
-        tmdbId: Int, movieId: String
-    ) = "name contains '${tmdbId}' and '${movieId}' in parents and trashed = false"
-
-    private fun hasInternetConnection(): Boolean {
-        val connectivityManager = getApplication<ThisApp>().getSystemService(
-            Context.CONNECTIVITY_SERVICE
-        ) as ConnectivityManager
-        val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
-        return when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-            else -> false
-        }
-    }
 
     fun calcDominantColor(drawable: Drawable, onFinish: (Int) -> Unit) {
         val bmp = (drawable as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)

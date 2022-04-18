@@ -141,9 +141,17 @@ dependencies {
     kapt "com.squareup.moshi:moshi-kotlin-codegen:1.13.0"
     implementation "com.squareup.retrofit2:converter-moshi:2.9.0"
 
+    // Gson
+    implementation "com.google.code.gson:gson:2.9.0"
+
+    //OkHttp
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.3"))
+    implementation "com.squareup.okhttp3:okhttp"
+    implementation "com.squareup.okhttp3:logging-interceptor"
+
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2"
+    implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
 
     // Navigation Components
     implementation "androidx.navigation:navigation-fragment-ktx:2.4.1"
@@ -151,8 +159,9 @@ dependencies {
 
     // Glide
     implementation "com.github.bumptech.glide:glide:4.12.0"
-    implementation "com.squareup.okhttp3:okhttp:5.0.0-alpha.3"
-    implementation "com.github.bumptech.glide:okhttp3-integration:4.12.0"
+    implementation("com.github.bumptech.glide:okhttp3-integration:4.12.0") {
+        exclude group: 'glide-parent'
+    }
     kapt "com.github.bumptech.glide:compiler:4.12.0"
 
     //Firebase

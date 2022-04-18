@@ -129,30 +129,6 @@
             android:id="@+id/action_castsFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />
     </fragment>
-    <fragment
-        android:id="@+id/musicFragment"
-        android:name="zechs.zplex.ui.fragment.music.FragmentMusic"
-        android:label="FragmentMusic"
-        tools:layout="@layout/fragment_music">
-        <argument
-            android:name="folderId"
-            android:defaultValue="null"
-            app:argType="string" />
-        <argument
-            android:name="folderName"
-            android:defaultValue="null"
-            app:argType="string" />
-        <action
-            android:id="@+id/action_musicFragment_self"
-            app:destination="@id/musicFragment">
-            <argument
-                android:name="folderId"
-                app:argType="string" />
-            <argument
-                android:name="folderName"
-                app:argType="string" />
-        </action>
-    </fragment>
     <dialog
         android:id="@+id/shareBottomSheet"
         android:name="zechs.zplex.ui.sheet.ShareBottomSheet"

@@ -37,7 +37,6 @@ class UpcomingFragment : Fragment(R.layout.fragment_upcoming) {
     private var isLastPage = true
     private val thisTAG = "UpcomingFragment"
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.item_episode.view.*
 import zechs.zplex.R
 import zechs.zplex.models.tmdb.StillSize
-import zechs.zplex.models.tmdb.entities.Episode
+import zechs.zplex.models.zplex.Episode
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 
@@ -54,14 +54,14 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
         val count = "Episode ${episode.episode_number}"
 
         holder.itemView.apply {
-            frame_not_available.isVisible = episode.fileId == null
+            frame_not_available.isVisible = episode.file_id == null
             if (episode.name == count) {
                 tv_episodeCount.tag = position
             }
 
             tv_episodeCount.isInvisible = tv_episodeCount.tag == position
 
-            tv_title.text = if (episode.name.isNullOrEmpty()) "No title" else episode.name
+            tv_title.text = episode.name.ifEmpty { "No title" }
             tv_episodeCount.text = count
             tv_overview.text = if (episode.overview.isNullOrEmpty()) {
                 "No description"
@@ -73,7 +73,7 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
                 .placeholder(R.drawable.no_thumb)
                 .into(iv_backdrop)
 
-            if (episode.fileId != null) {
+            if (episode.file_id != null) {
                 setOnClickListener {
                     onItemClickListener?.let { it(episode) }
                 }

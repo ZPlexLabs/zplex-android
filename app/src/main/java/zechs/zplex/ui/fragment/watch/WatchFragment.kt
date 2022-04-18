@@ -73,10 +73,8 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
                 is Resource.Success -> {
                     responseEpisode.data?.let { doOnSuccess(it) }
                 }
-                is Resource.Error -> {
-                }
-                is Resource.Loading -> {
-                }
+                is Resource.Error -> {}
+                is Resource.Loading -> {}
             }
         }
 

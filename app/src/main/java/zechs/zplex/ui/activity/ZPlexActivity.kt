@@ -33,9 +33,8 @@ import zechs.zplex.R
 import zechs.zplex.db.WatchlistDatabase
 import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.tmdb.entities.Media
-import zechs.zplex.repository.FilesRepository
 import zechs.zplex.repository.TmdbRepository
-import zechs.zplex.repository.WitchRepository
+import zechs.zplex.repository.ZPlexRepository
 import zechs.zplex.ui.fragment.browse.BrowseViewModel
 import zechs.zplex.ui.fragment.browse.BrowseViewModelProviderFactory
 import zechs.zplex.ui.fragment.cast.CastViewModel
@@ -85,9 +84,8 @@ class ZPlexActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        val filesRepository = FilesRepository()
         val tmdbRepository = TmdbRepository(WatchlistDatabase(this))
-        val witchRepository = WitchRepository()
+        val zplexRepository = ZPlexRepository()
 
         homeViewModel = ViewModelProvider(
             this,
@@ -113,19 +111,14 @@ class ZPlexActivity : AppCompatActivity() {
             this,
             MediaViewModelProviderFactory(
                 application,
-                filesRepository,
-                tmdbRepository,
-                witchRepository
+                tmdbRepository, zplexRepository
             )
         )[MediaViewModel::class.java]
 
         episodesViewModel = ViewModelProvider(
             this,
             EpisodesViewModelProviderFactory(
-                application,
-                filesRepository,
-                tmdbRepository,
-                witchRepository
+                application, zplexRepository
             )
         )[EpisodesViewModel::class.java]
 
@@ -138,11 +131,6 @@ class ZPlexActivity : AppCompatActivity() {
             this,
             CastViewModelProviderFactory(application, tmdbRepository)
         )[CastViewModel::class.java]
-
-//        musicViewModel = ViewModelProvider(
-//            this,
-//            MusicViewModelProviderFactory(application, filesRepository)
-//        )[MusicViewModel::class.java]
 
         collectionViewModel = ViewModelProvider(
             this,

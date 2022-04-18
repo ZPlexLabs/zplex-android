@@ -161,15 +161,10 @@ class GestureImageView : AppCompatImageView, View.OnTouchListener,
         viewWidth = MeasureSpec.getSize(widthMeasureSpec)
         viewHeight = MeasureSpec.getSize(heightMeasureSpec)
         if (mSaveScale == 1f) {
-
-            // Fit to screen.
             fitToScreen()
         }
     }
 
-    /*
-        Ontouch
-     */
     override fun onTouch(view: View?, event: MotionEvent): Boolean {
         mScaleDetector!!.onTouchEvent(event)
         mGestureDetector!!.onTouchEvent(event)

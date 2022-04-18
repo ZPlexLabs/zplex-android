@@ -80,9 +80,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         homeViewModel.trending.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Resource.Success -> {
-                    response.data?.let { trendingResponse ->
-                        trendingSuccess(trendingResponse)
-                    }
+                    response.data?.let { trendingSuccess(it) }
                 }
                 is Resource.Error -> {}
                 is Resource.Loading -> {}
