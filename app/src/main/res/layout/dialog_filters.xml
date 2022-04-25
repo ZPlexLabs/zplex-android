@@ -20,7 +20,7 @@
         android:layout_height="match_parent"
         android:padding="16sp">
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tv_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -53,31 +53,33 @@
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_movie"
-                style="@style/Widget.App.Chip.Choice"
+                style="@style/Widget.Material3.Chip.Filter.Elevated"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/movies"
-                android:textAppearance="@style/chipTextAppearance" />
+                android:textAppearance="@style/chipTextAppearance"
+                app:chipCornerRadius="24dp" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_tv"
-                style="@style/Widget.App.Chip.Choice"
+                style="@style/Widget.Material3.Chip.Filter.Elevated"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/tv_shows"
-                android:textAppearance="@style/chipTextAppearance" />
+                android:textAppearance="@style/chipTextAppearance"
+                app:chipCornerRadius="24dp" />
 
         </com.google.android.material.chip.ChipGroup>
 
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textView1"
+            style="@style/MaterialAlertDialog.Material3.Body.Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:fontFamily="@font/open_sans_bold"
+            android:fontFamily="@font/roboto_medium"
             android:text="@string/genre"
-            android:textColor="@color/textColor_87"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="@+id/genre_menu"
             app:layout_constraintEnd_toStartOf="@+id/genre_menu"
@@ -87,7 +89,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/genre_menu"
-            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -98,7 +100,6 @@
             android:textAllCaps="false"
             android:textColor="@color/textColor_74"
             android:textSize="14sp"
-            app:backgroundTint="@android:color/transparent"
             app:cornerRadius="16dp"
             app:elevation="0dp"
             app:icon="@drawable/ic_arrow_down_24"
@@ -109,14 +110,14 @@
             app:layout_constraintTop_toBottomOf="@+id/chipGroup_media"
             tools:text="Select genre" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/textView2"
+            style="@style/MaterialAlertDialog.Material3.Body.Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:fontFamily="@font/open_sans_bold"
+            android:fontFamily="@font/roboto_medium"
             android:text="@string/sort"
-            android:textColor="@color/textColor_87"
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="@+id/sort_menu"
             app:layout_constraintEnd_toStartOf="@+id/sort_menu"
@@ -126,7 +127,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/sort_menu"
-            style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
@@ -137,7 +138,6 @@
             android:textAllCaps="false"
             android:textColor="@color/textColor_74"
             android:textSize="14sp"
-            app:backgroundTint="@android:color/transparent"
             app:cornerRadius="16dp"
             app:elevation="0dp"
             app:icon="@drawable/ic_arrow_down_24"
@@ -150,12 +150,11 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_apply"
-            style="@style/Widget.MaterialComponents.Button"
+            style="@style/Widget.Material3.Button.ElevatedButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="8dp"
-            android:backgroundTint="@color/colorAccent"
             android:text="@string/apply"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -163,7 +162,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_reset"
-            style="@style/Widget.MaterialComponents.Button.TextButton"
+            style="@style/Widget.Material3.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"

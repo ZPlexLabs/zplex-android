@@ -450,8 +450,6 @@ public class PlayerActivity extends AppCompatActivity {
         float watchProgress = (float) ((double) watchedDuration / (double) totalDuration) * 100;
 
         if (watchProgress > 10) {
-
-
             if (isTV) {
                 playerViewModel.upsertWatchedShow(
                         tmdbId,
