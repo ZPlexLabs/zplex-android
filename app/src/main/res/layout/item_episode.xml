@@ -7,8 +7,7 @@
     android:background="@drawable/ripple_accent"
     android:clickable="true"
     android:focusable="true"
-    android:padding="2dp"
-    app:cardBackgroundColor="@color/colorPrimary">
+    android:padding="2dp">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/thumb_card"

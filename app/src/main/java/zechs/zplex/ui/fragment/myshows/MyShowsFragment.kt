@@ -15,17 +15,18 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.Transition
+import androidx.transition.TransitionManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
 import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentMyShowsBinding
-import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.activity.main.MainActivity
 
 
 class MyShowsFragment : BaseFragment() {
@@ -37,6 +38,7 @@ class MyShowsFragment : BaseFragment() {
 
     private lateinit var myShowsViewModel: MyShowsViewModel
     private val showsAdapter by lazy { SearchAdapter() }
+    private var selectedTabIndex = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,29 +49,32 @@ class MyShowsFragment : BaseFragment() {
         return binding.root
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("selectedTab", selectedTabIndex)
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentMyShowsBinding.bind(view)
 
-        myShowsViewModel = (activity as ZPlexActivity).myShowsViewModel
+        myShowsViewModel = (activity as MainActivity).myShowsViewModel
         setupRecyclerView()
 
-        myShowsViewModel.savedMedia.observe(viewLifecycleOwner) { media ->
-            val isEmpty = media?.isEmpty() ?: true
-            binding.rvMyShows.isGone = isEmpty
-            binding.errorView.apply {
-                root.isVisible = isEmpty
-                retryBtn.isVisible = false
-                errorTxt.text = getString(R.string.your_library_is_empty)
-                errorIcon.setImageDrawable(
-                    ContextCompat.getDrawable(
-                        requireContext(), R.drawable.ic_no_shows_24
-                    )
-                )
+        savedInstanceState?.let {
+            val selectedTab = it.getInt("selectedTab")
+            handleSelectedTab(selectedTab)
+        } ?: handleSelectedTab(selectedTabIndex)
+
+        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                handleTabNavigation(tab)
             }
-            showsAdapter.differ.submitList(media)
-        }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
+
 
         val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
             ItemTouchHelper.UP or ItemTouchHelper.DOWN,
@@ -86,10 +91,13 @@ class MyShowsFragment : BaseFragment() {
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
                 val media = showsAdapter.differ.currentList[position]
+
                 val bottomNavView = activity?.findViewById(
                     R.id.bottomNavigationView
                 ) as BottomNavigationView?
+
                 val name = media.name ?: media.title
+
                 val snackBar = Snackbar.make(
                     view, "$name removed from your library",
                     Snackbar.LENGTH_SHORT
@@ -140,16 +148,80 @@ class MyShowsFragment : BaseFragment() {
         ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(binding.rvMyShows)
     }
 
+    private fun handleSelectedTab(selectedTab: Int) {
+        binding.tabLayout.getTabAt(selectedTab)!!.select()
+        when (selectedTab) {
+            0 -> observeMovies()
+            1 -> observeShows()
+            else -> removeAllObservers()
+        }
+    }
+
+    private fun handleTabNavigation(tab: TabLayout.Tab?) {
+        TransitionManager.beginDelayedTransition(
+            binding.root,
+        )
+        selectedTabIndex = binding.tabLayout.selectedTabPosition
+        when (tab!!.text) {
+            resources.getString(R.string.movies) -> observeMovies()
+            resources.getString(R.string.tv_shows) -> observeShows()
+            else -> removeAllObservers()
+        }
+    }
+
+
+    private fun observeMovies() {
+        myShowsViewModel.movies.observe(viewLifecycleOwner) { media ->
+            handleLibrary(media)
+            showsAdapter.differ.submitList(media.map { it.toMedia() })
+        }
+        myShowsViewModel.shows.removeObservers(viewLifecycleOwner)
+    }
+
+    private fun observeShows() {
+        myShowsViewModel.shows.observe(viewLifecycleOwner) { media ->
+            handleLibrary(media)
+            showsAdapter.differ.submitList(media.map { it.toMedia() })
+        }
+
+        myShowsViewModel.movies.removeObservers(viewLifecycleOwner)
+    }
+
+    private fun removeAllObservers() {
+        myShowsViewModel.shows.removeObservers(viewLifecycleOwner)
+        myShowsViewModel.movies.removeObservers(viewLifecycleOwner)
+    }
+
+    private fun handleLibrary(media: List<*>?) {
+        val noShows = ContextCompat.getDrawable(requireContext(), R.drawable.ic_no_shows_24)
+        val isEmpty = media?.isEmpty() ?: true
+        binding.apply {
+            rvMyShows.isGone = isEmpty
+            errorView.apply {
+                root.isVisible = isEmpty
+                retryBtn.isVisible = false
+                errorTxt.text = getString(R.string.your_library_is_empty)
+                errorIcon.setImageDrawable(noShows)
+            }
+        }
+    }
+
 
     private fun setupRecyclerView() {
+        val gridLayoutManager = object : GridLayoutManager(activity, 3) {
+            override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
+                return lp?.let {
+                    it.width = (0.30 * width).toInt()
+                    true
+                } ?: super.checkLayoutParams(lp)
+            }
+        }
+
         binding.rvMyShows.apply {
             adapter = showsAdapter
-            layoutManager = GridLayoutManager(activity, 3)
-            showsAdapter.setOnItemClickListener { media, view, position ->
-                val action = MyShowsFragmentDirections.actionMyShowsFragmentToFragmentMedia(
-                    MediaArgs(media.id, media.media_type ?: "none", media, position)
-                )
-
+            layoutManager = gridLayoutManager
+            showsAdapter.setOnItemClickListener { media, view, _ ->
+                val action = MyShowsFragmentDirections.actionMyShowsFragmentToFragmentMedia(media)
                 val posterView = view.findViewById<MaterialCardView>(R.id.image_card)
                 val extras = FragmentNavigatorExtras(posterView to posterView.transitionName)
 

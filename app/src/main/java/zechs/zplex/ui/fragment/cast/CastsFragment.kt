@@ -6,39 +6,37 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.Fade
+import androidx.transition.Transition
 import androidx.transition.TransitionManager
-import androidx.transition.TransitionSet
 import com.google.android.material.chip.Chip
 import com.google.android.material.transition.MaterialFade
-import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
 import zechs.zplex.adapter.media.adapters.CurationAdapter
 import zechs.zplex.databinding.FragmentCastDetailsBinding
-import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.tmdb.ProfileSize
 import zechs.zplex.models.tmdb.credit.CastObject
 import zechs.zplex.models.tmdb.entities.Media
-import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.BaseFragment
+import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
 
-class CastsFragment : Fragment() {
+class CastsFragment : BaseFragment() {
+
+    override val enterTransitionListener: Transition.TransitionListener? = null
 
     private var _binding: FragmentCastDetailsBinding? = null
     private val binding get() = _binding!!
@@ -54,39 +52,6 @@ class CastsFragment : Fragment() {
 
     private val thisTAG = "CastsFragment"
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enterTransition = TransitionSet().apply {
-            addTransition(
-                MaterialSharedAxis(
-                    MaterialSharedAxis.Y, true
-                ).apply {
-                    interpolator = LinearInterpolator()
-                    duration = 500
-                })
-
-            addTransition(Fade().apply {
-                interpolator = LinearInterpolator()
-            })
-        }
-
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, true
-        ).apply {
-            interpolator = LinearInterpolator()
-            duration = 500
-        }
-
-        returnTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, false
-        ).apply {
-            interpolator = LinearInterpolator()
-            duration = 220
-        }
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -100,7 +65,7 @@ class CastsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        castViewModel = (activity as ZPlexActivity).castViewModel
+        castViewModel = (activity as MainActivity).castViewModel
         setupRecyclerView()
         setupCastObserver()
 
@@ -242,7 +207,7 @@ class CastsFragment : Fragment() {
             )
             if (it.media_type != null) {
                 val action = CastsFragmentDirections.actionCastsFragmentToFragmentMedia(
-                    MediaArgs(it.id, it.media_type, media, null)
+                    media.copy(media_type = it.media_type)
                 )
                 findNavController().navigate(action)
             }

@@ -6,10 +6,8 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
-import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.models.dataclass.Movie
@@ -99,35 +97,48 @@ class MediaViewModel(
         return Resource.Error(response.message())
     }
 
-    fun getMediaFlow(tmdbId: Int, mediaType: String) = channelFlow {
-        send(Resource.Loading())
+    private val _mediaResponse = MutableLiveData<Event<Resource<MediaResponse>>>()
+    val mediaResponse: LiveData<Event<Resource<MediaResponse>>>
+        get() = _mediaResponse
+
+    fun getMedia(tmdbId: Int, mediaType: String) = viewModelScope.launch {
+        _mediaResponse.postValue(Event(Resource.Loading()))
         try {
             if (hasInternetConnection()) {
                 if (mediaType == "movie") {
                     val response = tmdbRepository.getMovie(tmdbId)
                     response.body()?.belongs_to_collection?.let {
                         val collectionsResponse = tmdbRepository.getCollection(it.id)
-                        send(handleMovieResponseWithCollection(response, collectionsResponse))
-                    } ?: send(handleMovieResponse(response))
+                        _mediaResponse.postValue(
+                            Event(
+                                handleMovieResponseWithCollection(
+                                    response,
+                                    collectionsResponse
+                                )
+                            )
+                        )
+                    } ?: _mediaResponse.postValue(Event(handleMovieResponse(response)))
                 } else {
                     val response = tmdbRepository.getShow(tmdbId)
-                    send(handleTvResponse(response))
+                    _mediaResponse.postValue(Event(handleTvResponse(response)))
                 }
             } else {
-                send(Resource.Error("No internet connection"))
+                _mediaResponse.postValue(Event(Resource.Error("No internet connection")))
             }
         } catch (t: Throwable) {
             t.printStackTrace()
             println("getMediaFlow :  Message=${t.message}")
-            send(
-                Resource.Error(
-                    if (t is IOException) {
-                        "Network Failure"
-                    } else t.message ?: "Something went wrong"
+            _mediaResponse.postValue(
+                Event(
+                    Resource.Error(
+                        if (t is IOException) {
+                            "Network Failure"
+                        } else t.message ?: "Something went wrong"
+                    )
                 )
             )
         }
-    }.asLiveData()
+    }
 
     private fun handleMovieResponseWithCollection(
         response: Response<movieResponseTmdb>,

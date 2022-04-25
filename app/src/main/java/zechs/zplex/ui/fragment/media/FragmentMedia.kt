@@ -25,6 +25,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -35,6 +36,8 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
+import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.adapter.media.AboutDataModel
 import zechs.zplex.adapter.media.MediaDataAdapter
@@ -42,7 +45,6 @@ import zechs.zplex.adapter.media.MediaDataModel
 import zechs.zplex.databinding.FragmentTempBinding
 import zechs.zplex.models.Player
 import zechs.zplex.models.dataclass.CastArgs
-import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
 import zechs.zplex.models.tmdb.BackdropSize
@@ -53,12 +55,11 @@ import zechs.zplex.models.tmdb.entities.Season
 import zechs.zplex.models.tmdb.entities.Video
 import zechs.zplex.models.tmdb.media.MediaResponse
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.activity.player.PlayerActivity
-import zechs.zplex.ui.dialog.LookupMovieDialog
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.ui.fragment.list.ListViewModel
-import zechs.zplex.ui.fragment.viewmodels.SeasonViewModel
+import zechs.zplex.ui.fragment.shared_viewmodels.SeasonViewModel
 import zechs.zplex.ui.movieResponseZplex
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.ConverterUtils
@@ -74,8 +75,8 @@ class FragmentMedia : BaseFragment() {
 
     private val thisTAG = "FragmentMedia"
 
-    private var _movieDialog: LookupMovieDialog? = null
-    private val movieDialog get() = _movieDialog!!
+//    private var _movieDialog: LookupMovieDialog? = null
+//    private val movieDialog get() = _movieDialog!!
 
     private lateinit var mediaViewModel: MediaViewModel
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
@@ -96,7 +97,7 @@ class FragmentMedia : BaseFragment() {
 //        )
 //    }
     private val mediaDataAdapter by lazy {
-        MediaDataAdapter() { castsList?.let { setCastsList(it) } }
+        MediaDataAdapter { castsList?.let { setCastsList(it) } }
     }
 
     private var hasTransitionEnded = false
@@ -108,6 +109,7 @@ class FragmentMedia : BaseFragment() {
     private var castsList: List<Cast>? = null
     private var tmdbId: Int? = null
     private var showName: String? = null
+    private var showPoster: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -115,21 +117,29 @@ class FragmentMedia : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentTempBinding.inflate(inflater, container, false)
-        binding.ivPoster.transitionName = args.media.media?.poster_path
+        binding.ivPoster.transitionName = args.media.poster_path
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mediaViewModel = (activity as ZPlexActivity).mediaViewModel
+        mediaViewModel = (activity as MainActivity).mediaViewModel
         setupRecyclerView()
         setDominantColorObserver()
 //        setupDashStreamsObserver()
-        setupMediaViewModel(args.media.tmdbId, args.media.mediaType)
 
-        val mediaArgs = MediaArgs(args.media.tmdbId, args.media.mediaType, args.media.media, null)
-        when (args.media.mediaType) {
+        val media = args.media
+
+        val mediaType = media.media_type ?: when {
+            media.name != null -> "tv"
+            media.title != null -> "movie"
+            else -> media.media_type
+        }!!
+
+        setupMediaViewModel(media.id, mediaType)
+
+        when (mediaType) {
             "movie" -> {
                 movieOnClick()
 //                setupSearchObserverForMovie()
@@ -142,14 +152,13 @@ class FragmentMedia : BaseFragment() {
             else -> {}
         }
 
-        val media = args.media.media
-
-        val posterUrl = if (media?.poster_path == null) {
+        val posterUrl = if (media.poster_path == null) {
             R.drawable.no_poster
         } else {
             "$TMDB_IMAGE_PREFIX/${PosterSize.w500}${media.poster_path}"
         }
 
+        showPoster = media.poster_path
         binding.apply {
             GlideApp.with(ivPoster)
                 .load(posterUrl)
@@ -157,14 +166,14 @@ class FragmentMedia : BaseFragment() {
                 .addListener(glideRequestListener)
                 .into(ivPoster)
 
-            tvTitle.text = media?.let { media.name ?: media.title }
-            media?.overview?.let { plot ->
+            tvTitle.text = media.name ?: media.title
+            media.overview?.let { plot ->
                 spannablePlotText(tvPlot, plot, 160, "...more")
             }
             toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
             btnShare.setOnClickListener {
                 // shareIntent()
-                shareIntent(mediaArgs)
+                shareIntent(media)
             }
         }
     }
@@ -277,18 +286,19 @@ class FragmentMedia : BaseFragment() {
 //        }
 //    }
 
-    private fun witchDialogResponse(message: String) {
-        movieDialog.apply {
-            changeLayouts(
-                loading = false, request = false, message = true
-            )
-            findViewById<TextView>(R.id.tv_witch_message).text = message
-        }
-    }
+//    private fun witchDialogResponse(message: String) {
+//        movieDialog.apply {
+//            changeLayouts(
+//                loading = false, request = false, message = true
+//            )
+//            findViewById<TextView>(R.id.tv_witch_message).text = message
+//        }
+//    }
 
     private fun setupMediaViewModel(tmdbId: Int, mediaType: String) {
-        mediaViewModel.getMediaFlow(tmdbId, mediaType)
-            .observe(viewLifecycleOwner) { response ->
+        mediaViewModel.getMedia(tmdbId, mediaType)
+        mediaViewModel.mediaResponse.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { response ->
                 when (response) {
                     is Resource.Success -> response.data?.let { doOnMediaSuccess(it) }
                     is Resource.Error -> {}
@@ -298,6 +308,7 @@ class FragmentMedia : BaseFragment() {
                     }
                 }
             }
+        }
     }
 
     private fun isLoading(hide: Boolean) {
@@ -309,11 +320,15 @@ class FragmentMedia : BaseFragment() {
         if (!hide) showLastSeason(isLastSeasonVisible)
     }
 
-    private fun doOnMediaSuccess(response: MediaResponse) {
+    private fun doOnMediaSuccess(
+        response: MediaResponse
+    ) = viewLifecycleOwner.lifecycleScope.launch {
 
         setupMediaAdapterOnClickListener()
 
-        when (args.media.mediaType) {
+        val mediaType = args.media.media_type ?: "tv"
+
+        when (mediaType) {
             "movie" -> {
                 val movie = Movie(
                     id = response.id,
@@ -344,13 +359,14 @@ class FragmentMedia : BaseFragment() {
         }
 
         binding.apply {
-            if (args.media.media?.poster_path == null) {
+            if (args.media.poster_path == null) {
                 val posterUrl = "${TMDB_IMAGE_PREFIX}/${PosterSize.w500}${response.poster_path}"
                 GlideApp.with(ivPoster)
                     .load(posterUrl)
                     .placeholder(R.drawable.no_poster)
                     .addListener(glideRequestListener)
                     .into(ivPoster)
+                showPoster = response.poster_path
             }
 
             GlideApp.with(ivBackdrop)
@@ -456,7 +472,8 @@ class FragmentMedia : BaseFragment() {
                                 seasonName = it.name,
                                 seasonNumber = it.season_number,
                                 showName = response.name,
-                                posterPath = it.poster_path
+                                posterPath = it.poster_path,
+                                showPoster = showPoster
                             )
                         }
 
@@ -493,21 +510,9 @@ class FragmentMedia : BaseFragment() {
         }
 
         if (response.recommendations.isNotEmpty()) {
-            val recommendationsList = response.recommendations
+            val recommendationsList = response.recommendations.take(8)
                 .filter { it.backdrop_path != null }
-                .map {
-                    AboutDataModel.Curation(
-                        id = it.id,
-                        media_type = it.media_type,
-                        name = it.name,
-                        poster_path = it.poster_path,
-                        title = it.title,
-                        vote_average = it.vote_average,
-                        backdrop_path = it.backdrop_path,
-                        overview = it.overview,
-                        release_date = it.release_date
-                    )
-                }.take(8)
+                .map { it.toCuration() }
 
             detailsList.add(
                 MediaDataModel.Details(
@@ -524,8 +529,9 @@ class FragmentMedia : BaseFragment() {
             trailer?.let { setupTrailer(it) }
         }
 
-        mediaDataAdapter.differ.submitList(detailsList.toList())
-
+        viewLifecycleOwner.lifecycleScope.launch {
+            mediaDataAdapter.differ.submitList(detailsList.toList())
+        }
         if (extractedColor != null && collectionName != null && hasTransitionEnded) {
             spannableCollectionText(binding.tvCollection, collectionName!!, extractedColor!!)
         }
@@ -563,8 +569,6 @@ class FragmentMedia : BaseFragment() {
                 activity, LinearLayoutManager.VERTICAL, false
             )
             itemAnimator = null
-            setItemViewCacheSize(0)
-            setHasFixedSize(false)
         }
     }
 
@@ -572,22 +576,9 @@ class FragmentMedia : BaseFragment() {
         mediaDataAdapter.setOnItemClickListener {
             when (it) {
                 is AboutDataModel.Curation -> {
-                    val media = Media(
-                        id = it.id,
-                        media_type = it.media_type,
-                        name = it.name,
-                        poster_path = it.poster_path,
-                        title = it.title,
-                        vote_average = it.vote_average,
-                        backdrop_path = it.backdrop_path,
-                        overview = it.overview,
-                        release_date = it.release_date
-                    )
-
+                    val media = it.toMedia()
                     val action = FragmentMediaDirections.actionFragmentMediaSelf(
-                        MediaArgs(
-                            it.id, it.media_type ?: args.media.mediaType, media, null
-                        )
+                        media.copy(media_type = it.media_type)
                     )
                     findNavController().navigate(action)
                 }
@@ -595,7 +586,7 @@ class FragmentMedia : BaseFragment() {
                     val action = FragmentMediaDirections.actionFragmentMediaToCastsFragment(
                         CastArgs(it.credit_id, it.person_id, it.name, it.profile_path)
                     )
-                    findNavController().navigate(action)
+                    findNavController().navigateSafe(action)
                 }
                 else -> {}
             }
@@ -604,7 +595,6 @@ class FragmentMedia : BaseFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mediaDataAdapter.differ.submitList(listOf())
         binding.rvList.adapter = null
         _binding = null
     }
@@ -621,12 +611,21 @@ class FragmentMedia : BaseFragment() {
         binding.apply {
             val color = if (isDark(c)) lightUpColor(c) else c
             val tintColor = ColorStateList.valueOf(color)
+
             btnWatchNow.backgroundTintList = tintColor
             btnWatchNow.iconTint = ColorStateList.valueOf(getContrastColor(color))
             btnWatchNow.setTextColor(getContrastColor(color))
+
+//            btnSave.setTextColor(tintColor)
+//            btnSave.iconTint = tintColor
+//
+//            btnShare.setTextColor(tintColor)
+//            btnShare.iconTint = tintColor
+
             rbRating.progressTintList = tintColor
             rbRating.progressBackgroundTintList = tintColor
             rbRating.secondaryProgressTintList = tintColor
+
             loading.indeterminateTintList = tintColor
             if (hasTransitionEnded && collectionName != null) {
                 spannableCollectionText(tvCollection, collectionName!!, color)
@@ -725,6 +724,7 @@ class FragmentMedia : BaseFragment() {
     }
 
     private fun setupShowDatabaseObserver(show: Show) {
+        var updateSaved = false
         mediaViewModel.getShow(show.id).observe(viewLifecycleOwner) { isSaved ->
             Log.d("getShow", "isSaved=$isSaved")
             binding.btnSave.apply {
@@ -737,13 +737,40 @@ class FragmentMedia : BaseFragment() {
                 setOnClickListener {
                     if (isSaved) {
                         mediaViewModel.deleteShow(show)
-                    } else mediaViewModel.saveShow(show)
+                        val snackBar = Snackbar.make(
+                            binding.mainView, "${show.name} removed from your library",
+                            Snackbar.LENGTH_SHORT
+                        )
+                        snackBar.setAction(
+                            R.string.undo
+                        ) {
+                            mediaViewModel.saveShow(show)
+                        }
+                        snackBar.show()
+                    } else {
+                        mediaViewModel.saveShow(show)
+                        val snackBar = Snackbar.make(
+                            binding.mainView, "${show.name} added to your library",
+                            Snackbar.LENGTH_SHORT
+                        )
+                        snackBar.setAction(
+                            R.string.undo
+                        ) {
+                            mediaViewModel.deleteShow(show)
+                        }
+                        snackBar.show()
+                    }
                 }
+            }
+            if (isSaved && !updateSaved) {
+                mediaViewModel.saveShow(show)
+                updateSaved = true
             }
         }
     }
 
     private fun setupMovieDatabaseObserver(movie: Movie) {
+        var updateSaved = false
         mediaViewModel.getMovie(movie.id).observe(viewLifecycleOwner) { isSaved ->
             Log.d("getMovie", "isSaved=$isSaved")
             binding.btnSave.apply {
@@ -756,8 +783,34 @@ class FragmentMedia : BaseFragment() {
                 setOnClickListener {
                     if (isSaved) {
                         mediaViewModel.deleteMovie(movie)
-                    } else mediaViewModel.saveMovie(movie)
+                        val snackBar = Snackbar.make(
+                            binding.mainView, "${movie.title} removed from your library",
+                            Snackbar.LENGTH_SHORT
+                        )
+                        snackBar.setAction(
+                            R.string.undo
+                        ) {
+                            mediaViewModel.saveMovie(movie)
+                        }
+                        snackBar.show()
+                    } else {
+                        mediaViewModel.saveMovie(movie)
+                        val snackBar = Snackbar.make(
+                            binding.mainView, "${movie.title} added to your library",
+                            Snackbar.LENGTH_SHORT
+                        )
+                        snackBar.setAction(
+                            R.string.undo
+                        ) {
+                            mediaViewModel.deleteMovie(movie)
+                        }
+                        snackBar.show()
+                    }
                 }
+            }
+            if (isSaved && !updateSaved) {
+                mediaViewModel.saveMovie(movie)
+                updateSaved = true
             }
         }
     }
@@ -767,14 +820,14 @@ class FragmentMedia : BaseFragment() {
         findNavController().navigateSafe(action)
     }
 
-    private fun shareIntent(media: MediaArgs) {
-        val showName = media.media?.name ?: media.media?.title
-        val mediaType = media.mediaType
+    private fun shareIntent(media: Media) {
+        val showName = media.name ?: media.title
+        val mediaType = media.media_type ?: "tv"
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
         sendIntent.putExtra(
             Intent.EXTRA_TEXT,
-            "https://www.themoviedb.org/${mediaType}/${media.tmdbId}"
+            "https://www.themoviedb.org/${mediaType}/${media.id}"
         )
         sendIntent.type = "text/plain"
         val shareIntent = Intent.createChooser(sendIntent, showName)
@@ -1013,6 +1066,9 @@ class FragmentMedia : BaseFragment() {
         intent.putExtra("fileId", player.fileId)
         intent.putExtra("title", showName!!)
         intent.putExtra("accessToken", player.accessToken)
+        intent.putExtra("tmdbId", tmdbId!!)
+        intent.putExtra("name", showName!!)
+        intent.putExtra("posterPath", args.media.poster_path)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         activity?.startActivity(intent)
     }
@@ -1040,28 +1096,42 @@ class FragmentMedia : BaseFragment() {
         seasonName: String,
         seasonNumber: Int,
         showName: String?,
-        posterPath: String?
+        posterPath: String?,
+        showPoster: String?
     ) {
         seasonViewModel.setShowSeason(
             tmdbId = tmdbId,
             seasonName = seasonName,
             seasonNumber = seasonNumber,
             showName = showName ?: "Unknown",
-            posterPath = posterPath
+            posterPath = posterPath,
+            showPoster = showPoster
         )
-        findNavController().navigate(R.id.action_fragmentMedia_to_episodeListFragment)
+        findNavController().navigateSafe(R.id.action_fragmentMedia_to_episodeListFragment)
     }
 
     private fun setSeasonsList(seasons: List<Season>) {
         if (tmdbId != null && showName != null) {
-            listViewModel.setListArgs(tmdbId!!, showName!!, casts = null, seasons = seasons)
+            listViewModel.setListArgs(
+                tmdbId!!,
+                showName!!,
+                showPoster,
+                casts = null,
+                seasons = seasons
+            )
             findNavController().navigate(R.id.action_fragmentMedia_to_fragmentList)
         }
     }
 
     private fun setCastsList(casts: List<Cast>) {
         if (tmdbId != null && showName != null) {
-            listViewModel.setListArgs(tmdbId!!, showName!!, casts = casts, seasons = null)
+            listViewModel.setListArgs(
+                tmdbId!!,
+                showName!!,
+                showPoster,
+                casts = casts,
+                seasons = null
+            )
             findNavController().navigateSafe(R.id.action_fragmentMedia_to_fragmentList)
         }
     }

@@ -83,7 +83,6 @@
     <string name="music">Music</string>
     <string name="share_links">Share links</string>
     <string name="library">Library</string>
-    <string name="upcoming">Upcoming</string>
     <string name="search_for_a_movie_tv_show">Search for a movie, tv show…</string>
     <string name="streaming">Streaming</string>
     <string name="in_theatres">In Theatres</string>
@@ -109,4 +108,6 @@
     <string name="new_version_available">New version available</string>
     <string name="update">Update</string>
     <string name="update_msg">A new version of this app is available. Please update for new features and bug fixes.</string>
+    <string name="my_library">My Library</string>
+    <string name="upcoming">Upcoming</string>
 </resources>

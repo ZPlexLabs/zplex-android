@@ -1,100 +1,160 @@
 package zechs.zplex.ui.fragment.home
 
 import android.app.Application
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import retrofit2.Response
-import zechs.zplex.ThisApp
+import zechs.zplex.adapter.home.HomeDataModel
+import zechs.zplex.adapter.watched.WatchedDataModel
+import zechs.zplex.models.dataclass.WatchedMovie
+import zechs.zplex.models.dataclass.WatchedShow
 import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.repository.TmdbRepository
+import zechs.zplex.repository.WatchedRepository
+import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.utils.Resource
+import zechs.zplex.utils.combineWith
 import java.io.IOException
+import java.time.LocalDate
 
 class HomeViewModel(
     app: Application,
-    private val tmdbRepository: TmdbRepository
-) : AndroidViewModel(app) {
+    private val tmdbRepository: TmdbRepository,
+    watchedRepository: WatchedRepository
+) : BaseAndroidViewModel(app) {
 
-    private val timeWindow = "day"
+    @Suppress("unused")
+    private enum class TrendingWindow {
+        DAY, WEEK
+    }
 
-    val streamingTheatres: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
-    val trending: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
+    private val now = LocalDate.now()
+    private val getTodayDate = now.toString()
+    private val getMonthAgoDate = now.minusMonths(1).toString()
+
+    private fun <T : Throwable> postError(t: T): Resource<List<HomeDataModel>> {
+        return Resource.Error(
+            message = if (t is IOException) {
+                "Network Failure"
+            } else t.message ?: "Something went wrong",
+            data = null
+        )
+    }
+
+    private val _homeMedia = MutableLiveData<Resource<List<HomeDataModel>>>()
+    val homeMedia: LiveData<Resource<List<HomeDataModel>>>
+        get() = _homeMedia
 
     init {
-        getTrending()
-        getStreamingAndInTheatres(0)
+        getHomeMedia()
     }
 
-    private fun getTrending() = viewModelScope.launch {
-        trending.postValue(Resource.Loading())
+    val movies = watchedRepository.getAllWatchedMovies()
+    val shows = watchedRepository.getAllWatchedShows()
+
+    val watchedMedia = movies.combineWith(shows) { movie, show ->
+        movie?.let { show?.let { it1 -> handleWatchedMedia(it, it1) } }
+    }
+
+    private fun handleWatchedMedia(
+        movie: List<WatchedMovie>, show: List<WatchedShow>
+    ): List<WatchedDataModel> {
+
+        val watchedDataModel = mutableListOf<WatchedDataModel>()
+
+        movie.forEach {
+            watchedDataModel.add(WatchedDataModel.Movie(it))
+        }
+
+        show.map {
+            watchedDataModel.add(WatchedDataModel.Show(it))
+        }
+
+        watchedDataModel.sortByDescending {
+            when (it) {
+                is WatchedDataModel.Show -> it.show.id!!
+                is WatchedDataModel.Movie -> it.movie.id!!
+            }
+        }
+
+        return watchedDataModel.toList()
+    }
+
+    private fun getHomeMedia() = viewModelScope.launch {
+        _homeMedia.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
-                val response = tmdbRepository.getTrending(timeWindow)
-                trending.postValue(handleTrendingResponse(response))
+
+                val theatres = async {
+                    tmdbRepository.getInTheatres(
+                        dateStart = getMonthAgoDate,
+                        dateEnd = getTodayDate
+                    )
+                }
+
+                val trending = async {
+                    tmdbRepository.getTrending(
+                        time_window = TrendingWindow.DAY.toString().lowercase()
+                    )
+                }
+
+                val popular = async {
+                    tmdbRepository.getPopularOnStreaming()
+                }
+
+                val homeResponse = handleHomeResponse(
+                    theatres.await(), trending.await(), popular.await()
+                )
+                _homeMedia.postValue(homeResponse)
             } else {
-                trending.postValue(Resource.Error("No internet connection"))
+                _homeMedia.postValue(Resource.Error("No internet connection"))
             }
         } catch (t: Throwable) {
-            println(t.stackTrace)
-            println(t.message)
-            trending.postValue(
-                Resource.Error(
-                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
-                )
-            )
+            t.printStackTrace()
+            _homeMedia.postValue(postError(t))
         }
     }
 
-    fun getStreamingAndInTheatres(index: Int) = viewModelScope.launch {
-        streamingTheatres.postValue(Resource.Loading())
-        try {
-            if (hasInternetConnection()) {
-                val response = if (index == 0) {
-                    tmdbRepository.getInTheatres()
-                } else tmdbRepository.getStreaming()
-                streamingTheatres.postValue(handleTrendingResponse(response))
-            } else {
-                streamingTheatres.postValue(Resource.Error("No internet connection"))
-            }
-        } catch (t: Throwable) {
-            println(t.stackTrace)
-            println(t.message)
-            streamingTheatres.postValue(
-                Resource.Error(
-                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
-                )
-            )
-        }
-    }
+    private fun handleHomeResponse(
+        theatres: Response<SearchResponse>,
+        trending: Response<SearchResponse>,
+        popular: Response<SearchResponse>
+    ): Resource<List<HomeDataModel>> {
+        val homeMedia: MutableList<HomeDataModel> = mutableListOf()
 
-    private fun handleTrendingResponse(
-        response: Response<SearchResponse>
-    ): Resource<SearchResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
-                return Resource.Success(resultResponse)
+        if (theatres.isSuccessful && theatres.body() != null) {
+            val theatresList = theatres.body()!!.results
+            if (theatresList.isNotEmpty()) {
+                homeMedia.add(HomeDataModel.Banner(media = theatresList))
             }
         }
-        return Resource.Error(response.message())
-    }
 
+        if (trending.isSuccessful && trending.body() != null) {
+            val trendingList = trending.body()!!.results.filter {
+                it.backdrop_path != null
+            }
 
-    private fun hasInternetConnection(): Boolean {
-        val connectivityManager = getApplication<ThisApp>().getSystemService(
-            Context.CONNECTIVITY_SERVICE
-        ) as ConnectivityManager
-        val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
-        return when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-            else -> false
+            if (trendingList.isNotEmpty()) {
+                homeMedia.add(HomeDataModel.Header(heading = "Trending today"))
+                homeMedia.add(HomeDataModel.Media(media = trendingList))
+            }
         }
+
+        if (popular.isSuccessful && popular.body() != null) {
+            val popularList = popular.body()!!.results
+            if (popularList.isNotEmpty()) {
+                homeMedia.add(HomeDataModel.Header(heading = "Popular on streaming"))
+                homeMedia.add(HomeDataModel.Media(media = popularList))
+            }
+        }
+
+        if (homeMedia.isNotEmpty()) {
+            return Resource.Success(homeMedia)
+        }
+
+        return Resource.Error(theatres.message())
     }
 }

@@ -3,21 +3,31 @@
 
     <item
         android:id="@+id/homeFragment"
+        android:enabled="true"
         android:icon="@drawable/ic_round_home_24"
         android:title="@string/home" />
 
     <item
         android:id="@+id/discoverFragment"
+        android:enabled="true"
         android:icon="@drawable/ic_browse_filled_24dp"
         android:title="@string/discover" />
 
     <item
+        android:id="@+id/searchFragment"
+        android:enabled="true"
+        android:icon="@drawable/ic_search"
+        android:title="@string/search" />
+
+    <item
         android:id="@+id/upcomingFragment"
+        android:enabled="true"
         android:icon="@drawable/ic_upcoming_black_24dp"
         android:title="@string/upcoming" />
 
     <item
         android:id="@+id/myShowsFragment"
+        android:enabled="true"
         android:icon="@drawable/ic_library_filled_24dp"
         android:title="@string/library" />
 

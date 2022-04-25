@@ -111,15 +111,6 @@ interface TmdbAPI {
         language: String = "en-US"
     ): Response<CreditResponse>
 
-    @GET("3/trending/all/{time_window}")
-    suspend fun getTrending(
-        @Path("time_window")
-        time_window: String,
-        @Query("api_key")
-        api_key: String = TMDB_API_KEY,
-        @Query("language")
-        language: String = "en-US"
-    ): Response<SearchResponse>
 
     @GET("3/discover/{media_type}")
     suspend fun getDiscover(
@@ -140,26 +131,16 @@ interface TmdbAPI {
         @Query("first_air_date_year")
         first_air_date_year: Int?
     ): Response<SearchResponse>
-
-    @GET("3/discover/movie")
-    suspend fun getInTheatres(
-        @Query("api_key")
-        api_key: String = TMDB_API_KEY,
-        @Query("region")
-        region: String = "US",
-        @Query("with_release_type")
-        sort_by: String = "3|2",
-    ): Response<SearchResponse>
-
-    @GET("3/tv/on_the_air")
-    suspend fun getStreaming(
-        @Query("api_key")
-        api_key: String = TMDB_API_KEY,
-        @Query("language")
-        language: String = "en-US",
-        @Query("page")
-        page: Int = 1,
-    ): Response<SearchResponse>
+//
+//    @GET("3/discover/movie")
+//    suspend fun getInTheatres(
+//        @Query("api_key")
+//        api_key: String = TMDB_API_KEY,
+//        @Query("region")
+//        region: String = "US",
+//        @Query("with_release_type")
+//        sort_by: String = "3|2",
+//    ): Response<SearchResponse>
 
     @GET("3/discover/{media_type}")
     suspend fun getBrowse(
@@ -192,4 +173,40 @@ interface TmdbAPI {
         page: Int,
     ): Response<SearchResponse>
 
+    @GET("3/discover/movie")
+    suspend fun getInTheatres(
+        @Query("api_key")
+        api_key: String = TMDB_API_KEY,
+        @Query("language")
+        language: String = "en-US",
+        @Query("release_date.gte")
+        release_date_start: String,
+        @Query("release_date.lte")
+        release_date_end: String,
+        @Query("with_release_type")
+        with_release_type: String = "3|2",
+        @Query("region")
+        region: String = "US"
+    ): Response<SearchResponse>
+
+
+    @GET("3/trending/all/{time_window}")
+    suspend fun getTrending(
+        @Path("time_window")
+        time_window: String,
+        @Query("api_key")
+        api_key: String = TMDB_API_KEY,
+        @Query("language")
+        language: String = "en-US"
+    ): Response<SearchResponse>
+
+    @GET("3/tv/on_the_air")
+    suspend fun getPopularOnStreaming(
+        @Query("api_key")
+        api_key: String = TMDB_API_KEY,
+        @Query("language")
+        language: String = "en-US",
+        @Query("page")
+        page: Int = 1,
+    ): Response<SearchResponse>
 }

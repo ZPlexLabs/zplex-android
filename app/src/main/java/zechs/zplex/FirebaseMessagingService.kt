@@ -12,7 +12,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.utils.NotificationKeys
 import java.util.*
 
@@ -46,7 +46,7 @@ class FirebaseMessagingService : FirebaseMessagingService() {
 
             val requestCode = Random().nextInt()
 
-            val intent = Intent(this, ZPlexActivity::class.java).apply {
+            val intent = Intent(this, MainActivity::class.java).apply {
                 flags = (Intent.FLAG_ACTIVITY_NEW_TASK
                         or Intent.FLAG_ACTIVITY_CLEAR_TASK
                         or Intent.FLAG_ACTIVITY_SINGLE_TOP)
@@ -61,15 +61,16 @@ class FirebaseMessagingService : FirebaseMessagingService() {
                 RingtoneManager.TYPE_NOTIFICATION
             )
 
-            val notificationBuilder = NotificationCompat.Builder(this, NotificationKeys.RELEASES_CHANNEL_ID)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setSmallIcon(R.drawable.ic_new_releases_24dp)
-                .setContentTitle("New release")
-                .setContentText(title)
-                .setStyle(NotificationCompat.BigTextStyle().bigText(title))
-                .setAutoCancel(true)
-                .setSound(defaultSoundUri)
-                .setContentIntent(pendingIntent)
+            val notificationBuilder =
+                NotificationCompat.Builder(this, NotificationKeys.RELEASES_CHANNEL_ID)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setSmallIcon(R.drawable.ic_new_releases_24dp)
+                    .setContentTitle("New release")
+                    .setContentText(title)
+                    .setStyle(NotificationCompat.BigTextStyle().bigText(title))
+                    .setAutoCancel(true)
+                    .setSound(defaultSoundUri)
+                    .setContentIntent(pendingIntent)
 
             val notificationManager = getSystemService(
                 Context.NOTIFICATION_SERVICE

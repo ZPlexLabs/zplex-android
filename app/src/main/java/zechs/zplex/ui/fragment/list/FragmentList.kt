@@ -2,24 +2,25 @@ package zechs.zplex.ui.fragment.list
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import android.view.animation.LinearInterpolator
-import androidx.fragment.app.Fragment
+import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.Fade
-import androidx.transition.TransitionSet
-import com.google.android.material.transition.MaterialSharedAxis
+import androidx.transition.Transition
 import zechs.zplex.R
 import zechs.zplex.adapter.SeasonsAdapter
 import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.models.dataclass.ListArgs
 import zechs.zplex.models.tmdb.entities.Cast
 import zechs.zplex.models.tmdb.entities.Season
-import zechs.zplex.ui.fragment.viewmodels.SeasonViewModel
+import zechs.zplex.ui.BaseFragment
+import zechs.zplex.ui.fragment.shared_viewmodels.SeasonViewModel
 
-class FragmentList : Fragment(R.layout.fragment_list) {
+class FragmentList : BaseFragment() {
+
+    override val enterTransitionListener: Transition.TransitionListener? = null
 
     private val thisTAG = "FragmentList"
 
@@ -30,6 +31,7 @@ class FragmentList : Fragment(R.layout.fragment_list) {
     private val listViewModel by activityViewModels<ListViewModel>()
 
     private var tmdbId: Int? = null
+    private var showPoster: String? = null
     private var showName: String? = null
 
     private val seasonsAdapter by lazy {
@@ -39,42 +41,19 @@ class FragmentList : Fragment(R.layout.fragment_list) {
                 seasonName = it.name,
                 seasonNumber = it.season_number,
                 showName = showName!!,
-                posterPath = it.poster_path
+                posterPath = it.poster_path,
+                showPoster = showPoster
             )
         }
     }
 
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enterTransition = TransitionSet().apply {
-            addTransition(
-                MaterialSharedAxis(
-                    MaterialSharedAxis.Y, true
-                ).apply {
-                    interpolator = LinearInterpolator()
-                    duration = 500
-                })
-
-            addTransition(Fade().apply {
-                interpolator = LinearInterpolator()
-            })
-        }
-
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, true
-        ).apply {
-            interpolator = LinearInterpolator()
-            duration = 500
-        }
-
-        returnTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, false
-        ).apply {
-            interpolator = LinearInterpolator()
-            duration = 220
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentListBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -89,6 +68,7 @@ class FragmentList : Fragment(R.layout.fragment_list) {
 
             tmdbId = it.tmdbId
             showName = it.showName
+            showPoster = it.showPoster
 
             if (it.castList == null && it.seasonList != null) {
                 getSeasonList(it.seasonList)
@@ -130,7 +110,8 @@ class FragmentList : Fragment(R.layout.fragment_list) {
         seasonName: String,
         seasonNumber: Int,
         showName: String?,
-        posterPath: String?
+        posterPath: String?,
+        showPoster: String?
     ) {
         tmdbId?.let {
             seasonViewModel.setShowSeason(
@@ -138,7 +119,8 @@ class FragmentList : Fragment(R.layout.fragment_list) {
                 seasonName = seasonName,
                 seasonNumber = seasonNumber,
                 showName = showName ?: "Unknown",
-                posterPath = posterPath
+                posterPath = posterPath,
+                showPoster = showPoster
             )
             findNavController().navigate(R.id.action_fragmentList_to_episodesListFragment)
         }

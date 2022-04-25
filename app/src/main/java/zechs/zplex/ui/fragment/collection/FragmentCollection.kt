@@ -31,23 +31,21 @@ import com.bumptech.glide.request.target.Target
 import zechs.zplex.R
 import zechs.zplex.adapter.CollectionAdapter
 import zechs.zplex.databinding.FragmentCollectionBinding
-import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.tmdb.BackdropSize
 import zechs.zplex.models.tmdb.PosterSize
 import zechs.zplex.models.tmdb.collection.CollectionsResponse
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
+import zechs.zplex.utils.navigateSafe
 
 class FragmentCollection : BaseFragment() {
 
     override val enterTransitionListener: Transition.TransitionListener? = null
-
-    private val thisTAG = "FragmentCollection"
 
     private var _binding: FragmentCollectionBinding? = null
     private val binding get() = _binding!!
@@ -57,7 +55,7 @@ class FragmentCollection : BaseFragment() {
     private val args by navArgs<FragmentCollectionArgs>()
 
     private val collectionsAdapter by lazy {
-        CollectionAdapter() { navigateMedia(it) }
+        CollectionAdapter { navigateMedia(it) }
     }
 
     override fun onCreateView(
@@ -73,7 +71,7 @@ class FragmentCollection : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        collectionViewModel = (activity as ZPlexActivity).collectionViewModel
+        collectionViewModel = (activity as MainActivity).collectionViewModel
         setupRecyclerView()
         setupCollectionViewModel(args.media.id)
 
@@ -201,13 +199,9 @@ class FragmentCollection : BaseFragment() {
 
     private fun navigateMedia(media: Media) {
         val action = FragmentCollectionDirections.actionFragmentCollectionToFragmentMedia(
-            MediaArgs(
-                media.id,
-                media.media_type ?: "movie",
-                media, null
-            )
+            media.copy(media_type = media.media_type ?: "movie")
         )
-        findNavController().navigate(action)
+        findNavController().navigateSafe(action)
     }
 
     private fun spannablePlotText(

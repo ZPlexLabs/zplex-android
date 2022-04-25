@@ -1,8 +1,5 @@
 package zechs.zplex.ui.fragment.myshows
 
-
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
@@ -10,7 +7,7 @@ import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.repository.TmdbRepository
-
+import zechs.zplex.utils.combineWith
 
 class MyShowsViewModel(
     private val tmdbRepository: TmdbRepository
@@ -32,23 +29,11 @@ class MyShowsViewModel(
         tmdbRepository.deleteMovie(movie)
     }
 
-    private val movies = tmdbRepository.getSavedMovies()
-    private val shows = tmdbRepository.getSavedShows()
+    val movies = tmdbRepository.getSavedMovies()
+    val shows = tmdbRepository.getSavedShows()
 
     val savedMedia = movies.combineWith(shows) { movie, show ->
         movie?.let { show?.let { it1 -> handleSavedMedia(it, it1) } }
-    }
-
-    private fun <T, K, R> LiveData<T>.combineWith(
-        liveData: LiveData<K>,
-        block: (T?, K?) -> R
-    ) = MediatorLiveData<R>().also { mediator ->
-        mediator.addSource(this) {
-            mediator.value = block(this.value, liveData.value)
-        }
-        mediator.addSource(liveData) {
-            mediator.value = block(this.value, liveData.value)
-        }
     }
 
     private fun handleSavedMedia(

@@ -35,11 +35,13 @@ class EpisodesViewModel(
             t.printStackTrace()
             println("zplexGetSeason :  Message=${t.message}")
             _seasonZplex.postValue(
-               Event( Resource.Error(
-                    if (t is IOException) {
-                        "Network Failure"
-                    } else t.message ?: "Something went wrong"
-                ))
+                Event(
+                    Resource.Error(
+                        if (t is IOException) {
+                            "Network Failure"
+                        } else t.message ?: "Something went wrong"
+                    )
+                )
             )
         }
     }

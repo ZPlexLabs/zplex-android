@@ -12,8 +12,14 @@ class ListViewModel : ViewModel() {
     private val _listArgs = MutableLiveData<ListArgs>()
     val listArgs: LiveData<ListArgs> get() = _listArgs
 
-    fun setListArgs(tmdbId: Int, showName: String, casts: List<Cast>?, seasons: List<Season>?) {
-        val update = ListArgs(tmdbId, showName, casts, seasons)
+    fun setListArgs(
+        tmdbId: Int,
+        showName: String,
+        showPoster: String?,
+        casts: List<Cast>?,
+        seasons: List<Season>?
+    ) {
+        val update = ListArgs(tmdbId, showName, showPoster, casts, seasons)
         if (_listArgs.value == update) return
         _listArgs.value = update
     }

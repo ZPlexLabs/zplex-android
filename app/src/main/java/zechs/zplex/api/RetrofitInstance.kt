@@ -6,7 +6,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory
 import zechs.zplex.api.interfaces.TmdbAPI
 import zechs.zplex.api.interfaces.ZPlexAPI
 import zechs.zplex.utils.Constants.TMDB_API_URL
@@ -20,6 +19,8 @@ class RetrofitInstance {
             .add(KotlinJsonAdapterFactory())
             .build()
 
+        private val moshiConverterFactory = MoshiConverterFactory.create(moshi)
+
         private val logging = HttpLoggingInterceptor()
             .setLevel(HttpLoggingInterceptor.Level.BODY)
 
@@ -30,7 +31,7 @@ class RetrofitInstance {
         val tmdbApi: TmdbAPI by lazy {
             Retrofit.Builder()
                 .baseUrl(TMDB_API_URL)
-                .addConverterFactory(MoshiConverterFactory.create(moshi))
+                .addConverterFactory(moshiConverterFactory)
                 .client(loggingClient)
                 .build().create(TmdbAPI::class.java)
         }
@@ -38,7 +39,7 @@ class RetrofitInstance {
         val zplexApi: ZPlexAPI by lazy {
             Retrofit.Builder()
                 .baseUrl(ZPLEX_API_URL)
-                .addConverterFactory(MoshiConverterFactory.create(moshi))
+                .addConverterFactory(moshiConverterFactory)
                 .client(loggingClient)
                 .build().create(ZPlexAPI::class.java)
         }

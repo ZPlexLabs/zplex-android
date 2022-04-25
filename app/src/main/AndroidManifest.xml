@@ -36,7 +36,7 @@
             android:supportsPictureInPicture="true"
             android:theme="@style/AppTheme.Fullscreen" />
         <activity
-            android:name=".ui.activity.ZPlexActivity"
+            android:name=".ui.activity.main.MainActivity"
             android:configChanges="orientation"
             android:exported="true"
             android:launchMode="singleTask"
@@ -73,9 +73,6 @@
             android:supportsPictureInPicture="true"
             android:theme="@style/Theme.Player" />
 
-        <meta-data
-            android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
         <service
             android:name=".FirebaseMessagingService"
             android:exported="false">

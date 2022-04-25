@@ -1,4 +1,4 @@
-package zechs.zplex.ui.activity
+package zechs.zplex.ui.activity.main
 
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
@@ -12,11 +12,15 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.view.animation.TranslateAnimation
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -27,13 +31,14 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import kotlinx.android.synthetic.main.activity_zplex.*
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.launch
 import zechs.zplex.BuildConfig
 import zechs.zplex.R
 import zechs.zplex.db.WatchlistDatabase
-import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.repository.TmdbRepository
+import zechs.zplex.repository.WatchedRepository
 import zechs.zplex.repository.ZPlexRepository
 import zechs.zplex.ui.fragment.browse.BrowseViewModel
 import zechs.zplex.ui.fragment.browse.BrowseViewModelProviderFactory
@@ -62,9 +67,7 @@ import zechs.zplex.utils.NotificationKeys
 import java.util.*
 
 
-class ZPlexActivity : AppCompatActivity() {
-
-    private val thisTAG = "ZPlexActivity"
+class MainActivity : AppCompatActivity() {
 
     private lateinit var navController: NavController
 
@@ -76,20 +79,22 @@ class ZPlexActivity : AppCompatActivity() {
     lateinit var episodesViewModel: EpisodesViewModel
     lateinit var watchViewModel: WatchViewModel
     lateinit var castViewModel: CastViewModel
-
-    // lateinit var musicViewModel: MusicViewModel
     lateinit var collectionViewModel: CollectionViewModel
     lateinit var upcomingViewModel: UpcomingViewModel
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        val tmdbRepository = TmdbRepository(WatchlistDatabase(this))
+        val db = WatchlistDatabase(this)
+
+        val tmdbRepository = TmdbRepository(db)
         val zplexRepository = ZPlexRepository()
+        val watchedRepository = WatchedRepository(db)
 
         homeViewModel = ViewModelProvider(
             this,
-            HomeViewModelProviderFactory(application, tmdbRepository)
+            HomeViewModelProviderFactory(
+                application, tmdbRepository, watchedRepository
+            )
         )[HomeViewModel::class.java]
 
         browseViewModel = ViewModelProvider(
@@ -145,7 +150,7 @@ class ZPlexActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_zplex)
+        setContentView(R.layout.activity_main)
 
         val navHostFragment = supportFragmentManager.findFragmentById(
             R.id.mainNavHostFragment
@@ -160,31 +165,61 @@ class ZPlexActivity : AppCompatActivity() {
             when (destination.id) {
                 R.id.fragmentMedia, R.id.castsFragment,
                 R.id.episodesListFragment, R.id.fragmentList,
-                R.id.fragmentCollection, R.id.searchFragment,
-                R.id.shareBottomSheet -> {
-                    window.navigationBarColor = colorPrimary
-                    bottomNavigationView.isVisible = false
-                    view1.isVisible = false
+                R.id.fragmentCollection, R.id.shareBottomSheet -> {
+//                    window.navigationBarColor = colorPrimary
+//                    bottomNavigationView.isVisible = false
+                    hideSlideDown(bottomNavigationView)
                 }
                 R.id.watchFragment -> {
-                    bottomNavigationView.isVisible = false
-                    view1.isVisible = false
+//                    bottomNavigationView.isVisible = false
+                    hideSlideDown(bottomNavigationView)
                 }
-                R.id.bigImageFragment -> bottomNavigationView.visibility = View.GONE
+                R.id.bigImageFragment -> {
+//                    bottomNavigationView.visibility = View.GONE
+                    hideSlideDown(bottomNavigationView)
+                }
                 else -> {
-                    window.navigationBarColor = colorPrimaryDark
-                    bottomNavigationView.isVisible = true
-                    view1.isVisible = true
+//                    window.navigationBarColor = colorPrimaryDark
+                    showSlideUp(bottomNavigationView)
+//                    bottomNavigationView.isVisible = true
                 }
             }
         }
 
+
+        setupFirebase()
+        doOnIntent(intent)
+    }
+
+    private fun showSlideUp(view: View) = lifecycleScope.launch {
+        if (view.isGone) {
+            view.visibility = View.VISIBLE
+            val animate = TranslateAnimation(
+                0f, 0f, view.height.toFloat(), 0f
+            )
+            animate.duration = 250
+            view.startAnimation(animate)
+        }
+    }
+
+    private fun hideSlideDown(view: View) = lifecycleScope.launch {
+        if (view.isVisible) {
+            val animate = TranslateAnimation(
+                0f, 0f, 0f, view.height.toFloat()
+            )
+            animate.duration = 250
+            view.startAnimation(animate)
+            view.visibility = View.GONE
+        }
+    }
+
+    private fun setupFirebase() = lifecycleScope.launch {
         @SuppressLint("HardwareIds")
         val deviceId: String = if (BuildConfig.DEBUG) {
             "ZPLEX_TEST_CHANNEL"
         } else {
             Settings.Secure.getString(
-                this.contentResolver, Settings.Secure.ANDROID_ID
+                contentResolver, Settings.Secure.ANDROID_ID
             )
         }
 
@@ -205,8 +240,6 @@ class ZPlexActivity : AppCompatActivity() {
                 fetchAndActivate().addOnCompleteListener(firebaseOnCompleteListener)
             }
         }
-
-        doOnIntent(intent)
     }
 
     private val firebaseOnCompleteListener = OnCompleteListener<Boolean> {
@@ -272,16 +305,11 @@ class ZPlexActivity : AppCompatActivity() {
     }
 
     private fun doOnIntent(intent: Intent?) {
-        Log.d(thisTAG, "action=${intent?.action}, data=${intent?.data}")
+        Log.d(TAG, "action=${intent?.action}, data=${intent?.data}")
         intent?.data?.let {
             getTmdbId(it)?.let { media ->
-                val mediaArgs = MediaArgs(
-                    media.id,
-                    media.media_type ?: "tv",
-                    media, null
-                )
                 val bundle = Bundle()
-                bundle.putSerializable("media", mediaArgs)
+                bundle.putSerializable("media", media)
                 navController.navigate(R.id.fragmentMedia, bundle)
             }
         }
@@ -293,23 +321,31 @@ class ZPlexActivity : AppCompatActivity() {
 
     private fun getTmdbId(url: Uri): Media? {
         val items = THEMOVIEDB_ID_REGEX.toRegex().find(url.toString())?.destructured?.toList()
-        items?.let {
+        return items?.let {
             if (items.size >= 2) {
                 val mediaType = it[0]
-                val tmdbId = it[1].toInt()
-                return Media(
-                    id = tmdbId,
-                    media_type = mediaType,
-                    name = null,
-                    poster_path = null,
-                    title = null,
-                    vote_average = null,
-                    backdrop_path = null,
-                    overview = null,
-                    release_date = null
-                )
+                try {
+                    val tmdbId = it[1].toInt()
+                    Media(
+                        id = tmdbId,
+                        media_type = mediaType,
+                        name = null,
+                        poster_path = null,
+                        title = null,
+                        vote_average = null,
+                        backdrop_path = null,
+                        overview = null,
+                        release_date = null
+                    )
+                } catch (nfe: NumberFormatException) {
+                    Toast.makeText(this, "Bad url", Toast.LENGTH_SHORT).show()
+                }
             }
+            null
         }
-        return null
+    }
+
+    companion object {
+        const val TAG = "MainActivity"
     }
 }

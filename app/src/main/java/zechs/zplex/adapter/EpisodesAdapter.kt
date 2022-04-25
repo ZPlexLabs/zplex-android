@@ -44,6 +44,7 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
 
     override fun onBindViewHolder(holder: EpisodesViewHolder, position: Int) {
         val episode = differ.currentList[position]
+        val isLast = position == differ.currentList.size
 
         val episodeStillUrl = if (episode.still_path.isNullOrEmpty()) {
             R.drawable.no_thumb
@@ -75,16 +76,16 @@ class EpisodesAdapter : RecyclerView.Adapter<EpisodesAdapter.EpisodesViewHolder>
 
             if (episode.file_id != null) {
                 setOnClickListener {
-                    onItemClickListener?.let { it(episode) }
+                    onItemClickListener?.let { it(episode, isLast) }
                 }
             }
         }
 
     }
 
-    private var onItemClickListener: ((Episode) -> Unit)? = null
+    private var onItemClickListener: ((Episode, Boolean) -> Unit)? = null
 
-    fun setOnItemClickListener(listener: (Episode) -> Unit) {
+    fun setOnItemClickListener(listener: (Episode, Boolean) -> Unit) {
         onItemClickListener = listener
     }
 

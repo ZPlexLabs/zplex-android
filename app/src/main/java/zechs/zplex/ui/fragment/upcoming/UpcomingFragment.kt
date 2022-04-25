@@ -2,25 +2,26 @@ package zechs.zplex.ui.fragment.upcoming
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import android.view.animation.LinearInterpolator
+import android.view.ViewGroup
 import androidx.core.view.isVisible
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Fade
-import androidx.transition.TransitionSet
-import com.google.android.material.transition.MaterialSharedAxis
+import androidx.transition.Transition
 import zechs.zplex.R
 import zechs.zplex.adapter.UpcomingAdapter
 import zechs.zplex.databinding.FragmentUpcomingBinding
-import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.tmdb.entities.Media
-import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.BaseFragment
+import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.utils.Resource
+import zechs.zplex.utils.navigateSafe
 
-class UpcomingFragment : Fragment(R.layout.fragment_upcoming) {
+class UpcomingFragment : BaseFragment() {
+
+    override val enterTransitionListener: Transition.TransitionListener? = null
 
     private var _binding: FragmentUpcomingBinding? = null
     private val binding get() = _binding!!
@@ -37,44 +38,20 @@ class UpcomingFragment : Fragment(R.layout.fragment_upcoming) {
     private var isLastPage = true
     private val thisTAG = "UpcomingFragment"
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enterTransition = TransitionSet().apply {
-            addTransition(
-                MaterialSharedAxis(
-                    MaterialSharedAxis.Y, true
-                ).apply {
-                    interpolator = LinearInterpolator()
-                    duration = 500
-                })
-
-            addTransition(Fade().apply {
-                interpolator = LinearInterpolator()
-            })
-        }
-
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, true
-        ).apply {
-            interpolator = LinearInterpolator()
-            duration = 500
-        }
-
-        returnTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, false
-        ).apply {
-            interpolator = LinearInterpolator()
-            duration = 220
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentUpcomingBinding.inflate(inflater, container, false)
+        return binding.root
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentUpcomingBinding.bind(view)
 
-        upcomingViewModel = (activity as ZPlexActivity).upcomingViewModel
+        upcomingViewModel = (activity as MainActivity).upcomingViewModel
         setupRecyclerView()
 
         upcomingViewModel.upcoming.observe(viewLifecycleOwner) { response ->
@@ -153,11 +130,9 @@ class UpcomingFragment : Fragment(R.layout.fragment_upcoming) {
 
     private fun navigateMedia(media: Media) {
         val action = UpcomingFragmentDirections.actionUpcomingFragmentToFragmentMedia(
-            MediaArgs(
-                media.id, media.media_type ?: "movie", media, null
-            )
+            media.copy(media_type = media.media_type ?: "movie")
         )
-        findNavController().navigate(action)
+        findNavController().navigateSafe(action)
     }
 
     override fun onDestroyView() {

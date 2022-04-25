@@ -8,6 +8,7 @@ import zechs.zplex.models.tmdb.entities.Season
 data class ListArgs(
     val tmdbId: Int,
     val showName: String,
+    val showPoster: String?,
     val castList: List<Cast>?,
     val seasonList: List<Season>?
 )

@@ -6,5 +6,5 @@
         android:centerColor="@android:color/transparent"
         android:centerY="0.85"
         android:endColor="@android:color/transparent"
-        android:startColor="@color/colorPrimary" />
+        android:startColor="@color/statusBarColor" />
 </shape>

@@ -1,20 +1,58 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:textColor">@color/textColor</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:colorBackground">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/colorPrimaryDark</item>
-        <item name="android:statusBarColor">@color/colorPrimary</item>
+    <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/md_theme_dark_primary</item>
+        <item name="colorOnPrimary">@color/md_theme_dark_onPrimary</item>
+        <item name="colorPrimaryContainer">@color/md_theme_dark_primaryContainer</item>
+        <item name="colorOnPrimaryContainer">@color/md_theme_dark_onPrimaryContainer</item>
+        <item name="colorSecondary">@color/md_theme_dark_secondary</item>
+        <item name="colorOnSecondary">@color/md_theme_dark_onSecondary</item>
+        <item name="colorSecondaryContainer">@color/md_theme_dark_secondaryContainer</item>
+        <item name="colorOnSecondaryContainer">@color/md_theme_dark_onSecondaryContainer</item>
+        <item name="colorTertiary">@color/md_theme_dark_tertiary</item>
+        <item name="colorOnTertiary">@color/md_theme_dark_onTertiary</item>
+        <item name="colorTertiaryContainer">@color/md_theme_dark_tertiaryContainer</item>
+        <item name="colorOnTertiaryContainer">@color/md_theme_dark_onTertiaryContainer</item>
+        <item name="colorError">@color/md_theme_dark_error</item>
+        <item name="colorErrorContainer">@color/md_theme_dark_errorContainer</item>
+        <item name="colorOnError">@color/md_theme_dark_onError</item>
+        <item name="colorOnErrorContainer">@color/md_theme_dark_onErrorContainer</item>
+        <item name="android:colorBackground">@color/md_theme_dark_background</item>
+        <item name="colorOnBackground">@color/md_theme_dark_onBackground</item>
+        <item name="colorSurface">@color/md_theme_dark_surface</item>
+        <item name="colorOnSurface">@color/md_theme_dark_onSurface</item>
+        <item name="colorSurfaceVariant">@color/md_theme_dark_surfaceVariant</item>
+        <item name="colorOnSurfaceVariant">@color/md_theme_dark_onSurfaceVariant</item>
+        <item name="colorOutline">@color/md_theme_dark_outline</item>
+        <item name="colorOnSurfaceInverse">@color/md_theme_dark_inverseOnSurface</item>
+        <item name="colorSurfaceInverse">@color/md_theme_dark_inverseSurface</item>
+        <item name="colorPrimaryInverse">@color/md_theme_dark_primaryInverse</item>
         <item name="chipStyle">@style/Widget.App.Chip</item>
         <item name="popupMenuBackground">@drawable/popup_menu_bg</item>
         <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
         <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
         <item name="android:listPopupWindowStyle">@style/MyListPopupWindow</item>
+        <item name="materialCardViewStyle">@style/Widget.App.Card</item>
+        <item name="android:statusBarColor">@color/statusBarColor</item>
+        <item name="android:navigationBarColor">@color/fadedColor</item>
     </style>
+
+
+    <!--        <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">-->
+    <!--            <item name="colorPrimary">@color/colorPrimary</item>-->
+    <!--            <item name="colorPrimaryDark">@color/colorPrimaryDark</item>-->
+    <!--            <item name="colorAccent">@color/colorAccent</item>-->
+    <!--            <item name="android:textColor">@color/textColor</item>-->
+    <!--            <item name="android:windowBackground">@android:color/transparent</item>-->
+    <!--            <item name="android:colorBackground">@android:color/transparent</item>-->
+    <!--            <item name="android:navigationBarColor">@color/colorPrimaryDark</item>-->
+    <!--            <item name="android:statusBarColor">@color/colorPrimary</item>-->
+    <!--            <item name="chipStyle">@style/Widget.App.Chip</item>-->
+    <!--            <item name="popupMenuBackground">@drawable/popup_menu_bg</item>-->
+    <!--            <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>-->
+    <!--            <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>-->
+    <!--            <item name="android:listPopupWindowStyle">@style/MyListPopupWindow</item>-->
+    <!--        </style>-->
 
     <style name="MenuTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorSecondary">@color/textColor</item>
@@ -27,6 +65,7 @@
         <item name="selectableItemBackgroundBorderless">?android:selectableItemBackground</item>
     </style>
 
+
     <style name="chipTextAppearance" parent="TextAppearance.MaterialComponents.Chip">>
         <item name="android:textColor">@color/textColor_87</item>
         <item name="fontFamily">@font/open_sans</item>
@@ -34,10 +73,20 @@
 
     <style name="titleTextAppearance">
         <item name="android:textColor">@color/textColor</item>
-        <item name="fontFamily">@font/open_sans</item>
+        <item name="fontFamily">@font/roboto_black</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+
+    <style name="tabTitleTextAppearance">
+        <item name="fontFamily">@font/roboto_bold</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="homeTitleTextAppearance">
+        <item name="android:textColor">@color/textColor</item>
+        <item name="fontFamily">@font/roboto_black</item>
+        <item name="android:textSize">20sp</item>
     </style>
 
     <style name="seasonTitleTextAppearance" parent="TextAppearance.MaterialComponents.Headline1">
@@ -68,6 +117,8 @@
         <item name="chipSurfaceColor">@android:color/transparent</item>
     </style>
 
+
+    <style name="Widget.App.Card" parent="Widget.Material3.CardView.Elevated" />
 
     <style name="Widget.App.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
         <item name="fontFamily">@font/open_sans</item>
@@ -126,8 +177,7 @@
         <item name="colorControlActivated">@color/colorAccent</item>
     </style>
 
-    <style name="titleTextMedia">
-        <item name="android:textColor">@color/textColor</item>
+    <style name="titleTextMedia" parent="MaterialAlertDialog.Material3.Title.Text">
         <item name="fontFamily">@font/open_sans_bold</item>
         <item name="android:textSize">21sp</item>
         <item name="android:maxLines">3</item>

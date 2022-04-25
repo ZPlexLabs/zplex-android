@@ -1,4 +1,4 @@
-package zechs.zplex.ui.fragment.viewmodels
+package zechs.zplex.ui.fragment.shared_viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,12 +13,13 @@ class SeasonViewModel : ViewModel() {
 
     fun setShowSeason(
         tmdbId: Int,
-        seasonName: String,
+        seasonName: String?,
         seasonNumber: Int,
         showName: String,
-        posterPath: String?
+        posterPath: String?,
+        showPoster: String?
     ) {
-        val update = ShowSeason(tmdbId, seasonName, seasonNumber, showName, posterPath)
+        val update = ShowSeason(tmdbId, seasonName, seasonNumber, showName, posterPath, showPoster)
         if (_showSeason.value == update) return
         _showSeason.value = update
     }

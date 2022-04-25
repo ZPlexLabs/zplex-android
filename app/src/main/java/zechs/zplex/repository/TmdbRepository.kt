@@ -103,8 +103,7 @@ class TmdbRepository(
         time_window: String
     ) = RetrofitInstance.tmdbApi.getTrending(time_window)
 
-    suspend fun getStreaming() = RetrofitInstance.tmdbApi.getStreaming()
-    suspend fun getInTheatres() = RetrofitInstance.tmdbApi.getInTheatres()
+
     suspend fun getUpcoming(page: Int) = RetrofitInstance.tmdbApi.getUpcoming(page = page)
 
     suspend fun getBrowse(
@@ -121,4 +120,16 @@ class TmdbRepository(
         with_keywords = withKeyword,
         with_genres = withGenres,
     )
+
+    suspend fun getInTheatres(
+        dateStart: String, dateEnd: String
+    ) = RetrofitInstance.tmdbApi.getInTheatres(
+        release_date_start = dateStart,
+        release_date_end = dateEnd
+    )
+
+    suspend fun getPopularOnStreaming(
+    ) = RetrofitInstance.tmdbApi.getPopularOnStreaming()
+
+
 }

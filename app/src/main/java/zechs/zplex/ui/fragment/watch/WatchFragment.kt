@@ -16,8 +16,8 @@ import zechs.zplex.databinding.FragmentWatchBinding
 import zechs.zplex.models.dataclass.CastArgs
 import zechs.zplex.models.tmdb.StillSize
 import zechs.zplex.models.tmdb.entities.Episode
-import zechs.zplex.ui.activity.ZPlexActivity
-import zechs.zplex.ui.fragment.viewmodels.EpisodeViewModel
+import zechs.zplex.ui.activity.main.MainActivity
+import zechs.zplex.ui.fragment.shared_viewmodels.EpisodeViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
@@ -58,7 +58,7 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentWatchBinding.bind(view)
 
-        watchViewModel = (activity as ZPlexActivity).watchViewModel
+        watchViewModel = (activity as MainActivity).watchViewModel
         setupRecyclerView()
 
         episodeViewModel.showEpisode.observe(viewLifecycleOwner) {

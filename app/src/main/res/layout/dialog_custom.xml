@@ -10,7 +10,6 @@
     android:layout_marginEnd="16dp"
     android:layout_marginBottom="8dp"
     android:elevation="16sp"
-    app:cardBackgroundColor="@color/colorPrimaryDark"
     app:cardCornerRadius="24dp"
     app:cardElevation="16sp"
     app:cardMaxElevation="24dp">
@@ -62,7 +61,6 @@
             android:layout_marginTop="16dp"
             android:backgroundTint="@color/colorAccent"
             android:text="@string/yes"
-            android:textColor="@color/colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/tv_message"
             app:layout_constraintHorizontal_bias="1.0"
@@ -167,7 +165,6 @@
             android:layout_marginTop="16dp"
             android:backgroundTint="@color/colorAccent"
             android:text="@string/ok"
-            android:textColor="@color/colorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/tv_witch_message"
             app:layout_constraintHorizontal_bias="1.0"

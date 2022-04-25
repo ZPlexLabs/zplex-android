@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:background="@color/colorPrimary">
+    android:animateLayoutChanges="true">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/main_view"
@@ -133,7 +132,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/dark_faded_top"
-        android:backgroundTint="@color/colorPrimary"
         android:elevation="1dp"
         android:gravity="top"
         android:theme="@style/MenuTheme"

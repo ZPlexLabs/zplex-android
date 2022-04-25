@@ -3,14 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:animateLayoutChanges="true"
-    android:background="@color/colorPrimary">
+    android:layout_height="match_parent">
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/main_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -20,7 +19,9 @@
                 android:id="@+id/group_ui_elements"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:constraint_referenced_ids="backdropFrame,rb_rating,tv_rating_text,tv_genre,tv_runtime,btn_watch_now,btn_save,btn_share" />
+                android:visibility="invisible"
+                app:constraint_referenced_ids="backdropFrame,rb_rating,tv_rating_text,tv_genre,tv_runtime,btn_watch_now,btn_save,btn_share"
+                tools:visibility="visible" />
 
             <FrameLayout
                 android:id="@+id/backdropFrame"
@@ -75,7 +76,7 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <TextView
+            <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/tv_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -98,9 +99,6 @@
                 android:isIndicator="true"
                 android:max="5"
                 android:numStars="5"
-                android:progressBackgroundTint="@color/colorAccent"
-                android:progressTint="@color/colorAccent"
-                android:secondaryProgressTint="@color/colorAccent"
                 android:stepSize="0.1"
                 app:layout_constraintEnd_toEndOf="@+id/tv_genre"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -194,23 +192,18 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_watch_now"
-                style="@style/Widget.MaterialComponents.Button"
+                style="@style/Widget.Material3.Button.ElevatedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
                 android:clickable="true"
-                android:fontFamily="@font/open_sans_semibold"
                 android:padding="12dp"
                 android:text="@string/watch_now"
-                android:textColor="@color/textColor"
-                android:textSize="15sp"
-                app:backgroundTint="@color/colorAccent"
-                app:cornerRadius="72dp"
+                android:textSize="16sp"
                 app:icon="@drawable/ic_round_play_circle_outline_24"
                 app:iconGravity="textStart"
-                app:iconTint="@color/textColor"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
@@ -218,17 +211,14 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_save"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="4dp"
                 android:layout_marginBottom="8dp"
-                android:fontFamily="@font/open_sans_semibold"
-                android:padding="8dp"
                 android:text="@string/watchlist"
                 android:textColor="@color/textColor"
-                app:cornerRadius="72dp"
                 app:icon="@drawable/ic_add_24"
                 app:iconGravity="textStart"
                 app:iconTint="@color/textColor"
@@ -239,21 +229,18 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/btn_watch_now"
                 app:layout_constraintVertical_bias="0.0"
-                app:strokeColor="@color/cardColor" />
+                app:strokeColor="@color/fadedColor" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_share"
-                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_marginStart="4dp"
                 android:layout_marginEnd="16dp"
                 android:clickable="true"
-                android:fontFamily="@font/open_sans_semibold"
-                android:padding="8dp"
                 android:text="@string/share"
                 android:textColor="@color/textColor"
-                app:cornerRadius="72dp"
                 app:icon="@drawable/ic_share_24dp"
                 app:iconGravity="textStart"
                 app:iconTint="@color/textColor"
@@ -263,7 +250,7 @@
                 app:layout_constraintStart_toEndOf="@+id/btn_save"
                 app:layout_constraintTop_toTopOf="@+id/btn_save"
                 app:layout_constraintVertical_bias="0.0"
-                app:strokeColor="@color/cardColor" />
+                app:strokeColor="@color/fadedColor" />
 
             <TextView
                 android:id="@+id/tv_season_header"
@@ -338,21 +325,25 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tv_plot"
-                tools:indeterminateTint="@color/colorAccent"
                 tools:visibility="visible" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/dark_faded_top"
-        android:backgroundTint="@color/colorPrimary"
-        android:elevation="1dp"
-        android:gravity="top"
-        android:theme="@style/MenuTheme"
-        app:navigationIcon="@drawable/ic_round_keyboard_backspace_24"
-        app:navigationIconTint="@color/textColor" />
+        android:layout_height="?attr/actionBarSize"
+        android:gravity="top">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="@style/MenuTheme"
+            app:navigationIcon="@drawable/ic_round_keyboard_backspace_24"
+            app:navigationIconTint="@color/textColor"
+            app:titleTextAppearance="@style/titleTextAppearance" />
+
+    </com.google.android.material.appbar.AppBarLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

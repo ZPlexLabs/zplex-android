@@ -81,7 +81,7 @@ class StreamsDataAdapter(
             is StreamsDataViewHolder.StreamViewHolder ->
                 holder.bind(differ.currentList[position] as StreamsDataModel.Stream)
             is StreamsDataViewHolder.LoadingViewHolder ->
-                holder.bind(differ.currentList[position] as StreamsDataModel.Loading)
+                holder.bind()
         }
     }
 

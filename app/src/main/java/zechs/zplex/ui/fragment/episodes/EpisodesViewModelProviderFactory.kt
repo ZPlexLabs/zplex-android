@@ -3,7 +3,6 @@ package zechs.zplex.ui.fragment.episodes
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.repository.ZPlexRepository
 
 @Suppress("UNCHECKED_CAST")

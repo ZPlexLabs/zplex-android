@@ -15,6 +15,9 @@
         <action
             android:id="@+id/action_homeFragment_to_searchFragment"
             app:destination="@id/searchFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_episodesListFragment"
+            app:destination="@id/episodesListFragment" />
     </fragment>
 
     <fragment
@@ -60,7 +63,7 @@
         tools:layout="@layout/fragment_temp">
         <argument
             android:name="media"
-            app:argType="zechs.zplex.models.dataclass.MediaArgs" />
+            app:argType="zechs.zplex.models.tmdb.entities.Media" />
         <action
             android:id="@+id/action_fragmentMedia_to_episodeListFragment"
             app:destination="@id/episodesListFragment" />
@@ -78,7 +81,7 @@
             app:destination="@id/fragmentMedia">
             <argument
                 android:name="media"
-                app:argType="zechs.zplex.models.dataclass.MediaArgs" />
+                app:argType="zechs.zplex.models.tmdb.entities.Media" />
         </action>
         <action
             android:id="@+id/action_fragmentMedia_to_shareBottomSheet"

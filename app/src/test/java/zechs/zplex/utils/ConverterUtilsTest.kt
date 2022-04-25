@@ -11,7 +11,7 @@ class ConverterUtilsTest {
 
     @Test
     fun `dates to time ago`() {
-        val expected = "1 year ago"
+        val expected = "2 years ago"
         val response = toDuration("2020-04-20 20:00")
         assertEquals(expected, response)
     }

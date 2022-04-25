@@ -5,34 +5,34 @@ import android.os.Bundle
 import android.text.Editable
 import android.transition.TransitionManager
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
-import android.view.animation.LinearInterpolator
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
-import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Fade
-import androidx.transition.TransitionSet
-import com.google.android.material.transition.MaterialSharedAxis
+import androidx.transition.Transition
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentSearchBinding
-import zechs.zplex.models.dataclass.MediaArgs
-import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.BaseFragment
+import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
 import zechs.zplex.utils.Resource
+import zechs.zplex.utils.navigateSafe
 
 
-class SearchFragment : Fragment(R.layout.fragment_search) {
+class SearchFragment : BaseFragment() {
+
+    override val enterTransitionListener: Transition.TransitionListener? = null
 
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
@@ -44,43 +44,21 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     private var queryText = ""
     private var isLoading = true
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enterTransition = TransitionSet().apply {
-            addTransition(
-                MaterialSharedAxis(
-                    MaterialSharedAxis.Y, true
-                ).apply {
-                    interpolator = LinearInterpolator()
-                    duration = 500
-                })
-
-            addTransition(Fade().apply {
-                interpolator = LinearInterpolator()
-            })
-        }
-
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, true
-        ).apply {
-            interpolator = LinearInterpolator()
-            duration = 500
-        }
-
-        returnTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, false
-        ).apply {
-            interpolator = LinearInterpolator()
-            duration = 220
-        }
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentSearchBinding.inflate(inflater, container, false)
+        return binding.root
     }
+
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentSearchBinding.bind(view)
 
-        searchViewModel = (activity as ZPlexActivity).searchViewModel
+        searchViewModel = (activity as MainActivity).searchViewModel
         setupRecyclerView()
         binding.topAppBar.setNavigationOnClickListener { findNavController().navigateUp() }
 
@@ -177,12 +155,8 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
         searchAdapter.setOnItemClickListener { media, _, position ->
             hideKeyboard()
-            val action = SearchFragmentDirections.actionSearchFragmentToFragmentMedia(
-                MediaArgs(
-                    media.id, media.media_type ?: "none", media, position
-                )
-            )
-            findNavController().navigate(action)
+            val action = SearchFragmentDirections.actionSearchFragmentToFragmentMedia(media)
+            findNavController().navigateSafe(action)
         }
     }
 

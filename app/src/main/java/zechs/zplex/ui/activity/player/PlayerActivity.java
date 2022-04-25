@@ -3,7 +3,6 @@ package zechs.zplex.ui.activity.player;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
@@ -42,8 +41,10 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
@@ -75,10 +76,12 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import zechs.zplex.R;
+import zechs.zplex.db.WatchlistDatabase;
+import zechs.zplex.repository.WatchedRepository;
 import zechs.zplex.ui.activity.player.dtpv.DoubleTapPlayerView;
 import zechs.zplex.ui.activity.player.dtpv.youtube.YouTubeOverlay;
 
-public class PlayerActivity extends Activity {
+public class PlayerActivity extends AppCompatActivity {
 
     public static final int CONTROLLER_TIMEOUT = 3500;
     private static final String ACTION_MEDIA_CONTROL = "media_control";
@@ -136,10 +139,32 @@ public class PlayerActivity extends Activity {
 
     private Boolean _isInPip = false;
 
+    private int tmdbId;
+    private String name;
+    private String posterPath;
+    private int seasonNumber;
+    private int episodeNumber;
+    private boolean isTV = false;
+    private boolean isLastEpisode = false;
+
+
+    private PlayerViewModel playerViewModel;
+
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Utils.Companion.setOrientation(this, orientation);
+
+        WatchedRepository watchedRepository = new WatchedRepository(
+                WatchlistDatabase.Companion.invoke(this)
+        );
+
+        playerViewModel = new ViewModelProvider(
+                this,
+                new PlayerViewModelProviderFactory(watchedRepository)
+        ).get(PlayerViewModel.class);
+
         super.onCreate(savedInstanceState);
 
         if (Build.VERSION.SDK_INT == 28 && Build.MANUFACTURER.equalsIgnoreCase("xiaomi") && Build.DEVICE.equalsIgnoreCase("oneday")) {
@@ -405,10 +430,49 @@ public class PlayerActivity extends Activity {
         initializePlayer();
     }
 
+
+    @Override
+    protected void onStop() {
+        saveProgress();
+        super.onStop();
+    }
+
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        saveProgress();
         releasePlayer();
+        super.onDestroy();
+    }
+
+    private void saveProgress() {
+        long watchedDuration = player.getCurrentPosition();
+        long totalDuration = player.getDuration();
+        float watchProgress = (float) ((double) watchedDuration / (double) totalDuration) * 100;
+
+        if (watchProgress > 10) {
+
+
+            if (isTV) {
+                playerViewModel.upsertWatchedShow(
+                        tmdbId,
+                        name,
+                        posterPath,
+                        seasonNumber,
+                        episodeNumber,
+                        watchedDuration,
+                        totalDuration,
+                        isLastEpisode
+                );
+            } else {
+                playerViewModel.upsertWatchedMovie(
+                        tmdbId,
+                        name,
+                        posterPath,
+                        watchedDuration,
+                        totalDuration
+                );
+            }
+        }
     }
 
     @Override
@@ -482,6 +546,15 @@ public class PlayerActivity extends Activity {
         String fileId = intent.getStringExtra("fileId");
         String title = intent.getStringExtra("title");
         String accessToken = intent.getStringExtra("accessToken");
+
+        tmdbId = intent.getIntExtra("tmdbId", 0);
+        name = intent.getStringExtra("name");
+        posterPath = intent.getStringExtra("posterPath");
+        seasonNumber = intent.getIntExtra("seasonNumber", 0);
+        episodeNumber = intent.getIntExtra("episodeNumber", 0);
+
+        isTV = intent.getBooleanExtra("isTV", false);
+        isLastEpisode = intent.getBooleanExtra("isLastEpisode", false);
 
         Uri mediaUri = getStreamUrl(fileId);
 
@@ -794,6 +867,7 @@ public class PlayerActivity extends Activity {
 
     @Override
     protected void onPause() {
+        saveProgress();
         super.onPause();
         if (!_isInPip && player != null) player.pause();
     }

@@ -1,4 +1,4 @@
-package zechs.zplex.ui.fragment.viewmodels
+package zechs.zplex.ui.fragment.shared_viewmodels
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

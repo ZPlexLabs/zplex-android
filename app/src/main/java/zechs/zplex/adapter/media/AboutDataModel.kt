@@ -1,6 +1,7 @@
 package zechs.zplex.adapter.media
 
 import androidx.annotation.Keep
+import zechs.zplex.models.tmdb.entities.Media
 
 sealed class AboutDataModel {
 
@@ -38,7 +39,19 @@ sealed class AboutDataModel {
         val backdrop_path: String?,
         val overview: String?,
         val release_date: String?
-    ) : AboutDataModel()
+    ) : AboutDataModel() {
+        fun toMedia() = Media(
+            id = id,
+            media_type = media_type,
+            name = name,
+            poster_path = poster_path,
+            title = title,
+            vote_average = vote_average,
+            backdrop_path = backdrop_path,
+            overview = overview,
+            release_date = release_date
+        )
+    }
 
     @Keep
     data class Video(

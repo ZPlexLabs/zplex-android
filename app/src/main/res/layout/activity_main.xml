@@ -5,7 +5,7 @@
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activity.ZPlexActivity">
+    tools:context=".ui.activity.main.MainActivity">
 
     <FrameLayout
         android:id="@+id/zplex_frame"
@@ -25,25 +25,12 @@
             app:navGraph="@navigation/zplex_graph" />
     </FrameLayout>
 
-    <View
-        android:id="@+id/view1"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_gravity="center|bottom"
-        android:background="#323639"
-        app:layout_constraintBottom_toBottomOf="@+id/zplex_frame"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigationView"
-        style="@style/Widget.MaterialComponents.BottomNavigationView.Colored"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="?attr/actionBarSize"
         android:layout_gravity="bottom"
-        app:backgroundTint="@color/colorPrimaryDark"
-        app:itemIconTint="@drawable/icon_color"
-        app:itemTextColor="@drawable/icon_color"
+        app:labelVisibilityMode="unlabeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"

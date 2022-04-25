@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimary"
     android:clickable="true"
     android:focusable="true"
     android:focusableInTouchMode="true">
@@ -27,26 +26,20 @@
             android:minHeight="?attr/actionBarSize"
             android:padding="8dp"
             android:theme="@style/MenuTheme"
-            app:contentInsetEnd="0dp"
-            app:contentInsetStart="0dp"
             app:contentInsetStartWithNavigation="0dp"
-            app:layout_scrollFlags="scroll|enterAlways|snap"
-            app:navigationIcon="@drawable/ic_round_keyboard_backspace_24"
-            app:navigationIconTint="@color/textColor">
+            app:layout_scrollFlags="scroll|enterAlways|snap">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/search_box"
                 style="@style/MyDenseOutlined"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="16dp"
                 android:background="@drawable/search_bg"
                 android:gravity="center"
                 app:boxCornerRadiusBottomEnd="24dp"
                 app:boxCornerRadiusBottomStart="24dp"
                 app:boxCornerRadiusTopEnd="24dp"
                 app:boxCornerRadiusTopStart="24dp"
-                app:boxStrokeColor="@drawable/text_box_stroke"
                 app:boxStrokeWidth="0dp"
                 app:endIconMode="clear_text"
                 app:endIconTint="@color/colorAccent"

@@ -50,7 +50,7 @@ sealed class StreamsDataViewHolder(
         itemBinding: ItemLoadingBinding,
         streamsDataAdapter: StreamsDataAdapter
     ) : StreamsDataViewHolder(itemBinding, streamsDataAdapter) {
-        fun bind(item: StreamsDataModel.Loading) {}
+        fun bind() {}
     }
 
 }

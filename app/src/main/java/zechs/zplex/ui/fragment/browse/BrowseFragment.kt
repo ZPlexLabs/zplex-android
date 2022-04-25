@@ -26,16 +26,15 @@ import com.google.android.material.chip.ChipGroup
 import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentBrowseBinding
-import zechs.zplex.models.dataclass.MediaArgs
 import zechs.zplex.models.enum.MediaType
 import zechs.zplex.models.enum.Order
 import zechs.zplex.models.enum.SortBy
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.dialog.FiltersDialog
-import zechs.zplex.ui.fragment.viewmodels.FiltersViewModel
+import zechs.zplex.ui.fragment.shared_viewmodels.FiltersViewModel
 import zechs.zplex.utils.Resource
 
 class BrowseFragment : BaseFragment() {
@@ -67,7 +66,7 @@ class BrowseFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        browseViewModel = (activity as ZPlexActivity).browseViewModel
+        browseViewModel = (activity as MainActivity).browseViewModel
         setupRecyclerView()
         setupFiltersObservers()
         setupBrowseObservers()
@@ -238,9 +237,7 @@ class BrowseFragment : BaseFragment() {
             else -> "tv"
         }
         val action = BrowseFragmentDirections.actionDiscoverFragmentToFragmentMedia(
-            MediaArgs(
-                media.id, media.media_type ?: mediaType, media, null
-            )
+            media.copy(media_type = mediaType)
         )
         findNavController().navigate(action)
     }

@@ -21,10 +21,10 @@ import zechs.zplex.databinding.FragmentEpisodeBinding
 import zechs.zplex.models.tmdb.PosterSize
 import zechs.zplex.models.zplex.Episode
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.ZPlexActivity
+import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.activity.player.PlayerActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
-import zechs.zplex.ui.fragment.viewmodels.SeasonViewModel
+import zechs.zplex.ui.fragment.shared_viewmodels.SeasonViewModel
 import zechs.zplex.ui.seasonResponseZplex
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
@@ -59,6 +59,7 @@ class EpisodesFragment : BaseFragment() {
     private val thisTAG = "EpisodesFragment"
     private var tmdbId = 0
     private var showName: String? = null
+    private var showPoster: String? = null
 
 
     override fun onCreateView(
@@ -74,7 +75,7 @@ class EpisodesFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentEpisodeBinding.bind(view)
 
-        episodesViewModel = (activity as ZPlexActivity).episodesViewModel
+        episodesViewModel = (activity as MainActivity).episodesViewModel
 
         binding.rvEpisodes.apply {
             adapter = episodesAdapter
@@ -88,6 +89,7 @@ class EpisodesFragment : BaseFragment() {
 
         seasonViewModel.showId.observe(viewLifecycleOwner) { showSeason ->
             showName = showSeason.showName
+            showPoster = showSeason.showPoster
             episodesViewModel.zplexGetSeason(
                 tvId = showSeason.tmdbId,
                 seasonNumber = showSeason.seasonNumber
@@ -102,12 +104,14 @@ class EpisodesFragment : BaseFragment() {
             val seasonText = "Season ${showSeason.seasonNumber}"
 
             binding.apply {
-                if (showSeason.seasonName == seasonText) {
-                    seasonToolbar.title = seasonText
-                    seasonToolbar.subtitle = showSeason.showName
-                } else {
-                    seasonToolbar.title = seasonText
-                    seasonToolbar.subtitle = showSeason.seasonName
+                showSeason.seasonName?.let {
+                    if (it == seasonText) {
+                        seasonToolbar.title = seasonText
+                        seasonToolbar.subtitle = it
+                    } else {
+                        seasonToolbar.title = seasonText
+                        seasonToolbar.subtitle = it
+                    }
                 }
 
                 GlideApp.with(ivPoster)
@@ -157,7 +161,7 @@ class EpisodesFragment : BaseFragment() {
                     }
                     Toast.makeText(context, errorMsg, Toast.LENGTH_SHORT).show()
                 }
-                episodesAdapter.setOnItemClickListener { }
+                episodesAdapter.setOnItemClickListener { _, _ -> }
             }
 
             is Resource.Loading -> {
@@ -166,7 +170,7 @@ class EpisodesFragment : BaseFragment() {
                     pbEpisodes.isVisible = true
                     errorView.root.isVisible = false
                 }
-                episodesAdapter.setOnItemClickListener { }
+                episodesAdapter.setOnItemClickListener { _, _ -> }
             }
         }
     }
@@ -176,7 +180,7 @@ class EpisodesFragment : BaseFragment() {
         this.exitTransition = null
         bigImageViewModel.setImagePath(posterPath)
 
-        val action =  EpisodesFragmentDirections.actionEpisodesListFragmentToBigImageFragment()
+        val action = EpisodesFragmentDirections.actionEpisodesListFragmentToBigImageFragment()
         val extras = FragmentNavigatorExtras(
             imageView to imageView.transitionName
         )
@@ -189,6 +193,35 @@ class EpisodesFragment : BaseFragment() {
 
         val episodesList = seasonResponse.episodes?.toList() ?: listOf()
         episodesAdapter.differ.submitList(episodesList)
+
+        binding.apply {
+            seasonResponse.name.let {
+                val seasonText = "Season ${seasonResponse.season_number}"
+
+                if (it == seasonText) {
+                    seasonToolbar.title = seasonText
+                    seasonToolbar.subtitle = it
+                } else {
+                    seasonToolbar.title = seasonText
+                    seasonToolbar.subtitle = it
+                }
+            }
+
+            val posterUrl = if (seasonResponse.poster_path == null) {
+                R.drawable.no_poster
+            } else {
+                "$TMDB_IMAGE_PREFIX/${PosterSize.w500}${seasonResponse.poster_path}"
+            }
+
+            GlideApp.with(ivPoster)
+                .load(posterUrl)
+                .placeholder(R.drawable.no_poster)
+                .into(ivPoster)
+
+            ivPoster.setOnClickListener {
+                openImageFullSize(seasonResponse.poster_path, binding.ivPoster)
+            }
+        }
 
         if (episodesList.isEmpty()) {
             val errorMsg = getString(R.string.no_episodes_found)
@@ -210,10 +243,10 @@ class EpisodesFragment : BaseFragment() {
             }
         }
 
-        episodesAdapter.setOnItemClickListener {
+        episodesAdapter.setOnItemClickListener { episode: Episode, isLast: Boolean ->
             //it.fileId?.let { it1 -> episodesViewModel.getVideoInfo(it1) }
             //context?.let { c -> showStreamsDialog(c, it) }
-            playEpisode(it, seasonResponse.accessToken!!)
+            playEpisode(episode, seasonResponse.accessToken!!, isLast)
         }
     }
 
@@ -297,7 +330,9 @@ class EpisodesFragment : BaseFragment() {
 //        }
 //    }
 
-    private fun playEpisode(episode: Episode, accessToken: String) {
+    private fun playEpisode(
+        episode: Episode, accessToken: String, isLastEpisode: Boolean
+    ) {
         episode.file_id?.let { id ->
             val title = if (episode.name.isEmpty()) {
                 "No title"
@@ -306,6 +341,14 @@ class EpisodesFragment : BaseFragment() {
             intent.putExtra("fileId", id)
             intent.putExtra("title", title)
             intent.putExtra("accessToken", accessToken)
+            intent.putExtra("tmdbId", tmdbId)
+            intent.putExtra("name", showName!!)
+            intent.putExtra("posterPath", showPoster)
+            intent.putExtra("seasonNumber", episode.season_number)
+            intent.putExtra("episodeNumber", episode.episode_number)
+            intent.putExtra("isTV", true)
+            intent.putExtra("isLastEpisode", isLastEpisode)
+
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
             activity?.startActivity(intent)
         }
