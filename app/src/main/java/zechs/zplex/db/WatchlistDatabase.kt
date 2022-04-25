@@ -42,11 +42,10 @@ abstract class WatchlistDatabase : RoomDatabase() {
                 "zplex_db.db"
             ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
 
-
         private val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL(
-                    "CREATE TABLE `watched` " +
+                    "CREATE TABLE IF NOT EXISTS `watched` " +
                             "(`tmdbId` INTEGER NOT NULL, " +
                             "`name` TEXT NOT NULL, " +
                             "`mediaType` TEXT, " +
@@ -62,7 +61,7 @@ abstract class WatchlistDatabase : RoomDatabase() {
 
         private val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
-                database.execSQL("DROP TABLE `watched`")
+                database.execSQL("DROP TABLE IF EXISTS `watched`")
             }
         }
 
@@ -70,7 +69,7 @@ abstract class WatchlistDatabase : RoomDatabase() {
         private val MIGRATION_3_4 = object : Migration(3, 4) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL(
-                    "CREATE TABLE `watched_movies` " +
+                    "CREATE TABLE IF NOT EXISTS `watched_movies` " +
                             "(`tmdbId` INTEGER NOT NULL, " +
                             "`name` TEXT NOT NULL, " +
                             "`mediaType` TEXT NOT NULL, " +
@@ -81,7 +80,7 @@ abstract class WatchlistDatabase : RoomDatabase() {
                 )
 
                 database.execSQL(
-                    "CREATE TABLE `watched_shows` " +
+                    "CREATE TABLE IF NOT EXISTS `watched_shows` " +
                             "(`tmdbId` INTEGER NOT NULL, " +
                             "`name` TEXT NOT NULL, " +
                             "`mediaType` TEXT NOT NULL, " +
