@@ -131,16 +131,6 @@ interface TmdbAPI {
         @Query("first_air_date_year")
         first_air_date_year: Int?
     ): Response<SearchResponse>
-//
-//    @GET("3/discover/movie")
-//    suspend fun getInTheatres(
-//        @Query("api_key")
-//        api_key: String = TMDB_API_KEY,
-//        @Query("region")
-//        region: String = "US",
-//        @Query("with_release_type")
-//        sort_by: String = "3|2",
-//    ): Response<SearchResponse>
 
     @GET("3/discover/{media_type}")
     suspend fun getBrowse(
@@ -209,4 +199,23 @@ interface TmdbAPI {
         @Query("page")
         page: Int = 1,
     ): Response<SearchResponse>
+
+    @GET("3/discover/{media_type}")
+    suspend fun getFromCompany(
+        @Path("media_type")
+        media_type: MediaType,
+        @Query("api_key")
+        api_key: String = TMDB_API_KEY,
+        @Query("language")
+        language: String = "en-US",
+        @Query("page")
+        page: Int = 1,
+        @Query("include_adult")
+        include_adult: Boolean = false,
+        @Query("include_video")
+        include_video: Boolean = false,
+        @Query("with_companies")
+        with_companies: Int
+    ): Response<SearchResponse>
+
 }

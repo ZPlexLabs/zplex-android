@@ -45,8 +45,6 @@ import zechs.zplex.utils.navigateSafe
 
 class FragmentCollection : BaseFragment() {
 
-    override val enterTransitionListener: Transition.TransitionListener? = null
-
     private var _binding: FragmentCollectionBinding? = null
     private val binding get() = _binding!!
 

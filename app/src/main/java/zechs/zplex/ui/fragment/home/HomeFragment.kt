@@ -10,7 +10,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.Transition
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.adapter.home.HomeDataAdapter
@@ -139,7 +138,7 @@ class HomeFragment : BaseFragment() {
             seasonName = null,
             seasonNumber = show.seasonNumber,
             showName = show.name,
-            posterPath = null,
+            seasonPosterPath = null,
             showPoster = show.posterPath
         )
         findNavController().navigateSafe(R.id.action_homeFragment_to_episodesListFragment)
@@ -162,7 +161,5 @@ class HomeFragment : BaseFragment() {
     companion object {
         const val TAG = "HomeFragment"
     }
-
-    override val enterTransitionListener: Transition.TransitionListener? = null
 
 }

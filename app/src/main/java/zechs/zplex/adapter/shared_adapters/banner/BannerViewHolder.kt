@@ -1,4 +1,4 @@
-package zechs.zplex.adapter.home.adapter.banner
+package zechs.zplex.adapter.shared_adapters.banner
 
 import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.R

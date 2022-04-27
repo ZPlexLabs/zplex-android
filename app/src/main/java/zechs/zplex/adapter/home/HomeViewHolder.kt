@@ -4,12 +4,10 @@ import android.content.Context
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
-import zechs.zplex.adapter.home.adapter.banner.BannerAdapter
-import zechs.zplex.adapter.home.adapter.media.MediaAdapter
+import zechs.zplex.adapter.shared_adapters.banner.BannerAdapter
+import zechs.zplex.adapter.shared_adapters.media.MediaAdapter
 import zechs.zplex.adapter.watched.WatchedDataAdapter
 import zechs.zplex.databinding.ItemHeadingBinding
-import zechs.zplex.databinding.ItemList2Binding
-import zechs.zplex.databinding.ItemList3Binding
 import zechs.zplex.databinding.ItemListBinding
 
 sealed class HomeViewHolder(
@@ -26,7 +24,7 @@ sealed class HomeViewHolder(
         }
     }
 
-    class MediaViewHolder(
+    class ListViewHolder(
         context: Context,
         private val itemBinding: ItemListBinding,
         homeDataAdapter: HomeDataAdapter
@@ -36,7 +34,17 @@ sealed class HomeViewHolder(
             MediaAdapter { homeDataAdapter.homeOnClick.invoke(it) }
         }
 
-        fun bind(item: HomeDataModel.Media) {
+        private val bannerAdapter by lazy {
+            BannerAdapter { homeDataAdapter.homeOnClick.invoke(it) }
+        }
+
+        private val watchedAdapter by lazy {
+            WatchedDataAdapter {
+                homeDataAdapter.watchedOnClick.invoke((it))
+            }
+        }
+
+        fun bindMedia(item: HomeDataModel.Media) {
             val linearLayoutManager = object : LinearLayoutManager(
                 context, HORIZONTAL, false
             ) {
@@ -53,53 +61,10 @@ sealed class HomeViewHolder(
                 layoutManager = linearLayoutManager
             }
 
-            mediaAdapter.differ.submitList(item.media)
-        }
-    }
-
-    class BannerViewHolder(
-        context: Context,
-        private val itemBinding: ItemList2Binding,
-        homeDataAdapter: HomeDataAdapter
-    ) : HomeViewHolder(context, itemBinding) {
-
-        private val bannerAdapter by lazy {
-            BannerAdapter { homeDataAdapter.homeOnClick.invoke(it) }
+            mediaAdapter.submitList(item.media)
         }
 
-        fun bind(item: HomeDataModel.Banner) {
-            val linearLayoutManager = object : LinearLayoutManager(
-                context, HORIZONTAL, false
-            ) {
-                override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
-                    return lp?.let {
-                        it.width = (0.75 * width).toInt()
-                        true
-                    } ?: super.checkLayoutParams(lp)
-                }
-            }
-
-            itemBinding.rvList.apply {
-                adapter = bannerAdapter
-                layoutManager = linearLayoutManager
-            }
-            bannerAdapter.differ.submitList(item.media)
-        }
-    }
-
-    class WatchedViewHolder(
-        context: Context,
-        private val itemBinding: ItemList3Binding,
-        homeDataAdapter: HomeDataAdapter
-    ) : HomeViewHolder(context, itemBinding) {
-
-        private val watchedAdapter by lazy {
-            WatchedDataAdapter {
-                homeDataAdapter.watchedOnClick.invoke((it))
-            }
-        }
-
-        fun bind(item: HomeDataModel.Watched) {
+        fun bindWatched(item: HomeDataModel.Watched) {
             val linearLayoutManager = object : LinearLayoutManager(
                 context, HORIZONTAL, false
             ) {
@@ -117,6 +82,26 @@ sealed class HomeViewHolder(
             }
             watchedAdapter.differ.submitList(item.watched)
         }
+
+        fun bindBanner(item: HomeDataModel.Banner) {
+            val linearLayoutManager = object : LinearLayoutManager(
+                context, HORIZONTAL, false
+            ) {
+                override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
+                    return lp?.let {
+                        it.width = (0.75 * width).toInt()
+                        true
+                    } ?: super.checkLayoutParams(lp)
+                }
+            }
+
+            itemBinding.rvList.apply {
+                adapter = bannerAdapter
+                layoutManager = linearLayoutManager
+            }
+            bannerAdapter.submitList(item.media)
+        }
     }
+
 
 }

@@ -8,6 +8,6 @@ data class ShowSeason(
     val seasonName: String?,
     val seasonNumber: Int,
     val showName: String,
-    val posterPath: String?,
+    val seasonPosterPath: String?,
     val showPoster: String?
 )

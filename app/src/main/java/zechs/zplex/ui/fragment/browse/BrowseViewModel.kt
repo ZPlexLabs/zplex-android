@@ -13,13 +13,14 @@ import zechs.zplex.ThisApp
 import zechs.zplex.models.dataclass.FilterArgs
 import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.repository.TmdbRepository
+import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.utils.Resource
 import java.io.IOException
 
 class BrowseViewModel(
     app: Application,
     private val tmdbRepository: TmdbRepository
-) : AndroidViewModel(app) {
+) : BaseAndroidViewModel(app) {
 
     val browse: MutableLiveData<Resource<SearchResponse>> = MutableLiveData()
     private var browseResponse: SearchResponse? = null
@@ -33,7 +34,7 @@ class BrowseViewModel(
         println(
             "usedPage=${if (newSearchQuery != oldSearchQuery) 1 else page}, " +
                     "oldSearchQuery=$oldSearchQuery, " +
-                    "newSearchQuery=$newSearchQuery, " + "page=$page, "
+                    "newSearchQuery=$newSearchQuery, page=$page"
         )
         browse.postValue(Resource.Loading())
         try {
@@ -82,29 +83,5 @@ class BrowseViewModel(
         return Resource.Error(response.message())
     }
 
-//    private fun handleBrowseResponse(
-//        response: Response<SearchResponse>
-//    ): Resource<SearchResponse> {
-//        if (response.isSuccessful) {
-//            response.body()?.let { resultResponse ->
-//                return Resource.Success(resultResponse)
-//            }
-//        }
-//        return Resource.Error(response.message())
-//    }
 
-
-    private fun hasInternetConnection(): Boolean {
-        val connectivityManager = getApplication<ThisApp>().getSystemService(
-            Context.CONNECTIVITY_SERVICE
-        ) as ConnectivityManager
-        val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
-        return when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-            else -> false
-        }
-    }
 }

@@ -2,11 +2,8 @@ package zechs.zplex.ui
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import androidx.transition.Transition
 
 abstract class BaseFragment : Fragment() {
-
-    abstract val enterTransitionListener: Transition.TransitionListener?
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -31,8 +31,6 @@ import zechs.zplex.ui.activity.main.MainActivity
 
 class MyShowsFragment : BaseFragment() {
 
-    override val enterTransitionListener: Transition.TransitionListener? = null
-
     private var _binding: FragmentMyShowsBinding? = null
     private val binding get() = _binding!!
 

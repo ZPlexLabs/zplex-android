@@ -32,8 +32,6 @@ import zechs.zplex.utils.navigateSafe
 
 class SearchFragment : BaseFragment() {
 
-    override val enterTransitionListener: Transition.TransitionListener? = null
-
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 

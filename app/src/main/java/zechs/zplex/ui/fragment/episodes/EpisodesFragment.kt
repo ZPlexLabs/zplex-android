@@ -14,7 +14,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.Transition
 import zechs.zplex.R
 import zechs.zplex.adapter.EpisodesAdapter
 import zechs.zplex.databinding.FragmentEpisodeBinding
@@ -32,8 +31,6 @@ import zechs.zplex.utils.Resource
 
 
 class EpisodesFragment : BaseFragment() {
-
-    override val enterTransitionListener: Transition.TransitionListener? = null
 
     private var _binding: FragmentEpisodeBinding? = null
     private val binding get() = _binding!!
@@ -95,10 +92,10 @@ class EpisodesFragment : BaseFragment() {
                 seasonNumber = showSeason.seasonNumber
             )
 
-            val posterUrl = if (showSeason?.posterPath == null) {
+            val posterUrl = if (showSeason?.seasonPosterPath == null) {
                 R.drawable.no_poster
             } else {
-                "$TMDB_IMAGE_PREFIX/${PosterSize.w500}${showSeason.posterPath}"
+                "$TMDB_IMAGE_PREFIX/${PosterSize.w500}${showSeason.seasonPosterPath}"
             }
 
             val seasonText = "Season ${showSeason.seasonNumber}"
@@ -120,7 +117,7 @@ class EpisodesFragment : BaseFragment() {
                     .into(ivPoster)
 
                 ivPoster.setOnClickListener {
-                    openImageFullSize(showSeason?.posterPath, binding.ivPoster)
+                    openImageFullSize(showSeason?.seasonPosterPath, binding.ivPoster)
                 }
 
             }

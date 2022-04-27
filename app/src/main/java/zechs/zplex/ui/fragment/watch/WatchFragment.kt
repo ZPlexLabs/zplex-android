@@ -2,18 +2,12 @@ package zechs.zplex.ui.fragment.watch
 
 import android.os.Bundle
 import android.view.View
-import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
-import zechs.zplex.adapter.media.AboutDataModel
-import zechs.zplex.adapter.media.adapters.CastAdapter
 import zechs.zplex.databinding.FragmentWatchBinding
-import zechs.zplex.models.dataclass.CastArgs
 import zechs.zplex.models.tmdb.StillSize
 import zechs.zplex.models.tmdb.entities.Episode
 import zechs.zplex.ui.activity.main.MainActivity
@@ -30,7 +24,7 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
 
     private val episodeViewModel by activityViewModels<EpisodeViewModel>()
     private lateinit var watchViewModel: WatchViewModel
-    private val castAdapter by lazy { CastAdapter() }
+//    private val castAdapter by lazy { CastAdapter() }
 
     private var tmdbId: Int? = null
     private var seasonEpisodeText: String? = null
@@ -110,22 +104,22 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
                 .into(binding.ivBackdrop)
         }
 
-        val castList = episode.guest_stars?.map {
-            AboutDataModel.Cast(
-                character = it.character,
-                credit_id = it.credit_id,
-                person_id = it.id,
-                name = it.name,
-                profile_path = it.profile_path
-            )
-        } ?: listOf()
+//        val castList = episode.guest_stars?.map {
+//            AboutDataModel.Cast(
+//                character = it.character,
+//                credit_id = it.credit_id,
+//                person_id = it.id,
+//                name = it.name,
+//                profile_path = it.profile_path
+//            )
+//        } ?: listOf()
+//
+//        binding.apply {
+//            rvCasts.isInvisible = castList.isEmpty()
+//            textView1.isInvisible = castList.isEmpty()
+//        }
 
-        binding.apply {
-            rvCasts.isInvisible = castList.isEmpty()
-            textView1.isInvisible = castList.isEmpty()
-        }
-
-        castAdapter.differ.submitList(castList)
+        // castAdapter.differ.submitList(castList)
 
         val formatter = DecimalFormat("00")
         val seasonEpisode = "S${
@@ -136,19 +130,19 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
     }
 
     private fun setupRecyclerView() {
-        binding.rvCasts.apply {
-            adapter = castAdapter
-            layoutManager = LinearLayoutManager(
-                activity, LinearLayoutManager.HORIZONTAL, false
-            )
-            itemAnimator = null
-        }
-        castAdapter.setOnItemClickListener {
-            val action = WatchFragmentDirections.actionWatchFragmentToCastsFragment(
-                CastArgs(it.credit_id, it.person_id, it.name, it.profile_path)
-            )
-            findNavController().navigate(action)
-        }
+//        binding.rvCasts.apply {
+//            adapter = castAdapter
+//            layoutManager = LinearLayoutManager(
+//                activity, LinearLayoutManager.HORIZONTAL, false
+//            )
+//            itemAnimator = null
+//        }
+//        castAdapter.setOnItemClickListener {
+//            val action = WatchFragmentDirections.actionWatchFragmentToCastsFragment(
+//                CastArgs(it.credit_id, it.person_id, it.name, it.profile_path)
+//            )
+//            findNavController().navigate(action)
+//        }
     }
 
 

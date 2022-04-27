@@ -1,6 +1,7 @@
 package zechs.zplex.models.tmdb.entities
 
 import androidx.annotation.Keep
+import java.io.Serializable
 
 @Keep
 data class Cast(
@@ -9,4 +10,4 @@ data class Cast(
     val id: Int,
     val name: String,
     val profile_path: String?
-)
+) : Serializable

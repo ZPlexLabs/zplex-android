@@ -21,8 +21,6 @@ import zechs.zplex.utils.navigateSafe
 
 class UpcomingFragment : BaseFragment() {
 
-    override val enterTransitionListener: Transition.TransitionListener? = null
-
     private var _binding: FragmentUpcomingBinding? = null
     private val binding get() = _binding!!
 

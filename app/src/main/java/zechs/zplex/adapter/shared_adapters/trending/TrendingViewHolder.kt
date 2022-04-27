@@ -1,4 +1,4 @@
-package zechs.zplex.adapter.trending
+package zechs.zplex.adapter.shared_adapters.trending
 
 import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.R

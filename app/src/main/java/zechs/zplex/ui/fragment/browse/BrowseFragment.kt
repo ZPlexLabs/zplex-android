@@ -39,8 +39,6 @@ import zechs.zplex.utils.Resource
 
 class BrowseFragment : BaseFragment() {
 
-    override val enterTransitionListener: Transition.TransitionListener? = null
-
     private var _binding: FragmentBrowseBinding? = null
     private val binding get() = _binding!!
 

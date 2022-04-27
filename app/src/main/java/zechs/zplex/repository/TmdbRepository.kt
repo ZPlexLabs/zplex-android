@@ -131,5 +131,22 @@ class TmdbRepository(
     suspend fun getPopularOnStreaming(
     ) = RetrofitInstance.tmdbApi.getPopularOnStreaming()
 
+    suspend fun getShowsFromCompany(
+        company_id: Int,
+        page: Int
+    ) = RetrofitInstance.tmdbApi.getFromCompany(
+        media_type = MediaType.tv,
+        with_companies = company_id,
+        page = page
+    )
+
+    suspend fun getMoviesFromCompany(
+        company_id: Int,
+        page: Int
+    ) = RetrofitInstance.tmdbApi.getFromCompany(
+        media_type = MediaType.movie,
+        with_companies = company_id,
+        page = page
+    )
 
 }

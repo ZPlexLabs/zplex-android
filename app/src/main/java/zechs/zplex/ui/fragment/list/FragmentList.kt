@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.Transition
 import zechs.zplex.R
 import zechs.zplex.adapter.SeasonsAdapter
 import zechs.zplex.databinding.FragmentListBinding
@@ -19,8 +18,6 @@ import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.fragment.shared_viewmodels.SeasonViewModel
 
 class FragmentList : BaseFragment() {
-
-    override val enterTransitionListener: Transition.TransitionListener? = null
 
     private val thisTAG = "FragmentList"
 
@@ -119,7 +116,7 @@ class FragmentList : BaseFragment() {
                 seasonName = seasonName,
                 seasonNumber = seasonNumber,
                 showName = showName ?: "Unknown",
-                posterPath = posterPath,
+                seasonPosterPath = posterPath,
                 showPoster = showPoster
             )
             findNavController().navigate(R.id.action_fragmentList_to_episodesListFragment)

@@ -172,7 +172,7 @@
         <item name="android:visibility">gone</item>
     </style>
 
-    <style name="RatingBar" parent="android:style/Widget.Material.RatingBar.Small">
+    <style name="RatingBar" parent="Widget.AppCompat.RatingBar.Small">
         <item name="colorControlNormal">@color/cardColor</item>
         <item name="colorControlActivated">@color/colorAccent</item>
     </style>

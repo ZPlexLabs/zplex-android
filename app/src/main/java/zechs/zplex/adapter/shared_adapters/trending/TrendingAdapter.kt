@@ -1,4 +1,4 @@
-package zechs.zplex.adapter.home.adapter.media
+package zechs.zplex.adapter.shared_adapters.trending
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -8,9 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.databinding.ItemMediaBinding
 import zechs.zplex.models.tmdb.entities.Media
 
-class MediaAdapter(
+class TrendingAdapter(
     val mediaOnClick: (Media) -> Unit
-) : RecyclerView.Adapter<MediaViewHolder>() {
+) : RecyclerView.Adapter<TrendingViewHolder>() {
 
     private val differCallback = object : DiffUtil.ItemCallback<Media>() {
         override fun areItemsTheSame(oldItem: Media, newItem: Media): Boolean {
@@ -26,16 +26,16 @@ class MediaAdapter(
 
     override fun onCreateViewHolder(
         parent: ViewGroup, viewType: Int
-    ) = MediaViewHolder(
+    ) = TrendingViewHolder(
         itemBinding = ItemMediaBinding.inflate(
             LayoutInflater.from(parent.context),
             parent, false
         ),
-        mediaAdapter = this
+        trendingAdapter = this
     )
 
     override fun onBindViewHolder(
-        holder: MediaViewHolder, position: Int
+        holder: TrendingViewHolder, position: Int
     ) {
         val media = differ.currentList[position]
         holder.bind(media)

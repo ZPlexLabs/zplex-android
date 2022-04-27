@@ -1,4 +1,4 @@
-package zechs.zplex.adapter.home.adapter.media
+package zechs.zplex.adapter.shared_adapters.media
 
 import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.R

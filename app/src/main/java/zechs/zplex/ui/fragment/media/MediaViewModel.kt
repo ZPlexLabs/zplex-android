@@ -2,25 +2,29 @@ package zechs.zplex.ui.fragment.media
 
 import android.app.Application
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import zechs.zplex.adapter.media.MediaDataModel
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
-import zechs.zplex.models.tmdb.collection.CollectionsResponse
-import zechs.zplex.models.tmdb.entities.Episode
-import zechs.zplex.models.tmdb.media.MediaResponse
+import zechs.zplex.models.enum.MediaType
 import zechs.zplex.models.tmdb.media.TvResponse
+import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.repository.ZPlexRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.movieResponseTmdb
 import zechs.zplex.ui.movieResponseZplex
+import zechs.zplex.utils.ConverterUtils
 import zechs.zplex.utils.Event
 import zechs.zplex.utils.Resource
 import java.io.IOException
@@ -35,8 +39,8 @@ class MediaViewModel(
     val movieZplex: LiveData<Event<Resource<movieResponseZplex>>>
         get() = _movieZplex
 
-    private val _dominantColor = MutableLiveData(Event(6770852))
-    val dominantColor: LiveData<Event<Int>>
+    private val _dominantColor = MutableLiveData<Int>()
+    val dominantColor: LiveData<Int>
         get() = _dominantColor
 
     fun saveShow(show: Show) = viewModelScope.launch {
@@ -60,8 +64,8 @@ class MediaViewModel(
     fun getMovie(id: Int) = tmdbRepository.fetchMovie(id)
 
     fun setDominantColor(color: Int) {
-        if (_dominantColor.value == Event(color)) return
-        _dominantColor.value = Event(color)
+        if (_dominantColor.value == color) return
+        _dominantColor.value = color
     }
 
     fun zplexGetMovie(tmdbId: Int) = viewModelScope.launch {
@@ -97,178 +101,353 @@ class MediaViewModel(
         return Resource.Error(response.message())
     }
 
-    private val _mediaResponse = MutableLiveData<Event<Resource<MediaResponse>>>()
-    val mediaResponse: LiveData<Event<Resource<MediaResponse>>>
+    private val _mediaResponse = MutableLiveData<Event<Resource<List<MediaDataModel>>>>()
+    val mediaResponse: LiveData<Event<Resource<List<MediaDataModel>>>>
         get() = _mediaResponse
 
-    fun getMedia(tmdbId: Int, mediaType: String) = viewModelScope.launch {
+    fun getMedia(tmdbId: Int, mediaType: MediaType) = viewModelScope.launch {
         _mediaResponse.postValue(Event(Resource.Loading()))
         try {
             if (hasInternetConnection()) {
-                if (mediaType == "movie") {
-                    val response = tmdbRepository.getMovie(tmdbId)
-                    response.body()?.belongs_to_collection?.let {
-                        val collectionsResponse = tmdbRepository.getCollection(it.id)
-                        _mediaResponse.postValue(
-                            Event(
-                                handleMovieResponseWithCollection(
-                                    response,
-                                    collectionsResponse
-                                )
-                            )
-                        )
-                    } ?: _mediaResponse.postValue(Event(handleMovieResponse(response)))
-                } else {
-                    val response = tmdbRepository.getShow(tmdbId)
-                    _mediaResponse.postValue(Event(handleTvResponse(response)))
+                when (mediaType) {
+                    MediaType.tv -> fetchShow(this, tmdbId)
+                    MediaType.movie -> fetchMovie(this, tmdbId)
                 }
             } else {
                 _mediaResponse.postValue(Event(Resource.Error("No internet connection")))
             }
         } catch (t: Throwable) {
             t.printStackTrace()
-            println("getMediaFlow :  Message=${t.message}")
-            _mediaResponse.postValue(
-                Event(
-                    Resource.Error(
-                        if (t is IOException) {
-                            "Network Failure"
-                        } else t.message ?: "Something went wrong"
+
+            val errorMsg = if (t is IOException) {
+                "Network Failure"
+            } else t.message ?: "Something went wrong"
+
+            _mediaResponse.postValue(Event(Resource.Error(errorMsg)))
+        }
+    }
+
+    private fun fetchMovie(
+        scope: CoroutineScope, tmdbId: Int
+    ) = scope.launch {
+        val page = 1
+        val movieResponse = async { tmdbRepository.getMovie(tmdbId) }
+        val movie = movieResponse.await()
+
+        if (movie.isSuccessful && movie.body() != null) {
+            movie.body()!!.production_companies?.let {
+                if (it.isNotEmpty()) {
+                    val moreFromCompany = async {
+                        tmdbRepository.getMoviesFromCompany(
+                            it[0].id, page
+                        )
+                    }
+                    val handleTvResponse = handleMovieResponse(
+                        movie, moreFromCompany.await()
                     )
-                )
-            )
-        }
-    }
-
-    private fun handleMovieResponseWithCollection(
-        response: Response<movieResponseTmdb>,
-        collectionsResponse: Response<CollectionsResponse>
-    ): Resource<MediaResponse> {
-        if (response.isSuccessful && collectionsResponse.isSuccessful) {
-            if (response.body() != null && collectionsResponse.body() != null) {
-                val resultResponse = response.body()!!
-                val collectionsResult = collectionsResponse.body()!!
-
-                val year = resultResponse.release_date?.let { firstAired ->
-                    if (firstAired.isNotBlank()) {
-                        firstAired.take(4).toInt()
-                    } else 0
-                } ?: 0
-
-                val videosList = resultResponse.videos?.results?.filter { v ->
-                    v.site == "YouTube"
-                } ?: listOf()
-
-                val mediaResponse = MediaResponse(
-                    id = resultResponse.id,
-                    imdb_id = resultResponse.imdb_id,
-                    name = resultResponse.title,
-                    overview = resultResponse.overview,
-                    poster_path = resultResponse.poster_path,
-                    backdrop_path = resultResponse.backdrop_path,
-                    related_media = collectionsResult.parts,
-                    seasons = listOf(),
-                    cast = resultResponse.credits.cast?.toList() ?: listOf(),
-                    recommendations = resultResponse.recommendations?.results?.toList() ?: listOf(),
-                    videos = videosList,
-                    vote_average = resultResponse.vote_average?.div(2),
-                    runtime = resultResponse.runtime,
-                    genres = resultResponse.genres,
-                    year = year,
-                    belongs_to_collection = resultResponse.belongs_to_collection,
-                    last_episode_to_air = null
-                )
-                return Resource.Success(mediaResponse)
+                    _mediaResponse.postValue(Event(handleTvResponse))
+                }
             }
+        } else {
+            _mediaResponse.postValue(Event(handleMovieResponse(movie, null)))
         }
-        return Resource.Error(response.message())
     }
+
+    private fun fetchShow(
+        scope: CoroutineScope, tmdbId: Int
+    ) = scope.launch {
+        val page = 1
+        val tvResponse = async { tmdbRepository.getShow(tmdbId) }
+        val tv = tvResponse.await()
+
+        if (tv.isSuccessful && tv.body() != null) {
+            tv.body()!!.production_companies?.let {
+                if (it.isNotEmpty()) {
+                    val moreFromCompany = async {
+                        tmdbRepository.getShowsFromCompany(
+                            it[0].id, page
+                        )
+                    }
+                    val handleTvResponse = handleTvResponse(
+                        tv, moreFromCompany.await()
+                    )
+                    _mediaResponse.postValue(Event(handleTvResponse))
+                }
+            }
+        } else {
+            _mediaResponse.postValue(Event(handleTvResponse(tv, null)))
+        }
+    }
+
 
     private fun handleTvResponse(
-        response: Response<TvResponse>
-    ): Resource<MediaResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
+        response: Response<TvResponse>,
+        company: Response<SearchResponse>?
+    ): Resource<List<MediaDataModel>> {
 
-                val seasonList = resultResponse.seasons?.toList() ?: listOf()
-                val videosList = resultResponse.videos?.results?.filter { v ->
-                    v.site == "YouTube"
-                } ?: listOf()
+        if (response.isSuccessful && response.body() != null) {
+            val result = response.body()!!
+            val mediaDataModel = mutableListOf<MediaDataModel>()
 
-                val runtime = if (resultResponse.episode_run_time?.isNotEmpty() == true) {
-                    resultResponse.episode_run_time[0]
+            val year = result.first_air_date?.take(4)?.toInt()
+
+            var runtime = "${
+                if (result.episode_run_time?.isNotEmpty() == true) {
+                    result.episode_run_time[0]
                 } else 0
+            } min"
 
-                val lastEpisodeToAir = resultResponse.last_episode_to_air?.let { ep ->
-                    Episode(
-                        id = ep.id,
-                        episode_number = ep.episode_number,
-                        guest_stars = ep.guest_stars,
-                        name = ep.name,
-                        overview = ep.overview,
-                        season_number = ep.season_number,
-                        still_path = ep.still_path,
-                        fileId = null,
-                        fileName = null,
-                        fileSize = null
+            runtime += if (year != null) {
+                "  \u2022  $year"
+            } else ""
+
+            mediaDataModel.add(
+                MediaDataModel.Header(
+                    backdropPath = result.backdrop_path,
+                    posterPath = result.poster_path,
+                    rating = result.vote_average?.div(2) ?: 0.toDouble(),
+                    genre = result.genres?.take(3)?.joinToString(
+                        truncated = "",
+                        separator = ", ",
+                    ) { it.name }!!,
+                    runtime = runtime
+                )
+            )
+
+            val plot = if (result.overview == null || result.overview == "") {
+                "No description"
+            } else result.overview
+
+            mediaDataModel.add(
+                MediaDataModel.Title(
+                    title = result.name!!,
+                    plot = plot
+                )
+            )
+
+            val seasonList = result.seasons?.toList() ?: listOf()
+            result.last_episode_to_air?.let { ep ->
+                val season = seasonList.firstOrNull {
+                    it.season_number == ep.season_number
+                }
+
+                season?.let {
+                    val seasonName = "Season ${it.season_number}"
+
+                    var premiered = "$seasonName of ${result.name}"
+                    var yearSeason = ""
+
+                    val formattedDate = it.air_date?.let { date ->
+                        yearSeason += "${date.take(4)} | "
+                        ConverterUtils.parseDate(date)
+                    }
+
+                    yearSeason += "${it.episode_count} episodes"
+
+                    formattedDate?.let {
+                        premiered += " premiered on $formattedDate."
+                    }
+                    val seasonPlot = if (it.overview == null || it.overview.toString() == "") {
+                        premiered
+                    } else it.overview
+
+                    mediaDataModel.add(
+                        MediaDataModel.LatestSeason(
+                            showTmdbId = result.id,
+                            showName = result.name,
+                            showPoster = result.poster_path,
+                            seasonName = seasonName,
+                            seasonPosterPath = season.poster_path,
+                            seasonNumber = season.season_number,
+                            seasonPlot = seasonPlot,
+                            seasonYearAndEpisodeCount = yearSeason,
+                        )
                     )
                 }
-                val mediaResponse = MediaResponse(
-                    id = resultResponse.id,
-                    imdb_id = null,
-                    name = resultResponse.name,
-                    overview = resultResponse.overview,
-                    poster_path = resultResponse.poster_path,
-                    backdrop_path = resultResponse.backdrop_path,
-                    related_media = listOf(),
-                    seasons = seasonList,
-                    cast = resultResponse.credits.cast?.toList() ?: listOf(),
-                    recommendations = resultResponse.recommendations?.results?.toList() ?: listOf(),
-                    videos = videosList,
-                    vote_average = resultResponse.vote_average?.div(2),
-                    runtime = runtime,
-                    genres = resultResponse.genres,
-                    year = resultResponse.first_air_date?.take(4)?.toInt(),
-                    belongs_to_collection = null,
-                    last_episode_to_air = lastEpisodeToAir
-                )
-                return Resource.Success(mediaResponse)
             }
+
+            mediaDataModel.add(
+                MediaDataModel.ShowButton(
+                    show = Show(
+                        id = result.id,
+                        media_type = "tv",
+                        name = result.name,
+                        poster_path = result.poster_path,
+                        vote_average = result.vote_average,
+                    ),
+                    seasons = seasonList
+                )
+            )
+
+            result.credits.cast?.let {
+                if (it.isNotEmpty()) {
+                    mediaDataModel.add(
+                        MediaDataModel.Heading(heading = "Casts")
+                    )
+                    mediaDataModel.add(
+                        MediaDataModel.Casts(casts = it)
+                    )
+                }
+            }
+
+            result.recommendations?.results?.let {
+                if (it.isNotEmpty() && it.size >= 3) {
+                    mediaDataModel.add(
+                        MediaDataModel.Heading(heading = "Recommendations")
+                    )
+                    mediaDataModel.add(
+                        MediaDataModel.Recommendations(recommendations = it)
+                    )
+                }
+            }
+
+            if (company != null && company.isSuccessful && company.body() != null) {
+                val mediaList = company.body()!!.results
+                if (mediaList.isNotEmpty() && mediaList.size >= 3) {
+                    val studio = result.production_companies!![0].name!!
+
+                    mediaDataModel.add(
+                        MediaDataModel.Heading(heading = "More from $studio")
+                    )
+
+                    mediaDataModel.add(
+                        MediaDataModel.MoreFromCompany(more = mediaList)
+                    )
+
+                }
+            }
+
+            result.videos?.results?.let {
+                if (it.isNotEmpty()) {
+                    mediaDataModel.add(
+                        MediaDataModel.Heading(heading = "Related videos")
+                    )
+                    mediaDataModel.add(
+                        MediaDataModel.Videos(videos = it)
+                    )
+                }
+            }
+
+            return Resource.Success(mediaDataModel.toList())
         }
         return Resource.Error(response.message())
     }
 
     private fun handleMovieResponse(
-        response: Response<movieResponseTmdb>
-    ): Resource<MediaResponse> {
-        if (response.isSuccessful) {
-            response.body()?.let { resultResponse ->
+        response: Response<movieResponseTmdb>,
+        company: Response<SearchResponse>?
+    ): Resource<List<MediaDataModel>> {
+        if (response.isSuccessful && response.body() != null) {
+            val result = response.body()!!
+            val mediaDataModel = mutableListOf<MediaDataModel>()
 
-                val videosList = resultResponse.videos?.results?.filter { v ->
-                    v.site == "YouTube"
-                } ?: listOf()
-
-                val mediaResponse = MediaResponse(
-                    id = resultResponse.id,
-                    imdb_id = resultResponse.imdb_id,
-                    name = resultResponse.title,
-                    overview = resultResponse.overview,
-                    poster_path = resultResponse.poster_path,
-                    backdrop_path = resultResponse.backdrop_path,
-                    related_media = listOf(),
-                    seasons = listOf(),
-                    cast = resultResponse.credits.cast?.toList() ?: listOf(),
-                    recommendations = resultResponse.recommendations?.results?.toList() ?: listOf(),
-                    videos = videosList,
-                    vote_average = resultResponse.vote_average?.div(2),
-                    runtime = resultResponse.runtime,
-                    genres = resultResponse.genres,
-                    year = resultResponse.release_date?.take(4)?.toInt(),
-                    belongs_to_collection = resultResponse.belongs_to_collection,
-                    last_episode_to_air = null
-                )
-                return Resource.Success(mediaResponse)
+            val year: Int? = result.release_date?.let { firstAired ->
+                if (firstAired.isNotBlank()) {
+                    firstAired.take(4).toInt()
+                } else null
             }
+
+            var runtime = ""
+            result.runtime?.let {
+                runtime += "$it min"
+            }
+            runtime += if (year != null) {
+                "  \u2022  $year"
+            } else ""
+
+            mediaDataModel.add(
+                MediaDataModel.Header(
+                    backdropPath = result.backdrop_path,
+                    posterPath = result.poster_path,
+                    rating = result.vote_average?.div(2) ?: 0.toDouble(),
+                    genre = result.genres?.take(3)?.joinToString(
+                        truncated = "",
+                        separator = ", ",
+                    ) { it.name }!!,
+                    runtime = runtime
+                )
+            )
+
+            val plot = if (result.overview == null || result.overview == "") {
+                "No description"
+            } else result.overview
+
+            mediaDataModel.add(
+                MediaDataModel.Title(
+                    title = result.title!!,
+                    plot = plot
+                )
+            )
+
+            result.belongs_to_collection?.let {
+                mediaDataModel.add(
+                    MediaDataModel.PartOfCollection(
+                        bannerPoster = it.backdrop_path,
+                        collectionName = it.name!!,
+                        collectionId = it.id
+                    )
+                )
+            }
+
+            mediaDataModel.add(
+                MediaDataModel.MovieButton(
+                    movie = Movie(
+                        id = result.id,
+                        media_type = "movie",
+                        title = result.title,
+                        poster_path = result.poster_path,
+                        vote_average = result.vote_average
+                    )
+                )
+            )
+
+            result.credits.cast?.let {
+                if (it.isNotEmpty()) {
+                    mediaDataModel.add(
+                        MediaDataModel.Heading(heading = "Casts")
+                    )
+                    mediaDataModel.add(
+                        MediaDataModel.Casts(casts = it)
+                    )
+                }
+            }
+
+            result.recommendations?.results?.let {
+                if (it.isNotEmpty() && it.size >= 3) {
+                    mediaDataModel.add(
+                        MediaDataModel.Heading(heading = "Recommendations")
+                    )
+                    mediaDataModel.add(
+                        MediaDataModel.Recommendations(recommendations = it)
+                    )
+                }
+            }
+
+            if (company != null && company.isSuccessful && company.body() != null) {
+                val mediaList = company.body()!!.results
+                if (mediaList.isNotEmpty() && mediaList.size >= 3) {
+                    val studio = result.production_companies!![0].name!!
+                    mediaDataModel.add(
+                        MediaDataModel.Heading(heading = "More from $studio")
+                    )
+                    mediaDataModel.add(
+                        MediaDataModel.MoreFromCompany(more = mediaList)
+                    )
+                }
+            }
+
+            result.videos?.results?.let {
+                if (it.isNotEmpty()) {
+                    mediaDataModel.add(
+                        MediaDataModel.Heading(heading = "Related videos")
+                    )
+                    mediaDataModel.add(
+                        MediaDataModel.Videos(videos = it)
+                    )
+                }
+            }
+
+            return Resource.Success(mediaDataModel.toList())
         }
         return Resource.Error(response.message())
     }

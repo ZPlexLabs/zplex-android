@@ -73,10 +73,10 @@ class HomeViewModel(
             watchedDataModel.add(WatchedDataModel.Show(it))
         }
 
-        watchedDataModel.sortByDescending {
+        watchedDataModel.sortBy {
             when (it) {
-                is WatchedDataModel.Show -> it.show.id!!
-                is WatchedDataModel.Movie -> it.movie.id!!
+                is WatchedDataModel.Show -> it.show.watchProgress()
+                is WatchedDataModel.Movie -> it.movie.watchProgress()
             }
         }
 

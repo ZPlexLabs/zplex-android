@@ -16,10 +16,10 @@ class SeasonViewModel : ViewModel() {
         seasonName: String?,
         seasonNumber: Int,
         showName: String,
-        posterPath: String?,
+        seasonPosterPath: String?,
         showPoster: String?
     ) {
-        val update = ShowSeason(tmdbId, seasonName, seasonNumber, showName, posterPath, showPoster)
+        val update = ShowSeason(tmdbId, seasonName, seasonNumber, showName, seasonPosterPath, showPoster)
         if (_showSeason.value == update) return
         _showSeason.value = update
     }

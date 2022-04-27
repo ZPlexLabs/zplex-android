@@ -158,30 +158,16 @@ class MainActivity : AppCompatActivity() {
         navController = navHostFragment.navController
         bottomNavigationView.setupWithNavController(navController)
 
-        val colorPrimary = ContextCompat.getColor(this, R.color.colorPrimary)
-        val colorPrimaryDark = ContextCompat.getColor(this, R.color.colorPrimaryDark)
-
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.fragmentMedia, R.id.castsFragment,
                 R.id.episodesListFragment, R.id.fragmentList,
-                R.id.fragmentCollection, R.id.shareBottomSheet -> {
-//                    window.navigationBarColor = colorPrimary
-//                    bottomNavigationView.isVisible = false
-                    hideSlideDown(bottomNavigationView)
-                }
-                R.id.watchFragment -> {
-//                    bottomNavigationView.isVisible = false
-                    hideSlideDown(bottomNavigationView)
-                }
-                R.id.bigImageFragment -> {
-//                    bottomNavigationView.visibility = View.GONE
+                R.id.fragmentCollection, R.id.shareBottomSheet,
+                R.id.watchFragment, R.id.bigImageFragment -> {
                     hideSlideDown(bottomNavigationView)
                 }
                 else -> {
-//                    window.navigationBarColor = colorPrimaryDark
                     showSlideUp(bottomNavigationView)
-//                    bottomNavigationView.isVisible = true
                 }
             }
         }

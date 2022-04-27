@@ -1,4 +1,4 @@
-package zechs.zplex.adapter.browse.adapters
+package zechs.zplex.adapter.shared_adapters
 
 import android.view.LayoutInflater
 import android.view.View

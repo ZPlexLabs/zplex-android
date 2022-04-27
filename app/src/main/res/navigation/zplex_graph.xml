@@ -60,7 +60,7 @@
         android:id="@+id/fragmentMedia"
         android:name="zechs.zplex.ui.fragment.media.FragmentMedia"
         android:label="Fragment Media"
-        tools:layout="@layout/fragment_temp">
+        tools:layout="@layout/fragment_media">
         <argument
             android:name="media"
             app:argType="zechs.zplex.models.tmdb.entities.Media" />
@@ -123,8 +123,8 @@
         android:label="CastsFragment"
         tools:layout="@layout/fragment_cast_details">
         <argument
-            android:name="castArgs"
-            app:argType="zechs.zplex.models.dataclass.CastArgs" />
+            android:name="cast"
+            app:argType="zechs.zplex.models.tmdb.entities.Cast" />
         <action
             android:id="@+id/action_castsFragment_to_bigImageFragment"
             app:destination="@id/bigImageFragment" />

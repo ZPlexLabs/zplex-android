@@ -15,18 +15,13 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.transition.Transition
 import androidx.transition.TransitionManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.transition.MaterialFade
 import zechs.zplex.R
-import zechs.zplex.adapter.media.AboutDataModel
-import zechs.zplex.adapter.media.adapters.CurationAdapter
 import zechs.zplex.databinding.FragmentCastDetailsBinding
 import zechs.zplex.models.tmdb.ProfileSize
 import zechs.zplex.models.tmdb.credit.CastObject
-import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
@@ -36,8 +31,6 @@ import zechs.zplex.utils.Resource
 
 class CastsFragment : BaseFragment() {
 
-    override val enterTransitionListener: Transition.TransitionListener? = null
-
     private var _binding: FragmentCastDetailsBinding? = null
     private val binding get() = _binding!!
 
@@ -46,9 +39,9 @@ class CastsFragment : BaseFragment() {
     private val bigImageViewModel: BigImageViewModel by activityViewModels()
     private lateinit var castViewModel: CastViewModel
 
-    private val knowForAdapter by lazy {
-        CurationAdapter().apply { setHasStableIds(true) }
-    }
+//    private val knowForAdapter by lazy {
+//        CurationAdapter().apply { setHasStableIds(true) }
+//    }
 
     private val thisTAG = "CastsFragment"
 
@@ -58,7 +51,7 @@ class CastsFragment : BaseFragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentCastDetailsBinding.inflate(inflater, container, false)
-        binding.actorImage.transitionName = args.castArgs.profile_path
+        binding.actorImage.transitionName = args.cast.profile_path
         return binding.root
     }
 
@@ -69,7 +62,7 @@ class CastsFragment : BaseFragment() {
         setupRecyclerView()
         setupCastObserver()
 
-        val castArgs = args.castArgs
+        val castArgs = args.cast
 
         val profileUrl = if (castArgs.profile_path != null) {
             "${TMDB_IMAGE_PREFIX}/${ProfileSize.h632}${castArgs.profile_path}"
@@ -90,7 +83,7 @@ class CastsFragment : BaseFragment() {
                 openImageFullSize(castArgs.profile_path, binding.actorImage)
             }
         }
-        castViewModel.getCredit(castArgs.personId, castArgs.creditId)
+        castViewModel.getCredit(castArgs.id, castArgs.credit_id)
     }
 
     private fun openImageFullSize(posterPath: String?, imageView: ImageView) {
@@ -107,22 +100,22 @@ class CastsFragment : BaseFragment() {
     }
 
     private fun doOnMediaSuccess(cast: CastObject) {
+//
+//        val knownForList = cast.known_for.map {
+//            AboutDataModel.Curation(
+//                id = it.id,
+//                media_type = it.media_type,
+//                name = it.name,
+//                poster_path = it.poster_path,
+//                title = it.title,
+//                vote_average = it.vote_average,
+//                backdrop_path = it.backdrop_path,
+//                overview = it.overview,
+//                release_date = it.release_date
+//            )
+//        }
 
-        val knownForList = cast.known_for.map {
-            AboutDataModel.Curation(
-                id = it.id,
-                media_type = it.media_type,
-                name = it.name,
-                poster_path = it.poster_path,
-                title = it.title,
-                vote_average = it.vote_average,
-                backdrop_path = it.backdrop_path,
-                overview = it.overview,
-                release_date = it.release_date
-            )
-        }
-
-        val hideKnown = knownForList.isEmpty()
+//        val hideKnown = knownForList.isEmpty()
 
         context?.let { c ->
 
@@ -158,11 +151,11 @@ class CastsFragment : BaseFragment() {
                 TransitionManager.beginDelayedTransition(binding.root, MaterialFade())
                 tvBiography.maxLines = if (tvBiography.lineCount > 4) 4 else 1000
             }
-            textView2.isGone = hideKnown
-            rvKnowFor.isGone = hideKnown
+//            textView2.isGone = hideKnown
+//            rvKnowFor.isGone = hideKnown
         }
 
-        knowForAdapter.differ.submitList(knownForList)
+//        knowForAdapter.differ.submitList(knownForList)
         isLoading(false)
     }
 
@@ -179,40 +172,40 @@ class CastsFragment : BaseFragment() {
     }
 
     private fun setupRecyclerView() {
-        binding.rvKnowFor.apply {
-            adapter = knowForAdapter
-            layoutManager = LinearLayoutManager(
-                activity, LinearLayoutManager.HORIZONTAL, false
-            )
-            itemAnimator = null
-        }
-
-        knowForAdapter.setOnItemClickListener {
-            castOnClickListener(it)
-        }
+//        binding.rvKnowFor.apply {
+//            adapter = knowForAdapter
+//            layoutManager = LinearLayoutManager(
+//                activity, LinearLayoutManager.HORIZONTAL, false
+//            )
+//            itemAnimator = null
+//        }
+//
+//        knowForAdapter.setOnItemClickListener {
+//            castOnClickListener(it)
+//        }
     }
 
-    private fun castOnClickListener(it: AboutDataModel) {
-        if (it is AboutDataModel.Curation) {
-            val media = Media(
-                id = it.id,
-                media_type = it.media_type,
-                name = it.name,
-                poster_path = it.poster_path,
-                title = it.title,
-                vote_average = it.vote_average,
-                backdrop_path = it.backdrop_path,
-                overview = it.overview,
-                release_date = it.release_date
-            )
-            if (it.media_type != null) {
-                val action = CastsFragmentDirections.actionCastsFragmentToFragmentMedia(
-                    media.copy(media_type = it.media_type)
-                )
-                findNavController().navigate(action)
-            }
-        }
-    }
+//    private fun castOnClickListener(it: AboutDataModel) {
+//        if (it is AboutDataModel.Curation) {
+//            val media = Media(
+//                id = it.id,
+//                media_type = it.media_type,
+//                name = it.name,
+//                poster_path = it.poster_path,
+//                title = it.title,
+//                vote_average = it.vote_average,
+//                backdrop_path = it.backdrop_path,
+//                overview = it.overview,
+//                release_date = it.release_date
+//            )
+//            if (it.media_type != null) {
+//                val action = CastsFragmentDirections.actionCastsFragmentToFragmentMedia(
+//                    media.copy(media_type = it.media_type)
+//                )
+//                findNavController().navigate(action)
+//            }
+//        }
+//    }
 
     private fun isLoading(loading: Boolean) {
         binding.groupUiElements.isInvisible = loading
