@@ -21,7 +21,6 @@ class SeasonsAdapter(
 
     class SeasonViewHolder(
         private val showName: String,
-
         private val itemBinding: ItemLastSeasonBinding
     ) : RecyclerView.ViewHolder(itemBinding.root) {
         fun bind(season: Season) {
