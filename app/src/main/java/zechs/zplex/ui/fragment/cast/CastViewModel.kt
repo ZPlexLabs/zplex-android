@@ -1,87 +1,100 @@
 package zechs.zplex.ui.fragment.cast
 
 import android.app.Application
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import retrofit2.Response
-import zechs.zplex.ThisApp
-import zechs.zplex.models.tmdb.credit.CastObject
-import zechs.zplex.models.tmdb.credit.CreditResponse
-import zechs.zplex.models.tmdb.credit.PersonResponse
+import zechs.zplex.adapter.cast.CastDataModel
+import zechs.zplex.models.tmdb.person.PersonResponse
 import zechs.zplex.repository.TmdbRepository
+import zechs.zplex.ui.BaseAndroidViewModel
+import zechs.zplex.utils.Event
 import zechs.zplex.utils.Resource
 import java.io.IOException
 
 class CastViewModel(
     app: Application,
     private val tmdbRepository: TmdbRepository
-) : AndroidViewModel(app) {
+) : BaseAndroidViewModel(app) {
 
-    val cast: MutableLiveData<Resource<CastObject>> = MutableLiveData()
+    private val _personResponse = MutableLiveData<Event<Resource<List<CastDataModel>>>>()
+    val personResponse: LiveData<Event<Resource<List<CastDataModel>>>>
+        get() = _personResponse
 
-    fun getCredit(personId: Int, creditId: String) = viewModelScope.launch {
-        cast.postValue(Resource.Loading())
+    fun getPerson(personId: Int) = viewModelScope.launch {
+        _personResponse.postValue(Event(Resource.Loading()))
         try {
             if (hasInternetConnection()) {
-                val credit = tmdbRepository.getCredit(creditId)
-                val people = tmdbRepository.getPeople(personId)
-                cast.postValue(handleCastResponse(credit, people))
+                val person = tmdbRepository.getPerson(personId)
+                _personResponse.postValue(Event(handlePersonResponse(person)))
             } else {
-                cast.postValue(Resource.Error("No internet connection"))
+                _personResponse.postValue(Event(Resource.Error("No internet connection")))
             }
         } catch (t: Throwable) {
-            println(t.stackTrace)
-            println(t.message)
-            cast.postValue(
-                Resource.Error(
-                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
+            t.printStackTrace()
+
+            val errorMsg = if (t is IOException) {
+                "Network Failure"
+            } else t.message ?: "Something went wrong"
+
+            _personResponse.postValue(Event(Resource.Error(errorMsg)))
+        }
+    }
+
+
+    private fun handlePersonResponse(
+        response: Response<PersonResponse>
+    ): Resource<List<CastDataModel>> {
+
+        if (response.isSuccessful && response.body() != null) {
+            val result = response.body()!!
+            val castDataModel = mutableListOf<CastDataModel>()
+
+            castDataModel.add(
+                CastDataModel.Header(
+                    name = result.name,
+                    biography = result.biography,
+                    profilePath = result.profile_path
                 )
             )
-        }
-    }
 
-    private fun handleCastResponse(
-        credit: Response<CreditResponse>,
-        people: Response<PersonResponse>
-    ): Resource<CastObject> {
-        if (credit.isSuccessful && people.isSuccessful) {
-            if (credit.body() != null && people.body() != null) {
-                val creditResponse = credit.body()!!
-                val peopleResponse = people.body()!!
-
-                val castObject = CastObject(
-                    gender = peopleResponse.gender,
-                    known_for = creditResponse.person?.known_for ?: listOf(),
-                    name = peopleResponse.name,
-                    profile_path = peopleResponse.profile_path,
-                    biography = peopleResponse.biography,
-                    birthday = peopleResponse.birthday,
-                    deathday = peopleResponse.deathday,
-                    place_of_birth = peopleResponse.place_of_birth,
-                    job = creditResponse.job
+            castDataModel.add(
+                CastDataModel.Meta(
+                    id = result.id,
+                    age = result.age(),
+                    birthday = result.birthday,
+                    death = result.deathday,
+                    gender = result.gender,
+                    genderName = result.genderName,
+                    place_of_birth = result.place_of_birth
                 )
-                return Resource.Success(castObject)
+            )
+
+            result.combined_credits.cast?.let { mediaList ->
+                if (mediaList.isNotEmpty()) {
+                    castDataModel.add(
+                        CastDataModel.Heading(
+                            heading = "Appears In"
+                        )
+                    )
+
+                    castDataModel.add(
+                        CastDataModel.AppearsIn(
+                            appearsIn = mediaList.filter { m ->
+                                m.releasedDate() != null && m.poster_path != null
+                            }.sortedByDescending { m ->
+                                m.releasedDate()!!.takeLast(4)
+                            }.toList()
+                        )
+                    )
+                }
             }
+
+            return Resource.Success(castDataModel.toList())
         }
-        return Resource.Error(people.message())
+        return Resource.Error(response.message())
     }
 
-    private fun hasInternetConnection(): Boolean {
-        val connectivityManager = getApplication<ThisApp>().getSystemService(
-            Context.CONNECTIVITY_SERVICE
-        ) as ConnectivityManager
-        val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
-        return when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-            else -> false
-        }
-    }
 }

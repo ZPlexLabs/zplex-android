@@ -16,7 +16,6 @@ import android.view.animation.TranslateAnimation
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -146,7 +145,6 @@ class MainActivity : AppCompatActivity() {
             this,
             UpcomingViewModelProviderFactory(application, tmdbRepository)
         )[UpcomingViewModel::class.java]
-
 
         super.onCreate(savedInstanceState)
 
@@ -321,7 +319,8 @@ class MainActivity : AppCompatActivity() {
                         vote_average = null,
                         backdrop_path = null,
                         overview = null,
-                        release_date = null
+                        release_date = null,
+                        first_air_date = null
                     )
                 } catch (nfe: NumberFormatException) {
                     Toast.makeText(this, "Bad url", Toast.LENGTH_SHORT).show()

@@ -50,7 +50,8 @@ class MyShowsViewModel(
                 vote_average = it.vote_average,
                 backdrop_path = null,
                 overview = null,
-                release_date = null
+                release_date = null,
+                first_air_date = null
             )
         }
 
@@ -64,7 +65,8 @@ class MyShowsViewModel(
                 vote_average = it.vote_average,
                 backdrop_path = null,
                 overview = null,
-                release_date = null
+                release_date = null,
+                first_air_date = null
             )
         }
         return movie.plus(show).sortedBy { it.name }

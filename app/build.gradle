@@ -165,6 +165,7 @@ dependencies {
         exclude group: 'glide-parent'
     }
     kapt "com.github.bumptech.glide:compiler:4.12.0"
+    implementation 'jp.wasabeef:glide-transformations:4.3.0'
 
     //Firebase
     implementation platform("com.google.firebase:firebase-bom:29.0.0")

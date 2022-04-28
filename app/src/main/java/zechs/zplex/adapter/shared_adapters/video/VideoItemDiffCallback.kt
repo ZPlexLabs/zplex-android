@@ -1,7 +1,6 @@
 package zechs.zplex.adapter.shared_adapters.video
 
 import androidx.recyclerview.widget.DiffUtil
-import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.models.tmdb.entities.Video
 
 open class VideoItemDiffCallback : DiffUtil.ItemCallback<Video>() {

@@ -91,10 +91,6 @@ class TmdbRepository(
         collectionId: Int
     ) = RetrofitInstance.tmdbApi.getCollection(collection_id = collectionId)
 
-    suspend fun getCredit(
-        creditId: String
-    ) = RetrofitInstance.tmdbApi.getCredit(credit_id = creditId)
-
     suspend fun getPeople(
         person_id: Int
     ) = RetrofitInstance.tmdbApi.getPeople(person_id = person_id)
@@ -147,6 +143,12 @@ class TmdbRepository(
         media_type = MediaType.movie,
         with_companies = company_id,
         page = page
+    )
+
+    suspend fun getPerson(
+        person_id: Int
+    ) = RetrofitInstance.tmdbApi.getPerson(
+        person_id = person_id
     )
 
 }

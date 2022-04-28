@@ -2,7 +2,6 @@ package zechs.zplex.ui.fragment.media
 
 import android.app.Application
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.lifecycle.LiveData

@@ -6,6 +6,7 @@ import zechs.zplex.utils.ConverterUtils.convertMinutes
 import zechs.zplex.utils.ConverterUtils.getSize
 import zechs.zplex.utils.ConverterUtils.parseDate
 import zechs.zplex.utils.ConverterUtils.toDuration
+import zechs.zplex.utils.ConverterUtils.yearsBetween
 
 class ConverterUtilsTest {
 
@@ -36,4 +37,12 @@ class ConverterUtilsTest {
         val response = parseDate("2020-04-20")
         assertEquals(expected, response)
     }
+
+    @Test
+    fun `age from birthday`() {
+        val expected = 20
+        val response = yearsBetween("2002-02-21", ConverterUtils.getDate())
+        assertEquals(expected, response)
+    }
+
 }

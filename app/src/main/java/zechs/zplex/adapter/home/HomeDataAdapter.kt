@@ -1,7 +1,6 @@
 package zechs.zplex.adapter.home
 
 import android.content.Context
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer

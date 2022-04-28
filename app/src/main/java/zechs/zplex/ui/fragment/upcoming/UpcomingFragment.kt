@@ -9,9 +9,8 @@ import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.Transition
 import zechs.zplex.R
-import zechs.zplex.adapter.UpcomingAdapter
+import zechs.zplex.adapter.shared_adapters.detailed_media.DetailedMediaAdapter
 import zechs.zplex.databinding.FragmentUpcomingBinding
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
@@ -27,9 +26,7 @@ class UpcomingFragment : BaseFragment() {
     private lateinit var upcomingViewModel: UpcomingViewModel
 
     private val upcomingAdapter by lazy {
-        UpcomingAdapter {
-            navigateMedia(it)
-        }
+        DetailedMediaAdapter { navigateMedia(it) }
     }
 
     private var isLoading = true
@@ -60,7 +57,7 @@ class UpcomingFragment : BaseFragment() {
                         rvBrowse.isVisible = true
                     }
                     response.data?.let { showsResponse ->
-                        upcomingAdapter.differ.submitList(showsResponse.results.toList())
+                        upcomingAdapter.submitList(showsResponse.results.toList())
                         isLastPage = showsResponse.page == showsResponse.total_pages
                     }
                     isLoading = false

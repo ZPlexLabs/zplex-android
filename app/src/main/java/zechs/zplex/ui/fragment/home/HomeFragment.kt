@@ -15,7 +15,7 @@ import zechs.zplex.R
 import zechs.zplex.adapter.home.HomeDataAdapter
 import zechs.zplex.adapter.home.HomeDataModel
 import zechs.zplex.adapter.watched.WatchedDataModel
-import zechs.zplex.databinding.FragmentHomeBinding
+import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.models.dataclass.WatchedShow
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
@@ -27,7 +27,7 @@ import zechs.zplex.utils.navigateSafe
 
 class HomeFragment : BaseFragment() {
 
-    private var _binding: FragmentHomeBinding? = null
+    private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var homeViewModel: HomeViewModel
@@ -38,15 +38,21 @@ class HomeFragment : BaseFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        _binding = FragmentListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentHomeBinding.bind(view)
 
         homeViewModel = (activity as MainActivity).homeViewModel
+
+        binding.toolbar.apply {
+            navigationIcon = null
+            isTitleCentered = false
+            setTitleTextAppearance(context, R.style.homeTitleTextAppearance)
+            title = resources.getString(R.string.app_name)
+        }
 
         setupRecyclerView()
         setupTrendingObserver()
@@ -123,7 +129,7 @@ class HomeFragment : BaseFragment() {
     }
 
     private fun setupRecyclerView() {
-        binding.rvHome.apply {
+        binding.rvList.apply {
             adapter = homeDataAdapter
             layoutManager = LinearLayoutManager(
                 activity, LinearLayoutManager.VERTICAL, false

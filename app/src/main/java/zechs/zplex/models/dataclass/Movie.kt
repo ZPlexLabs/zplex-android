@@ -25,6 +25,7 @@ data class Movie(
         vote_average = vote_average,
         backdrop_path = null,
         overview = null,
-        release_date = null
+        release_date = null,
+        first_air_date = null
     )
 }

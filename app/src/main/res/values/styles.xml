@@ -67,7 +67,6 @@
 
 
     <style name="chipTextAppearance" parent="TextAppearance.MaterialComponents.Chip">>
-        <item name="android:textColor">@color/textColor_87</item>
         <item name="fontFamily">@font/open_sans</item>
     </style>
 

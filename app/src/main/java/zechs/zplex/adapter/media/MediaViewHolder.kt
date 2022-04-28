@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
@@ -21,7 +22,6 @@ import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.google.android.material.transition.MaterialFade
 import zechs.zplex.R
 import zechs.zplex.adapter.shared_adapters.casts.CastAdapter
 import zechs.zplex.adapter.shared_adapters.media.MediaAdapter
@@ -86,7 +86,10 @@ sealed class MediaViewHolder(
                 isPoster = true
                 "$TMDB_IMAGE_PREFIX/${PosterSize.w500}${item.posterPath}"
             }
-            val backdropUrl = if (item.backdropPath == null) R.drawable.no_thumb else {
+            val backdropUrl = if (item.backdropPath == null) {
+                itemBinding.backdropFrame.isInvisible = true
+                R.drawable.no_thumb
+            } else {
                 "$TMDB_IMAGE_PREFIX/${BackdropSize.w780}${item.backdropPath}"
             }
             itemBinding.apply {

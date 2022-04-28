@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.R
-import zechs.zplex.databinding.ItemLastSeasonBinding
+import zechs.zplex.databinding.ItemDetailedMediaBinding
 import zechs.zplex.models.tmdb.PosterSize
 import zechs.zplex.models.tmdb.entities.Season
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
@@ -19,9 +19,9 @@ class SeasonsAdapter(
     val setOnClickListener: (Season) -> Unit
 ) : RecyclerView.Adapter<SeasonsAdapter.SeasonViewHolder>() {
 
-    class SeasonViewHolder(
+    inner class SeasonViewHolder(
         private val showName: String,
-        private val itemBinding: ItemLastSeasonBinding
+        private val itemBinding: ItemDetailedMediaBinding
     ) : RecyclerView.ViewHolder(itemBinding.root) {
         fun bind(season: Season) {
             itemBinding.apply {
@@ -31,13 +31,13 @@ class SeasonsAdapter(
                     "${TMDB_IMAGE_PREFIX}/${PosterSize.w342}${season.poster_path}"
                 }
 
-                GlideApp.with(ivSeasonPoster)
+                GlideApp.with(ivPoster)
                     .load(seasonPosterUrl)
                     .placeholder(R.drawable.no_poster)
-                    .into(ivSeasonPoster)
+                    .into(ivPoster)
 
                 val seasonName = "Season ${season.season_number}"
-                tvSeasonNumber.text = season.name
+                tvTitle.text = season.name
 
                 var premiered = "$seasonName of $showName"
                 var yearSeason = ""
@@ -48,7 +48,7 @@ class SeasonsAdapter(
                 }
 
                 yearSeason += "${season.episode_count} episodes"
-                tvYearEpisode.text = yearSeason
+                tvYear.text = yearSeason
 
                 formattedDate?.let {
                     premiered += " premiered on $formattedDate."
@@ -56,7 +56,7 @@ class SeasonsAdapter(
                 val seasonPlot = if (season.overview.toString() == "") {
                     premiered
                 } else season.overview
-                tvSeasonPlot.text = seasonPlot
+                tvPlot.text = seasonPlot
             }
         }
     }
@@ -74,7 +74,7 @@ class SeasonsAdapter(
     val differ = AsyncListDiffer(this, differCallback)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SeasonViewHolder {
-        val itemBinding = ItemLastSeasonBinding.inflate(
+        val itemBinding = ItemDetailedMediaBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
         return SeasonViewHolder(showName, itemBinding)

@@ -1,6 +1,8 @@
 package zechs.zplex.adapter.shared_adapters.banner
 
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.request.RequestOptions
+import jp.wasabeef.glide.transformations.BlurTransformation
 import zechs.zplex.R
 import zechs.zplex.databinding.ItemWideBannerBinding
 import zechs.zplex.models.tmdb.BackdropSize
@@ -22,15 +24,24 @@ class BannerViewHolder(
 
         itemBinding.apply {
             tvTitle.text = media.title
-            ivBanner.apply {
-                GlideApp.with(this)
-                    .load(mediaBannerUrl)
-                    .placeholder(R.drawable.no_thumb)
-                    .into(this)
+            val rating = media.vote_average?.div(2).toString()
+            val ratingText = "$rating/5"
+            rbRating.rating = rating.toFloat()
+            tvRatingText.text = ratingText
 
-                setOnClickListener {
-                    bannerAdapter.bannerOnClick.invoke(media)
-                }
+            GlideApp.with(ivBanner)
+                .load(mediaBannerUrl)
+                .placeholder(R.drawable.no_thumb)
+                .apply(RequestOptions.bitmapTransform(BlurTransformation(100)))
+                .into(ivBanner)
+
+            GlideApp.with(ivMainBanner)
+                .load(mediaBannerUrl)
+                .placeholder(R.drawable.no_thumb)
+                .into(ivMainBanner)
+
+            root.setOnClickListener {
+                bannerAdapter.bannerOnClick.invoke(media)
             }
         }
     }

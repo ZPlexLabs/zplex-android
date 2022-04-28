@@ -1,57 +1,56 @@
 package zechs.zplex.ui.fragment.cast
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.core.content.ContextCompat
-import androidx.core.view.isGone
+import android.widget.Toast
 import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
-import com.google.android.material.chip.Chip
-import com.google.android.material.transition.MaterialFade
+import com.google.android.material.transition.MaterialFadeThrough
 import zechs.zplex.R
-import zechs.zplex.databinding.FragmentCastDetailsBinding
-import zechs.zplex.models.tmdb.ProfileSize
-import zechs.zplex.models.tmdb.credit.CastObject
+import zechs.zplex.adapter.cast.CastDataAdapter
+import zechs.zplex.databinding.FragmentListBinding
+import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
-import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.Resource
+import zechs.zplex.utils.navigateSafe
 
 class CastsFragment : BaseFragment() {
 
-    private var _binding: FragmentCastDetailsBinding? = null
+    private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
 
     private val args: CastsFragmentArgs by navArgs()
 
-    private val bigImageViewModel: BigImageViewModel by activityViewModels()
+    private val bigImageViewModel by activityViewModels<BigImageViewModel>()
     private lateinit var castViewModel: CastViewModel
 
-//    private val knowForAdapter by lazy {
-//        CurationAdapter().apply { setHasStableIds(true) }
-//    }
+    private var hasLoaded: Boolean = false
 
-    private val thisTAG = "CastsFragment"
+    private val castDataAdapter by lazy {
+        CastDataAdapter(
+            context = requireContext(),
+            setOnClickListener = { navigateMedia(it) },
+            expandBiography = {}
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentCastDetailsBinding.inflate(inflater, container, false)
-        binding.actorImage.transitionName = args.cast.profile_path
+        _binding = FragmentListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -60,30 +59,12 @@ class CastsFragment : BaseFragment() {
 
         castViewModel = (activity as MainActivity).castViewModel
         setupRecyclerView()
-        setupCastObserver()
 
-        val castArgs = args.cast
-
-        val profileUrl = if (castArgs.profile_path != null) {
-            "${TMDB_IMAGE_PREFIX}/${ProfileSize.h632}${castArgs.profile_path}"
-        } else {
-            R.drawable.no_actor
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
         }
 
-        binding.apply {
-            GlideApp.with(actorImage)
-                .load(profileUrl)
-                .placeholder(R.drawable.no_actor)
-                .into(actorImage)
-            actorName.text = castArgs.name
-            toolbar.setNavigationOnClickListener {
-                findNavController().navigateUp()
-            }
-            actorImage.setOnClickListener {
-                openImageFullSize(castArgs.profile_path, binding.actorImage)
-            }
-        }
-        castViewModel.getCredit(castArgs.id, castArgs.credit_id)
+        setupCastViewModel(args.cast.id)
     }
 
     private fun openImageFullSize(posterPath: String?, imageView: ImageView) {
@@ -99,159 +80,73 @@ class CastsFragment : BaseFragment() {
         Log.d("navigateToMedia", imageView.transitionName)
     }
 
-    private fun doOnMediaSuccess(cast: CastObject) {
-//
-//        val knownForList = cast.known_for.map {
-//            AboutDataModel.Curation(
-//                id = it.id,
-//                media_type = it.media_type,
-//                name = it.name,
-//                poster_path = it.poster_path,
-//                title = it.title,
-//                vote_average = it.vote_average,
-//                backdrop_path = it.backdrop_path,
-//                overview = it.overview,
-//                release_date = it.release_date
-//            )
-//        }
+    private fun navigateMedia(media: Media) {
+        val action = CastsFragmentDirections.actionCastsFragmentToFragmentMedia(
+            media.copy(media_type = media.media_type ?: "movie")
+        )
+        findNavController().navigateSafe(action)
+    }
 
-//        val hideKnown = knownForList.isEmpty()
-
-        context?.let { c ->
-
-            cast.job?.let {
-                addChip(it, c, R.drawable.ic_work_24)
-            }
-
-            cast.birthday?.let {
-                addChip("Born in ${it.take(4)}", c, R.drawable.ic_child_24)
-            }
-
-            cast.deathday?.let {
-                addChip("Died in ${it.take(4)}", c, R.drawable.ic_face_sad_24)
-            }
-            val genderIcon = when (cast.gender) {
-                0 -> R.drawable.ic_transgender_24dp
-                1 -> R.drawable.ic_female_24dp
-                2 -> R.drawable.ic_male_24dp
-                else -> R.drawable.ic_transgender_24dp
-            }
-
-            addChip(cast.genderName, c, genderIcon)
-
-            cast.place_of_birth?.let {
-                addChip(it, c, R.drawable.ic_place_24)
-            }
+    private fun setupCastViewModel(personId: Int) {
+        if (!hasLoaded) {
+            castViewModel.getPerson(personId)
         }
-        binding.apply {
-            tvBiography.text = if (cast.biography.isNullOrEmpty()) {
-                "No biography available"
-            } else cast.biography
-            tvBiography.setOnClickListener {
-                TransitionManager.beginDelayedTransition(binding.root, MaterialFade())
-                tvBiography.maxLines = if (tvBiography.lineCount > 4) 4 else 1000
-            }
-//            textView2.isGone = hideKnown
-//            rvKnowFor.isGone = hideKnown
-        }
-
-//        knowForAdapter.differ.submitList(knownForList)
-        isLoading(false)
-    }
-
-    private fun addChip(name: String, context: Context, drawable: Int) {
-        val mChip = layoutInflater.inflate(
-            R.layout.item_person_meta,
-            binding.root,
-            false
-        ) as Chip
-
-        mChip.text = name
-        mChip.chipIcon = ContextCompat.getDrawable(context, drawable)
-        binding.chipGroupActorMeta.addView(mChip)
-    }
-
-    private fun setupRecyclerView() {
-//        binding.rvKnowFor.apply {
-//            adapter = knowForAdapter
-//            layoutManager = LinearLayoutManager(
-//                activity, LinearLayoutManager.HORIZONTAL, false
-//            )
-//            itemAnimator = null
-//        }
-//
-//        knowForAdapter.setOnItemClickListener {
-//            castOnClickListener(it)
-//        }
-    }
-
-//    private fun castOnClickListener(it: AboutDataModel) {
-//        if (it is AboutDataModel.Curation) {
-//            val media = Media(
-//                id = it.id,
-//                media_type = it.media_type,
-//                name = it.name,
-//                poster_path = it.poster_path,
-//                title = it.title,
-//                vote_average = it.vote_average,
-//                backdrop_path = it.backdrop_path,
-//                overview = it.overview,
-//                release_date = it.release_date
-//            )
-//            if (it.media_type != null) {
-//                val action = CastsFragmentDirections.actionCastsFragmentToFragmentMedia(
-//                    media.copy(media_type = it.media_type)
-//                )
-//                findNavController().navigate(action)
-//            }
-//        }
-//    }
-
-    private fun isLoading(loading: Boolean) {
-        binding.groupUiElements.isInvisible = loading
-        binding.pbDetails.isInvisible = !loading
-    }
-
-
-    private fun setupCastObserver() {
-        castViewModel.cast.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Resource.Success -> {
-                    response.data?.let { doOnMediaSuccess(it) }
-                }
-                is Resource.Error -> {
-                    response.message?.let { message ->
-                        val errorMsg = message.ifEmpty {
-                            resources.getString(R.string.something_went_wrong)
-                        }
-                        Log.e(thisTAG, errorMsg)
-                        binding.apply {
-                            pbDetails.isGone = true
-                            successView.isGone = true
-                            errorView.root.isVisible = true
-                        }
-                        binding.errorView.apply {
-                            errorTxt.text = errorMsg
-                        }
+        castViewModel.personResponse.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { response ->
+                when (response) {
+                    is Resource.Success -> response.data?.let {
+                        TransitionManager.beginDelayedTransition(
+                            binding.root,
+                            MaterialFadeThrough()
+                        )
+                        castDataAdapter.submitList(it)
+                        isLoading(false)
+                        hasLoaded = true
                     }
-                }
-                is Resource.Loading -> {
-                    binding.apply {
-                        chipGroupActorMeta.removeAllViews()
+                    is Resource.Error -> {
+                        showToast(response.message)
+                        binding.rvList.isInvisible = true
+                    }
+                    is Resource.Loading -> if (!hasLoaded) {
                         isLoading(true)
                     }
                 }
             }
         }
-
     }
 
+    private fun isLoading(hide: Boolean) {
+        binding.apply {
+            loading.isInvisible = !hide
+            rvList.isInvisible = hide
+        }
+    }
+
+    private fun setupRecyclerView() {
+        binding.rvList.apply {
+            adapter = castDataAdapter
+            layoutManager = LinearLayoutManager(
+                activity, LinearLayoutManager.VERTICAL, false
+            )
+        }
+    }
+
+    private fun showToast(message: String?) {
+        Toast.makeText(
+            context,
+            message ?: resources.getString(R.string.something_went_wrong),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.apply {
-            rvKnowFor.adapter = null
-        }
+        binding.rvList.adapter = null
         _binding = null
     }
+
+    companion object {
+        const val TAG = "CastsFragment"
+    }
+
 }

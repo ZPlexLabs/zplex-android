@@ -25,12 +25,11 @@ import androidx.transition.TransitionManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
-import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.adapter.media.MediaClickListener
 import zechs.zplex.adapter.media.MediaDataAdapter
 import zechs.zplex.adapter.media.MediaDataModel
-import zechs.zplex.databinding.FragmentMediaBinding
+import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.models.Player
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
@@ -53,7 +52,7 @@ import java.util.*
 
 class FragmentMedia : BaseFragment(), MediaClickListener {
 
-    private var _binding: FragmentMediaBinding? = null
+    private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
 
     private val mediaDataAdapter by lazy {
@@ -73,7 +72,6 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
     private var showPoster: String? = null
     private var hasLoaded: Boolean = false
 
-
     private lateinit var mediaType: MediaType
 
     override fun onCreateView(
@@ -81,7 +79,7 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentMediaBinding.inflate(inflater, container, false)
+        _binding = FragmentListBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -160,7 +158,7 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
                     is Resource.Success -> response.data?.let {
                         TransitionManager.beginDelayedTransition(
                             binding.root,
-                             MaterialFadeThrough()
+                            MaterialFadeThrough()
                         )
                         mediaDataAdapter.submitList(it)
                         isLoading(false)
@@ -168,6 +166,7 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
                     }
                     is Resource.Error -> {
                         showToast(response.message)
+                        binding.rvList.isInvisible = true
                     }
                     is Resource.Loading -> {
                         if (!hasLoaded) {
@@ -185,7 +184,7 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
     private fun isLoading(hide: Boolean) {
         binding.apply {
             loading.isInvisible = !hide
-            rvMedia.isInvisible = hide
+            rvList.isInvisible = hide
         }
     }
 
@@ -216,7 +215,7 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
     }
 
     private fun setupRecyclerView() {
-        binding.rvMedia.apply {
+        binding.rvList.apply {
             adapter = mediaDataAdapter
             layoutManager = LinearLayoutManager(
                 activity, LinearLayoutManager.VERTICAL, false
@@ -226,10 +225,9 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.rvMedia.adapter = null
+        binding.rvList.adapter = null
         _binding = null
     }
-
 
     private fun shareIntent() {
         val action = FragmentMediaDirections.actionFragmentMediaToShareBottomSheet()
@@ -305,8 +303,8 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
         }
     }
 
-    private fun navigateToCollection(media: Media) {
-        val action = FragmentMediaDirections.actionFragmentMediaToFragmentCollection(media)
+    private fun navigateToCollection(collectionId: Int) {
+        val action = FragmentMediaDirections.actionFragmentMediaToFragmentCollection(collectionId)
         findNavController().navigateSafe(action)
     }
 
@@ -380,6 +378,7 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
     }
 
     override fun collectionClick(collectionId: Int) {
+        navigateToCollection(collectionId)
     }
 
     override fun movieWatchNow(tmdbId: Int) {
@@ -422,7 +421,7 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
                     if (isSaved) {
                         mediaViewModel.deleteShow(show)
                         val snackBar = Snackbar.make(
-                            binding.rvMedia, "${show.name} removed from your library",
+                            binding.rvList, "${show.name} removed from your library",
                             Snackbar.LENGTH_SHORT
                         )
                         snackBar.setAction(
@@ -434,7 +433,7 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
                     } else {
                         mediaViewModel.saveShow(show)
                         val snackBar = Snackbar.make(
-                            binding.rvMedia, "${show.name} added to your library",
+                            binding.rvList, "${show.name} added to your library",
                             Snackbar.LENGTH_SHORT
                         )
                         snackBar.setAction(
@@ -470,7 +469,7 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
                     if (isSaved) {
                         mediaViewModel.deleteMovie(movie)
                         val snackBar = Snackbar.make(
-                            binding.rvMedia, "${movie.title} removed from your library",
+                            binding.rvList, "${movie.title} removed from your library",
                             Snackbar.LENGTH_SHORT
                         )
                         snackBar.setAction(
@@ -482,7 +481,7 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
                     } else {
                         mediaViewModel.saveMovie(movie)
                         val snackBar = Snackbar.make(
-                            binding.rvMedia, "${movie.title} added to your library",
+                            binding.rvList, "${movie.title} added to your library",
                             Snackbar.LENGTH_SHORT
                         )
                         snackBar.setAction(

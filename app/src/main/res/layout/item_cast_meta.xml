@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginBottom="8dp">
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        app:selectionRequired="false"
+        app:singleLine="false"
+        app:singleSelection="false">
+
+        <!--        <com.google.android.material.chip.Chip-->
+        <!--            style="@style/Widget.Material3.Chip.Assist"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:textAppearance="@style/chipTextAppearance"-->
+        <!--            app:chipCornerRadius="24dp"-->
+        <!--            app:chipMinTouchTargetSize="0dp"-->
+        <!--            tools:chipIcon="@drawable/ic_person_24"-->
+        <!--            tools:text="24 years old" />-->
+
+        <!--        <com.google.android.material.chip.Chip-->
+        <!--            style="@style/Widget.Material3.Chip.Assist"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:textAppearance="@style/chipTextAppearance"-->
+        <!--            app:chipCornerRadius="24dp"-->
+        <!--            app:chipMinTouchTargetSize="0dp"-->
+        <!--            tools:chipIcon="@drawable/ic_child_24"-->
+        <!--            tools:text="Born 1996" />-->
+
+        <!--        <com.google.android.material.chip.Chip-->
+        <!--            style="@style/Widget.Material3.Chip.Assist"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:textAppearance="@style/chipTextAppearance"-->
+        <!--            app:chipCornerRadius="24dp"-->
+        <!--            app:chipMinTouchTargetSize="0dp"-->
+        <!--            tools:chipIcon="@drawable/ic_male_24dp"-->
+        <!--            tools:text="Male" />-->
+
+        <!--        <com.google.android.material.chip.Chip-->
+        <!--            style="@style/Widget.Material3.Chip.Assist"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:textAppearance="@style/chipTextAppearance"-->
+        <!--            app:chipCornerRadius="24dp"-->
+        <!--            app:chipMinTouchTargetSize="0dp"-->
+        <!--            tools:chipIcon="@drawable/ic_place_24"-->
+        <!--            tools:text="Surrey, England, UK" />-->
+
+    </com.google.android.material.chip.ChipGroup>
+
+</LinearLayout>

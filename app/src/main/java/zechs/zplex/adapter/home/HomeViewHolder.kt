@@ -84,20 +84,12 @@ sealed class HomeViewHolder(
         }
 
         fun bindBanner(item: HomeDataModel.Banner) {
-            val linearLayoutManager = object : LinearLayoutManager(
-                context, HORIZONTAL, false
-            ) {
-                override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
-                    return lp?.let {
-                        it.width = (0.75 * width).toInt()
-                        true
-                    } ?: super.checkLayoutParams(lp)
-                }
-            }
 
             itemBinding.rvList.apply {
                 adapter = bannerAdapter
-                layoutManager = linearLayoutManager
+                layoutManager = LinearLayoutManager(
+                    context, LinearLayoutManager.HORIZONTAL, false
+                )
             }
             bannerAdapter.submitList(item.media)
         }

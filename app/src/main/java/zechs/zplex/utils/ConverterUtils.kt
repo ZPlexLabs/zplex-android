@@ -3,9 +3,11 @@ package zechs.zplex.utils
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.time.Period
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.TimeUnit
+
 
 object ConverterUtils {
 
@@ -63,10 +65,28 @@ object ConverterUtils {
         return "${min / 60} hr ${min % 60} min"
     }
 
-    fun parseDate(date: String, pattern: String = "EEEE dd, yyyy"): String {
-        val srcFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val dstFormat = DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH)
+    fun parseDate(
+        date: String,
+        srcPattern: String = "yyyy-MM-dd",
+        dstPattern: String = "EEEE dd, yyyy"
+    ): String {
+        val srcFormat = DateTimeFormatter.ofPattern(srcPattern)
+        val dstFormat = DateTimeFormatter.ofPattern(dstPattern, Locale.ENGLISH)
         val datetime = LocalDate.parse(date, srcFormat)
         return datetime.format(dstFormat)
     }
+
+    fun yearsBetween(startDate: String, endDate: String): Int {
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val start = LocalDate.parse(startDate, formatter)
+        val end = LocalDate.parse(endDate, formatter)
+        return Period.between(start, end).years
+    }
+
+    fun getDate(): String {
+        val time = System.currentTimeMillis()
+        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return formatter.format(time)!!
+    }
+
 }

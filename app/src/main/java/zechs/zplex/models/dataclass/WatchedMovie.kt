@@ -27,6 +27,7 @@ data class WatchedMovie(
         vote_average = null,
         backdrop_path = null,
         overview = null,
-        release_date = null
+        release_date = null,
+        first_air_date = null
     )
 }

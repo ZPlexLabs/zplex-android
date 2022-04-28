@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardBackgroundColor="@color/colorPrimaryDark"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="8dp"
     app:cardCornerRadius="24dp"
-    app:cardElevation="8dp"
-    app:cardMaxElevation="8dp">
+    app:layout_goneMarginBottom="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -25,7 +25,7 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@drawable/no_poster" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tv_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -44,9 +44,9 @@
             app:layout_constraintVertical_chainStyle="packed"
             tools:text="Spider-Man: Homecoming" />
 
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tv_year"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:ellipsize="end"
@@ -61,42 +61,7 @@
             app:layout_constraintTop_toBottomOf="@+id/tv_title"
             tools:text="2017" />
 
-        <TextView
-            android:id="@+id/tv_rating"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="16dp"
-            android:ellipsize="end"
-            android:fontFamily="@font/open_sans"
-            android:maxLines="1"
-            android:textAlignment="center"
-            android:textColor="@color/textColor_87"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_year"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/imageView2"
-            app:layout_constraintTop_toTopOf="@+id/tv_year"
-            tools:text="4.5" />
-
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="16dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="2dp"
-            android:contentDescription="@null"
-            app:layout_constraintBottom_toBottomOf="@+id/tv_rating"
-            app:layout_constraintEnd_toStartOf="@+id/tv_rating"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintHorizontal_chainStyle="packed"
-            app:layout_constraintStart_toEndOf="@+id/tv_year"
-            app:layout_constraintTop_toTopOf="@+id/tv_rating"
-            app:srcCompat="@drawable/ic_round_star_24"
-            app:tint="@color/textColor_74" />
-
-        <TextView
+        <com.google.android.material.textview.MaterialTextView
             android:id="@+id/tv_plot"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -104,7 +69,6 @@
             android:ellipsize="end"
             android:fontFamily="@font/open_sans"
             android:maxLines="3"
-            android:textColor="@color/textColor_74"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/tv_title"

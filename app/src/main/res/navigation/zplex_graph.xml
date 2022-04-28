@@ -8,7 +8,7 @@
         android:id="@+id/homeFragment"
         android:name="zechs.zplex.ui.fragment.home.HomeFragment"
         android:label="Home"
-        tools:layout="@layout/fragment_home">
+        tools:layout="@layout/fragment_list">
         <action
             android:id="@+id/action_homeFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />
@@ -60,7 +60,7 @@
         android:id="@+id/fragmentMedia"
         android:name="zechs.zplex.ui.fragment.media.FragmentMedia"
         android:label="Fragment Media"
-        tools:layout="@layout/fragment_media">
+        tools:layout="@layout/fragment_list">
         <argument
             android:name="media"
             app:argType="zechs.zplex.models.tmdb.entities.Media" />
@@ -121,7 +121,7 @@
         android:id="@+id/castsFragment"
         android:name="zechs.zplex.ui.fragment.cast.CastsFragment"
         android:label="CastsFragment"
-        tools:layout="@layout/fragment_cast_details">
+        tools:layout="@layout/fragment_cast">
         <argument
             android:name="cast"
             app:argType="zechs.zplex.models.tmdb.entities.Cast" />
@@ -150,10 +150,10 @@
         android:id="@+id/fragmentCollection"
         android:name="zechs.zplex.ui.fragment.collection.FragmentCollection"
         android:label="FragmentCollection"
-        tools:layout="@layout/fragment_collection">
+        tools:layout="@layout/fragment_list">
         <argument
-            android:name="media"
-            app:argType="zechs.zplex.models.tmdb.entities.Media" />
+            android:name="collectionId"
+            app:argType="integer" />
         <action
             android:id="@+id/action_fragmentCollection_to_bigImageFragment"
             app:destination="@id/bigImageFragment" />
