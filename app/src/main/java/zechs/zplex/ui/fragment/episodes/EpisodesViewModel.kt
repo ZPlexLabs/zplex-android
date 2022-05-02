@@ -6,9 +6,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import zechs.zplex.adapter.episodes.EpisodesDataModel
+import zechs.zplex.models.zplex.SeasonResponse
 import zechs.zplex.repository.ZPlexRepository
 import zechs.zplex.ui.BaseAndroidViewModel
-import zechs.zplex.ui.seasonResponseZplex
 import zechs.zplex.utils.Event
 import zechs.zplex.utils.Resource
 import java.io.IOException
@@ -18,39 +19,58 @@ class EpisodesViewModel(
     private val zplexRepository: ZPlexRepository
 ) : BaseAndroidViewModel(app) {
 
-    private val _seasonZplex = MutableLiveData<Event<Resource<seasonResponseZplex>>>()
-    val seasonZplex: LiveData<Event<Resource<seasonResponseZplex>>>
-        get() = _seasonZplex
+    private val _seasonResponse = MutableLiveData<Event<Resource<List<EpisodesDataModel>>>>()
+    val episodesResponse: LiveData<Event<Resource<List<EpisodesDataModel>>>>
+        get() = _seasonResponse
 
-    fun zplexGetSeason(tvId: Int, seasonNumber: Int) = viewModelScope.launch {
-        _seasonZplex.postValue(Event(Resource.Loading()))
+    fun getSeason(tmdbId: Int, seasonNumber: Int) = viewModelScope.launch {
+        _seasonResponse.postValue(Event(Resource.Loading()))
         try {
             if (hasInternetConnection()) {
-                val zplexMovie = zplexRepository.getSeason(tvId, seasonNumber)
-                _seasonZplex.postValue(Event(handleZplexSeasonResponse(zplexMovie)))
+                val season = zplexRepository.getSeason(tmdbId, seasonNumber)
+                _seasonResponse.postValue(Event(handleSeasonResponse(season)))
             } else {
-                _seasonZplex.postValue(Event(Resource.Error("No internet connection")))
+                _seasonResponse.postValue(Event(Resource.Error("No internet connection")))
             }
         } catch (t: Throwable) {
             t.printStackTrace()
-            println("zplexGetSeason :  Message=${t.message}")
-            _seasonZplex.postValue(
-                Event(
-                    Resource.Error(
-                        if (t is IOException) {
-                            "Network Failure"
-                        } else t.message ?: "Something went wrong"
-                    )
-                )
-            )
+
+            val errorMsg = if (t is IOException) {
+                "Network Failure"
+            } else t.message ?: "Something went wrong"
+
+            _seasonResponse.postValue(Event(Resource.Error(errorMsg)))
         }
     }
 
-    private fun handleZplexSeasonResponse(
-        response: Response<seasonResponseZplex>
-    ): Resource<seasonResponseZplex> {
-        if (response.isSuccessful) {
-            return Resource.Success(response.body()!!)
+    private fun handleSeasonResponse(
+        response: Response<SeasonResponse>
+    ): Resource<List<EpisodesDataModel>> {
+
+        if (response.isSuccessful && response.body() != null) {
+            val result = response.body()!!
+            val seasonDataModel = mutableListOf<EpisodesDataModel>()
+
+            seasonDataModel.add(
+                EpisodesDataModel.Header(
+                    seasonNumber = "Season ${result.season_number}",
+                    seasonName = result.name,
+                    seasonPosterPath = result.poster_path,
+                    seasonOverview = result.overview ?: "No description"
+                )
+            )
+
+            val epsiodesList = result.episodes
+            if (epsiodesList != null && epsiodesList.isNotEmpty()) {
+                seasonDataModel.add(
+                    EpisodesDataModel.Episodes(
+                        episodes = epsiodesList,
+                        accessToken = result.accessToken
+                    )
+                )
+            }
+
+            return Resource.Success(seasonDataModel.toList())
         }
         return Resource.Error(response.message())
     }

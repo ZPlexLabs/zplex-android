@@ -64,7 +64,7 @@ class FragmentCollection : BaseFragment() {
             findNavController().navigateUp()
         }
 
-        setupCastViewModel(args.collectionId)
+        setupCollectionViewModel(args.collectionId)
     }
 
     private fun openImageFullSize(posterPath: String?, imageView: ImageView) {
@@ -88,7 +88,7 @@ class FragmentCollection : BaseFragment() {
         findNavController().navigateSafe(action)
     }
 
-    private fun setupCastViewModel(collectionId: Int) {
+    private fun setupCollectionViewModel(collectionId: Int) {
         if (!hasLoaded) {
             collectionViewModel.getCollection(collectionId)
         }

@@ -42,8 +42,9 @@
         android:id="@+id/tv_seconds"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:fontFamily="@font/roboto_medium"
         android:gravity="center"
         android:padding="4dp"
-        tools:text="20 Sekunden" />
+        tools:text="20 Seconds" />
 
 </LinearLayout>

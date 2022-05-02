@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/image_card"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        app:cardCornerRadius="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/iv_poster"
+            android:layout_width="134dp"
+            android:layout_height="201dp"
+            android:contentDescription="@null"
+            android:scaleType="fitXY"
+            tools:srcCompat="@drawable/no_poster" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvSeasonNumber"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:maxLines="1"
+        android:textAppearance="@style/titleTextMedia"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/image_card"
+        app:layout_constraintTop_toTopOf="@+id/image_card"
+        tools:text="Season 4"
+        tools:visibility="visible" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvSeasonName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/open_sans_semibold"
+        android:maxLines="2"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/image_card"
+        app:layout_constraintTop_toBottomOf="@+id/tvSeasonNumber"
+        tools:text="Entertainment District Arc" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tvPlot"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:ellipsize="end"
+        android:fontFamily="@font/open_sans"
+        android:maxLines="5"
+        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
+        android:textColor="@color/textColor_74"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toBottomOf="@+id/image_card"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/image_card"
+        app:layout_constraintTop_toBottomOf="@+id/tvSeasonName"
+        app:layout_constraintVertical_bias="0.0"
+        tools:text="Thomas William Hiddleston (born 9 February 1981) is an English actor. He gained international fame portraying Loki in the Marvel Cinematic Universe (MCU), appearing in Thor (2011), The Avengers (2012), Thor: The Dark World (2013), Thor: Ragnarok (2017), Avengers: Infinity War (2018), Avengers: Endgame (2019), and in the Disney+ series Loki (2021)." />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

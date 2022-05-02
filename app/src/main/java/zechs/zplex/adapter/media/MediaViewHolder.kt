@@ -1,22 +1,12 @@
 package zechs.zplex.adapter.media
 
 import android.content.Context
-import android.graphics.Color
-import android.graphics.Typeface
 import android.graphics.drawable.Drawable
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.SpannableStringBuilder
-import android.text.style.ForegroundColorSpan
-import android.text.style.StyleSpan
-import android.view.ViewGroup
-import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.TransitionManager
 import androidx.viewbinding.ViewBinding
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -31,6 +21,7 @@ import zechs.zplex.models.tmdb.BackdropSize
 import zechs.zplex.models.tmdb.PosterSize
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
+import zechs.zplex.utils.SpannableTextView.spannablePlotText
 
 sealed class MediaViewHolder(
     val context: Context,
@@ -122,56 +113,6 @@ sealed class MediaViewHolder(
         context: Context,
         private val itemBinding: ItemMediaTitleBinding
     ) : MediaViewHolder(context, itemBinding) {
-
-        private fun spannablePlotText(
-            textView: TextView, plot: String,
-            limit: Int, suffixText: String,
-            root: ViewGroup
-        ) {
-            val textColor = ForegroundColorSpan(Color.parseColor("#BDFFFFFF"))
-            val suffixColor = ForegroundColorSpan(Color.parseColor("#DEFFFFFF"))
-
-            if (plot.length > 200) {
-                val stringBuilder = SpannableStringBuilder()
-
-                val plotText = SpannableString(plot.substring(0, limit)).apply {
-                    setSpan(textColor, 0, limit, 0)
-                }
-
-                val readMore = SpannableString(suffixText).apply {
-                    setSpan(
-                        StyleSpan(Typeface.BOLD),
-                        0, suffixText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-                    )
-                    setSpan(suffixColor, 0, suffixText.length, 0)
-                }
-
-                stringBuilder.append(plotText)
-                stringBuilder.append(readMore)
-
-                val textViewTag = "textViewTAG"
-                textView.apply {
-                    if (tag != null) {
-                        text = plot
-                    } else {
-                        setText(stringBuilder, TextView.BufferType.SPANNABLE)
-                    }
-                    setOnClickListener {
-                        TransitionManager.beginDelayedTransition(root)
-                        if (text.length > (limit + suffixText.length)) {
-                            setText(stringBuilder, TextView.BufferType.SPANNABLE)
-                            tag = null
-                        } else {
-                            text = plot
-                            tag = textViewTag
-                        }
-                    }
-                }
-            } else {
-                textView.text = plot
-                textView.setOnClickListener(null)
-            }
-        }
 
         fun bind(item: MediaDataModel.Title) {
             itemBinding.apply {

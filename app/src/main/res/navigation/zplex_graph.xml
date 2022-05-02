@@ -121,7 +121,7 @@
         android:id="@+id/castsFragment"
         android:name="zechs.zplex.ui.fragment.cast.CastsFragment"
         android:label="CastsFragment"
-        tools:layout="@layout/fragment_cast">
+        tools:layout="@layout/fragment_list">
         <argument
             android:name="cast"
             app:argType="zechs.zplex.models.tmdb.entities.Cast" />
