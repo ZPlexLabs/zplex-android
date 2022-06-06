@@ -8,8 +8,10 @@ import retrofit2.Response
 import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.ui.BaseAndroidViewModel
+import zechs.zplex.utils.ConverterUtils
 import zechs.zplex.utils.Resource
 import java.io.IOException
+import java.time.LocalDate
 
 class UpcomingViewModel(
     app: Application,
@@ -26,7 +28,6 @@ class UpcomingViewModel(
     }
 
     fun getUpcoming() = viewModelScope.launch {
-        println("page=$page")
         upcoming.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
@@ -35,12 +36,14 @@ class UpcomingViewModel(
             } else {
                 upcoming.postValue(Resource.Error("No internet connection"))
             }
-        } catch (t: Throwable) {
-            println(t.stackTrace)
-            println(t.message)
+        } catch (e: Exception) {
+            e.printStackTrace()
+
             upcoming.postValue(
                 Resource.Error(
-                    if (t is IOException) "Network Failure" else t.message ?: "Something went wrong"
+                    if (e is IOException) {
+                        "Network Failure"
+                    } else e.message ?: "Something went wrong"
                 )
             )
         }
@@ -60,7 +63,23 @@ class UpcomingViewModel(
                     val newItems = resultResponse.results
                     oldItems?.addAll(newItems)
                 }
-                return Resource.Success(upcomingResponse ?: resultResponse)
+                var responseList = upcomingResponse ?: resultResponse
+                responseList = responseList.copy(
+                    results = responseList.results.asSequence().filter {
+                        it.releasedDate() != null
+                    }.filter {
+                        ConverterUtils.parseDate(
+                            it.releasedDate()!!
+                        ).isAfter(LocalDate.now())
+                    }.sortedBy {
+                        ConverterUtils.parseDate(
+                            it.releasedDate()!!
+                        )
+                    }.distinctBy {
+                        it.id
+                    }.toMutableList()
+                )
+                return Resource.Success(responseList)
             }
         }
         return Resource.Error(response.message())
