@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.TranslateAnimation
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -177,23 +178,31 @@ class MainActivity : AppCompatActivity() {
 
     private fun showSlideUp(view: View) = lifecycleScope.launch {
         if (view.isGone) {
-            view.visibility = View.VISIBLE
-            val animate = TranslateAnimation(
-                0f, 0f, view.height.toFloat(), 0f
-            )
-            animate.duration = 250
-            view.startAnimation(animate)
+            view.isVisible = true
+            TranslateAnimation(
+                0f, 0f,
+                view.height.toFloat(), 0f
+            ).apply {
+                interpolator = AccelerateInterpolator()
+                duration = 250L
+            }.also {
+                view.startAnimation(it)
+            }
         }
     }
 
     private fun hideSlideDown(view: View) = lifecycleScope.launch {
         if (view.isVisible) {
-            val animate = TranslateAnimation(
-                0f, 0f, 0f, view.height.toFloat()
-            )
-            animate.duration = 250
-            view.startAnimation(animate)
-            view.visibility = View.GONE
+            TranslateAnimation(
+                0f, 0f, 0f,
+                view.height.toFloat()
+            ).apply {
+                interpolator = AccelerateInterpolator()
+                duration = 250L
+            }.also {
+                view.startAnimation(it)
+            }
+            view.isGone = true
         }
     }
 
