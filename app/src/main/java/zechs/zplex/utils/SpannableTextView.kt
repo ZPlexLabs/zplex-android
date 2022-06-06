@@ -8,7 +8,9 @@ import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.TextView
+import androidx.transition.ChangeBounds
 import androidx.transition.TransitionManager
 
 object SpannableTextView {
@@ -46,7 +48,13 @@ object SpannableTextView {
                     setText(stringBuilder, TextView.BufferType.SPANNABLE)
                 }
                 setOnClickListener {
-                    TransitionManager.beginDelayedTransition(root)
+                    TransitionManager.beginDelayedTransition(
+                        root,
+                        ChangeBounds().apply {
+                            duration = 200L
+                            interpolator = DecelerateInterpolator()
+                        }
+                    )
                     if (text.length > (limit + suffixText.length)) {
                         setText(stringBuilder, TextView.BufferType.SPANNABLE)
                         tag = null
