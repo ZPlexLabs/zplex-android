@@ -1,14 +1,11 @@
 package zechs.zplex.ui.fragment.search
 
-import android.content.Context
 import android.os.Bundle
-import android.text.Editable
 import android.transition.TransitionManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -25,8 +22,10 @@ import zechs.zplex.databinding.FragmentSearchBinding
 import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
+import zechs.zplex.utils.Keyboard
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.navigateSafe
+import zechs.zplex.utils.setupClearButtonWithAction
 
 
 class SearchFragment : BaseFragment() {
@@ -56,24 +55,25 @@ class SearchFragment : BaseFragment() {
         _binding = FragmentSearchBinding.bind(view)
 
         searchViewModel = (activity as MainActivity).searchViewModel
-        setupRecyclerView()
-        binding.topAppBar.setNavigationOnClickListener { findNavController().navigateUp() }
 
+        setupRecyclerView()
+
+        binding.searchBar.setupClearButtonWithAction()
         var job: Job? = null
-        binding.searchBox.apply {
-            this.requestFocus()
-            showKeyboard()
-            editText?.text = Editable.Factory.getInstance().newEditable(queryText)
-            editText?.addTextChangedListener { editable ->
-                binding.rvSearch.isInvisible = true
+
+        binding.searchBar.apply {
+            Keyboard.show(this)
+            setText(queryText)
+            addTextChangedListener { editable ->
                 job?.cancel()
                 job = MainScope().launch {
                     delay(SEARCH_DELAY_AMOUNT)
                     editable?.let {
-                        queryText = it.toString()
-                        if (queryText.isNotEmpty()) {
-                            searchViewModel.getSearchList(queryText)
+                        val query = it.toString()
+                        if (query.isNotEmpty() && query != queryText) {
+                            searchViewModel.getSearchList(query)
                         }
+                        queryText = query
                     }
                 }
             }
@@ -98,6 +98,9 @@ class SearchFragment : BaseFragment() {
                             it.media_type == "tv" || it.media_type == "movie"
                         }
                         searchAdapter.differ.submitList(searchList.toList())
+                        binding.rvSearch.post {
+                            binding.rvSearch.scrollToPosition(0)
+                        }
                     }
                 }
                 is Resource.Error -> {
@@ -150,28 +153,10 @@ class SearchFragment : BaseFragment() {
             addOnScrollListener(this@SearchFragment.scrollListener)
         }
 
-        searchAdapter.setOnItemClickListener { media, _, position ->
-            hideKeyboard()
+        searchAdapter.setOnItemClickListener { media, _, _ ->
+            Keyboard.hide(binding.searchBar)
             val action = SearchFragmentDirections.actionSearchFragmentToFragmentMedia(media)
             findNavController().navigateSafe(action)
-        }
-    }
-
-    private fun hideKeyboard() {
-        activity?.currentFocus.let { view ->
-            val imm = context?.getSystemService(
-                Context.INPUT_METHOD_SERVICE
-            ) as InputMethodManager
-            imm.hideSoftInputFromWindow(view?.windowToken, 0)
-        }
-    }
-
-    private fun showKeyboard() {
-        activity?.currentFocus.let { view ->
-            val imm = context?.getSystemService(
-                Context.INPUT_METHOD_SERVICE
-            ) as InputMethodManager
-            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT)
         }
     }
 
