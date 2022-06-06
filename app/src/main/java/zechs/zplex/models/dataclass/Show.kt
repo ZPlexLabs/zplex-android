@@ -18,7 +18,7 @@ data class Show(
 ) {
     fun toMedia() = Media(
         id = id,
-        media_type = media_type,
+        media_type = "tv",
         name = name,
         poster_path = poster_path,
         title = null,

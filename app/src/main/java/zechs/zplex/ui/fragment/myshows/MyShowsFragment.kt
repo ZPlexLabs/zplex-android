@@ -30,6 +30,10 @@ import zechs.zplex.ui.activity.main.MainActivity
 
 class MyShowsFragment : BaseFragment() {
 
+    companion object {
+        const val TAG = "MyShowsFragment"
+    }
+
     private var _binding: FragmentMyShowsBinding? = null
     private val binding get() = _binding!!
 
@@ -95,35 +99,40 @@ class MyShowsFragment : BaseFragment() {
 
                 val name = media.name ?: media.title
 
+                Log.d(TAG, "name=$name, mediaType=${media.media_type}")
+
                 val snackBar = Snackbar.make(
                     view, "$name removed from your library",
                     Snackbar.LENGTH_SHORT
                 )
-                if (media.media_type == "tv") {
-                    val show = Show(
-                        id = media.id,
-                        name = media.name ?: "",
-                        media_type = media.media_type,
-                        poster_path = media.poster_path,
-                        vote_average = media.vote_average
-                    )
-                    myShowsViewModel.deleteShow(show)
-                    snackBar.setAction(
-                        R.string.undo
-                    ) {
-                        myShowsViewModel.saveShow(show)
+                when (media.media_type) {
+                    "tv" -> {
+                        val show = Show(
+                            id = media.id,
+                            name = media.name ?: "",
+                            media_type = media.media_type,
+                            poster_path = media.poster_path,
+                            vote_average = media.vote_average
+                        )
+                        myShowsViewModel.deleteShow(show)
+                        snackBar.setAction(R.string.undo) {
+                            Log.d(TAG, "Undo invoked(), show=$show")
+                            myShowsViewModel.saveShow(show)
+                        }
                     }
-                } else {
-                    val movie = Movie(
-                        id = media.id,
-                        title = media.title ?: "",
-                        media_type = media.media_type,
-                        poster_path = media.poster_path,
-                        vote_average = media.vote_average
-                    )
-                    myShowsViewModel.deleteMovie(movie)
-                    snackBar.setAction(R.string.undo) {
-                        myShowsViewModel.saveMovie(movie)
+                    "movie" -> {
+                        val movie = Movie(
+                            id = media.id,
+                            title = media.title ?: "",
+                            media_type = media.media_type,
+                            poster_path = media.poster_path,
+                            vote_average = media.vote_average
+                        )
+                        myShowsViewModel.deleteMovie(movie)
+                        snackBar.setAction(R.string.undo) {
+                            Log.d(TAG, "Undo invoked(), movie=$movie")
+                            myShowsViewModel.saveMovie(movie)
+                        }
                     }
                 }
 

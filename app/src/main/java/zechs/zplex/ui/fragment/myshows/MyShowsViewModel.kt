@@ -43,7 +43,7 @@ class MyShowsViewModel(
         val movie: List<Media> = movies.map {
             Media(
                 id = it.id,
-                media_type = it.media_type,
+                media_type = "movie",
                 name = null,
                 poster_path = it.poster_path,
                 title = it.title,
@@ -58,7 +58,7 @@ class MyShowsViewModel(
         val show: List<Media> = shows.map {
             Media(
                 id = it.id,
-                media_type = it.media_type,
+                media_type = "tv",
                 name = it.name,
                 poster_path = it.poster_path,
                 title = null,
@@ -69,7 +69,7 @@ class MyShowsViewModel(
                 first_air_date = null
             )
         }
-        return movie.plus(show).sortedBy { it.name }
+        return movie.plus(show).sortedBy { it.id }
     }
 
 }

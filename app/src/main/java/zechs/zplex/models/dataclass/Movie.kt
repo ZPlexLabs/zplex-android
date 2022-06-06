@@ -18,10 +18,10 @@ data class Movie(
 ) {
     fun toMedia() = Media(
         id = id,
-        media_type = media_type,
-        name = title,
+        media_type = "movie",
+        name = null,
         poster_path = poster_path,
-        title = null,
+        title = title,
         vote_average = vote_average,
         backdrop_path = null,
         overview = null,
