@@ -10,7 +10,6 @@ import android.graphics.Rect
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
@@ -214,11 +213,7 @@ class MainActivity : AppCompatActivity() {
         @SuppressLint("HardwareIds")
         val deviceId: String = if (BuildConfig.DEBUG) {
             "ZPLEX_TEST_CHANNEL"
-        } else {
-            Settings.Secure.getString(
-                contentResolver, Settings.Secure.ANDROID_ID
-            )
-        }
+        } else "ZPLEX_NEW_RELEASES"
 
         val firebaseDefaultMap = HashMap<String, Any>()
         firebaseDefaultMap[VERSION_CODE_KEY] = BuildConfig.VERSION_CODE
@@ -270,18 +265,20 @@ class MainActivity : AppCompatActivity() {
         val notificationBuilder = NotificationCompat.Builder(
             this,
             NotificationKeys.UPDATE_CHANNEL_ID
-        ).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setSmallIcon(R.drawable.ic_zplex)
-            .setContentTitle(getString(R.string.new_version_available))
-            .setContentText(getString(R.string.update_msg))
-            .setStyle(
+        ).apply {
+            setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            setSmallIcon(R.drawable.ic_zplex)
+            setContentTitle(getString(R.string.new_version_available))
+            setContentText(getString(R.string.update_msg))
+            setStyle(
                 NotificationCompat
                     .BigTextStyle()
                     .bigText(getString(R.string.update_msg))
-            ).setAutoCancel(true)
-            .setSound(defaultSoundUri)
-            .addAction(R.drawable.ic_update_24dp, getString(R.string.update), pendingIntent)
-
+            )
+            setAutoCancel(true)
+            setSound(defaultSoundUri)
+            addAction(R.drawable.ic_update_24dp, getString(R.string.update), pendingIntent)
+        }
         val notificationManager = getSystemService(
             Context.NOTIFICATION_SERVICE
         ) as NotificationManager
