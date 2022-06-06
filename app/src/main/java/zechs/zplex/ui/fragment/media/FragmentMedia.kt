@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isInvisible
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -25,6 +26,7 @@ import androidx.transition.TransitionManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
+import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.adapter.media.MediaClickListener
 import zechs.zplex.adapter.media.MediaDataAdapter
@@ -160,13 +162,16 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
                             binding.root,
                             MaterialFadeThrough()
                         )
-                        mediaDataAdapter.submitList(it)
+                        lifecycleScope.launch {
+                            mediaDataAdapter.submitList(it)
+                        }
                         isLoading(false)
                         hasLoaded = true
                     }
                     is Resource.Error -> {
                         showToast(response.message)
-                        binding.rvList.isInvisible = true
+                        isLoading(false)
+                        hasLoaded = true
                     }
                     is Resource.Loading -> {
                         if (!hasLoaded) {
