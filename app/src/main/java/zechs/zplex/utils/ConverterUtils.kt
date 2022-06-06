@@ -4,7 +4,12 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.Period
+import java.time.chrono.ChronoLocalDate
+import java.time.chrono.IsoChronology
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.format.DecimalStyle
+import java.time.temporal.TemporalAccessor
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -87,6 +92,20 @@ object ConverterUtils {
         val time = System.currentTimeMillis()
         val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         return formatter.format(time)!!
+    }
+
+    fun parseDate(date: String): LocalDate {
+        val pattern = "MMM dd, yyyy"
+
+        val locale = Locale.getDefault(Locale.Category.FORMAT)
+        val chronology = IsoChronology.INSTANCE
+        val df = DateTimeFormatterBuilder()
+            .parseLenient().appendPattern(pattern).toFormatter()
+            .withChronology(chronology)
+            .withDecimalStyle(DecimalStyle.of(locale))
+        val temporal: TemporalAccessor = df.parse(date)
+        val cDate: ChronoLocalDate = chronology.date(temporal)
+        return LocalDate.from(cDate)
     }
 
 }
