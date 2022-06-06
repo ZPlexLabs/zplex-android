@@ -28,9 +28,11 @@ sealed class EpisodesViewHolder(
                 "${TMDB_IMAGE_PREFIX}/${PosterSize.w780}${item.seasonPosterPath}"
             } else R.drawable.no_thumb
 
+            val overviewText = item.seasonOverview.ifEmpty { "No description" }
+
             itemBinding.apply {
                 tvSeasonNumber.text = item.seasonNumber
-                tvPlot.text = item.seasonOverview
+                tvPlot.text = overviewText
 
                 val tvSeasonNameTAG = "tvSeasonNameTAG"
 

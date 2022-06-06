@@ -7,15 +7,18 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.adapter.episodes.EpisodesDataModel
-import zechs.zplex.models.zplex.SeasonResponse
+import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.repository.ZPlexRepository
 import zechs.zplex.ui.BaseAndroidViewModel
+import zechs.zplex.ui.seasonResponseTmdb
+import zechs.zplex.ui.seasonResponseZplex
 import zechs.zplex.utils.Event
 import zechs.zplex.utils.Resource
 import java.io.IOException
 
 class EpisodesViewModel(
     app: Application,
+    private val tmdbRepository: TmdbRepository,
     private val zplexRepository: ZPlexRepository
 ) : BaseAndroidViewModel(app) {
 
@@ -28,26 +31,30 @@ class EpisodesViewModel(
         try {
             if (hasInternetConnection()) {
                 val season = zplexRepository.getSeason(tmdbId, seasonNumber)
-                _seasonResponse.postValue(Event(handleSeasonResponse(season)))
+                if (season.isSuccessful) {
+                    _seasonResponse.postValue(Event(handleZPlexSeasonResponse(season)))
+                } else {
+                    val tmdbSeason = tmdbRepository.getSeason(tmdbId, seasonNumber)
+                    _seasonResponse.postValue(Event(handleSeasonResponse(tmdbSeason)))
+                }
             } else {
                 _seasonResponse.postValue(Event(Resource.Error("No internet connection")))
             }
-        } catch (t: Throwable) {
-            t.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
 
-            val errorMsg = if (t is IOException) {
+            val errorMsg = if (e is IOException) {
                 "Network Failure"
-            } else t.message ?: "Something went wrong"
+            } else e.message ?: "Something went wrong"
 
             _seasonResponse.postValue(Event(Resource.Error(errorMsg)))
         }
     }
 
     private fun handleSeasonResponse(
-        response: Response<SeasonResponse>
+        response: Response<seasonResponseTmdb>
     ): Resource<List<EpisodesDataModel>> {
-
-        if (response.isSuccessful && response.body() != null) {
+        if (response.body() != null) {
             val result = response.body()!!
             val seasonDataModel = mutableListOf<EpisodesDataModel>()
 
@@ -60,11 +67,45 @@ class EpisodesViewModel(
                 )
             )
 
-            val epsiodesList = result.episodes
-            if (epsiodesList != null && epsiodesList.isNotEmpty()) {
+            val episodesList = result.episodes?.map {
+                it.toZplex()
+            }
+            if (episodesList != null && episodesList.isNotEmpty()) {
                 seasonDataModel.add(
                     EpisodesDataModel.Episodes(
-                        episodes = epsiodesList,
+                        episodes = episodesList,
+                        accessToken = null
+                    )
+                )
+            }
+
+            return Resource.Success(seasonDataModel.toList())
+        }
+        return Resource.Error(response.message())
+    }
+
+
+    private fun handleZPlexSeasonResponse(
+        response: Response<seasonResponseZplex>
+    ): Resource<List<EpisodesDataModel>> {
+        if (response.body() != null) {
+            val result = response.body()!!
+            val seasonDataModel = mutableListOf<EpisodesDataModel>()
+
+            seasonDataModel.add(
+                EpisodesDataModel.Header(
+                    seasonNumber = "Season ${result.season_number}",
+                    seasonName = result.name,
+                    seasonPosterPath = result.poster_path,
+                    seasonOverview = result.overview ?: "No description"
+                )
+            )
+
+            val episodesList = result.episodes
+            if (episodesList != null && episodesList.isNotEmpty()) {
+                seasonDataModel.add(
+                    EpisodesDataModel.Episodes(
+                        episodes = episodesList,
                         accessToken = result.accessToken
                     )
                 )

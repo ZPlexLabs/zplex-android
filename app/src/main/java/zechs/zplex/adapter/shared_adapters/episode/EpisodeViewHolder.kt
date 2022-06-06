@@ -3,6 +3,7 @@ package zechs.zplex.adapter.shared_adapters.episode
 import android.content.Context
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.R
 import zechs.zplex.databinding.ItemEpisodeBinding
@@ -55,16 +56,21 @@ class EpisodeViewHolder(
                 tvEpisodeCount.text = count
             }
 
-            println("filedId = ${episode.file_id}")
             if (episode.file_id == null || btnPlay.tag == btnPlayTAG) {
-                btnPlay.tag = btnPlayTAG
-                btnPlay.text = context.getString(R.string.not_available)
-                btnPlay.setOnClickListener(null)
+                btnPlay.apply {
+                    tag = btnPlayTAG
+                    text = context.getString(R.string.not_available)
+                    setOnClickListener(null)
+                    isGone = true
+                }
             } else {
-                btnPlay.tag = null
-                btnPlay.text = context.getString(R.string.play)
-                btnPlay.setOnClickListener {
-                    episodeAdapter.episodeOnClick.invoke(episode, accessToken!!, isLast)
+                btnPlay.apply {
+                    tag = null
+                    text = context.getString(R.string.play)
+                    setOnClickListener {
+                        episodeAdapter.episodeOnClick.invoke(episode, accessToken!!, isLast)
+                    }
+                    isVisible = true
                 }
             }
 

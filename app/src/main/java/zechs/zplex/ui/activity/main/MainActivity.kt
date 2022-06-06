@@ -126,7 +126,8 @@ class MainActivity : AppCompatActivity() {
         episodesViewModel = ViewModelProvider(
             this,
             EpisodesViewModelProviderFactory(
-                application, zplexRepository
+                application,
+                tmdbRepository, zplexRepository
             )
         )[EpisodesViewModel::class.java]
 
