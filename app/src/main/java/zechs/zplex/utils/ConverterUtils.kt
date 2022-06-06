@@ -94,7 +94,7 @@ object ConverterUtils {
         return formatter.format(time)!!
     }
 
-    fun parseDate(date: String): LocalDate {
+    fun dateToLocalDate(date: String): LocalDate {
         val pattern = "MMM dd, yyyy"
 
         val locale = Locale.getDefault(Locale.Category.FORMAT)

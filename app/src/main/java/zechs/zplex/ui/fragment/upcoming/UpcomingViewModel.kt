@@ -68,11 +68,11 @@ class UpcomingViewModel(
                     results = responseList.results.asSequence().filter {
                         it.releasedDate() != null
                     }.filter {
-                        ConverterUtils.parseDate(
+                        ConverterUtils.dateToLocalDate(
                             it.releasedDate()!!
                         ).isAfter(LocalDate.now())
                     }.sortedBy {
-                        ConverterUtils.parseDate(
+                        ConverterUtils.dateToLocalDate(
                             it.releasedDate()!!
                         )
                     }.distinctBy {
