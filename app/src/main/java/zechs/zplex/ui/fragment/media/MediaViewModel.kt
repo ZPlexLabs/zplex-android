@@ -76,15 +76,15 @@ class MediaViewModel(
             } else {
                 _movieZplex.postValue(Event(Resource.Error("No internet connection")))
             }
-        } catch (t: Throwable) {
-            t.printStackTrace()
-            println("zplexGetMovie :  Message=${t.message}")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            println("zplexGetMovie :  Message=${e.message}")
             _movieZplex.postValue(
                 Event(
                     Resource.Error(
-                        if (t is IOException) {
+                        if (e is IOException) {
                             "Network Failure"
-                        } else t.message ?: "Something went wrong"
+                        } else e.message ?: "Something went wrong"
                     )
                 )
             )
@@ -115,12 +115,12 @@ class MediaViewModel(
             } else {
                 _mediaResponse.postValue(Event(Resource.Error("No internet connection")))
             }
-        } catch (t: Throwable) {
-            t.printStackTrace()
+        } catch (e: Exception) {
+            e.printStackTrace()
 
-            val errorMsg = if (t is IOException) {
+            val errorMsg = if (e is IOException) {
                 "Network Failure"
-            } else t.message ?: "Something went wrong"
+            } else e.message ?: "Something went wrong"
 
             _mediaResponse.postValue(Event(Resource.Error(errorMsg)))
         }
@@ -453,10 +453,14 @@ class MediaViewModel(
 
 
     fun calcDominantColor(drawable: Drawable, onFinish: (Int) -> Unit) {
-        val bmp = (drawable as BitmapDrawable).bitmap.copy(Bitmap.Config.ARGB_8888, true)
-        Palette.from(bmp).generate { palette ->
-            palette?.let { p ->
-                onFinish(p.vibrantSwatch?.rgb ?: p.dominantSwatch?.rgb ?: 6770852)
+        val bmp = (drawable as BitmapDrawable).bitmap.copy(
+            Bitmap.Config.ARGB_8888, true
+        )
+        Palette.from(bmp).generate { p ->
+            try {
+                onFinish(p!!.vibrantSwatch?.rgb ?: p.dominantSwatch?.rgb ?: 6770852)
+            } catch (npe: NullPointerException) {
+                onFinish(6770852)
             }
         }
     }
