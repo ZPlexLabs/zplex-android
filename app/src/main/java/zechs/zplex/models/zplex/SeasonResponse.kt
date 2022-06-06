@@ -12,5 +12,7 @@ data class SeasonResponse(
     val season_number: Int,
     val access_token: String?,
 ) {
-    val accessToken get() = access_token?.let { AESEncryption.decrypt(it) } ?: access_token
+    val accessToken
+        get() = access_token?.let { AESEncryption.decrypt(it) }
+
 }
