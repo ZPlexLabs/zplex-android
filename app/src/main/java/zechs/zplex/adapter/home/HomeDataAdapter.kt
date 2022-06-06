@@ -7,15 +7,12 @@ import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.R
-import zechs.zplex.adapter.watched.WatchedDataModel
 import zechs.zplex.databinding.ItemHeadingBinding
 import zechs.zplex.databinding.ItemListBinding
-import zechs.zplex.models.tmdb.entities.Media
 
 class HomeDataAdapter(
     val context: Context,
-    val homeOnClick: (Media) -> Unit,
-    val watchedOnClick: (WatchedDataModel) -> Unit
+    val homeClickListener: HomeClickListener
 ) : RecyclerView.Adapter<HomeViewHolder>() {
 
     private val differCallback = object : DiffUtil.ItemCallback<HomeDataModel>() {

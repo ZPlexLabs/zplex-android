@@ -1,10 +1,12 @@
 package zechs.zplex.ui.fragment.home
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RatingBar
 import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -12,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
 import zechs.zplex.R
+import zechs.zplex.adapter.home.HomeClickListener
 import zechs.zplex.adapter.home.HomeDataAdapter
 import zechs.zplex.adapter.home.HomeDataModel
 import zechs.zplex.adapter.watched.WatchedDataModel
@@ -25,7 +28,14 @@ import zechs.zplex.utils.Resource
 import zechs.zplex.utils.navigateSafe
 
 
-class HomeFragment : BaseFragment() {
+class HomeFragment : BaseFragment(), HomeClickListener {
+
+    private val homeDataAdapter by lazy {
+        HomeDataAdapter(
+            context = requireContext(),
+            homeClickListener = this@HomeFragment
+        )
+    }
 
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
@@ -76,19 +86,6 @@ class HomeFragment : BaseFragment() {
                 }
             }
         }
-    }
-
-    private val homeDataAdapter by lazy {
-        HomeDataAdapter(
-            context = requireContext(),
-            homeOnClick = { navigateToMedia(it) },
-            watchedOnClick = {
-                when (it) {
-                    is WatchedDataModel.Movie -> navigateToMedia(it.movie.toMedia())
-                    is WatchedDataModel.Show -> navigateToSeason(it.show)
-                }
-            }
-        )
     }
 
 
@@ -166,6 +163,26 @@ class HomeFragment : BaseFragment() {
 
     companion object {
         const val TAG = "HomeFragment"
+    }
+
+    override fun onClickMedia(media: Media) {
+        navigateToMedia(media)
+    }
+
+    override fun onClickWatched(watched: WatchedDataModel) {
+        when (watched) {
+            is WatchedDataModel.Movie -> navigateToMedia(watched.movie.toMedia())
+            is WatchedDataModel.Show -> navigateToSeason(watched.show)
+        }
+    }
+
+    override fun setImageResource(image: Drawable) {
+        //TODO: Implement palette api using image
+
+    }
+
+    override fun setRatingBarView(ratingBar: RatingBar) {
+        //TODO: Implement Dynamic color
     }
 
 }

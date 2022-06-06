@@ -31,16 +31,20 @@ sealed class HomeViewHolder(
     ) : HomeViewHolder(context, itemBinding) {
 
         private val mediaAdapter by lazy {
-            MediaAdapter { homeDataAdapter.homeOnClick.invoke(it) }
+            MediaAdapter {
+                homeDataAdapter.homeClickListener.onClickMedia(it)
+            }
         }
 
         private val bannerAdapter by lazy {
-            BannerAdapter { homeDataAdapter.homeOnClick.invoke(it) }
+            BannerAdapter {
+                homeDataAdapter.homeClickListener.onClickMedia(it)
+            }
         }
 
         private val watchedAdapter by lazy {
             WatchedDataAdapter {
-                homeDataAdapter.watchedOnClick.invoke((it))
+                homeDataAdapter.homeClickListener.onClickWatched(it)
             }
         }
 
