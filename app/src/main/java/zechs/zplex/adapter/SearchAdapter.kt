@@ -20,7 +20,7 @@ class SearchAdapter : RecyclerView.Adapter<SearchAdapter.SearchViewHolder>() {
 
     private val differCallback = object : DiffUtil.ItemCallback<Media>() {
         override fun areItemsTheSame(oldItem: Media, newItem: Media): Boolean {
-            return oldItem.id == newItem.id
+            return oldItem.id == newItem.id && oldItem.media_type == oldItem.media_type
         }
 
         override fun areContentsTheSame(oldItem: Media, newItem: Media): Boolean {

@@ -1,7 +1,6 @@
 package zechs.zplex.ui.fragment.search
 
 import android.os.Bundle
-import android.transition.TransitionManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,6 +9,7 @@ import android.widget.Toast
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,15 +30,19 @@ import zechs.zplex.utils.setupClearButtonWithAction
 
 class SearchFragment : BaseFragment() {
 
+    companion object {
+        const val TAG = "SearchFragment"
+    }
+
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var searchViewModel: SearchViewModel
 
     private val searchAdapter by lazy { SearchAdapter() }
-    private val thisTag = "SearchFragment"
     private var queryText = ""
     private var isLoading = true
+    var isLastPage = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -71,7 +75,7 @@ class SearchFragment : BaseFragment() {
                     editable?.let {
                         val query = it.toString()
                         if (query.isNotEmpty() && query != queryText) {
-                            searchViewModel.getSearchList(query)
+                            searchViewModel.getSearch(query)
                         }
                         queryText = query
                     }
@@ -79,28 +83,31 @@ class SearchFragment : BaseFragment() {
             }
         }
 
-        searchViewModel.searchList.observe(viewLifecycleOwner) { response ->
+        searchViewModel.searchResponse.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Resource.Success -> {
-                    isLoading = false
-                    TransitionManager.beginDelayedTransition(binding.root)
                     binding.apply {
                         pbSearch.isInvisible = true
                         rvSearch.isInvisible = queryText.isEmpty()
                     }
-                    response.data?.let { searchResponse ->
-                        if (searchResponse.results.isEmpty()) {
+                    response.data?.let { search ->
+                        isLastPage = searchViewModel.page - 1 == search.total_pages
+
+                        if (search.results.isEmpty()) {
                             Toast.makeText(
                                 context, "Nothing found", Toast.LENGTH_SHORT
                             ).show()
                         }
-                        val searchList = searchResponse.results.filter {
+
+                        val searchList = search.results.filter {
                             it.media_type == "tv" || it.media_type == "movie"
+                                    && it.poster_path != null
                         }
-                        searchAdapter.differ.submitList(searchList.toList())
-                        binding.rvSearch.post {
-                            binding.rvSearch.scrollToPosition(0)
+
+                        lifecycleScope.launch {
+                            searchAdapter.differ.submitList(searchList.toList())
                         }
+                        isLoading = false
                     }
                 }
                 is Resource.Error -> {
@@ -109,22 +116,18 @@ class SearchFragment : BaseFragment() {
                         Toast.makeText(
                             context, "An error occurred: $message", Toast.LENGTH_SHORT
                         ).show()
-                        Log.e(thisTag, "An error occurred: $message")
+                        Log.e(TAG, "An error occurred: $message")
                     }
                     binding.pbSearch.isInvisible = true
                 }
                 is Resource.Loading -> {
                     isLoading = true
                     binding.pbSearch.isVisible = true
-                    binding.apply {
-                        rvSearch.isVisible = false
-                    }
                 }
             }
         }
 
     }
-
 
     private val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -132,16 +135,16 @@ class SearchFragment : BaseFragment() {
             if (dy > 0) {
                 val layoutManager = binding.rvSearch.layoutManager as GridLayoutManager
                 val visibleItemCount = layoutManager.findLastCompletelyVisibleItemPosition() + 1
-                val itemCount = layoutManager.itemCount - 6
+                val itemCount = layoutManager.itemCount
 
-                Log.d(
-                    "onScrolled",
-                    "visibleItemCount=$visibleItemCount, itemCount=$itemCount, isLoading=$isLoading"
-                )
-
-//                if (visibleItemCount == itemCount && !isLoading && !isLastPage) {
-//                    searchViewModel.getSearchList(setDriveQuery(queryText), PAGE_TOKEN)
-//                }
+                if (visibleItemCount == itemCount && !isLoading && !isLastPage) {
+                    Log.d(
+                        "onScrolled",
+                        "visibleItemCount=$visibleItemCount, itemCount=$itemCount, " +
+                                "isLoading=$isLoading isLastPage=$isLastPage"
+                    )
+                    searchViewModel.getSearch(queryText)
+                }
             }
         }
     }
@@ -162,9 +165,7 @@ class SearchFragment : BaseFragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        binding.apply {
-            rvSearch.adapter = null
-        }
+        binding.rvSearch.adapter = null
         _binding = null
     }
 }
