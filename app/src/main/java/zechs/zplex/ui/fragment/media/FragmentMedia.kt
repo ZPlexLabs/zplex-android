@@ -14,7 +14,6 @@ import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.Toast
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.ColorUtils
 import androidx.core.view.isInvisible
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -47,6 +46,9 @@ import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.ui.fragment.list.ListViewModel
 import zechs.zplex.ui.fragment.shared_viewmodels.SeasonViewModel
 import zechs.zplex.ui.movieResponseZplex
+import zechs.zplex.utils.ColorManager.Companion.getContrastColor
+import zechs.zplex.utils.ColorManager.Companion.isDark
+import zechs.zplex.utils.ColorManager.Companion.lightUpColor
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.navigateSafe
 import java.util.*
@@ -193,27 +195,6 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
         }
     }
 
-
-    private fun getContrastColor(color: Int): Int {
-        val y = (299 * Color.red(color) + 587 * Color.green(color) + 114 * Color.blue(color)) / 1000
-        return if (y >= 128) Color.parseColor("#1C1B1F") else Color.parseColor("#DEFFFFFF")
-    }
-
-    private fun isDark(color: Int): Boolean {
-        val luminance = ("%.5f".format(ColorUtils.calculateLuminance(color))).toFloat()
-        val threshold = 0.09000
-        val isDark = luminance < threshold
-        Log.d(TAG, "luminance=$luminance, threshold=$threshold, isDark=$isDark")
-        return isDark
-    }
-
-    private fun lightUpColor(color: Int): Int {
-        return Color.HSVToColor(FloatArray(3).apply {
-            Color.colorToHSV(color, this)
-            this[2] *= 2.0f
-        })
-    }
-
     private fun openWebLink(webUrl: String) {
         val launchWebIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
         startActivity(launchWebIntent)
@@ -340,7 +321,9 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
     }
 
     override fun setImageResource(image: Drawable) {
+        Log.d(TAG, "${UUID.randomUUID()} setImageResource(), invoked")
         mediaViewModel.calcDominantColor(image) { color ->
+            Log.d(TAG, "${UUID.randomUUID()} setImageResource(), color=$color")
             mediaViewModel.setDominantColor(color)
         }
     }
@@ -354,7 +337,6 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
             ratingBar.progressTintList = tintColor
             ratingBar.progressBackgroundTintList = tintColor
             ratingBar.secondaryProgressTintList = tintColor
-
         }
     }
 
