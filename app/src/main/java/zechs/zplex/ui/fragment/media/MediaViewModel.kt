@@ -132,22 +132,27 @@ class MediaViewModel(
         val page = 1
         val movieResponse = async { tmdbRepository.getMovie(tmdbId) }
         val movie = movieResponse.await()
+        var isCompany = false
 
         if (movie.isSuccessful && movie.body() != null) {
             movie.body()!!.production_companies?.let {
                 if (it.isNotEmpty()) {
+                    isCompany = true
+
                     val moreFromCompany = async {
                         tmdbRepository.getMoviesFromCompany(
                             it[0].id, page
                         )
                     }
-                    val handleTvResponse = handleMovieResponse(
+                    val handleMovieResponse = handleMovieResponse(
                         movie, moreFromCompany.await()
                     )
-                    _mediaResponse.postValue(Event(handleTvResponse))
+                    _mediaResponse.postValue(Event(handleMovieResponse))
                 }
             }
-        } else {
+        }
+
+        if (!isCompany) {
             _mediaResponse.postValue(Event(handleMovieResponse(movie, null)))
         }
     }
@@ -158,10 +163,12 @@ class MediaViewModel(
         val page = 1
         val tvResponse = async { tmdbRepository.getShow(tmdbId) }
         val tv = tvResponse.await()
+        var isCompany = false
 
         if (tv.isSuccessful && tv.body() != null) {
             tv.body()!!.production_companies?.let {
                 if (it.isNotEmpty()) {
+                    isCompany = true
                     val moreFromCompany = async {
                         tmdbRepository.getShowsFromCompany(
                             it[0].id, page
@@ -173,7 +180,9 @@ class MediaViewModel(
                     _mediaResponse.postValue(Event(handleTvResponse))
                 }
             }
-        } else {
+        }
+
+        if (!isCompany) {
             _mediaResponse.postValue(Event(handleTvResponse(tv, null)))
         }
     }
