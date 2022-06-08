@@ -13,6 +13,7 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.widget.ListPopupWindow
 import androidx.constraintlayout.widget.Constraints
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -22,6 +23,11 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.databinding.FragmentBrowseBinding
@@ -29,14 +35,21 @@ import zechs.zplex.models.enum.MediaType
 import zechs.zplex.models.enum.Order
 import zechs.zplex.models.enum.SortBy
 import zechs.zplex.models.tmdb.entities.Media
+import zechs.zplex.models.tmdb.keyword.TmdbKeyword
 import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.dialog.FiltersDialog
 import zechs.zplex.ui.fragment.shared_viewmodels.FiltersViewModel
+import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
+import zechs.zplex.utils.Keyboard
 import zechs.zplex.utils.Resource
 
 class BrowseFragment : BaseFragment() {
+
+    companion object {
+        const val TAG = "BrowseFragment"
+    }
 
     private var _binding: FragmentBrowseBinding? = null
     private val binding get() = _binding!!
@@ -49,7 +62,6 @@ class BrowseFragment : BaseFragment() {
 
     private var isLoading = true
     private var isLastPage = true
-    private val thisTAG = "BrowseFragment"
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,9 +79,31 @@ class BrowseFragment : BaseFragment() {
         setupRecyclerView()
         setupFiltersObservers()
         setupBrowseObservers()
+        setupKeywordsObserver()
 
         binding.btnFilters.setOnClickListener {
             context?.let { it1 -> showFiltersDialog(it1) }
+        }
+    }
+
+    private fun keywordSearch(textInputLayout: TextInputLayout) {
+        var job: Job? = null
+        textInputLayout.apply {
+            this.requestFocus()
+            Keyboard.show(this)
+            editText!!.addTextChangedListener { editable ->
+                job?.cancel()
+                job = MainScope().launch {
+                    delay(SEARCH_DELAY_AMOUNT)
+                    editable?.let {
+                        val query = it.toString()
+                        if (query.isNotEmpty()) {
+                            browseViewModel.getSearch(query)
+                        }
+                        Log.d(TAG, "Search query=${query}")
+                    }
+                }
+            }
         }
     }
 
@@ -79,6 +113,18 @@ class BrowseFragment : BaseFragment() {
                 is Resource.Success -> response.data?.let { onSuccess(it) }
                 is Resource.Error -> response.message?.let { onError(it) }
                 is Resource.Loading -> isLoading = true
+            }
+        }
+    }
+
+    private fun setupKeywordsObserver() {
+        browseViewModel.keywordsList.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let {
+                if (it.isNotEmpty() && ::filtersDialog.isInitialized) {
+                    setupKeywordList(requireContext(), filtersDialog, it)
+                }
+                Log.d(TAG, "Keywords list: $it")
+                Log.d(TAG, "FiltersDialog isInitialized=${::filtersDialog.isInitialized}")
             }
         }
     }
@@ -108,7 +154,7 @@ class BrowseFragment : BaseFragment() {
 
     private fun onError(message: String) {
         val errorMsg = message.ifEmpty { resources.getString(R.string.something_went_wrong) }
-        Log.e(thisTAG, errorMsg)
+        Log.e(TAG, errorMsg)
         binding.apply {
             pbBrowse.isVisible = true
             rvBrowse.isVisible = false
@@ -268,6 +314,9 @@ class BrowseFragment : BaseFragment() {
         val mediaChipGroup = filtersDialog.findViewById<ChipGroup>(R.id.chipGroup_media)
         val genreMenu = filtersDialog.findViewById<MaterialButton>(R.id.genre_menu)
         val sortMenu = filtersDialog.findViewById<MaterialButton>(R.id.sort_menu)
+        val tfKeyword = filtersDialog.findViewById<TextInputLayout>(R.id.tf_keyword)
+
+        keywordSearch(tfKeyword)
 
         val currentFilters = filterModel.getFilter()
         val moviesGenreList = getMovieGenre().keys.toList()
@@ -442,5 +491,43 @@ class BrowseFragment : BaseFragment() {
         }
 
         sortMenu.setOnClickListener { listPopupSortBy.show() }
+    }
+
+    private fun setupKeywordList(
+        context: Context, filtersDialog: FiltersDialog,
+        keywordList: List<TmdbKeyword>,
+    ) {
+
+        val tfKeyword = filtersDialog.findViewById<TextInputLayout>(R.id.tf_keyword)
+
+        val listPopupKeyword = ListPopupWindow(
+            context, null,
+            R.attr.listPopupWindowStyle
+        )
+
+        listPopupKeyword.setAdapter(null)
+
+        val adapter = ArrayAdapter(
+            context,
+            R.layout.item_dropdown,
+            keywordList.map { it.name }
+        )
+
+        listPopupKeyword.apply {
+            isModal = true
+            anchorView = tfKeyword
+            setAdapter(adapter)
+
+            setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
+                val keyword = keywordList[position]
+                listPopupKeyword.dismiss()
+                Log.d(TAG, "Selected keyword=$keyword")
+            }
+
+            setOnDismissListener {
+                browseViewModel.clearKeywordList()
+            }
+
+        }.also { it.show() }
     }
 }
