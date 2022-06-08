@@ -4,13 +4,14 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import zechs.zplex.R
-import zechs.zplex.adapter.shared_adapters.detailed_media.DetailedMediaAdapter
+import zechs.zplex.adapter.SearchAdapter
+import zechs.zplex.adapter.shared_adapters.media.MediaAdapter
 import zechs.zplex.databinding.ItemCastHeaderBinding
 import zechs.zplex.databinding.ItemCastMetaBinding
 import zechs.zplex.databinding.ItemHeadingBinding
@@ -135,20 +136,32 @@ sealed class CastViewHolder(
         castDataAdapter: CastDataAdapter
     ) : CastViewHolder(context, itemBinding) {
 
-        private val detailedMediaBinding by lazy {
-            DetailedMediaAdapter {
-                castDataAdapter.setOnClickListener.invoke(it)
+        private val mediaAdapter by lazy {
+            SearchAdapter().also {
+                it.setOnItemClickListener { media, _, _ ->
+                    castDataAdapter.setOnClickListener.invoke(media)
+                }
             }
         }
 
         fun bindAppearedIn(item: CastDataModel.AppearsIn) {
-            itemBinding.rvList.apply {
-                adapter = detailedMediaBinding
-                layoutManager = LinearLayoutManager(
-                    context, LinearLayoutManager.VERTICAL, false
-                )
+            val gridLayoutManager = object : GridLayoutManager(
+                context, 3
+            ) {
+                override fun checkLayoutParams(
+                    lp: RecyclerView.LayoutParams?
+                ) = lp?.let {
+                    it.width = (0.30 * width).toInt()
+                    true
+                } ?: super.checkLayoutParams(lp)
             }
-            detailedMediaBinding.submitList(item.appearsIn)
+
+            itemBinding.rvList.apply {
+                adapter = mediaAdapter
+                layoutManager = gridLayoutManager
+            }
+
+            mediaAdapter.differ.submitList(item.appearsIn)
         }
     }
 }
