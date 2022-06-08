@@ -151,4 +151,10 @@ class TmdbRepository(
         person_id = person_id
     )
 
+    suspend fun searchKeyword(
+        query: String
+    ) = RetrofitInstance.tmdbApi.searchKeyword(
+        query = query
+    )
+
 }

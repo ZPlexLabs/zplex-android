@@ -7,6 +7,7 @@ import retrofit2.http.Query
 import zechs.zplex.models.enum.MediaType
 import zechs.zplex.models.tmdb.collection.CollectionsResponse
 import zechs.zplex.models.tmdb.entities.Episode
+import zechs.zplex.models.tmdb.keyword.KeywordResponse
 import zechs.zplex.models.tmdb.media.MovieResponse
 import zechs.zplex.models.tmdb.media.TvResponse
 import zechs.zplex.models.tmdb.person.PersonResponse
@@ -217,5 +218,14 @@ interface TmdbAPI {
         @Query("append_to_response")
         append_to_response: String = "combined_credits"
     ): Response<PersonResponse>
+
+
+    @GET("3/search/keyword")
+    suspend fun searchKeyword(
+        @Query("query")
+        query: String,
+        @Query("api_key")
+        api_key: String = TMDB_API_KEY
+    ): Response<KeywordResponse>
 
 }
