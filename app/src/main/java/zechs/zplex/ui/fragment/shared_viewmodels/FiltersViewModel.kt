@@ -7,6 +7,7 @@ import zechs.zplex.models.dataclass.FilterArgs
 import zechs.zplex.models.enum.MediaType
 import zechs.zplex.models.enum.Order
 import zechs.zplex.models.enum.SortBy
+import zechs.zplex.models.tmdb.keyword.TmdbKeyword
 
 
 class FiltersViewModel : ViewModel() {
@@ -30,7 +31,7 @@ class FiltersViewModel : ViewModel() {
         sortBy: SortBy,
         order: Order,
         page: Int,
-        withKeyword: Int?,
+        withKeyword: List<TmdbKeyword>?,
         withGenres: Int?
     ) {
         val update = FilterArgs(mediaType, sortBy, order, page, withKeyword, withGenres)

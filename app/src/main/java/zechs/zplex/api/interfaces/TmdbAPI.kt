@@ -134,7 +134,7 @@ interface TmdbAPI {
         @Query("page")
         page: Int,
         @Query("with_keywords")
-        with_keywords: Int?,
+        with_keywords: String?,
         @Query("with_genres")
         with_genres: Int?,
         @Query("include_adult")

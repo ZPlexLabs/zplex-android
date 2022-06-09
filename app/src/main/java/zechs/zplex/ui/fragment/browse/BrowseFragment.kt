@@ -13,9 +13,11 @@ import android.widget.ArrayAdapter
 import android.widget.EditText
 import androidx.appcompat.widget.ListPopupWindow
 import androidx.constraintlayout.widget.Constraints
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -319,44 +321,60 @@ class BrowseFragment : BaseFragment() {
         val genreMenu = filtersDialog.findViewById<MaterialButton>(R.id.genre_menu)
         val sortMenu = filtersDialog.findViewById<MaterialButton>(R.id.sort_menu)
         val etKeyword = filtersDialog.findViewById<EditText>(R.id.etKeyword)
+        val keywordGroup = filtersDialog.findViewById<ChipGroup>(R.id.chipGroupKeywords)
 
         keywordSearch(etKeyword)
 
         val currentFilters = filterModel.getFilter()
         val moviesGenreList = getMovieGenre().keys.toList()
         val tvGenreList = getTvGenre().keys.toList()
+        val keywordLayout = currentFilters?.withKeyword
 
-        if (currentFilters != null) {
-            when (currentFilters.mediaType) {
-                MediaType.movie -> {
-                    val movieChip = filtersDialog.findViewById<Chip>(R.id.chip_movie)
-                    val tvChip = filtersDialog.findViewById<Chip>(R.id.chip_tv)
-                    movieChip.isChecked = true
-                    tvChip.isChecked = false
-                    setupGenresMenu(context, filtersDialog, moviesGenreList)
-                    if (currentFilters.withGenres == null) {
-                        genreMenu.text = getString(R.string.select_genre)
-                    } else {
-                        genreMenu.text = getGenre(currentFilters.withGenres, getMovieGenre())
-                    }
-                }
-                MediaType.tv -> {
-                    val movieChip = filtersDialog.findViewById<Chip>(R.id.chip_movie)
-                    val tvChip = filtersDialog.findViewById<Chip>(R.id.chip_tv)
-                    movieChip.isChecked = false
-                    tvChip.isChecked = true
-                    setupGenresMenu(context, filtersDialog, tvGenreList)
-                    if (currentFilters.withGenres == null) {
-                        genreMenu.text = getString(R.string.select_genre)
-                    } else {
-                        genreMenu.text = getGenre(currentFilters.withGenres, getTvGenre())
-                    }
+        lifecycleScope.launch {
+            keywordGroup.removeAllViews()
+            keywordLayout?.let {
+                it.forEach { keyword ->
+                    addChip(
+                        requireContext(),
+                        keyword,
+                        dialogRoot,
+                        keywordGroup,
+                    )
                 }
             }
-            sortMenu.text = getSort(currentFilters.sortBy.name)
-        }
 
-        setupSortMenu(context, filtersDialog)
+
+            if (currentFilters != null) {
+                when (currentFilters.mediaType) {
+                    MediaType.movie -> {
+                        val movieChip = filtersDialog.findViewById<Chip>(R.id.chip_movie)
+                        val tvChip = filtersDialog.findViewById<Chip>(R.id.chip_tv)
+                        movieChip.isChecked = true
+                        tvChip.isChecked = false
+                        setupGenresMenu(context, filtersDialog, moviesGenreList)
+                        if (currentFilters.withGenres == null) {
+                            genreMenu.text = getString(R.string.select_genre)
+                        } else {
+                            genreMenu.text = getGenre(currentFilters.withGenres, getMovieGenre())
+                        }
+                    }
+                    MediaType.tv -> {
+                        val movieChip = filtersDialog.findViewById<Chip>(R.id.chip_movie)
+                        val tvChip = filtersDialog.findViewById<Chip>(R.id.chip_tv)
+                        movieChip.isChecked = false
+                        tvChip.isChecked = true
+                        setupGenresMenu(context, filtersDialog, tvGenreList)
+                        if (currentFilters.withGenres == null) {
+                            genreMenu.text = getString(R.string.select_genre)
+                        } else {
+                            genreMenu.text = getGenre(currentFilters.withGenres, getTvGenre())
+                        }
+                    }
+                }
+                sortMenu.text = getSort(currentFilters.sortBy.name)
+            }
+            setupSortMenu(context, filtersDialog)
+        }
 
         mediaChipGroup.setOnCheckedChangeListener { group, checkedId ->
             TransitionManager.beginDelayedTransition(dialogRoot)
@@ -408,12 +426,21 @@ class BrowseFragment : BaseFragment() {
                 else -> MediaType.movie
             }
 
+            val keywords = keywordGroup.children.toList().map {
+                it as Chip
+            }.map {
+                TmdbKeyword(
+                    id = Integer.parseInt(it.tag.toString()),
+                    name = it.text.toString()
+                )
+            }
+
             filterModel.setFilter(
                 mediaType = mediaType,
                 sortBy = sortBy,
                 order = Order.desc,
                 page = 1,
-                withKeyword = null,
+                withKeyword = keywords.ifEmpty { null },
                 withGenres = genre
             )
             filtersDialog.dismiss()

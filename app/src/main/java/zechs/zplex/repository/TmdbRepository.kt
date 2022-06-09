@@ -1,5 +1,7 @@
 package zechs.zplex.repository
 
+import android.util.Log
+import retrofit2.Response
 import zechs.zplex.api.RetrofitInstance
 import zechs.zplex.db.WatchlistDatabase
 import zechs.zplex.models.dataclass.Movie
@@ -7,6 +9,8 @@ import zechs.zplex.models.dataclass.Show
 import zechs.zplex.models.enum.MediaType
 import zechs.zplex.models.enum.Order
 import zechs.zplex.models.enum.SortBy
+import zechs.zplex.models.tmdb.keyword.TmdbKeyword
+import zechs.zplex.models.tmdb.search.SearchResponse
 
 class TmdbRepository(
     private val db: WatchlistDatabase
@@ -107,15 +111,25 @@ class TmdbRepository(
         sortBy: SortBy,
         order: Order,
         page: Int,
-        withKeyword: Int?,
+        withKeyword: List<TmdbKeyword>?,
         withGenres: Int?,
-    ) = RetrofitInstance.tmdbApi.getBrowse(
-        media_type = mediaType,
-        sort_by = "${sortBy.name}.${order.name}",
-        page = page,
-        with_keywords = withKeyword,
-        with_genres = withGenres,
-    )
+    ): Response<SearchResponse> {
+        val keywords = try {
+            withKeyword
+                ?.map { keyword -> keyword.id }
+                ?.joinToString(separator = ",")
+        } catch (e: Exception) {
+            Log.d("TmdbRepository", e.message ?: "Unable to parse keywords")
+            null
+        }
+        return RetrofitInstance.tmdbApi.getBrowse(
+            media_type = mediaType,
+            sort_by = "${sortBy.name}.${order.name}",
+            page = page,
+            with_keywords = keywords,
+            with_genres = withGenres,
+        )
+    }
 
     suspend fun getInTheatres(
         dateStart: String, dateEnd: String
