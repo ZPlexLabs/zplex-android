@@ -9,8 +9,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import zechs.zplex.R
 import zechs.zplex.adapter.SeasonsAdapter
+import zechs.zplex.adapter.list.ListDataModel
 import zechs.zplex.databinding.FragmentListBinding
-import zechs.zplex.models.TmdbList
 import zechs.zplex.models.tmdb.entities.Season
 import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.fragment.shared_viewmodels.SeasonViewModel
@@ -57,14 +57,14 @@ class FragmentList : BaseFragment() {
 
         listViewModel.listArgs.observe(viewLifecycleOwner) { tmdbList ->
             when (tmdbList) {
-                is TmdbList.Seasons -> handleSeason(tmdbList)
+                is ListDataModel.Seasons -> handleSeason(tmdbList)
                 else -> {}
             }
         }
 
     }
 
-    private fun handleSeason(it: TmdbList.Seasons) {
+    private fun handleSeason(it: ListDataModel.Seasons) {
         binding.toolbar.apply {
             title = "Seasons"
             subtitle = it.showName
@@ -76,6 +76,7 @@ class FragmentList : BaseFragment() {
         showPoster = it.showPoster
 
         getSeasonList(it.seasons)
+
     }
 
     private fun getSeasonList(seasonList: List<Season>) {

@@ -1,4 +1,4 @@
-package zechs.zplex.models
+package zechs.zplex.adapter.list
 
 import androidx.annotation.Keep
 import zechs.zplex.models.tmdb.entities.Cast
@@ -6,7 +6,7 @@ import zechs.zplex.models.tmdb.entities.Season
 import zechs.zplex.models.tmdb.entities.Video
 import zechs.zplex.ui.tmdbMedia
 
-sealed class TmdbList {
+sealed class ListDataModel {
 
     @Keep
     data class Seasons(
@@ -14,24 +14,21 @@ sealed class TmdbList {
         val showName: String,
         val showPoster: String?,
         val seasons: List<Season>
-    ) : TmdbList()
+    ) : ListDataModel()
 
     @Keep
     data class Media(
-        val heading: String,
         val media: List<tmdbMedia>
-    ) : TmdbList()
+    ) : ListDataModel()
 
     @Keep
     data class Casts(
-        val heading: String,
         val casts: List<Cast>
-    ) : TmdbList()
+    ) : ListDataModel()
 
     @Keep
     data class Videos(
-        val heading: String,
         val videos: List<Video>
-    ) : TmdbList()
+    ) : ListDataModel()
 
 }
