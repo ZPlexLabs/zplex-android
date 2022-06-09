@@ -1,7 +1,6 @@
 package zechs.zplex.ui.fragment.list
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,8 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import zechs.zplex.R
 import zechs.zplex.adapter.SeasonsAdapter
 import zechs.zplex.databinding.FragmentListBinding
-import zechs.zplex.models.dataclass.ListArgs
-import zechs.zplex.models.tmdb.entities.Cast
+import zechs.zplex.models.TmdbList
 import zechs.zplex.models.tmdb.entities.Season
 import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.fragment.shared_viewmodels.SeasonViewModel
@@ -57,41 +55,34 @@ class FragmentList : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentListBinding.bind(view)
 
-        listViewModel.listArgs.observe(viewLifecycleOwner) {
-            binding.toolbar.apply {
-                setNavigationOnClickListener { findNavController().navigateUp() }
-                subtitle = it.showName
-            }
-
-            tmdbId = it.tmdbId
-            showName = it.showName
-            showPoster = it.showPoster
-
-            if (it.castList == null && it.seasonList != null) {
-                getSeasonList(it.seasonList)
-            } else if (it.castList != null && it.seasonList == null) {
-                getCastList(it.castList)
-            } else {
-                throwError(it)
+        listViewModel.listArgs.observe(viewLifecycleOwner) { tmdbList ->
+            when (tmdbList) {
+                is TmdbList.Seasons -> handleSeason(tmdbList)
+                else -> {}
             }
         }
 
     }
 
+    private fun handleSeason(it: TmdbList.Seasons) {
+        binding.toolbar.apply {
+            title = "Seasons"
+            subtitle = it.showName
+            setNavigationOnClickListener { findNavController().navigateUp() }
+        }
+
+        tmdbId = it.tmdbId
+        showName = it.showName
+        showPoster = it.showPoster
+
+        getSeasonList(it.seasons)
+    }
 
     private fun getSeasonList(seasonList: List<Season>) {
-        binding.toolbar.title = "Seasons"
         setupSeasonRecyclerView()
         seasonsAdapter.differ.submitList(seasonList)
     }
 
-    private fun getCastList(castList: List<Cast>) {
-        TODO("Not yet implemented")
-    }
-
-    private fun throwError(listArgs: ListArgs) {
-        Log.d(thisTAG, "[ERROR] ListArgs=$listArgs")
-    }
 
     private fun setupSeasonRecyclerView() {
         binding.rvList.apply {

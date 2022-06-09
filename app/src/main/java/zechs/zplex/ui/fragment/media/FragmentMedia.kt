@@ -265,11 +265,10 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
 
     private fun setSeasonsList(seasons: List<Season>) {
         if (tmdbId != null && showName != null) {
-            listViewModel.setListArgs(
+            listViewModel.setSeasonsList(
                 tmdbId!!,
                 showName!!,
                 showPoster,
-                casts = null,
                 seasons = seasons
             )
             findNavController().navigate(R.id.action_fragmentMedia_to_fragmentList)
@@ -277,16 +276,8 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
     }
 
     private fun setCastsList(casts: List<Cast>) {
-        if (tmdbId != null && showName != null) {
-            listViewModel.setListArgs(
-                tmdbId!!,
-                showName!!,
-                showPoster,
-                casts = casts,
-                seasons = null
-            )
-            findNavController().navigateSafe(R.id.action_fragmentMedia_to_fragmentList)
-        }
+        listViewModel.setCasts(casts = casts)
+        findNavController().navigateSafe(R.id.action_fragmentMedia_to_fragmentList)
     }
 
     private fun navigateToCollection(collectionId: Int) {

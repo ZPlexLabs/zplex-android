@@ -3,24 +3,31 @@ package zechs.zplex.ui.fragment.list
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import zechs.zplex.models.dataclass.ListArgs
+import zechs.zplex.models.TmdbList
 import zechs.zplex.models.tmdb.entities.Cast
 import zechs.zplex.models.tmdb.entities.Season
 
 class ListViewModel : ViewModel() {
 
-    private val _listArgs = MutableLiveData<ListArgs>()
-    val listArgs: LiveData<ListArgs> get() = _listArgs
+    private val _listArgs = MutableLiveData<TmdbList>()
+    val listArgs: LiveData<TmdbList> get() = _listArgs
 
-    fun setListArgs(
+    fun setSeasonsList(
         tmdbId: Int,
         showName: String,
         showPoster: String?,
-        casts: List<Cast>?,
-        seasons: List<Season>?
+        seasons: List<Season>
     ) {
-        val update = ListArgs(tmdbId, showName, showPoster, casts, seasons)
+        val update = TmdbList.Seasons(tmdbId, showName, showPoster, seasons)
         if (_listArgs.value == update) return
         _listArgs.value = update
     }
+
+
+    fun setCasts(casts: List<Cast>) {
+        val update = TmdbList.Casts(heading = "Casts", casts = casts)
+        if (_listArgs.value == update) return
+        _listArgs.value = update
+    }
+
 }
