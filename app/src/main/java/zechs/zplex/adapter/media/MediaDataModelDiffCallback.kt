@@ -8,9 +8,6 @@ class MediaDataModelDiffCallback : DiffUtil.ItemCallback<MediaDataModel>() {
         oldItem: MediaDataModel,
         newItem: MediaDataModel
     ): Boolean = when {
-        oldItem is MediaDataModel.Heading && newItem
-                is MediaDataModel.Heading && oldItem.heading == newItem.heading
-        -> true
 
         oldItem is MediaDataModel.Header && newItem
                 is MediaDataModel.Header && oldItem.backdropPath == newItem.backdropPath

@@ -11,11 +11,6 @@ import zechs.zplex.models.tmdb.entities.Video
 sealed class MediaDataModel {
 
     @Keep
-    data class Heading(
-        val heading: String
-    ) : MediaDataModel()
-
-    @Keep
     data class Header(
         val backdropPath: String?,
         val posterPath: String?,
@@ -62,21 +57,25 @@ sealed class MediaDataModel {
 
     @Keep
     data class Casts(
+        val heading: String,
         val casts: List<Cast>
     ) : MediaDataModel()
 
     @Keep
     data class Recommendations(
+        val heading: String,
         val recommendations: List<Media>
     ) : MediaDataModel()
 
     @Keep
     data class MoreFromCompany(
+        val heading: String,
         val more: List<Media>
     ) : MediaDataModel()
 
     @Keep
     data class Videos(
+        val heading: String,
         val videos: List<Video>
     ) : MediaDataModel()
 

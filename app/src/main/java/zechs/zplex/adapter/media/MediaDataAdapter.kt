@@ -16,14 +16,6 @@ class MediaDataAdapter(
         parent: ViewGroup, viewType: Int
     ): MediaViewHolder {
 
-        val headingViewHolder = MediaViewHolder.HeadingViewHolder(
-            context = context,
-            itemBinding = ItemHeadingBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent, false
-            )
-        )
-
         val headerViewHolder = MediaViewHolder.HeaderViewHolder(
             context = context,
             itemBinding = ItemMediaHeaderBinding.inflate(
@@ -70,7 +62,7 @@ class MediaDataAdapter(
 
         val listViewHolder = MediaViewHolder.ListViewHolder(
             context = context,
-            itemBinding = ItemListBinding.inflate(
+            itemBinding = ItemListWithHeadingBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false
             ),
@@ -78,13 +70,12 @@ class MediaDataAdapter(
         )
 
         return when (viewType) {
-            R.layout.item_heading -> headingViewHolder
             R.layout.item_media_header -> headerViewHolder
             R.layout.item_media_title -> titleViewHolder
             R.layout.item_media_season -> lastSeasonViewHolder
             R.layout.item_media_collection -> partOfCollectionViewHolder
             R.layout.item_media_buttons -> buttonViewHolder
-            R.layout.item_list -> listViewHolder
+            R.layout.item_list_with_heading -> listViewHolder
             else -> throw IllegalArgumentException("Invalid view type")
         }
     }
@@ -93,7 +84,6 @@ class MediaDataAdapter(
         val item = getItem(position)
 
         when (holder) {
-            is MediaViewHolder.HeadingViewHolder -> holder.bind(item as MediaDataModel.Heading)
             is MediaViewHolder.HeaderViewHolder -> holder.bind(item as MediaDataModel.Header)
             is MediaViewHolder.TitleViewHolder -> holder.bind(item as MediaDataModel.Title)
             is MediaViewHolder.LatestSeasonViewHolder -> holder.bind(item as MediaDataModel.LatestSeason)
@@ -119,7 +109,6 @@ class MediaDataAdapter(
 
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
-            is MediaDataModel.Heading -> R.layout.item_heading
             is MediaDataModel.Header -> R.layout.item_media_header
             is MediaDataModel.Title -> R.layout.item_media_title
             is MediaDataModel.LatestSeason -> R.layout.item_media_season
@@ -133,7 +122,7 @@ class MediaDataAdapter(
             is MediaDataModel.Recommendations,
             is MediaDataModel.MoreFromCompany,
             is MediaDataModel.Videos
-            -> R.layout.item_list
+            -> R.layout.item_list_with_heading
         }
     }
 }

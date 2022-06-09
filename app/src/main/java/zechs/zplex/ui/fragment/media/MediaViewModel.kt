@@ -290,10 +290,10 @@ class MediaViewModel(
             result.credits.cast?.let {
                 if (it.isNotEmpty()) {
                     mediaDataModel.add(
-                        MediaDataModel.Heading(heading = "Casts")
-                    )
-                    mediaDataModel.add(
-                        MediaDataModel.Casts(casts = it)
+                        MediaDataModel.Casts(
+                            heading = "Casts",
+                            casts = it
+                        )
                     )
                 }
             }
@@ -301,10 +301,10 @@ class MediaViewModel(
             result.recommendations?.results?.let {
                 if (it.isNotEmpty() && it.size >= 3) {
                     mediaDataModel.add(
-                        MediaDataModel.Heading(heading = "Recommendations")
-                    )
-                    mediaDataModel.add(
-                        MediaDataModel.Recommendations(recommendations = it)
+                        MediaDataModel.Recommendations(
+                            heading = "Recommendations",
+                            recommendations = it
+                        )
                     )
                 }
             }
@@ -315,11 +315,10 @@ class MediaViewModel(
                     val studio = result.production_companies!![0].name!!
 
                     mediaDataModel.add(
-                        MediaDataModel.Heading(heading = "More from $studio")
-                    )
-
-                    mediaDataModel.add(
-                        MediaDataModel.MoreFromCompany(more = mediaList)
+                        MediaDataModel.MoreFromCompany(
+                            heading = "More from $studio",
+                            more = mediaList
+                        )
                     )
 
                 }
@@ -328,10 +327,10 @@ class MediaViewModel(
             result.videos?.results?.let {
                 if (it.isNotEmpty()) {
                     mediaDataModel.add(
-                        MediaDataModel.Heading(heading = "Related videos")
-                    )
-                    mediaDataModel.add(
-                        MediaDataModel.Videos(videos = it)
+                        MediaDataModel.Videos(
+                            heading = "Related videos",
+                            videos = it
+                        )
                     )
                 }
             }
@@ -412,10 +411,10 @@ class MediaViewModel(
             result.credits.cast?.let {
                 if (it.isNotEmpty()) {
                     mediaDataModel.add(
-                        MediaDataModel.Heading(heading = "Casts")
-                    )
-                    mediaDataModel.add(
-                        MediaDataModel.Casts(casts = it)
+                        MediaDataModel.Casts(
+                            heading = "Casts",
+                            casts = it
+                        )
                     )
                 }
             }
@@ -423,10 +422,10 @@ class MediaViewModel(
             result.recommendations?.results?.let {
                 if (it.isNotEmpty() && it.size >= 3) {
                     mediaDataModel.add(
-                        MediaDataModel.Heading(heading = "Recommendations")
-                    )
-                    mediaDataModel.add(
-                        MediaDataModel.Recommendations(recommendations = it)
+                        MediaDataModel.Recommendations(
+                            heading = "Recommendations",
+                            recommendations = it
+                        )
                     )
                 }
             }
@@ -435,11 +434,12 @@ class MediaViewModel(
                 val mediaList = company.body()!!.results
                 if (mediaList.isNotEmpty() && mediaList.size >= 3) {
                     val studio = result.production_companies!![0].name!!
+
                     mediaDataModel.add(
-                        MediaDataModel.Heading(heading = "More from $studio")
-                    )
-                    mediaDataModel.add(
-                        MediaDataModel.MoreFromCompany(more = mediaList)
+                        MediaDataModel.MoreFromCompany(
+                            heading = "More from $studio",
+                            more = mediaList
+                        )
                     )
                 }
             }
@@ -447,10 +447,10 @@ class MediaViewModel(
             result.videos?.results?.let {
                 if (it.isNotEmpty()) {
                     mediaDataModel.add(
-                        MediaDataModel.Heading(heading = "Related videos")
-                    )
-                    mediaDataModel.add(
-                        MediaDataModel.Videos(videos = it)
+                        MediaDataModel.Videos(
+                            heading = "Related videos",
+                            videos = it
+                        )
                     )
                 }
             }

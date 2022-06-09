@@ -28,15 +28,6 @@ sealed class MediaViewHolder(
     binding: ViewBinding
 ) : RecyclerView.ViewHolder(binding.root) {
 
-    class HeadingViewHolder(
-        context: Context,
-        private val itemBinding: ItemHeadingBinding
-    ) : MediaViewHolder(context, itemBinding) {
-        fun bind(item: MediaDataModel.Heading) {
-            itemBinding.tvText.text = item.heading
-        }
-    }
-
     class HeaderViewHolder(
         context: Context,
         private val itemBinding: ItemMediaHeaderBinding,
@@ -242,7 +233,7 @@ sealed class MediaViewHolder(
 
     class ListViewHolder(
         context: Context,
-        private val itemBinding: ItemListBinding,
+        private val itemBinding: ItemListWithHeadingBinding,
         mediaDataAdapter: MediaDataAdapter
     ) : MediaViewHolder(context, itemBinding) {
 
@@ -264,18 +255,32 @@ sealed class MediaViewHolder(
         }
 
         fun bindRecommendations(item: MediaDataModel.Recommendations) {
-            itemBinding.rvList.apply {
-                adapter = mediaAdapter
-                layoutManager = linearLayoutManager
+            itemBinding.apply {
+                tvText.text = item.heading
+                btnViewAll.apply {
+                    isInvisible = false
+                    setOnClickListener { }
+                }
+                rvList.apply {
+                    adapter = mediaAdapter
+                    layoutManager = linearLayoutManager
+                }
             }
 
             mediaAdapter.submitList(item.recommendations)
         }
 
         fun bindMoreFromCompany(item: MediaDataModel.MoreFromCompany) {
-            itemBinding.rvList.apply {
-                adapter = mediaAdapter
-                layoutManager = linearLayoutManager
+            itemBinding.apply {
+                tvText.text = item.heading
+                btnViewAll.apply {
+                    isInvisible = false
+                    setOnClickListener { }
+                }
+                rvList.apply {
+                    adapter = mediaAdapter
+                    layoutManager = linearLayoutManager
+                }
             }
 
             mediaAdapter.submitList(item.more)
@@ -288,11 +293,17 @@ sealed class MediaViewHolder(
         }
 
         fun bindCasts(item: MediaDataModel.Casts) {
-            itemBinding.rvList.apply {
-                adapter = castAdapter
-                layoutManager = linearLayoutManager
+            itemBinding.apply {
+                tvText.text = item.heading
+                btnViewAll.apply {
+                    isInvisible = false
+                    setOnClickListener { }
+                }
+                rvList.apply {
+                    adapter = castAdapter
+                    layoutManager = linearLayoutManager
+                }
             }
-
             castAdapter.submitList(item.casts)
         }
 
@@ -303,11 +314,18 @@ sealed class MediaViewHolder(
         }
 
         fun bindVideos(item: MediaDataModel.Videos) {
-            itemBinding.rvList.apply {
-                adapter = videoAdapter
-                layoutManager = LinearLayoutManager(
-                    context, LinearLayoutManager.HORIZONTAL, false
-                )
+            itemBinding.apply {
+                tvText.text = item.heading
+                btnViewAll.apply {
+                    isInvisible = false
+                    setOnClickListener { }
+                }
+                rvList.apply {
+                    adapter = videoAdapter
+                    layoutManager = LinearLayoutManager(
+                        context, LinearLayoutManager.HORIZONTAL, false
+                    )
+                }
             }
 
             videoAdapter.submitList(item.videos)
