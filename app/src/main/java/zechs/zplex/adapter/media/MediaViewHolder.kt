@@ -13,6 +13,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import zechs.zplex.R
+import zechs.zplex.adapter.list.ListDataModel
 import zechs.zplex.adapter.shared_adapters.casts.CastAdapter
 import zechs.zplex.adapter.shared_adapters.media.MediaAdapter
 import zechs.zplex.adapter.shared_adapters.video.VideoAdapter
@@ -234,7 +235,7 @@ sealed class MediaViewHolder(
     class ListViewHolder(
         context: Context,
         private val itemBinding: ItemListWithHeadingBinding,
-        mediaDataAdapter: MediaDataAdapter
+        private val mediaDataAdapter: MediaDataAdapter
     ) : MediaViewHolder(context, itemBinding) {
 
         private val mediaAdapter by lazy {
@@ -259,7 +260,14 @@ sealed class MediaViewHolder(
                 tvText.text = item.heading
                 btnViewAll.apply {
                     isInvisible = false
-                    setOnClickListener { }
+                    setOnClickListener {
+                        mediaDataAdapter.mediaClickListener.onClickViewAll(
+                            ListDataModel.Media(
+                                heading = item.heading,
+                                media = item.recommendations
+                            )
+                        )
+                    }
                 }
                 rvList.apply {
                     adapter = mediaAdapter
@@ -275,7 +283,14 @@ sealed class MediaViewHolder(
                 tvText.text = item.heading
                 btnViewAll.apply {
                     isInvisible = false
-                    setOnClickListener { }
+                    setOnClickListener {
+                        mediaDataAdapter.mediaClickListener.onClickViewAll(
+                            ListDataModel.Media(
+                                heading = item.heading,
+                                media = item.more
+                            )
+                        )
+                    }
                 }
                 rvList.apply {
                     adapter = mediaAdapter
@@ -297,7 +312,11 @@ sealed class MediaViewHolder(
                 tvText.text = item.heading
                 btnViewAll.apply {
                     isInvisible = false
-                    setOnClickListener { }
+                    setOnClickListener {
+                        mediaDataAdapter.mediaClickListener.onClickViewAll(
+                            ListDataModel.Casts(item.casts)
+                        )
+                    }
                 }
                 rvList.apply {
                     adapter = castAdapter
@@ -318,7 +337,11 @@ sealed class MediaViewHolder(
                 tvText.text = item.heading
                 btnViewAll.apply {
                     isInvisible = false
-                    setOnClickListener { }
+                    setOnClickListener {
+                        mediaDataAdapter.mediaClickListener.onClickViewAll(
+                            ListDataModel.Videos(item.videos)
+                        )
+                    }
                 }
                 rvList.apply {
                     adapter = videoAdapter

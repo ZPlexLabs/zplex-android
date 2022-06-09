@@ -18,6 +18,7 @@ sealed class ListDataModel {
 
     @Keep
     data class Media(
+        val heading: String,
         val media: List<tmdbMedia>
     ) : ListDataModel()
 

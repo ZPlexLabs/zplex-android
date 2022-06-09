@@ -80,12 +80,21 @@ class ListViewHolder(
         }
     }
 
+    private val linearLayoutManager = object : LinearLayoutManager(
+        context, VERTICAL, false
+    ) {
+        override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
+            return lp?.let {
+                it.bottomMargin = 50
+                true
+            } ?: super.checkLayoutParams(lp)
+        }
+    }
+
     fun bindVideo(item: ListDataModel.Videos) {
         itemBinding.rvList.apply {
             adapter = videoAdapter
-            layoutManager = LinearLayoutManager(
-                context, LinearLayoutManager.VERTICAL, false
-            )
+            layoutManager = linearLayoutManager
         }
         videoAdapter.submitList(item.videos)
     }

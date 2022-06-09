@@ -3,6 +3,7 @@ package zechs.zplex.adapter.media
 import android.graphics.drawable.Drawable
 import android.widget.RatingBar
 import com.google.android.material.button.MaterialButton
+import zechs.zplex.adapter.list.ListDataModel
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
 import zechs.zplex.models.tmdb.entities.Cast
@@ -11,6 +12,8 @@ import zechs.zplex.models.tmdb.entities.Season
 import zechs.zplex.models.tmdb.entities.Video
 
 interface MediaClickListener {
+
+    fun onClickViewAll(listDataModel: ListDataModel)
 
     fun onClickMedia(media: Media)
     fun onClickVideo(video: Video)

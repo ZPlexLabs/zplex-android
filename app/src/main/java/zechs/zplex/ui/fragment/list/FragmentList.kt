@@ -1,23 +1,30 @@
 package zechs.zplex.ui.fragment.list
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import kotlinx.coroutines.launch
 import zechs.zplex.R
-import zechs.zplex.adapter.SeasonsAdapter
+import zechs.zplex.adapter.list.ListClickListener
+import zechs.zplex.adapter.list.ListDataAdapter
 import zechs.zplex.adapter.list.ListDataModel
 import zechs.zplex.databinding.FragmentListBinding
+import zechs.zplex.models.tmdb.entities.Cast
+import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.models.tmdb.entities.Season
+import zechs.zplex.models.tmdb.entities.Video
 import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.fragment.shared_viewmodels.SeasonViewModel
+import zechs.zplex.utils.navigateSafe
 
-class FragmentList : BaseFragment() {
-
-    private val thisTAG = "FragmentList"
+class FragmentList : BaseFragment(), ListClickListener {
 
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
@@ -25,21 +32,10 @@ class FragmentList : BaseFragment() {
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
     private val listViewModel by activityViewModels<ListViewModel>()
 
-    private var tmdbId: Int? = null
-    private var showPoster: String? = null
-    private var showName: String? = null
-
-    private val seasonsAdapter by lazy {
-        SeasonsAdapter(showName!!) {
-            navigateToSeason(
-                tmdbId = tmdbId!!,
-                seasonName = it.name,
-                seasonNumber = it.season_number,
-                showName = showName!!,
-                posterPath = it.poster_path,
-                showPoster = showPoster
-            )
-        }
+    private val listAdapter by lazy {
+        ListDataAdapter(
+            listClickListener = this@FragmentList
+        )
     }
 
     override fun onCreateView(
@@ -55,64 +51,135 @@ class FragmentList : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentListBinding.bind(view)
 
-        listViewModel.listArgs.observe(viewLifecycleOwner) { tmdbList ->
-            when (tmdbList) {
-                is ListDataModel.Seasons -> handleSeason(tmdbList)
-                else -> {}
+        setupRecyclerView()
+        setupListsObserver()
+    }
+
+    private fun setupListsObserver() {
+        listViewModel.listArgs.observe(viewLifecycleOwner) {
+            when (it) {
+                is ListDataModel.Seasons -> handleSeason(it)
+                is ListDataModel.Casts -> handleCasts(it)
+                is ListDataModel.Media -> handleMedia(it)
+                is ListDataModel.Videos -> handleVideo(it)
             }
         }
-
     }
 
     private fun handleSeason(it: ListDataModel.Seasons) {
         binding.toolbar.apply {
             title = "Seasons"
             subtitle = it.showName
-            setNavigationOnClickListener { findNavController().navigateUp() }
+            setNavigationOnClickListener {
+                findNavController().navigateUp()
+            }
         }
 
-        tmdbId = it.tmdbId
-        showName = it.showName
-        showPoster = it.showPoster
-
-        getSeasonList(it.seasons)
-
+        lifecycleScope.launch {
+            listAdapter.submitList(listOf(it))
+        }
     }
 
-    private fun getSeasonList(seasonList: List<Season>) {
-        setupSeasonRecyclerView()
-        seasonsAdapter.differ.submitList(seasonList)
+    private fun handleCasts(it: ListDataModel.Casts) {
+        binding.toolbar.apply {
+            title = "Casts"
+            isTitleCentered = false
+            setNavigationOnClickListener {
+                findNavController().navigateUp()
+            }
+        }
+
+        listAdapter.submitList(listOf(it))
     }
 
+    private fun handleMedia(it: ListDataModel.Media) {
+        binding.toolbar.apply {
+            title = it.heading
+            isTitleCentered = false
+            setNavigationOnClickListener {
+                findNavController().navigateUp()
+            }
+        }
 
-    private fun setupSeasonRecyclerView() {
+        listAdapter.submitList(listOf(it))
+    }
+
+    private fun handleVideo(it: ListDataModel.Videos) {
+        binding.toolbar.apply {
+            title = "More videos"
+            isTitleCentered = false
+            setNavigationOnClickListener {
+                findNavController().navigateUp()
+            }
+        }
+
+        listAdapter.submitList(listOf(it))
+    }
+
+    private fun setupRecyclerView() {
         binding.rvList.apply {
-            adapter = seasonsAdapter
+            adapter = listAdapter
             layoutManager = LinearLayoutManager(
                 activity, LinearLayoutManager.VERTICAL, false
             )
         }
     }
 
+    override fun onClickSeason(season: Season) {
+        listViewModel.listArgs.observe(viewLifecycleOwner) {
+            when (it) {
+                is ListDataModel.Seasons -> {
+                    navigateToSeason(
+                        tmdbId = it.tmdbId,
+                        seasonName = season.name,
+                        seasonNumber = season.season_number,
+                        showName = it.showName,
+                        posterPath = season.poster_path,
+                        showPoster = it.showPoster
+                    )
+                }
+                else -> {}
+            }
+        }
+
+    }
+
+    override fun onClickMedia(media: Media) {
+        val action = FragmentListDirections.actionFragmentListToFragmentMedia(media)
+        findNavController().navigateSafe(action)
+    }
+
+    override fun onClickCast(cast: Cast) {
+        val action = FragmentListDirections.actionFragmentListToCastsFragment(cast)
+        findNavController().navigateSafe(action)
+    }
+
+    override fun onClickVideo(video: Video) {
+        openWebLink(video.watchUrl)
+    }
+
     private fun navigateToSeason(
-        tmdbId: Int?,
+        tmdbId: Int,
         seasonName: String,
         seasonNumber: Int,
         showName: String?,
         posterPath: String?,
         showPoster: String?
     ) {
-        tmdbId?.let {
-            seasonViewModel.setShowSeason(
-                tmdbId = it,
-                seasonName = seasonName,
-                seasonNumber = seasonNumber,
-                showName = showName ?: "Unknown",
-                seasonPosterPath = posterPath,
-                showPoster = showPoster
-            )
-            findNavController().navigate(R.id.action_fragmentList_to_episodesListFragment)
-        }
+        seasonViewModel.setShowSeason(
+            tmdbId = tmdbId,
+            seasonName = seasonName,
+            seasonNumber = seasonNumber,
+            showName = showName ?: "Unknown",
+            seasonPosterPath = posterPath,
+            showPoster = showPoster
+        )
+        findNavController().navigate(R.id.action_fragmentList_to_episodesListFragment)
+    }
+
+    private fun openWebLink(webUrl: String) {
+        val launchWebIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
+        startActivity(launchWebIntent)
     }
 
     override fun onDestroy() {

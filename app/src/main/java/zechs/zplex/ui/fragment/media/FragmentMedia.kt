@@ -27,6 +27,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.coroutines.launch
 import zechs.zplex.R
+import zechs.zplex.adapter.list.ListDataModel
 import zechs.zplex.adapter.media.MediaClickListener
 import zechs.zplex.adapter.media.MediaDataAdapter
 import zechs.zplex.adapter.media.MediaDataModel
@@ -280,6 +281,16 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
         findNavController().navigateSafe(R.id.action_fragmentMedia_to_fragmentList)
     }
 
+    private fun setMediaList(heading: String, media: List<Media>) {
+        listViewModel.setMedia(heading, media)
+        findNavController().navigateSafe(R.id.action_fragmentMedia_to_fragmentList)
+    }
+
+    private fun setVideoList(videos: List<Video>) {
+        listViewModel.setVideo(videos)
+        findNavController().navigateSafe(R.id.action_fragmentMedia_to_fragmentList)
+    }
+
     private fun navigateToCollection(collectionId: Int) {
         val action = FragmentMediaDirections.actionFragmentMediaToFragmentCollection(collectionId)
         findNavController().navigateSafe(action)
@@ -295,6 +306,15 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
             message ?: resources.getString(R.string.something_went_wrong),
             Toast.LENGTH_SHORT
         ).show()
+    }
+
+    override fun onClickViewAll(listDataModel: ListDataModel) {
+        when (listDataModel) {
+            is ListDataModel.Casts -> setCastsList(listDataModel.casts)
+            is ListDataModel.Media -> setMediaList(listDataModel.heading, listDataModel.media)
+            is ListDataModel.Videos -> setVideoList(listDataModel.videos)
+            else -> {}
+        }
     }
 
     override fun onClickMedia(media: Media) {

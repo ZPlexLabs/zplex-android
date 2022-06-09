@@ -145,6 +145,12 @@
         <action
             android:id="@+id/action_fragmentList_to_episodesListFragment"
             app:destination="@id/episodesListFragment" />
+        <action
+            android:id="@+id/action_fragmentList_to_fragmentMedia"
+            app:destination="@id/fragmentMedia" />
+        <action
+            android:id="@+id/action_fragmentList_to_castsFragment"
+            app:destination="@id/castsFragment" />
     </fragment>
     <fragment
         android:id="@+id/fragmentCollection"

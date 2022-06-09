@@ -27,8 +27,8 @@ class ListViewModel : ViewModel() {
         setList(ListDataModel.Casts(casts = casts))
     }
 
-    fun setMedia(media: List<Media>) {
-        setList(ListDataModel.Media(media))
+    fun setMedia(heading: String, media: List<Media>) {
+        setList(ListDataModel.Media(heading, media))
     }
 
     fun setVideo(video: List<Video>) {
