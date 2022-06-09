@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import androidx.appcompat.widget.ListPopupWindow
 import androidx.constraintlayout.widget.Constraints
 import androidx.core.view.isVisible
@@ -44,6 +45,7 @@ import zechs.zplex.ui.fragment.shared_viewmodels.FiltersViewModel
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
 import zechs.zplex.utils.Keyboard
 import zechs.zplex.utils.Resource
+import zechs.zplex.utils.navigateSafe
 
 class BrowseFragment : BaseFragment() {
 
@@ -86,12 +88,10 @@ class BrowseFragment : BaseFragment() {
         }
     }
 
-    private fun keywordSearch(textInputLayout: TextInputLayout) {
+    private fun keywordSearch(editText: EditText) {
         var job: Job? = null
-        textInputLayout.apply {
-            this.requestFocus()
-            Keyboard.show(this)
-            editText!!.addTextChangedListener { editable ->
+        editText.apply {
+            addTextChangedListener { editable ->
                 job?.cancel()
                 job = MainScope().launch {
                     delay(SEARCH_DELAY_AMOUNT)
@@ -103,6 +103,10 @@ class BrowseFragment : BaseFragment() {
                         Log.d(TAG, "Search query=${query}")
                     }
                 }
+            }
+            setOnClickListener {
+                this.requestFocus()
+                Keyboard.show(it)
             }
         }
     }
@@ -282,7 +286,7 @@ class BrowseFragment : BaseFragment() {
         val action = BrowseFragmentDirections.actionDiscoverFragmentToFragmentMedia(
             media.copy(media_type = mediaType)
         )
-        findNavController().navigate(action)
+        findNavController().navigateSafe(action)
     }
 
     override fun onDestroyView() {
@@ -314,9 +318,9 @@ class BrowseFragment : BaseFragment() {
         val mediaChipGroup = filtersDialog.findViewById<ChipGroup>(R.id.chipGroup_media)
         val genreMenu = filtersDialog.findViewById<MaterialButton>(R.id.genre_menu)
         val sortMenu = filtersDialog.findViewById<MaterialButton>(R.id.sort_menu)
-        val tfKeyword = filtersDialog.findViewById<TextInputLayout>(R.id.tf_keyword)
+        val etKeyword = filtersDialog.findViewById<EditText>(R.id.etKeyword)
 
-        keywordSearch(tfKeyword)
+        keywordSearch(etKeyword)
 
         val currentFilters = filterModel.getFilter()
         val moviesGenreList = getMovieGenre().keys.toList()
@@ -497,8 +501,10 @@ class BrowseFragment : BaseFragment() {
         context: Context, filtersDialog: FiltersDialog,
         keywordList: List<TmdbKeyword>,
     ) {
-
+        val dialogRoot = filtersDialog.findViewById<MaterialCardView>(R.id.dialog_root)
         val tfKeyword = filtersDialog.findViewById<TextInputLayout>(R.id.tf_keyword)
+        val etKeyword = filtersDialog.findViewById<EditText>(R.id.etKeyword)
+        val keywordChips = filtersDialog.findViewById<ChipGroup>(R.id.chipGroupKeywords)
 
         val listPopupKeyword = ListPopupWindow(
             context, null,
@@ -520,7 +526,9 @@ class BrowseFragment : BaseFragment() {
 
             setOnItemClickListener { _: AdapterView<*>?, _: View?, position: Int, _: Long ->
                 val keyword = keywordList[position]
+                addChip(requireContext(), keyword, dialogRoot, keywordChips)
                 listPopupKeyword.dismiss()
+                etKeyword.text.clear()
                 Log.d(TAG, "Selected keyword=$keyword")
             }
 
@@ -529,5 +537,31 @@ class BrowseFragment : BaseFragment() {
             }
 
         }.also { it.show() }
+    }
+
+    private fun addChip(
+        context: Context,
+        keyword: TmdbKeyword,
+        root: ViewGroup,
+        chipGroup: ChipGroup
+    ) {
+
+        val layoutInflater = context.getSystemService(
+            Context.LAYOUT_INFLATER_SERVICE
+        ) as LayoutInflater
+
+        val mChip = layoutInflater.inflate(
+            R.layout.ic_keyword_chip,
+            root, false
+        ) as Chip
+
+        mChip.text = keyword.name
+        mChip.tag = keyword.id
+
+        mChip.setOnCloseIconClickListener {
+            chipGroup.removeView(mChip)
+        }
+
+        chipGroup.addView(mChip)
     }
 }

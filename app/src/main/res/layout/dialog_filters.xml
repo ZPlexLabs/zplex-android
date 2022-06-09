@@ -18,6 +18,9 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:padding="16sp">
 
         <com.google.android.material.textview.MaterialTextView
@@ -49,7 +52,8 @@
             app:layout_constraintTop_toBottomOf="@+id/tv_title"
             app:selectionRequired="true"
             app:singleLine="true"
-            app:singleSelection="true">
+            app:singleSelection="true"
+            tools:checkedChip="@id/chip_movie">
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_movie"
@@ -93,7 +97,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="8dp"
             android:insetTop="4dp"
             android:insetBottom="2dp"
             android:minHeight="0dp"
@@ -131,7 +135,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginEnd="8dp"
             android:insetTop="4dp"
             android:insetBottom="2dp"
             android:minHeight="0dp"
@@ -153,10 +157,9 @@
             style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="16dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
+            android:layout_marginEnd="8dp"
             app:boxCornerRadiusBottomEnd="8dp"
             app:boxCornerRadiusBottomStart="8dp"
             app:boxCornerRadiusTopEnd="8dp"
@@ -166,6 +169,7 @@
             app:layout_constraintTop_toBottomOf="@+id/sort_menu">
 
             <EditText
+                android:id="@+id/etKeyword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/keyword"
@@ -175,6 +179,20 @@
                 android:maxLines="3" />
 
         </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupKeywords"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tf_keyword"
+            app:selectionRequired="false"
+            app:singleLine="false"
+            app:singleSelection="false" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_apply"
@@ -186,7 +204,7 @@
             android:text="@string/apply"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tf_keyword" />
+            app:layout_constraintTop_toBottomOf="@+id/chipGroupKeywords" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_reset"
