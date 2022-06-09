@@ -5,7 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import zechs.zplex.adapter.list.ListDataModel
 import zechs.zplex.models.tmdb.entities.Cast
+import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.models.tmdb.entities.Season
+import zechs.zplex.models.tmdb.entities.Video
 
 class ListViewModel : ViewModel() {
 
@@ -18,16 +20,24 @@ class ListViewModel : ViewModel() {
         showPoster: String?,
         seasons: List<Season>
     ) {
-        val update = ListDataModel.Seasons(tmdbId, showName, showPoster, seasons)
-        if (_listArgs.value == update) return
-        _listArgs.value = update
+        setList(ListDataModel.Seasons(tmdbId, showName, showPoster, seasons))
     }
 
-
     fun setCasts(casts: List<Cast>) {
-        val update = ListDataModel.Casts(casts = casts)
-        if (_listArgs.value == update) return
-        _listArgs.value = update
+        setList(ListDataModel.Casts(casts = casts))
+    }
+
+    fun setMedia(media: List<Media>) {
+        setList(ListDataModel.Media(media))
+    }
+
+    fun setVideo(video: List<Video>) {
+        setList(ListDataModel.Videos(video))
+    }
+
+    private fun <T : ListDataModel> setList(list: T) {
+        if (_listArgs.value == list) return
+        _listArgs.value = list
     }
 
 }
