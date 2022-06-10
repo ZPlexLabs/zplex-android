@@ -10,7 +10,6 @@ import androidx.viewbinding.ViewBinding
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import zechs.zplex.R
-import zechs.zplex.adapter.SearchAdapter
 import zechs.zplex.adapter.shared_adapters.media.MediaAdapter
 import zechs.zplex.databinding.ItemCastHeaderBinding
 import zechs.zplex.databinding.ItemCastMetaBinding
@@ -137,10 +136,8 @@ sealed class CastViewHolder(
     ) : CastViewHolder(context, itemBinding) {
 
         private val mediaAdapter by lazy {
-            SearchAdapter().also {
-                it.setOnItemClickListener { media, _, _ ->
-                    castDataAdapter.setOnClickListener.invoke(media)
-                }
+            MediaAdapter(rating = true) {
+                castDataAdapter.setOnClickListener.invoke(it)
             }
         }
 
@@ -161,7 +158,7 @@ sealed class CastViewHolder(
                 layoutManager = gridLayoutManager
             }
 
-            mediaAdapter.differ.submitList(item.appearsIn)
+            mediaAdapter.submitList(item.appearsIn)
         }
     }
 }

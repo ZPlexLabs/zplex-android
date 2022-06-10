@@ -7,6 +7,7 @@ import zechs.zplex.databinding.ItemMediaBinding
 import zechs.zplex.models.tmdb.entities.Media
 
 class MediaAdapter(
+    val rating: Boolean = false,
     val mediaOnClick: (Media) -> Unit
 ) : ListAdapter<Media, MediaViewHolder>(MediaItemDiffCallback()) {
 

@@ -67,7 +67,7 @@
         android:paddingTop="72dp"
         android:paddingEnd="16dp"
         tools:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        tools:listitem="@layout/item_season"
+        tools:listitem="@layout/item_media"
         tools:spanCount="3" />
 
     <ProgressBar

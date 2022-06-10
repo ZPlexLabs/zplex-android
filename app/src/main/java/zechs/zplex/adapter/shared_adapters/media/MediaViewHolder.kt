@@ -1,5 +1,6 @@
 package zechs.zplex.adapter.shared_adapters.media
 
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.R
 import zechs.zplex.databinding.ItemMediaBinding
@@ -21,14 +22,24 @@ class MediaViewHolder(
             "${TMDB_IMAGE_PREFIX}/${PosterSize.w342}${media.poster_path}"
         }
 
-        itemBinding.itemPoster.apply {
-            GlideApp.with(this)
-                .load(mediaPosterUrl)
-                .placeholder(R.drawable.no_poster)
-                .into(this)
+        val rating = "${media.vote_average?.div(2) ?: 0.0}"
 
-            setOnClickListener {
-                mediaAdapter.mediaOnClick.invoke(media)
+        itemBinding.apply {
+            seasonNumber.text = media.name ?: media.title
+            episodeCount.text = rating.take(3)
+            if (mediaAdapter.rating) {
+                ratingView.isVisible = true
+            }
+
+            itemPoster.apply {
+                GlideApp.with(this)
+                    .load(mediaPosterUrl)
+                    .placeholder(R.drawable.no_poster)
+                    .into(this)
+
+                setOnClickListener {
+                    mediaAdapter.mediaOnClick.invoke(media)
+                }
             }
         }
 

@@ -9,23 +9,23 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import zechs.zplex.R
-import zechs.zplex.adapter.SearchAdapter
+import zechs.zplex.adapter.shared_adapters.media.MediaAdapter
 import zechs.zplex.databinding.FragmentMyShowsBinding
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
+import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.activity.main.MainActivity
+import zechs.zplex.utils.navigateSafe
 
 
 class MyShowsFragment : BaseFragment() {
@@ -38,7 +38,13 @@ class MyShowsFragment : BaseFragment() {
     private val binding get() = _binding!!
 
     private lateinit var myShowsViewModel: MyShowsViewModel
-    private val showsAdapter by lazy { SearchAdapter() }
+    private val mediaAdapter by lazy {
+        MediaAdapter(
+            rating = true,
+            mediaOnClick = { navigateToMedia(it) }
+        )
+    }
+
     private var selectedTabIndex = 0
 
     override fun onCreateView(
@@ -91,7 +97,7 @@ class MyShowsFragment : BaseFragment() {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val position = viewHolder.adapterPosition
-                val media = showsAdapter.differ.currentList[position]
+                val media = mediaAdapter.currentList[position]
 
                 val bottomNavView = activity?.findViewById(
                     R.id.bottomNavigationView
@@ -179,7 +185,7 @@ class MyShowsFragment : BaseFragment() {
     private fun observeMovies() {
         myShowsViewModel.movies.observe(viewLifecycleOwner) { media ->
             handleLibrary(media)
-            showsAdapter.differ.submitList(media.map { it.toMedia() })
+            mediaAdapter.submitList(media.map { it.toMedia() })
         }
         myShowsViewModel.shows.removeObservers(viewLifecycleOwner)
     }
@@ -187,7 +193,7 @@ class MyShowsFragment : BaseFragment() {
     private fun observeShows() {
         myShowsViewModel.shows.observe(viewLifecycleOwner) { media ->
             handleLibrary(media)
-            showsAdapter.differ.submitList(media.map { it.toMedia() })
+            mediaAdapter.submitList(media.map { it.toMedia() })
         }
 
         myShowsViewModel.movies.removeObservers(viewLifecycleOwner)
@@ -224,18 +230,14 @@ class MyShowsFragment : BaseFragment() {
         }
 
         binding.rvMyShows.apply {
-            adapter = showsAdapter
+            adapter = mediaAdapter
             layoutManager = gridLayoutManager
-            showsAdapter.setOnItemClickListener { media, view, _ ->
-                val action = MyShowsFragmentDirections.actionMyShowsFragmentToFragmentMedia(media)
-                val posterView = view.findViewById<MaterialCardView>(R.id.image_card)
-                val extras = FragmentNavigatorExtras(posterView to posterView.transitionName)
-
-                Log.d("showsAdapter", posterView.transitionName)
-
-                findNavController().navigate(action, extras)
-            }
         }
+    }
+
+    private fun navigateToMedia(media: Media) {
+        val action = MyShowsFragmentDirections.actionMyShowsFragmentToFragmentMedia(media)
+        findNavController().navigateSafe(action)
     }
 
     override fun onDestroyView() {

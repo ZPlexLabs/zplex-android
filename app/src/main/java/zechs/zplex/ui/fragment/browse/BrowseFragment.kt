@@ -32,7 +32,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import zechs.zplex.R
-import zechs.zplex.adapter.SearchAdapter
+import zechs.zplex.adapter.shared_adapters.media.MediaAdapter
 import zechs.zplex.databinding.FragmentBrowseBinding
 import zechs.zplex.models.enum.MediaType
 import zechs.zplex.models.enum.Order
@@ -62,7 +62,12 @@ class BrowseFragment : BaseFragment() {
     private lateinit var browseViewModel: BrowseViewModel
     private lateinit var filtersDialog: FiltersDialog
 
-    private val browseAdapter by lazy { SearchAdapter() }
+    private val browseAdapter by lazy {
+        MediaAdapter(
+            rating = true,
+            mediaOnClick = { navigateToMedia(it) }
+        )
+    }
 
     private var isLoading = true
     private var isLastPage = true
@@ -141,7 +146,7 @@ class BrowseFragment : BaseFragment() {
             rvBrowse.isVisible = true
         }
 
-        browseAdapter.differ.submitList(showsResponse.results.toList())
+        browseAdapter.submitList(showsResponse.results.toList())
         isLastPage = showsResponse.page == showsResponse.total_pages
 
         isLoading = false
@@ -207,9 +212,6 @@ class BrowseFragment : BaseFragment() {
             adapter = browseAdapter
             layoutManager = GridLayoutManager(activity, 3)
             addOnScrollListener(this@BrowseFragment.scrollListener)
-        }
-        browseAdapter.setOnItemClickListener { media, _, _ ->
-            navigateMedia(media)
         }
     }
 
@@ -279,7 +281,7 @@ class BrowseFragment : BaseFragment() {
         return genres.filterValues { it == key }.keys.elementAt(0)
     }
 
-    private fun navigateMedia(media: Media) {
+    private fun navigateToMedia(media: Media) {
         val mediaType = when {
             media.name == null -> "movie"
             media.title == null -> "tv"

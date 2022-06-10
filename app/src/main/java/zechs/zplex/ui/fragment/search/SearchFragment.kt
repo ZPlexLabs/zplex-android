@@ -17,8 +17,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import zechs.zplex.adapter.SearchAdapter
+import zechs.zplex.adapter.shared_adapters.media.MediaAdapter
 import zechs.zplex.databinding.FragmentSearchBinding
+import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
 import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
@@ -39,7 +40,12 @@ class SearchFragment : BaseFragment() {
 
     private lateinit var searchViewModel: SearchViewModel
 
-    private val searchAdapter by lazy { SearchAdapter() }
+    private val searchAdapter by lazy {
+        MediaAdapter(
+            rating = true,
+            mediaOnClick = { navigateToMedia(it) }
+        )
+    }
     private var queryText = ""
     private var isLoading = true
     var isLastPage = false
@@ -105,7 +111,7 @@ class SearchFragment : BaseFragment() {
                         }
 
                         lifecycleScope.launch {
-                            searchAdapter.differ.submitList(searchList.toList())
+                            searchAdapter.submitList(searchList.toList())
                         }
                         isLoading = false
                     }
@@ -155,12 +161,12 @@ class SearchFragment : BaseFragment() {
             layoutManager = GridLayoutManager(activity, 3)
             addOnScrollListener(this@SearchFragment.scrollListener)
         }
+    }
 
-        searchAdapter.setOnItemClickListener { media, _, _ ->
-            Keyboard.hide(binding.searchBar)
-            val action = SearchFragmentDirections.actionSearchFragmentToFragmentMedia(media)
-            findNavController().navigateSafe(action)
-        }
+    private fun navigateToMedia(media: Media) {
+        Keyboard.hide(binding.searchBar)
+        val action = SearchFragmentDirections.actionSearchFragmentToFragmentMedia(media)
+        findNavController().navigateSafe(action)
     }
 
     override fun onDestroyView() {
