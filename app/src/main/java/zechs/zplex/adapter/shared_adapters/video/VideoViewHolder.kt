@@ -1,7 +1,6 @@
 package zechs.zplex.adapter.shared_adapters.video
 
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_video.view.*
 import zechs.zplex.R
 import zechs.zplex.databinding.ItemVideoBinding
 import zechs.zplex.models.tmdb.entities.Video
@@ -19,7 +18,7 @@ class VideoViewHolder(
                 GlideApp.with(this)
                     .load(video.thumbUrl)
                     .placeholder(R.drawable.no_thumb)
-                    .into(iv_backdrop)
+                    .into(ivBackdrop)
             }
 
             tvSource.text = video.site

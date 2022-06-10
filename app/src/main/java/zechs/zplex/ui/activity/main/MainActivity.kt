@@ -34,10 +34,10 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import com.google.firebase.remoteconfig.ktx.remoteConfig
 import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.launch
 import zechs.zplex.BuildConfig
 import zechs.zplex.R
+import zechs.zplex.databinding.ActivityMainBinding
 import zechs.zplex.db.WatchlistDatabase
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.repository.TmdbRepository
@@ -71,6 +71,8 @@ import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
 
     private lateinit var navController: NavController
 
@@ -153,13 +155,15 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+
+        setContentView(binding.root)
 
         val navHostFragment = supportFragmentManager.findFragmentById(
             R.id.mainNavHostFragment
         ) as NavHostFragment
         navController = navHostFragment.navController
-        bottomNavigationView.setupWithNavController(navController)
+        binding.bottomNavigationView.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
@@ -167,10 +171,10 @@ class MainActivity : AppCompatActivity() {
                 R.id.episodesListFragment, R.id.fragmentList,
                 R.id.fragmentCollection, R.id.shareBottomSheet,
                 R.id.watchFragment, R.id.bigImageFragment -> {
-                    hideSlideDown(bottomNavigationView)
+                    hideSlideDown(binding.bottomNavigationView)
                 }
                 else -> {
-                    showSlideUp(bottomNavigationView)
+                    showSlideUp(binding.bottomNavigationView)
                 }
             }
         }
