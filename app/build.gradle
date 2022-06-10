@@ -1,3 +1,5 @@
+import com.android.build.OutputFile
+
 plugins {
     id "com.android.application"
     id "com.google.gms.google-services"
@@ -66,7 +68,7 @@ android {
     android.applicationVariants.all { variant ->
         variant.outputs.each { output ->
             output.versionCodeOverride = project.ext.versionCodes.get(
-                    output.getFilter(com.android.build.OutputFile.ABI), 0
+                    output.getFilter(OutputFile.ABI), 0
             ) + android.defaultConfig.versionCode
         }
     }
@@ -122,11 +124,13 @@ dependencies {
 
 
     // Room
-    implementation "androidx.room:room-runtime:2.4.2"
-    kapt "androidx.room:room-compiler:2.4.2"
+    def room_version = "2.4.2"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
 
     // Kotlin Extensions and Coroutines support for Room
-    implementation "androidx.room:room-ktx:2.4.2"
+    implementation "androidx.room:room-ktx:$room_version"
 
     // Coroutine Lifecycle Scopes
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1"
