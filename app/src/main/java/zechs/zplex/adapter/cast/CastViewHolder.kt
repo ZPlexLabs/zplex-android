@@ -143,12 +143,12 @@ sealed class CastViewHolder(
 
         fun bindAppearedIn(item: CastDataModel.AppearsIn) {
             val gridLayoutManager = object : GridLayoutManager(
-                context, 3
+                context, 2, HORIZONTAL, false
             ) {
                 override fun checkLayoutParams(
                     lp: RecyclerView.LayoutParams?
                 ) = lp?.let {
-                    it.width = (0.30 * width).toInt()
+                    it.width = (0.28 * width).toInt()
                     true
                 } ?: super.checkLayoutParams(lp)
             }
