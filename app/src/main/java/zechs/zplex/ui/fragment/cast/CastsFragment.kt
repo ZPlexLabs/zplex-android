@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.core.view.isInvisible
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.FragmentNavigatorExtras
@@ -14,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import zechs.zplex.R
 import zechs.zplex.adapter.cast.CastDataAdapter
@@ -104,7 +104,7 @@ class CastsFragment : BaseFragment() {
                         hasLoaded = true
                     }
                     is Resource.Error -> {
-                        showToast(response.message)
+                        showSnackBar(response.message)
                         binding.rvList.isInvisible = true
                     }
                     is Resource.Loading -> if (!hasLoaded) {
@@ -131,11 +131,11 @@ class CastsFragment : BaseFragment() {
         }
     }
 
-    private fun showToast(message: String?) {
-        Toast.makeText(
-            context,
+    private fun showSnackBar(message: String?) {
+        Snackbar.make(
+            binding.root,
             message ?: resources.getString(R.string.something_went_wrong),
-            Toast.LENGTH_SHORT
+            Snackbar.LENGTH_SHORT
         ).show()
     }
 
