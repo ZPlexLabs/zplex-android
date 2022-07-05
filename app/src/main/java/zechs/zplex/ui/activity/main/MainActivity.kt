@@ -1,13 +1,7 @@
 package zechs.zplex.ui.activity.main
 
-import android.annotation.SuppressLint
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
-import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -19,7 +13,6 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -27,15 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.ktx.messaging
-import com.google.firebase.remoteconfig.ktx.remoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfigSettings
 import kotlinx.coroutines.launch
-import zechs.zplex.BuildConfig
 import zechs.zplex.R
 import zechs.zplex.databinding.ActivityMainBinding
 import zechs.zplex.db.WatchlistDatabase
@@ -63,11 +48,7 @@ import zechs.zplex.ui.fragment.upcoming.UpcomingViewModel
 import zechs.zplex.ui.fragment.upcoming.UpcomingViewModelProviderFactory
 import zechs.zplex.ui.fragment.watch.WatchViewModel
 import zechs.zplex.ui.fragment.watch.WatchViewModelProviderFactory
-import zechs.zplex.utils.Constants.DRIVE_ZPLEX_RELEASES
 import zechs.zplex.utils.Constants.THEMOVIEDB_ID_REGEX
-import zechs.zplex.utils.Constants.VERSION_CODE_KEY
-import zechs.zplex.utils.NotificationKeys
-import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -179,8 +160,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
-        setupFirebase()
         doOnIntent(intent)
     }
 
@@ -212,90 +191,6 @@ class MainActivity : AppCompatActivity() {
             }
             view.isGone = true
         }
-    }
-
-    private fun setupFirebase() = lifecycleScope.launch {
-        @SuppressLint("HardwareIds")
-        val deviceId: String = if (BuildConfig.DEBUG) {
-            "ZPLEX_TEST_CHANNEL"
-        } else "ZPLEX_NEW_RELEASES"
-
-        val firebaseDefaultMap = HashMap<String, Any>()
-        firebaseDefaultMap[VERSION_CODE_KEY] = BuildConfig.VERSION_CODE
-
-        Firebase.apply {
-            crashlytics.apply { setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG) }
-            analytics.apply { setAnalyticsCollectionEnabled(!BuildConfig.DEBUG) }
-            messaging.apply { subscribeToTopic(deviceId) }
-
-            remoteConfig.apply {
-                remoteConfigSettings {
-                    minimumFetchIntervalInSeconds = 3600
-                }
-                setDefaultsAsync(firebaseDefaultMap)
-                fetch(0)
-                fetchAndActivate().addOnCompleteListener(firebaseOnCompleteListener)
-            }
-        }
-    }
-
-    private val firebaseOnCompleteListener = OnCompleteListener<Boolean> {
-        if (it.isSuccessful) {
-            val latestAppVersion = Firebase.remoteConfig.getDouble(VERSION_CODE_KEY).toInt()
-            if (latestAppVersion > BuildConfig.VERSION_CODE) {
-                showUpdateNotification()
-            }
-            Log.d(
-                "firebaseOnCompleteListener",
-                "Update=${latestAppVersion > BuildConfig.VERSION_CODE}"
-            )
-        }
-    }
-
-    private fun showUpdateNotification() {
-        val requestCode = Random().nextInt()
-
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse(DRIVE_ZPLEX_RELEASES)
-        }
-
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent, PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val defaultSoundUri = RingtoneManager.getDefaultUri(
-            RingtoneManager.TYPE_NOTIFICATION
-        )
-
-        val notificationBuilder = NotificationCompat.Builder(
-            this,
-            NotificationKeys.UPDATE_CHANNEL_ID
-        ).apply {
-            setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            setSmallIcon(R.drawable.ic_zplex)
-            setContentTitle(getString(R.string.new_version_available))
-            setContentText(getString(R.string.update_msg))
-            setStyle(
-                NotificationCompat
-                    .BigTextStyle()
-                    .bigText(getString(R.string.update_msg))
-            )
-            setAutoCancel(true)
-            setSound(defaultSoundUri)
-            addAction(R.drawable.ic_update_24dp, getString(R.string.update), pendingIntent)
-        }
-        val notificationManager = getSystemService(
-            Context.NOTIFICATION_SERVICE
-        ) as NotificationManager
-
-        val channel = NotificationChannel(
-            NotificationKeys.UPDATE_CHANNEL_ID,
-            NotificationKeys.UPDATE_CHANNEL_NAME,
-            NotificationManager.IMPORTANCE_HIGH
-        )
-
-        notificationManager.createNotificationChannel(channel)
-        notificationManager.notify(requestCode, notificationBuilder.build())
     }
 
     override fun onNewIntent(intent: Intent?) {

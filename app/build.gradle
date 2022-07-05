@@ -2,11 +2,9 @@ import com.android.build.OutputFile
 
 plugins {
     id "com.android.application"
-    id "com.google.gms.google-services"
     id "kotlin-android"
     id "kotlin-kapt"
     id "androidx.navigation.safeargs"
-    id "com.google.firebase.crashlytics"
 }
 
 def gitCommitHash = "git rev-parse --verify --short HEAD".execute().text.trim()
@@ -132,13 +130,13 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
 
     // Coroutine Lifecycle Scopes
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.1"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.0"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.5.0"
 
     // Coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.2"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.2"
 
     // Moshi
     implementation "com.squareup.moshi:moshi:1.13.0"
@@ -159,8 +157,8 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-scalars:2.9.0'
 
     // Navigation Components
-    implementation "androidx.navigation:navigation-fragment-ktx:2.4.2"
-    implementation "androidx.navigation:navigation-ui-ktx:2.4.2"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.5.0"
+    implementation "androidx.navigation:navigation-ui-ktx:2.5.0"
 
     // Glide
     implementation "com.github.bumptech.glide:glide:4.13.2"
