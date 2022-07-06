@@ -2,22 +2,15 @@
 <resources>
     <color name="colorPrimary">#000000</color>
     <color name="colorPrimaryDark">#1E1E22</color>
-    <color name="blackColor_74">#3D000000</color>
     <color name="cardColor">#1B1920</color>
-    <color name="cardColor_50">#8025232A</color>
     <color name="colorAccent">#6750a4</color>
-    <color name="colorAccentDarken">#55487E</color>
     <color name="textColor">#FFFFFF</color>
     <color name="textColor_54">#8AFFFFFF</color>
     <color name="textColor_74">#BDFFFFFF</color>
     <color name="textColor_87">#DEFFFFFF</color>
-    <color name="dark_tint">#40000000</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="green">#3DDC84</color>
-    <color name="shortcut_background">#F5F5F5</color>
 
     <color name="fadedColor">#2a2831</color>
     <color name="statusBarColor">#1c1b1f</color>
+    <color name="md_theme_dark_onPrimaryContainer">#EADDFF</color>
 
 </resources>

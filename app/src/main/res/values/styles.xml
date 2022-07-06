@@ -85,10 +85,6 @@
         <item name="android:textAlignment">center</item>
     </style>
 
-    <style name="BottomNavTextStyle">
-        <item name="fontFamily">@font/open_sans_semibold</item>
-    </style>
-
     <style name="Widget.App.Chip" parent="Widget.MaterialComponents.Chip.Action">
         <item name="chipBackgroundColor">#80000000</item>
         <item name="android:textColor">@color/textColor</item>
@@ -99,17 +95,6 @@
 
 
     <style name="Widget.App.Card" parent="Widget.Material3.CardView.Elevated" />
-
-    <style name="Widget.App.Chip.Choice" parent="Widget.MaterialComponents.Chip.Choice">
-        <item name="fontFamily">@font/open_sans</item>
-        <item name="chipBackgroundColor">@color/chip_bg_color</item>
-        <item name="android:textColor">@color/textColor</item>
-        <item name="chipStrokeWidth">1dp</item>
-        <item name="chipStrokeColor">@color/stroke_tint</item>
-        <item name="checkedIconVisible">false</item>
-        <item name="chipCornerRadius">24dp</item>
-        <item name="shapeAppearanceOverlay">@null</item>
-    </style>
 
 
     <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
@@ -141,24 +126,6 @@
         <item name="android:ellipsize">end</item>
     </style>
 
-    <style name="DialogAnimation">
-        <item name="android:windowEnterAnimation">@android:anim/fade_in</item>
-        <item name="android:windowExitAnimation">@android:anim/slide_out_right</item>
-    </style>
-
-    <style name="RoundCardViewStyle" parent="@style/Widget.MaterialComponents.CardView">
-        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay_card_custom_corners</item>
-    </style>
-
-
-    <style name="ShapeAppearanceOverlay_card_custom_corners" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSizeTopRight">24dp</item>
-        <item name="cornerSizeTopLeft">24dp</item>
-        <item name="cornerSizeBottomRight">0dp</item>
-        <item name="cornerSizeBottomLeft">0dp</item>
-    </style>
-
 
     <style name="AppModalStyle" parent="Widget.Design.BottomSheet.Modal">
         <item name="android:background">@drawable/sheet_background_round</item>
@@ -169,33 +136,6 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-    </style>
-
-    <style name="ButtonToggleGroup" parent="Widget.MaterialComponents.Button.TextButton">
-        <item name="strokeWidth">0dp</item>
-        <item name="android:textSize">18sp</item>
-        <item name="android:textColor">@drawable/toggle_button_selector</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:fontFamily">@font/open_sans_bold</item>
-        <item name="android:insetTop">0dp</item>
-        <item name="android:insetBottom">0dp</item>
-        <item name="android:paddingStart">8dp</item>
-        <item name="android:paddingEnd">8dp</item>
-    </style>
-
-    <style name="MyDenseOutlined" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
-        <item name="materialThemeOverlay">@style/MyThemeOverlayOutlinedDense</item>
-
-    </style>
-
-    <style name="MyThemeOverlayOutlinedDense">
-        <item name="editTextStyle">@style/MyTextInputEditText_outlinedBox_dense_h
-        </item>
-    </style>
-
-    <style name="MyTextInputEditText_outlinedBox_dense_h" parent="@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox.Dense">
-        <item name="android:paddingTop">8dp</item>
-        <item name="android:paddingBottom">8dp</item>
     </style>
 
     <style name="MyListPopupWindow">
