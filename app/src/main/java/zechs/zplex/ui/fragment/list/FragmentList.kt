@@ -53,15 +53,22 @@ class FragmentList : BaseFragment(), ListClickListener {
 
         setupRecyclerView()
         setupListsObserver()
+
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+
     }
 
     private fun setupListsObserver() {
-        listViewModel.listArgs.observe(viewLifecycleOwner) {
-            when (it) {
-                is ListDataModel.Seasons -> handleSeason(it)
-                is ListDataModel.Casts -> handleCasts(it)
-                is ListDataModel.Media -> handleMedia(it)
-                is ListDataModel.Videos -> handleVideo(it)
+        listViewModel.listArgs.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let {
+                when (it) {
+                    is ListDataModel.Seasons -> handleSeason(it)
+                    is ListDataModel.Casts -> handleCasts(it)
+                    is ListDataModel.Media -> handleMedia(it)
+                    is ListDataModel.Videos -> handleVideo(it)
+                }
             }
         }
     }
@@ -70,9 +77,6 @@ class FragmentList : BaseFragment(), ListClickListener {
         binding.toolbar.apply {
             title = "Seasons"
             subtitle = it.showName
-            setNavigationOnClickListener {
-                findNavController().navigateUp()
-            }
         }
 
         lifecycleScope.launch {
@@ -84,9 +88,6 @@ class FragmentList : BaseFragment(), ListClickListener {
         binding.toolbar.apply {
             title = "Casts"
             isTitleCentered = false
-            setNavigationOnClickListener {
-                findNavController().navigateUp()
-            }
         }
 
         listAdapter.submitList(listOf(it))
@@ -96,9 +97,6 @@ class FragmentList : BaseFragment(), ListClickListener {
         binding.toolbar.apply {
             title = it.heading
             isTitleCentered = false
-            setNavigationOnClickListener {
-                findNavController().navigateUp()
-            }
         }
 
         listAdapter.submitList(listOf(it))
@@ -108,9 +106,6 @@ class FragmentList : BaseFragment(), ListClickListener {
         binding.toolbar.apply {
             title = "More videos"
             isTitleCentered = false
-            setNavigationOnClickListener {
-                findNavController().navigateUp()
-            }
         }
 
         listAdapter.submitList(listOf(it))
@@ -126,8 +121,8 @@ class FragmentList : BaseFragment(), ListClickListener {
     }
 
     override fun onClickSeason(season: Season) {
-        listViewModel.listArgs.observe(viewLifecycleOwner) {
-            when (it) {
+        listViewModel.listArgs.observe(viewLifecycleOwner) { event ->
+            when (val it = event.peekContent()) {
                 is ListDataModel.Seasons -> {
                     navigateToSeason(
                         tmdbId = it.tmdbId,
@@ -141,7 +136,6 @@ class FragmentList : BaseFragment(), ListClickListener {
                 else -> {}
             }
         }
-
     }
 
     override fun onClickMedia(media: Media) {

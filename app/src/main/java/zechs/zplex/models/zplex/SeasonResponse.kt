@@ -1,7 +1,7 @@
 package zechs.zplex.models.zplex
 
 import androidx.annotation.Keep
-import zechs.zplex.utils.AESEncryption
+import com.squareup.moshi.Json
 
 @Keep
 data class SeasonResponse(
@@ -10,9 +10,6 @@ data class SeasonResponse(
     val overview: String?,
     val poster_path: String?,
     val season_number: Int,
-    val access_token: String?,
-) {
-    val accessToken
-        get() = access_token?.let { AESEncryption.decrypt(it) }
-
-}
+    @Json(name = "access_token")
+    val accessToken: String?
+)

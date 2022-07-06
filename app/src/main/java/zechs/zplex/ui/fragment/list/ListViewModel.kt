@@ -8,11 +8,12 @@ import zechs.zplex.models.tmdb.entities.Cast
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.models.tmdb.entities.Season
 import zechs.zplex.models.tmdb.entities.Video
+import zechs.zplex.utils.Event
 
 class ListViewModel : ViewModel() {
 
-    private val _listArgs = MutableLiveData<ListDataModel>()
-    val listArgs: LiveData<ListDataModel> get() = _listArgs
+    private val _listArgs = MutableLiveData<Event<ListDataModel>>()
+    val listArgs: LiveData<Event<ListDataModel>> get() = _listArgs
 
     fun setSeasonsList(
         tmdbId: Int,
@@ -36,8 +37,7 @@ class ListViewModel : ViewModel() {
     }
 
     private fun <T : ListDataModel> setList(list: T) {
-        if (_listArgs.value == list) return
-        _listArgs.value = list
+        _listArgs.value = Event(list)
     }
 
 }
