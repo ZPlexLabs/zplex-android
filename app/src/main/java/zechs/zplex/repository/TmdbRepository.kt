@@ -2,8 +2,9 @@ package zechs.zplex.repository
 
 import android.util.Log
 import retrofit2.Response
-import zechs.zplex.api.RetrofitInstance
-import zechs.zplex.db.WatchlistDatabase
+import zechs.zplex.api.TmdbApi
+import zechs.zplex.db.MovieDao
+import zechs.zplex.db.ShowDao
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
 import zechs.zplex.models.enum.MediaType
@@ -11,55 +12,60 @@ import zechs.zplex.models.enum.Order
 import zechs.zplex.models.enum.SortBy
 import zechs.zplex.models.tmdb.keyword.TmdbKeyword
 import zechs.zplex.models.tmdb.search.SearchResponse
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class TmdbRepository(
-    private val db: WatchlistDatabase
+@Singleton
+class TmdbRepository @Inject constructor(
+    private val tmdbApi: TmdbApi,
+    private val movieDao: MovieDao,
+    private val showDao: ShowDao
 ) {
 
     suspend fun upsertMovie(
         movie: Movie
-    ) = db.getMovieDao().upsertMovie(movie)
+    ) = movieDao.upsertMovie(movie)
 
     fun fetchMovie(
         id: Int
-    ) = db.getMovieDao().getMovie(id)
+    ) = movieDao.getMovie(id)
 
     suspend fun deleteMovie(
         movie: Movie
-    ) = db.getMovieDao().deleteMovie(movie)
+    ) = movieDao.deleteMovie(movie)
 
-    fun getSavedMovies() = db.getMovieDao().getAllMovies()
+    fun getSavedMovies() = movieDao.getAllMovies()
 
     suspend fun upsertShow(
         Show: Show
-    ) = db.getShowDao().upsertShow(Show)
+    ) = showDao.upsertShow(Show)
 
     fun fetchShow(
         id: Int
-    ) = db.getShowDao().getShow(id)
+    ) = showDao.getShow(id)
 
     suspend fun deleteShow(
         Show: Show
-    ) = db.getShowDao().deleteShow(Show)
+    ) = showDao.deleteShow(Show)
 
-    fun getSavedShows() = db.getShowDao().getAllShows()
+    fun getSavedShows() = showDao.getAllShows()
 
     suspend fun getShow(
         tvId: Int
-    ) = RetrofitInstance.tmdbApi.getShow(tvId)
+    ) = tmdbApi.getShow(tvId)
 
     suspend fun getMovie(
         movieId: Int
-    ) = RetrofitInstance.tmdbApi.getMovie(movieId)
+    ) = tmdbApi.getMovie(movieId)
 
     suspend fun getSeason(
         tvId: Int,
         seasonNumber: Int
-    ) = RetrofitInstance.tmdbApi.getSeason(tvId, seasonNumber)
+    ) = tmdbApi.getSeason(tvId, seasonNumber)
 
     suspend fun getPopularMovie(
         year: Int,
-    ) = RetrofitInstance.tmdbApi.getDiscover(
+    ) = tmdbApi.getDiscover(
         media_type = "movie",
         sort_by = "popularity.desc",
         page = 1,
@@ -71,7 +77,7 @@ class TmdbRepository(
     suspend fun getPopularShow(
         year: Int,
         keyword: Int?
-    ) = RetrofitInstance.tmdbApi.getDiscover(
+    ) = tmdbApi.getDiscover(
         media_type = "tv",
         sort_by = "popularity.desc",
         page = 1,
@@ -84,27 +90,26 @@ class TmdbRepository(
         tvId: Int,
         seasonNumber: Int,
         episodeNumber: Int
-    ) = RetrofitInstance.tmdbApi.getEpisode(tvId, seasonNumber, episodeNumber)
+    ) = tmdbApi.getEpisode(tvId, seasonNumber, episodeNumber)
 
     suspend fun getSearch(
         query: String,
         page: Int
-    ) = RetrofitInstance.tmdbApi.getSearch(query = query, page = page)
+    ) = tmdbApi.getSearch(query = query, page = page)
 
     suspend fun getCollection(
         collectionId: Int
-    ) = RetrofitInstance.tmdbApi.getCollection(collection_id = collectionId)
+    ) = tmdbApi.getCollection(collection_id = collectionId)
 
     suspend fun getPeople(
         person_id: Int
-    ) = RetrofitInstance.tmdbApi.getPeople(person_id = person_id)
+    ) = tmdbApi.getPeople(person_id = person_id)
 
     suspend fun getTrending(
         time_window: String
-    ) = RetrofitInstance.tmdbApi.getTrending(time_window)
+    ) = tmdbApi.getTrending(time_window)
 
-
-    suspend fun getUpcoming(page: Int) = RetrofitInstance.tmdbApi.getUpcoming(page = page)
+    suspend fun getUpcoming(page: Int) = tmdbApi.getUpcoming(page = page)
 
     suspend fun getBrowse(
         mediaType: MediaType,
@@ -122,7 +127,7 @@ class TmdbRepository(
             Log.d("TmdbRepository", e.message ?: "Unable to parse keywords")
             null
         }
-        return RetrofitInstance.tmdbApi.getBrowse(
+        return tmdbApi.getBrowse(
             media_type = mediaType,
             sort_by = "${sortBy.name}.${order.name}",
             page = page,
@@ -133,18 +138,18 @@ class TmdbRepository(
 
     suspend fun getInTheatres(
         dateStart: String, dateEnd: String
-    ) = RetrofitInstance.tmdbApi.getInTheatres(
+    ) = tmdbApi.getInTheatres(
         release_date_start = dateStart,
         release_date_end = dateEnd
     )
 
     suspend fun getPopularOnStreaming(
-    ) = RetrofitInstance.tmdbApi.getPopularOnStreaming()
+    ) = tmdbApi.getPopularOnStreaming()
 
     suspend fun getShowsFromCompany(
         company_id: Int,
         page: Int
-    ) = RetrofitInstance.tmdbApi.getFromCompany(
+    ) = tmdbApi.getFromCompany(
         media_type = MediaType.tv,
         with_companies = company_id,
         page = page
@@ -153,7 +158,7 @@ class TmdbRepository(
     suspend fun getMoviesFromCompany(
         company_id: Int,
         page: Int
-    ) = RetrofitInstance.tmdbApi.getFromCompany(
+    ) = tmdbApi.getFromCompany(
         media_type = MediaType.movie,
         with_companies = company_id,
         page = page
@@ -161,13 +166,13 @@ class TmdbRepository(
 
     suspend fun getPerson(
         person_id: Int
-    ) = RetrofitInstance.tmdbApi.getPerson(
+    ) = tmdbApi.getPerson(
         person_id = person_id
     )
 
     suspend fun searchKeyword(
         query: String
-    ) = RetrofitInstance.tmdbApi.searchKeyword(
+    ) = tmdbApi.searchKeyword(
         query = query
     )
 

@@ -22,7 +22,6 @@ import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.models.dataclass.WatchedShow
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.fragment.shared_viewmodels.SeasonViewModel
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.navigateSafe
@@ -40,7 +39,7 @@ class HomeFragment : BaseFragment(), HomeClickListener {
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var homeViewModel: HomeViewModel
+    private val homeViewModel by activityViewModels<HomeViewModel>()
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
 
     override fun onCreateView(
@@ -54,8 +53,6 @@ class HomeFragment : BaseFragment(), HomeClickListener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        homeViewModel = (activity as MainActivity).homeViewModel
 
         binding.toolbar.apply {
             navigationIcon = null

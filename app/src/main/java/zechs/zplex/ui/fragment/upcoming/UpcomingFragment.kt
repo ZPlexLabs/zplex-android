@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,7 +15,6 @@ import zechs.zplex.adapter.shared_adapters.detailed_media.DetailedMediaAdapter
 import zechs.zplex.databinding.FragmentUpcomingBinding
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.navigateSafe
 
@@ -23,7 +23,7 @@ class UpcomingFragment : BaseFragment() {
     private var _binding: FragmentUpcomingBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var upcomingViewModel: UpcomingViewModel
+    private val upcomingViewModel by activityViewModels<UpcomingViewModel>()
 
     private val upcomingAdapter by lazy {
         DetailedMediaAdapter { navigateMedia(it) }
@@ -46,7 +46,6 @@ class UpcomingFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentUpcomingBinding.bind(view)
 
-        upcomingViewModel = (activity as MainActivity).upcomingViewModel
         setupRecyclerView()
 
         upcomingViewModel.upcoming.observe(viewLifecycleOwner) { response ->

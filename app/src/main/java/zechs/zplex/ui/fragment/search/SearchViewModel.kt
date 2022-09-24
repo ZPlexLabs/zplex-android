@@ -1,10 +1,10 @@
 package zechs.zplex.ui.fragment.search
 
-
 import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.models.tmdb.search.SearchResponse
@@ -12,9 +12,10 @@ import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.utils.Resource
 import java.io.IOException
+import javax.inject.Inject
 
-
-class SearchViewModel(
+@HiltViewModel
+class SearchViewModel @Inject constructor(
     app: Application,
     private val tmdbRepository: TmdbRepository
 ) : BaseAndroidViewModel(app) {

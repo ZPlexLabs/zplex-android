@@ -15,125 +15,26 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.ActivityMainBinding
-import zechs.zplex.db.WatchlistDatabase
 import zechs.zplex.models.tmdb.entities.Media
-import zechs.zplex.repository.TmdbRepository
-import zechs.zplex.repository.WatchedRepository
-import zechs.zplex.repository.ZPlexRepository
-import zechs.zplex.ui.fragment.browse.BrowseViewModel
-import zechs.zplex.ui.fragment.browse.BrowseViewModelProviderFactory
-import zechs.zplex.ui.fragment.cast.CastViewModel
-import zechs.zplex.ui.fragment.cast.CastViewModelProviderFactory
-import zechs.zplex.ui.fragment.collection.CollectionViewModel
-import zechs.zplex.ui.fragment.collection.CollectionViewModelProviderFactory
-import zechs.zplex.ui.fragment.episodes.EpisodesViewModel
-import zechs.zplex.ui.fragment.episodes.EpisodesViewModelProviderFactory
-import zechs.zplex.ui.fragment.home.HomeViewModel
-import zechs.zplex.ui.fragment.home.HomeViewModelProviderFactory
-import zechs.zplex.ui.fragment.media.MediaViewModel
-import zechs.zplex.ui.fragment.media.MediaViewModelProviderFactory
-import zechs.zplex.ui.fragment.myshows.MyShowsViewModel
-import zechs.zplex.ui.fragment.myshows.MyShowsViewModelProviderFactory
-import zechs.zplex.ui.fragment.search.SearchViewModel
-import zechs.zplex.ui.fragment.search.SearchViewModelProviderFactory
-import zechs.zplex.ui.fragment.upcoming.UpcomingViewModel
-import zechs.zplex.ui.fragment.upcoming.UpcomingViewModelProviderFactory
-import zechs.zplex.ui.fragment.watch.WatchViewModel
-import zechs.zplex.ui.fragment.watch.WatchViewModelProviderFactory
 import zechs.zplex.utils.Constants.THEMOVIEDB_ID_REGEX
 
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
     private lateinit var navController: NavController
 
-    lateinit var homeViewModel: HomeViewModel
-    lateinit var browseViewModel: BrowseViewModel
-    lateinit var searchViewModel: SearchViewModel
-    lateinit var myShowsViewModel: MyShowsViewModel
-    lateinit var mediaViewModel: MediaViewModel
-    lateinit var episodesViewModel: EpisodesViewModel
-    lateinit var watchViewModel: WatchViewModel
-    lateinit var castViewModel: CastViewModel
-    lateinit var collectionViewModel: CollectionViewModel
-    lateinit var upcomingViewModel: UpcomingViewModel
-
     override fun onCreate(savedInstanceState: Bundle?) {
-
-        val db = WatchlistDatabase(this)
-
-        val tmdbRepository = TmdbRepository(db)
-        val zplexRepository = ZPlexRepository()
-        val watchedRepository = WatchedRepository(db)
-
-        homeViewModel = ViewModelProvider(
-            this,
-            HomeViewModelProviderFactory(
-                application, tmdbRepository, watchedRepository
-            )
-        )[HomeViewModel::class.java]
-
-        browseViewModel = ViewModelProvider(
-            this,
-            BrowseViewModelProviderFactory(application, tmdbRepository)
-        )[BrowseViewModel::class.java]
-
-        searchViewModel = ViewModelProvider(
-            this,
-            SearchViewModelProviderFactory(application, tmdbRepository)
-        )[SearchViewModel::class.java]
-
-        myShowsViewModel = ViewModelProvider(
-            this,
-            MyShowsViewModelProviderFactory(tmdbRepository)
-        )[MyShowsViewModel::class.java]
-
-        mediaViewModel = ViewModelProvider(
-            this,
-            MediaViewModelProviderFactory(
-                application,
-                tmdbRepository, zplexRepository
-            )
-        )[MediaViewModel::class.java]
-
-        episodesViewModel = ViewModelProvider(
-            this,
-            EpisodesViewModelProviderFactory(
-                application,
-                tmdbRepository, zplexRepository
-            )
-        )[EpisodesViewModel::class.java]
-
-        watchViewModel = ViewModelProvider(
-            this,
-            WatchViewModelProviderFactory(application, tmdbRepository)
-        )[WatchViewModel::class.java]
-
-        castViewModel = ViewModelProvider(
-            this,
-            CastViewModelProviderFactory(application, tmdbRepository)
-        )[CastViewModel::class.java]
-
-        collectionViewModel = ViewModelProvider(
-            this,
-            CollectionViewModelProviderFactory(application, tmdbRepository)
-        )[CollectionViewModel::class.java]
-
-        upcomingViewModel = ViewModelProvider(
-            this,
-            UpcomingViewModelProviderFactory(application, tmdbRepository)
-        )[UpcomingViewModel::class.java]
-
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)

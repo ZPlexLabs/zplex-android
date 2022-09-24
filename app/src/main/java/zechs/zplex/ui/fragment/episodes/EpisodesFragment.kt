@@ -1,6 +1,5 @@
 package zechs.zplex.ui.fragment.episodes
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -21,15 +20,12 @@ import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.models.zplex.Episode
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.main.MainActivity
-import zechs.zplex.ui.activity.player.PlayerActivity
 import zechs.zplex.ui.fragment.cast.CastsFragmentDirections
 import zechs.zplex.ui.fragment.collection.FragmentCollectionDirections
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.ui.fragment.shared_viewmodels.SeasonViewModel
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.navigateSafe
-
 
 class EpisodesFragment : BaseFragment() {
 
@@ -38,7 +34,7 @@ class EpisodesFragment : BaseFragment() {
 
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
     private val bigImageViewModel by activityViewModels<BigImageViewModel>()
-    private lateinit var episodesViewModel: EpisodesViewModel
+    private val episodesViewModel by activityViewModels<EpisodesViewModel>()
 
     private var hasLoaded: Boolean = false
     private var tmdbId = 0
@@ -66,7 +62,6 @@ class EpisodesFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        episodesViewModel = (activity as MainActivity).episodesViewModel
         setupRecyclerView()
 
         binding.toolbar.setNavigationOnClickListener {
@@ -161,25 +156,25 @@ class EpisodesFragment : BaseFragment() {
     private fun playEpisode(
         episode: Episode, accessToken: String, isLastEpisode: Boolean
     ) {
-        episode.file_id?.let { id ->
-            val title = if (episode.name.isEmpty()) {
-                "No title"
-            } else "Episode ${episode.episode_number} - ${episode.name}"
-            val intent = Intent(activity, PlayerActivity::class.java)
-            intent.putExtra("fileId", id)
-            intent.putExtra("title", title)
-            intent.putExtra("accessToken", accessToken)
-            intent.putExtra("tmdbId", tmdbId)
-            intent.putExtra("name", showName!!)
-            intent.putExtra("posterPath", showPoster)
-            intent.putExtra("seasonNumber", episode.season_number)
-            intent.putExtra("episodeNumber", episode.episode_number)
-            intent.putExtra("isTV", true)
-            intent.putExtra("isLastEpisode", isLastEpisode)
-
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            activity?.startActivity(intent)
-        }
+//        episode.file_id?.let { id ->
+//            val title = if (episode.name.isEmpty()) {
+//                "No title"
+//            } else "Episode ${episode.episode_number} - ${episode.name}"
+//            val intent = Intent(activity, PlayerActivity::class.java)
+//            intent.putExtra("fileId", id)
+//            intent.putExtra("title", title)
+//            intent.putExtra("accessToken", accessToken)
+//            intent.putExtra("tmdbId", tmdbId)
+//            intent.putExtra("name", showName!!)
+//            intent.putExtra("posterPath", showPoster)
+//            intent.putExtra("seasonNumber", episode.season_number)
+//            intent.putExtra("episodeNumber", episode.episode_number)
+//            intent.putExtra("isTV", true)
+//            intent.putExtra("isLastEpisode", isLastEpisode)
+//
+//            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//            activity?.startActivity(intent)
+//        }
     }
 
     override fun onDestroyView() {

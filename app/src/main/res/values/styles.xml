@@ -142,16 +142,4 @@
         <item name="android:popupBackground">@color/cardColor</item>
     </style>
 
-    <style name="subtitleTextAppearance" parent="TextAppearance.MaterialComponents.Headline1">
-        <item name="android:textColor">@color/textColor_87</item>
-        <item name="fontFamily">@font/open_sans</item>
-        <item name="android:textSize">12sp</item>
-        <item name="android:textAllCaps">false</item>
-        <item name="android:textAlignment">center</item>
-    </style>
-
-    <style name="Widget.Material3.Button.TonalButton.Icon.Only" parent="Widget.Material3.Button.IconButton">
-        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3.Button.TonalButton</item>
-    </style>
-
 </resources>

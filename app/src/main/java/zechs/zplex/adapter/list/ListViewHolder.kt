@@ -3,7 +3,6 @@ package zechs.zplex.adapter.list
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import zechs.zplex.ThisApp.Companion.context
 import zechs.zplex.adapter.SeasonsAdapter
 import zechs.zplex.adapter.shared_adapters.casts.CastAdapter
 import zechs.zplex.adapter.shared_adapters.detailed_media.DetailedMediaAdapter
@@ -56,20 +55,19 @@ class ListViewHolder(
     }
 
     fun bindCasts(item: ListDataModel.Casts) {
-        val gridLayoutManager = object : GridLayoutManager(
-            context, 3
-        ) {
-            override fun checkLayoutParams(
-                lp: RecyclerView.LayoutParams?
-            ) = lp?.let {
-                it.width = (0.30 * width).toInt()
-                true
-            } ?: super.checkLayoutParams(lp)
-        }
 
         itemBinding.rvList.apply {
             adapter = castAdapter
-            layoutManager = gridLayoutManager
+            layoutManager = object : GridLayoutManager(
+                context, 3
+            ) {
+                override fun checkLayoutParams(
+                    lp: RecyclerView.LayoutParams?
+                ) = lp?.let {
+                    it.width = (0.30 * width).toInt()
+                    true
+                } ?: super.checkLayoutParams(lp)
+            }
         }
         castAdapter.submitList(item.casts)
     }
@@ -80,21 +78,20 @@ class ListViewHolder(
         }
     }
 
-    private val linearLayoutManager = object : LinearLayoutManager(
-        context, VERTICAL, false
-    ) {
-        override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
-            return lp?.let {
-                it.bottomMargin = 50
-                true
-            } ?: super.checkLayoutParams(lp)
-        }
-    }
 
     fun bindVideo(item: ListDataModel.Videos) {
         itemBinding.rvList.apply {
             adapter = videoAdapter
-            layoutManager = linearLayoutManager
+            layoutManager = object : LinearLayoutManager(
+                context, VERTICAL, false
+            ) {
+                override fun checkLayoutParams(
+                    lp: RecyclerView.LayoutParams?
+                ) = lp?.let {
+                    it.bottomMargin = 50
+                    true
+                } ?: super.checkLayoutParams(lp)
+            }
         }
         videoAdapter.submitList(item.videos)
     }

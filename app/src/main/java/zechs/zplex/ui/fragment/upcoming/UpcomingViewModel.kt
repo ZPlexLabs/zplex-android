@@ -3,6 +3,7 @@ package zechs.zplex.ui.fragment.upcoming
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.models.tmdb.search.SearchResponse
@@ -12,8 +13,10 @@ import zechs.zplex.utils.ConverterUtils
 import zechs.zplex.utils.Resource
 import java.io.IOException
 import java.time.LocalDate
+import javax.inject.Inject
 
-class UpcomingViewModel(
+@HiltViewModel
+class UpcomingViewModel @Inject constructor(
     app: Application,
     private val tmdbRepository: TmdbRepository
 ) : BaseAndroidViewModel(app) {

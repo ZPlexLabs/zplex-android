@@ -39,22 +39,4 @@
     <string name="upcoming">Upcoming</string>
     <string name="play">Play</string>
     <string name="keyword">Keyword</string>
-    <string name="chapters">Chapters</string>
-    <string name="subtitles">Subtitles</string>
-    <string name="audio">Audio</string>
-    <string name="playback_speed">Playback speed</string>
-    <string name="resize">Resize</string>
-    <string name="pip_mode">PiP Mode</string>
-    <string name="rotate">Rotate</string>
-    <string name="unknown">Unknown</string>
-    <string name="select_subtitle">Select subtitle track</string>
-    <string name="select_audio">Select audio track</string>
-    <string name="select_speed">Playback speed</string>
-    <string name="portrait">Portrait</string>
-    <string name="landscape">Landscape</string>
-    <string name="details">Details</string>
-    <string name="unlock">Unlock</string>
-    <string name="rewind_10_seconds">Rewind 10 seconds</string>
-    <string name="skip_10_seconds">Skip 10 seconds</string>
-    <string name="lock">Lock</string>
 </resources>

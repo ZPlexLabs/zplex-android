@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.models.dataclass.FilterArgs
@@ -17,8 +18,11 @@ import zechs.zplex.ui.fragment.browse.BrowseFragment.Companion.TAG
 import zechs.zplex.utils.Event
 import zechs.zplex.utils.Resource
 import java.io.IOException
+import javax.inject.Inject
 
-class BrowseViewModel(
+
+@HiltViewModel
+class BrowseViewModel @Inject constructor(
     app: Application,
     private val tmdbRepository: TmdbRepository
 ) : BaseAndroidViewModel(app) {

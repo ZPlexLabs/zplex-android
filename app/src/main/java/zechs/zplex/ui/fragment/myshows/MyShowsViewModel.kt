@@ -2,14 +2,17 @@ package zechs.zplex.ui.fragment.myshows
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.repository.TmdbRepository
 import zechs.zplex.utils.combineWith
+import javax.inject.Inject
 
-class MyShowsViewModel(
+@HiltViewModel
+class MyShowsViewModel @Inject constructor(
     private val tmdbRepository: TmdbRepository
 ) : ViewModel() {
 

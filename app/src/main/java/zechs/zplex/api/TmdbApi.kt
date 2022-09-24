@@ -1,4 +1,4 @@
-package zechs.zplex.api.interfaces
+package zechs.zplex.api
 
 import retrofit2.Response
 import retrofit2.http.GET
@@ -15,7 +15,7 @@ import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.models.tmdb.season.SeasonResponse
 import zechs.zplex.utils.Constants.TMDB_API_KEY
 
-interface TmdbAPI {
+interface TmdbApi {
 
     @GET("3/tv/{tv_id}")
     suspend fun getShow(

@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -24,7 +25,6 @@ import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.utils.navigateSafe
 
 
@@ -37,7 +37,8 @@ class MyShowsFragment : BaseFragment() {
     private var _binding: FragmentMyShowsBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var myShowsViewModel: MyShowsViewModel
+    private val myShowsViewModel by activityViewModels<MyShowsViewModel>()
+
     private val mediaAdapter by lazy {
         MediaAdapter(
             rating = true,
@@ -65,7 +66,6 @@ class MyShowsFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentMyShowsBinding.bind(view)
 
-        myShowsViewModel = (activity as MainActivity).myShowsViewModel
         setupRecyclerView()
 
         savedInstanceState?.let {

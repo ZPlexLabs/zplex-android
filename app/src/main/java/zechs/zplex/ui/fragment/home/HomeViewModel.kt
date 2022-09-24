@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -19,8 +20,10 @@ import zechs.zplex.utils.Resource
 import zechs.zplex.utils.combineWith
 import java.io.IOException
 import java.time.LocalDate
+import javax.inject.Inject
 
-class HomeViewModel(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     app: Application,
     private val tmdbRepository: TmdbRepository,
     watchedRepository: WatchedRepository

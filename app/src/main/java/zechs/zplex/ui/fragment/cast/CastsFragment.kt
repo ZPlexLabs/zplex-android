@@ -20,7 +20,6 @@ import zechs.zplex.adapter.cast.CastDataAdapter
 import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.navigateSafe
@@ -33,7 +32,7 @@ class CastsFragment : BaseFragment() {
     private val args: CastsFragmentArgs by navArgs()
 
     private val bigImageViewModel by activityViewModels<BigImageViewModel>()
-    private lateinit var castViewModel: CastViewModel
+    private val castViewModel by activityViewModels<CastViewModel>()
 
     private var hasLoaded: Boolean = false
 
@@ -57,7 +56,6 @@ class CastsFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        castViewModel = (activity as MainActivity).castViewModel
         setupRecyclerView()
 
         binding.toolbar.setNavigationOnClickListener {

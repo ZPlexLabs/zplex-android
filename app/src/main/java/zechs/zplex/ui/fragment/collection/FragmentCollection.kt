@@ -20,7 +20,6 @@ import zechs.zplex.adapter.collection.CollectionDataAdapter
 import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.fragment.cast.CastsFragmentDirections
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.utils.Resource
@@ -31,10 +30,10 @@ class FragmentCollection : BaseFragment() {
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
 
-    private val args: FragmentCollectionArgs by navArgs()
+    private val args by navArgs<FragmentCollectionArgs>()
 
     private val bigImageViewModel by activityViewModels<BigImageViewModel>()
-    private lateinit var collectionViewModel: CollectionViewModel
+    private val collectionViewModel by activityViewModels<CollectionViewModel>()
 
     private var hasLoaded: Boolean = false
 
@@ -57,7 +56,6 @@ class FragmentCollection : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        collectionViewModel = (activity as MainActivity).collectionViewModel
         setupRecyclerView()
 
         binding.toolbar.setNavigationOnClickListener {

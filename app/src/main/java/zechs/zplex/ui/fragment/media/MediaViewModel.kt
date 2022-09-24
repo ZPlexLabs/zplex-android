@@ -8,7 +8,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -19,24 +21,19 @@ import zechs.zplex.models.enum.MediaType
 import zechs.zplex.models.tmdb.media.TvResponse
 import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.repository.TmdbRepository
-import zechs.zplex.repository.ZPlexRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.movieResponseTmdb
-import zechs.zplex.ui.movieResponseZplex
 import zechs.zplex.utils.ConverterUtils
 import zechs.zplex.utils.Event
 import zechs.zplex.utils.Resource
 import java.io.IOException
+import javax.inject.Inject
 
-class MediaViewModel(
+@HiltViewModel
+class MediaViewModel @Inject constructor(
     app: Application,
-    private val tmdbRepository: TmdbRepository,
-    private val zplexRepository: ZPlexRepository
+    private val tmdbRepository: TmdbRepository
 ) : BaseAndroidViewModel(app) {
-
-    private val _movieZplex = MutableLiveData<Event<Resource<movieResponseZplex>>>()
-    val movieZplex: LiveData<Event<Resource<movieResponseZplex>>>
-        get() = _movieZplex
 
     private val _dominantColor = MutableLiveData<Int>()
     val dominantColor: LiveData<Int>
@@ -67,44 +64,14 @@ class MediaViewModel(
         _dominantColor.value = color
     }
 
-    fun zplexGetMovie(tmdbId: Int) = viewModelScope.launch {
-        _movieZplex.postValue(Event(Resource.Loading()))
-        try {
-            if (hasInternetConnection()) {
-                val zplexMovie = zplexRepository.getMovie(tmdbId)
-                _movieZplex.postValue(Event(handleZPlexMovieResponse(zplexMovie)))
-            } else {
-                _movieZplex.postValue(Event(Resource.Error("No internet connection")))
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            println("zplexGetMovie :  Message=${e.message}")
-            _movieZplex.postValue(
-                Event(
-                    Resource.Error(
-                        if (e is IOException) {
-                            "Network Failure"
-                        } else e.message ?: "Something went wrong"
-                    )
-                )
-            )
-        }
-    }
-
-    private fun handleZPlexMovieResponse(
-        response: Response<movieResponseZplex>
-    ): Resource<movieResponseZplex> {
-        if (response.isSuccessful) {
-            return Resource.Success(response.body()!!)
-        }
-        return Resource.Error(response.message())
-    }
-
     private val _mediaResponse = MutableLiveData<Event<Resource<List<MediaDataModel>>>>()
     val mediaResponse: LiveData<Event<Resource<List<MediaDataModel>>>>
         get() = _mediaResponse
 
-    fun getMedia(tmdbId: Int, mediaType: MediaType) = viewModelScope.launch {
+    fun getMedia(
+        tmdbId: Int,
+        mediaType: MediaType
+    ) = viewModelScope.launch(Dispatchers.IO) {
         _mediaResponse.postValue(Event(Resource.Loading()))
         try {
             if (hasInternetConnection()) {

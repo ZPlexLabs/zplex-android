@@ -32,7 +32,6 @@ import zechs.zplex.adapter.media.MediaClickListener
 import zechs.zplex.adapter.media.MediaDataAdapter
 import zechs.zplex.adapter.media.MediaDataModel
 import zechs.zplex.databinding.FragmentListBinding
-import zechs.zplex.models.Player
 import zechs.zplex.models.dataclass.Movie
 import zechs.zplex.models.dataclass.Show
 import zechs.zplex.models.enum.MediaType
@@ -41,19 +40,15 @@ import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.models.tmdb.entities.Season
 import zechs.zplex.models.tmdb.entities.Video
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.main.MainActivity
-import zechs.zplex.ui.activity.player.PlayerActivity
 import zechs.zplex.ui.fragment.image.BigImageViewModel
 import zechs.zplex.ui.fragment.list.ListViewModel
 import zechs.zplex.ui.fragment.shared_viewmodels.SeasonViewModel
-import zechs.zplex.ui.movieResponseZplex
 import zechs.zplex.utils.ColorManager.Companion.getContrastColor
 import zechs.zplex.utils.ColorManager.Companion.isDark
 import zechs.zplex.utils.ColorManager.Companion.lightUpColor
 import zechs.zplex.utils.Resource
 import zechs.zplex.utils.navigateSafe
 import java.util.*
-
 
 class FragmentMedia : BaseFragment(), MediaClickListener {
 
@@ -65,7 +60,7 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
     }
 
     // View models
-    private lateinit var mediaViewModel: MediaViewModel
+    private val mediaViewModel by activityViewModels<MediaViewModel>()
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
     private val bigImageViewModel by activityViewModels<BigImageViewModel>()
     private val listViewModel by activityViewModels<ListViewModel>()
@@ -91,7 +86,6 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        mediaViewModel = (activity as MainActivity).mediaViewModel
         setupRecyclerView()
 
         val media = args.media
@@ -105,10 +99,6 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
         )
 
         setupMediaViewModel(media.id, mediaType)
-
-        if (mediaType == MediaType.movie) {
-            setupZplexMovieObserver()
-        }
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
@@ -131,28 +121,6 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
         Log.d("navigateToMedia", imageView.transitionName)
     }
 
-    private fun setupZplexMovieObserver() {
-        mediaViewModel.movieZplex.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { movie ->
-                handleZplexMovieResponse(movie)
-            }
-        }
-    }
-
-    private fun handleZplexMovieResponse(movie: Resource<movieResponseZplex>) {
-        when (movie) {
-            is Resource.Success -> {
-                movie.data?.let {
-                    playMovie(Player(it.id, it.name, it.accessToken))
-                }
-            }
-            is Resource.Error -> {
-                showToast(movie.message)
-            }
-            is Resource.Loading -> {}
-        }
-    }
-
     private fun setupMediaViewModel(tmdbId: Int, mediaType: MediaType) {
         if (!hasLoaded) {
             mediaViewModel.getMedia(tmdbId, mediaType)
@@ -165,9 +133,11 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
                             binding.root,
                             MaterialFadeThrough()
                         )
-                        lifecycleScope.launch {
-                            mediaDataAdapter.submitList(it)
-                        }
+
+                        viewLifecycleOwner
+                            .lifecycleScope
+                            .launch { mediaDataAdapter.submitList(it) }
+
                         isLoading(false)
                         hasLoaded = true
                     }
@@ -233,16 +203,16 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
         startActivity(shareIntent)
     }
 
-    private fun playMovie(player: Player) {
-        val intent = Intent(activity, PlayerActivity::class.java)
-        intent.putExtra("fileId", player.fileId)
-        intent.putExtra("title", showName!!)
-        intent.putExtra("accessToken", player.accessToken)
-        intent.putExtra("tmdbId", tmdbId!!)
-        intent.putExtra("name", showName!!)
-        intent.putExtra("posterPath", args.media.poster_path)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        activity?.startActivity(intent)
+    private fun playMovie() {
+//        val intent = Intent(activity, PlayerActivity::class.java)
+//        intent.putExtra("fileId", player.fileId)
+//        intent.putExtra("title", showName!!)
+//        intent.putExtra("accessToken", player.accessToken)
+//        intent.putExtra("tmdbId", tmdbId!!)
+//        intent.putExtra("name", showName!!)
+//        intent.putExtra("posterPath", args.media.poster_path)
+//        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+//        activity?.startActivity(intent)
     }
 
     private fun navigateToSeason(
@@ -380,7 +350,6 @@ class FragmentMedia : BaseFragment(), MediaClickListener {
     }
 
     override fun movieWatchNow(tmdbId: Int) {
-        mediaViewModel.zplexGetMovie(tmdbId)
     }
 
     override fun movieShare(movie: Movie) {

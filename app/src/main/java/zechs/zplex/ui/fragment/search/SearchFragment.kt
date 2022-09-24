@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
@@ -21,7 +22,6 @@ import zechs.zplex.adapter.shared_adapters.media.MediaAdapter
 import zechs.zplex.databinding.FragmentSearchBinding
 import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
 import zechs.zplex.utils.Keyboard
 import zechs.zplex.utils.Resource
@@ -38,7 +38,7 @@ class SearchFragment : BaseFragment() {
     private var _binding: FragmentSearchBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var searchViewModel: SearchViewModel
+    private val searchViewModel by activityViewModels<SearchViewModel>()
 
     private val searchAdapter by lazy {
         MediaAdapter(
@@ -63,8 +63,6 @@ class SearchFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentSearchBinding.bind(view)
-
-        searchViewModel = (activity as MainActivity).searchViewModel
 
         setupRecyclerView()
 

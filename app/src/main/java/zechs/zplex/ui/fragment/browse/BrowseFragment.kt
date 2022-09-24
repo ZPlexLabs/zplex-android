@@ -41,7 +41,6 @@ import zechs.zplex.models.tmdb.entities.Media
 import zechs.zplex.models.tmdb.keyword.TmdbKeyword
 import zechs.zplex.models.tmdb.search.SearchResponse
 import zechs.zplex.ui.BaseFragment
-import zechs.zplex.ui.activity.main.MainActivity
 import zechs.zplex.ui.dialog.FiltersDialog
 import zechs.zplex.ui.fragment.shared_viewmodels.FiltersViewModel
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
@@ -59,7 +58,7 @@ class BrowseFragment : BaseFragment() {
     private val binding get() = _binding!!
 
     private val filterModel by activityViewModels<FiltersViewModel>()
-    private lateinit var browseViewModel: BrowseViewModel
+    private val browseViewModel by activityViewModels<BrowseViewModel>()
     private lateinit var filtersDialog: FiltersDialog
 
     private val browseAdapter by lazy {
@@ -84,7 +83,6 @@ class BrowseFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        browseViewModel = (activity as MainActivity).browseViewModel
         setupRecyclerView()
         setupFiltersObservers()
         setupBrowseObservers()

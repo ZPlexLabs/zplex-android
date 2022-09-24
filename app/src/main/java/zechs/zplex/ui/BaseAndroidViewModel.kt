@@ -5,13 +5,19 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import androidx.lifecycle.AndroidViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import zechs.zplex.ThisApp
+import javax.inject.Inject
 
-abstract class BaseAndroidViewModel(
+@HiltViewModel
+open class BaseAndroidViewModel @Inject constructor(
     app: Application
 ) : AndroidViewModel(app) {
 
-    fun hasInternetConnection(): Boolean {
+    protected val context
+        get() = getApplication<Application>()
+
+    protected fun hasInternetConnection(): Boolean {
         val connectivityManager = getApplication<ThisApp>().getSystemService(
             Context.CONNECTIVITY_SERVICE
         ) as ConnectivityManager
