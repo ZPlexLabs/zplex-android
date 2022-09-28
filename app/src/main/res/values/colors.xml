@@ -11,6 +11,5 @@
 
     <color name="fadedColor">#2a2831</color>
     <color name="statusBarColor">#1c1b1f</color>
-    <color name="md_theme_dark_onPrimaryContainer">#EADDFF</color>
 
 </resources>

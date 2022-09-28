@@ -58,7 +58,7 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_seasonEpisode"
-        tools:text="I Got a Girlfriend!" />
+        tools:text="Episode title" />
 
     <View
         android:id="@+id/view"
@@ -99,7 +99,7 @@
         app:layout_constraintEnd_toEndOf="@+id/textView2"
         app:layout_constraintStart_toStartOf="@+id/textView2"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
-        tools:text="Issei Hyodo's first date with his new girlfriend ends poorly when she turns into a monster and stabs him in the stomach. Luckily, he's saved by Rias, the buxom president of his school's Occult Research Club. And then, things really start to get weird..." />
+        tools:text="@tools:sample/lorem/random" />
 
     <TextView
         android:id="@+id/textView1"

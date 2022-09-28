@@ -24,8 +24,8 @@
             app:titleCentered="true"
             app:titleTextAppearance="@style/seasonTitleTextAppearance"
             app:titleTextColor="@color/textColor_87"
-            tools:subtitle="That Time I Got Reincarnated as a Slime"
-            tools:title="Seasons" />
+            tools:subtitle="Subtitle text"
+            tools:title="Title text" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

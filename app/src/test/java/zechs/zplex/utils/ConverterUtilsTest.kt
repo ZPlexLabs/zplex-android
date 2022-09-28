@@ -2,11 +2,12 @@ package zechs.zplex.utils
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import zechs.zplex.utils.ConverterUtils.convertMinutes
-import zechs.zplex.utils.ConverterUtils.getSize
-import zechs.zplex.utils.ConverterUtils.parseDate
-import zechs.zplex.utils.ConverterUtils.toDuration
-import zechs.zplex.utils.ConverterUtils.yearsBetween
+import zechs.zplex.utils.util.Converter
+import zechs.zplex.utils.util.Converter.convertMinutes
+import zechs.zplex.utils.util.Converter.getSize
+import zechs.zplex.utils.util.Converter.parseDate
+import zechs.zplex.utils.util.Converter.toDuration
+import zechs.zplex.utils.util.Converter.yearsBetween
 
 class ConverterUtilsTest {
 
@@ -41,7 +42,7 @@ class ConverterUtilsTest {
     @Test
     fun `age from birthday`() {
         val expected = 20
-        val response = yearsBetween("2002-02-21", ConverterUtils.getDate())
+        val response = yearsBetween("2002-02-21", Converter.getDate())
         assertEquals(expected, response)
     }
 

@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="zechs.zplex.ui.fragment.home.HomeFragment"
+        android:name="zechs.zplex.ui.home.HomeFragment"
         android:label="Home"
         tools:layout="@layout/fragment_list">
         <action
@@ -22,7 +22,7 @@
 
     <fragment
         android:id="@+id/discoverFragment"
-        android:name="zechs.zplex.ui.fragment.browse.BrowseFragment"
+        android:name="zechs.zplex.ui.browse.BrowseFragment"
         android:label="Discover"
         tools:layout="@layout/fragment_browse">
         <action
@@ -32,7 +32,7 @@
 
     <fragment
         android:id="@+id/searchFragment"
-        android:name="zechs.zplex.ui.fragment.search.SearchFragment"
+        android:name="zechs.zplex.ui.search.SearchFragment"
         android:label="Search"
         tools:layout="@layout/fragment_search">
         <action
@@ -42,7 +42,7 @@
 
     <fragment
         android:id="@+id/myShowsFragment"
-        android:name="zechs.zplex.ui.fragment.myshows.MyShowsFragment"
+        android:name="zechs.zplex.ui.myshows.MyShowsFragment"
         android:label="My shows"
         tools:layout="@layout/fragment_my_shows">
         <action
@@ -52,18 +52,18 @@
 
     <fragment
         android:id="@+id/bigImageFragment"
-        android:name="zechs.zplex.ui.fragment.image.BigImageFragment"
+        android:name="zechs.zplex.ui.image.BigImageFragment"
         android:label="BigImageFragment"
         tools:layout="@layout/fragment_big_image" />
 
     <fragment
         android:id="@+id/fragmentMedia"
-        android:name="zechs.zplex.ui.fragment.media.FragmentMedia"
+        android:name="zechs.zplex.ui.media.FragmentMedia"
         android:label="Fragment Media"
         tools:layout="@layout/fragment_list">
         <argument
             android:name="media"
-            app:argType="zechs.zplex.models.tmdb.entities.Media" />
+            app:argType="zechs.zplex.data.model.tmdb.entities.Media" />
         <action
             android:id="@+id/action_fragmentMedia_to_episodeListFragment"
             app:destination="@id/episodesListFragment" />
@@ -81,7 +81,7 @@
             app:destination="@id/fragmentMedia">
             <argument
                 android:name="media"
-                app:argType="zechs.zplex.models.tmdb.entities.Media" />
+                app:argType="zechs.zplex.data.model.tmdb.entities.Media" />
         </action>
         <action
             android:id="@+id/action_fragmentMedia_to_shareBottomSheet"
@@ -96,7 +96,7 @@
 
     <fragment
         android:id="@+id/episodesListFragment"
-        android:name="zechs.zplex.ui.fragment.episodes.EpisodesFragment"
+        android:name="zechs.zplex.ui.episodes.EpisodesFragment"
         android:label="EpisodesFragment"
         tools:layout="@layout/fragment_episode">
         <action
@@ -109,7 +109,7 @@
 
     <fragment
         android:id="@+id/watchFragment"
-        android:name="zechs.zplex.ui.fragment.watch.WatchFragment"
+        android:name="zechs.zplex.ui.watch.WatchFragment"
         android:label="WatchFragment"
         tools:layout="@layout/fragment_watch">
         <action
@@ -119,12 +119,12 @@
 
     <fragment
         android:id="@+id/castsFragment"
-        android:name="zechs.zplex.ui.fragment.cast.CastsFragment"
+        android:name="zechs.zplex.ui.cast.CastsFragment"
         android:label="CastsFragment"
         tools:layout="@layout/fragment_list">
         <argument
             android:name="cast"
-            app:argType="zechs.zplex.models.tmdb.entities.Cast" />
+            app:argType="zechs.zplex.data.model.tmdb.entities.Cast" />
         <action
             android:id="@+id/action_castsFragment_to_bigImageFragment"
             app:destination="@id/bigImageFragment" />
@@ -139,7 +139,7 @@
         tools:layout="@layout/sheet_share" />
     <fragment
         android:id="@+id/fragmentList"
-        android:name="zechs.zplex.ui.fragment.list.FragmentList"
+        android:name="zechs.zplex.ui.list.FragmentList"
         android:label="FragmentList"
         tools:layout="@layout/fragment_list">
         <action
@@ -154,7 +154,7 @@
     </fragment>
     <fragment
         android:id="@+id/fragmentCollection"
-        android:name="zechs.zplex.ui.fragment.collection.FragmentCollection"
+        android:name="zechs.zplex.ui.collection.FragmentCollection"
         android:label="FragmentCollection"
         tools:layout="@layout/fragment_list">
         <argument
@@ -169,7 +169,7 @@
     </fragment>
     <fragment
         android:id="@+id/upcomingFragment"
-        android:name="zechs.zplex.ui.fragment.upcoming.UpcomingFragment"
+        android:name="zechs.zplex.ui.upcoming.UpcomingFragment"
         android:label="UpcomingFragment"
         tools:layout="@layout/fragment_upcoming">
         <action

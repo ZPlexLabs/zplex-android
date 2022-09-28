@@ -11,7 +11,6 @@
     <string name="discover">Discover</string>
     <string name="your_library_is_empty">Your library is empty</string>
     <string name="watch_now">Watch now</string>
-    <string name="not_available">Not available</string>
     <string name="please_wait">Please wait</string>
     <string name="request_movie_description">Unfortunately we do not have this movie in our database.\nWould you like to put in a request for this movie?\n\nThis is an automated process and should retrieve the movie within 10 mins</string>
     <string name="yes">Yes</string>
@@ -25,8 +24,6 @@
     <string name="view_all_seasons">View all seasons</string>
     <string name="movies">Movies</string>
     <string name="tv_shows">TV Shows</string>
-    <string name="available_streams">Available streams</string>
-    <string name="original">Original</string>
     <string name="filters">Filters</string>
     <string name="reset">Reset</string>
     <string name="apply">Apply</string>
@@ -37,6 +34,5 @@
     <string name="select_genre">Select genre</string>
     <string name="my_library">My Library</string>
     <string name="upcoming">Upcoming</string>
-    <string name="play">Play</string>
     <string name="keyword">Keyword</string>
 </resources>

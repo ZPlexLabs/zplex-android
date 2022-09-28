@@ -7,7 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import zechs.zplex.db.*
+import zechs.zplex.data.local.*
 import javax.inject.Singleton
 
 @Module

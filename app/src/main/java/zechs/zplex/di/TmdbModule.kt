@@ -8,10 +8,10 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import zechs.zplex.api.TmdbApi
-import zechs.zplex.db.MovieDao
-import zechs.zplex.db.ShowDao
-import zechs.zplex.repository.TmdbRepository
+import zechs.zplex.data.local.MovieDao
+import zechs.zplex.data.local.ShowDao
+import zechs.zplex.data.remote.TmdbApi
+import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.utils.Constants.TMDB_API_URL
 import javax.inject.Singleton
 
