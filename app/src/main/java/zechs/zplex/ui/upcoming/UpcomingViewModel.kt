@@ -29,6 +29,7 @@ class UpcomingViewModel @Inject constructor(
 
     private var upcomingResponse: SearchResponse? = null
     private var page = 1
+    private var count = 0
 
     init {
         page = 1
@@ -80,6 +81,10 @@ class UpcomingViewModel @Inject constructor(
                         it.id
                     }.toMutableList()
                 )
+                if (responseList.results.size < 5 && count <= 5) {
+                    count++
+                    viewModelScope.launch { getUpcoming() }
+                }
                 return Resource.Success(responseList)
             }
         }
