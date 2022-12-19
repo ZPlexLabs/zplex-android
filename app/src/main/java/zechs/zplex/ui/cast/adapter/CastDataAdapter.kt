@@ -2,6 +2,7 @@ package zechs.zplex.ui.cast.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.recyclerview.widget.ListAdapter
 import zechs.zplex.R
 import zechs.zplex.data.model.tmdb.entities.Media
@@ -12,7 +13,8 @@ import zechs.zplex.databinding.ItemListBinding
 
 class CastDataAdapter(
     val setOnClickListener: (Media) -> Unit,
-    val expandBiography: (String) -> Unit
+    val expandBiography: (String) -> Unit,
+    val setOnImageClick: (String, ImageView) -> Unit
 ) : ListAdapter<CastDataModel, CastViewHolder>(CastDataModelDiffCallback()) {
 
     override fun onCreateViewHolder(

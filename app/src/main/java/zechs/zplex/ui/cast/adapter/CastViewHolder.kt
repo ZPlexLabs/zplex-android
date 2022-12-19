@@ -3,6 +3,7 @@ package zechs.zplex.ui.cast.adapter
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -59,6 +60,14 @@ sealed class CastViewHolder(
                     castDataAdapter.expandBiography.invoke(biography)
                 }
 
+                ivPoster.setOnClickListener {
+                    item.profilePath?.let { img ->
+                        castDataAdapter.setOnImageClick.invoke(
+                            img,
+                            it as ImageView
+                        )
+                    }
+                }
             }
         }
     }

@@ -30,7 +30,7 @@ class CastsFragment : Fragment() {
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
 
-    private val args: CastsFragmentArgs by navArgs()
+    private val args by navArgs<CastsFragmentArgs>()
 
     private val bigImageViewModel by activityViewModels<BigImageViewModel>()
     private val castViewModel by activityViewModels<CastViewModel>()
@@ -40,7 +40,10 @@ class CastsFragment : Fragment() {
     private val castDataAdapter by lazy {
         CastDataAdapter(
             setOnClickListener = { navigateMedia(it) },
-            expandBiography = {}
+            expandBiography = {},
+            setOnImageClick = { url, iv ->
+                openImageFullSize(url, iv)
+            }
         )
     }
 
