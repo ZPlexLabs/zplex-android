@@ -1,55 +1,23 @@
 package zechs.zplex.ui.home.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.AsyncListDiffer
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.ListAdapter
 import zechs.zplex.R
 import zechs.zplex.databinding.ItemHeadingBinding
 import zechs.zplex.databinding.ItemListBinding
 
 class HomeDataAdapter(
-    val context: Context,
     val homeClickListener: HomeClickListener
-) : RecyclerView.Adapter<HomeViewHolder>() {
-
-    private val differCallback = object : DiffUtil.ItemCallback<HomeDataModel>() {
-
-        override fun areItemsTheSame(
-            oldItem: HomeDataModel,
-            newItem: HomeDataModel
-        ): Boolean = when {
-            oldItem is HomeDataModel.Header && newItem
-                    is HomeDataModel.Header && oldItem.heading == newItem.heading
-            -> true
-            oldItem is HomeDataModel.Media && newItem
-                    is HomeDataModel.Media && oldItem.media == newItem.media
-            -> true
-            oldItem is HomeDataModel.Banner && newItem
-                    is HomeDataModel.Banner && oldItem.media == newItem.media
-            -> true
-            oldItem is HomeDataModel.Watched && newItem
-                    is HomeDataModel.Watched && oldItem.watched == newItem.watched
-            -> true
-            else -> false
-        }
-
-        override fun areContentsTheSame(
-            oldItem: HomeDataModel, newItem: HomeDataModel
-        ) = oldItem == newItem
-
-    }
-
-    val differ = AsyncListDiffer(this, differCallback)
+) : ListAdapter<HomeDataModel, HomeViewHolder>(
+    HomeDataModelDiffCallback()
+) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup, viewType: Int
     ): HomeViewHolder {
 
         val headerViewHolder = HomeViewHolder.HeadingViewHolder(
-            context = context,
             itemBinding = ItemHeadingBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false
@@ -57,7 +25,6 @@ class HomeDataAdapter(
         )
 
         val listViewHolder = HomeViewHolder.ListViewHolder(
-            context = context,
             itemBinding = ItemListBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false
@@ -72,8 +39,11 @@ class HomeDataAdapter(
         }
     }
 
-    override fun onBindViewHolder(holder: HomeViewHolder, position: Int) {
-        val item = differ.currentList[position]
+    override fun onBindViewHolder(
+        holder: HomeViewHolder,
+        position: Int
+    ) {
+        val item = getItem(position)
 
         when (holder) {
             is HomeViewHolder.HeadingViewHolder ->
@@ -90,14 +60,12 @@ class HomeDataAdapter(
     }
 
     override fun getItemViewType(position: Int): Int {
-        return when (differ.currentList[position]) {
+        return when (getItem(position)) {
             is HomeDataModel.Header -> R.layout.item_heading
             is HomeDataModel.Media -> R.layout.item_list
             is HomeDataModel.Banner -> R.layout.item_list
             is HomeDataModel.Watched -> R.layout.item_list
         }
     }
-
-    override fun getItemCount() = differ.currentList.size
 
 }

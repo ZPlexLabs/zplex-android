@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -38,7 +39,6 @@ class HomeViewModel @Inject constructor(
     private val now = LocalDate.now()
     private val getTodayDate = now.toString()
     private val getMonthAgoDate = now.minusMonths(1).toString()
-
 
     private val _homeMedia = MutableLiveData<Resource<List<HomeDataModel>>>()
     val homeMedia: LiveData<Resource<List<HomeDataModel>>>
@@ -81,40 +81,40 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun getHomeMedia(
-    ) = viewModelScope.launch(Dispatchers.IO) {
-        _homeMedia.postValue(Resource.Loading())
-        try {
-            if (hasInternetConnection()) {
-
-                val theatres = async {
-                    tmdbRepository.getInTheatres(
-                        dateStart = getMonthAgoDate,
-                        dateEnd = getTodayDate
-                    )
-                }
-
-                val trending = async {
-                    tmdbRepository.getTrending(
-                        time_window = TrendingWindow.DAY.toString().lowercase()
-                    )
-                }
-
-                val popular = async {
-                    tmdbRepository.getPopularOnStreaming()
-                }
-
-                val homeResponse = handleHomeResponse(
-                    theatres.await(),
-                    trending.await(),
-                    popular.await()
-                )
-                _homeMedia.postValue(homeResponse)
-            } else {
-                _homeMedia.postValue(Resource.Error("No internet connection"))
-            }
-        } catch (t: Exception) {
+    ) = viewModelScope.launch(
+        context = Dispatchers.IO + CoroutineExceptionHandler { _, t ->
             t.printStackTrace()
             _homeMedia.postValue(postError(t))
+        }
+    ) {
+        _homeMedia.postValue(Resource.Loading())
+        if (hasInternetConnection()) {
+
+            val theatres = async {
+                tmdbRepository.getInTheatres(
+                    dateStart = getMonthAgoDate,
+                    dateEnd = getTodayDate
+                )
+            }
+
+            val trending = async {
+                tmdbRepository.getTrending(
+                    time_window = TrendingWindow.DAY.toString().lowercase()
+                )
+            }
+
+            val popular = async {
+                tmdbRepository.getPopularOnStreaming()
+            }
+
+            val homeResponse = handleHomeResponse(
+                theatres.await(),
+                trending.await(),
+                popular.await()
+            )
+            _homeMedia.postValue(homeResponse)
+        } else {
+            _homeMedia.postValue(Resource.Error("No internet connection"))
         }
     }
 

@@ -11,6 +11,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.data.model.entities.WatchedShow
@@ -25,7 +26,7 @@ import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
 
 
-class HomeFragment : Fragment(), HomeClickListener {
+class HomeFragment : Fragment() {
 
     companion object {
         const val TAG = "HomeFragment"
@@ -68,11 +69,12 @@ class HomeFragment : Fragment(), HomeClickListener {
                 is Resource.Success -> {
                     Log.d(TAG, "Success")
                     isLoading(false)
-                    response.data?.let { trendingSuccess(it) }
+                    homeMediaSuccess(response.data!!)
                 }
                 is Resource.Error -> {
                     isLoading(false)
                     Log.d(TAG, "Error: ${response.message}")
+                    homeMediaError(response.message!!)
                 }
                 is Resource.Loading -> {
                     isLoading(true)
@@ -82,49 +84,67 @@ class HomeFragment : Fragment(), HomeClickListener {
         }
     }
 
-    private val homeDataAdapter by lazy {
-        HomeDataAdapter(
-            context = requireContext(),
-            homeClickListener = this@HomeFragment
-        )
+    private fun homeMediaError(message: String) {
+        Snackbar.make(
+            binding.root,
+            message,
+            Snackbar.LENGTH_SHORT
+        ).show()
     }
 
-    private fun trendingSuccess(listResponse: List<HomeDataModel>) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            homeDataAdapter.differ.submitList(listResponse)
+    private val homeDataAdapter by lazy {
+        HomeDataAdapter(homeClickListener)
+    }
+
+    private val homeClickListener = object : HomeClickListener {
+        override fun onClickMedia(media: Media) {
+            navigateToMedia(media)
         }
 
-        homeViewModel.watchedMedia.observe(viewLifecycleOwner) {
-            viewLifecycleOwner.lifecycleScope.launch {
-                it?.let {
-                    val currentList = homeDataAdapter.differ.currentList.toMutableList()
-                    println("WatchedDataModel=$it")
-                    println("currentListSize=${homeDataAdapter.itemCount}")
-                    println("currentList.size=${currentList.size}")
-                    currentList.forEachIndexed { i, a ->
-                        println("$i. $a")
-                    }
-                    when (homeDataAdapter.itemCount) {
-                        5 -> {
-                            if (it.isNotEmpty()) {
-                                currentList.add(1, HomeDataModel.Header("Continue Watching"))
-                                currentList.add(2, HomeDataModel.Watched(it))
-                            }
-                        }
-                        7 -> {
-                            currentList.removeAt(1)
-                            currentList.removeAt(1)
-                            if (it.isNotEmpty()) {
-                                currentList.add(1, HomeDataModel.Header("Continue Watching"))
-                                currentList.add(2, HomeDataModel.Watched(it))
-                            }
-                        }
-                        else -> {}
-                    }
-                    homeDataAdapter.differ.submitList(currentList)
-                }
+        override fun onClickWatched(watched: WatchedDataModel) {
+            when (watched) {
+                is WatchedDataModel.Movie -> navigateToMedia(watched.movie.toMedia())
+                is WatchedDataModel.Show -> navigateToSeason(watched.show)
             }
         }
+    }
+
+    private fun homeMediaSuccess(listResponse: List<HomeDataModel>) {
+        homeDataAdapter.submitList(listResponse)
+
+        homeViewModel.watchedMedia.observe(viewLifecycleOwner) { watchedList ->
+            watchedList?.let { setupWatchedList(it) }
+        }
+    }
+
+    private fun setupWatchedList(
+        watchedList: List<WatchedDataModel>
+    ) = viewLifecycleOwner.lifecycleScope.launch {
+        val currentList = homeDataAdapter.currentList.toMutableList()
+        Log.d(TAG, "WatchedDataModel=$watchedList")
+        Log.d(TAG, "currentListSize=${homeDataAdapter.itemCount}")
+        Log.d(TAG, "currentList.size=${currentList.size}")
+        currentList.forEachIndexed { i, a ->
+            Log.d(TAG, "currentList[$i]=$a")
+        }
+        when (homeDataAdapter.itemCount) {
+            5 -> {
+                if (watchedList.isNotEmpty()) {
+                    currentList.add(1, HomeDataModel.Header("Continue Watching"))
+                    currentList.add(2, HomeDataModel.Watched(watchedList))
+                }
+            }
+            7 -> {
+                currentList.removeAt(1)
+                currentList.removeAt(1)
+                if (watchedList.isNotEmpty()) {
+                    currentList.add(1, HomeDataModel.Header("Continue Watching"))
+                    currentList.add(2, HomeDataModel.Watched(watchedList))
+                }
+            }
+            else -> {}
+        }
+        homeDataAdapter.submitList(currentList)
     }
 
     private fun setupRecyclerView() {
@@ -135,7 +155,6 @@ class HomeFragment : Fragment(), HomeClickListener {
             )
         }
     }
-
 
     private fun navigateToSeason(show: WatchedShow) {
         seasonViewModel.setShowSeason(
@@ -150,28 +169,20 @@ class HomeFragment : Fragment(), HomeClickListener {
     }
 
     private fun navigateToMedia(media: Media) {
-        val action = HomeFragmentDirections.actionHomeFragmentToFragmentMedia(media)
-        findNavController().navigateSafe(action)
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        HomeFragmentDirections
+            .actionHomeFragmentToFragmentMedia(media)
+            .also {
+                findNavController().navigateSafe(it)
+            }
     }
 
     private fun isLoading(hide: Boolean) {
         binding.loading.isVisible = hide
     }
 
-    override fun onClickMedia(media: Media) {
-        navigateToMedia(media)
-    }
-
-    override fun onClickWatched(watched: WatchedDataModel) {
-        when (watched) {
-            is WatchedDataModel.Movie -> navigateToMedia(watched.movie.toMedia())
-            is WatchedDataModel.Show -> navigateToSeason(watched.show)
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 
 }

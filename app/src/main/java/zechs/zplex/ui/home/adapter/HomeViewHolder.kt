@@ -1,6 +1,5 @@
 package zechs.zplex.ui.home.adapter
 
-import android.content.Context
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
@@ -11,24 +10,21 @@ import zechs.zplex.ui.shared_adapters.banner.BannerAdapter
 import zechs.zplex.ui.shared_adapters.media.MediaAdapter
 
 sealed class HomeViewHolder(
-    val context: Context,
     binding: ViewBinding
 ) : RecyclerView.ViewHolder(binding.root) {
 
     class HeadingViewHolder(
-        context: Context,
         private val itemBinding: ItemHeadingBinding
-    ) : HomeViewHolder(context, itemBinding) {
+    ) : HomeViewHolder(itemBinding) {
         fun bind(item: HomeDataModel.Header) {
             itemBinding.tvText.text = item.heading
         }
     }
 
     class ListViewHolder(
-        context: Context,
         private val itemBinding: ItemListBinding,
         homeDataAdapter: HomeDataAdapter
-    ) : HomeViewHolder(context, itemBinding) {
+    ) : HomeViewHolder(itemBinding) {
 
         private val mediaAdapter by lazy {
             MediaAdapter {
@@ -49,41 +45,38 @@ sealed class HomeViewHolder(
         }
 
         fun bindMedia(item: HomeDataModel.Media) {
-            val linearLayoutManager = object : LinearLayoutManager(
-                context, HORIZONTAL, false
-            ) {
-                override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
-                    return lp?.let {
-                        it.width = (0.28 * width).toInt()
-                        true
-                    } ?: super.checkLayoutParams(lp)
-                }
-            }
-
             itemBinding.rvList.apply {
                 adapter = mediaAdapter
-                layoutManager = linearLayoutManager
+                layoutManager = object : LinearLayoutManager(
+                    context, HORIZONTAL, false
+                ) {
+                    override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
+                        return lp?.let {
+                            it.width = (0.28 * width).toInt()
+                            true
+                        } ?: super.checkLayoutParams(lp)
+                    }
+                }
             }
 
             mediaAdapter.submitList(item.media)
         }
 
         fun bindWatched(item: HomeDataModel.Watched) {
-            val linearLayoutManager = object : LinearLayoutManager(
-                context, HORIZONTAL, false
-            ) {
-                override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
-                    return lp?.let {
-                        it.width = (0.33 * width).toInt()
-                        true
-                    } ?: super.checkLayoutParams(lp)
+            itemBinding.rvList.apply {
+                adapter = watchedAdapter
+                layoutManager = object : LinearLayoutManager(
+                    context, HORIZONTAL, false
+                ) {
+                    override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
+                        return lp?.let {
+                            it.width = (0.33 * width).toInt()
+                            true
+                        } ?: super.checkLayoutParams(lp)
+                    }
                 }
             }
 
-            itemBinding.rvList.apply {
-                adapter = watchedAdapter
-                layoutManager = linearLayoutManager
-            }
             watchedAdapter.differ.submitList(item.watched)
         }
 
