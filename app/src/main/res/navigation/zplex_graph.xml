@@ -154,7 +154,7 @@
     </fragment>
     <fragment
         android:id="@+id/fragmentCollection"
-        android:name="zechs.zplex.ui.collection.FragmentCollection"
+        android:name="zechs.zplex.ui.collection.CollectionFragment"
         android:label="FragmentCollection"
         tools:layout="@layout/fragment_list">
         <argument

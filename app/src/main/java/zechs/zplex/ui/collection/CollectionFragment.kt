@@ -5,12 +5,10 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,20 +18,17 @@ import zechs.zplex.R
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.FragmentListBinding
-import zechs.zplex.ui.cast.CastsFragmentDirections
 import zechs.zplex.ui.collection.adapter.CollectionDataAdapter
-import zechs.zplex.ui.image.BigImageViewModel
 import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
 
-class FragmentCollection : Fragment() {
+class CollectionFragment : Fragment() {
 
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
 
-    private val args by navArgs<FragmentCollectionArgs>()
+    private val args by navArgs<CollectionFragmentArgs>()
 
-    private val bigImageViewModel by activityViewModels<BigImageViewModel>()
     private val collectionViewModel by activityViewModels<CollectionViewModel>()
 
     private var hasLoaded: Boolean = false
@@ -65,24 +60,11 @@ class FragmentCollection : Fragment() {
         setupCollectionViewModel(args.collectionId)
     }
 
-    private fun openImageFullSize(posterPath: String?, imageView: ImageView) {
-        imageView.transitionName = posterPath
-        this.exitTransition = null
-        bigImageViewModel.setImagePath(posterPath)
-
-        val action = CastsFragmentDirections.actionCastsFragmentToBigImageFragment()
-        val extras = FragmentNavigatorExtras(
-            imageView to imageView.transitionName
-        )
-        findNavController().navigate(action, extras)
-        Log.d("navigateToMedia", imageView.transitionName)
-    }
-
     private fun navigateMedia(media: Media) {
-        val action = FragmentCollectionDirections.actionFragmentCollectionToFragmentMedia(
+        val action = CollectionFragmentDirections.actionFragmentCollectionToFragmentMedia(
             media.copy(media_type = media.media_type ?: MediaType.movie)
         )
-        Log.d(TAG, "navigateMedia, invoked. ($media)")
+        Log.d(TAG, "navigateMedia($media)")
         findNavController().navigateSafe(action)
     }
 
