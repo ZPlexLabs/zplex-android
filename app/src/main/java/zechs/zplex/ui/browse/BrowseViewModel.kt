@@ -21,7 +21,6 @@ import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import javax.inject.Inject
 
-
 @HiltViewModel
 class BrowseViewModel @Inject constructor(
     app: Application,
@@ -41,6 +40,11 @@ class BrowseViewModel @Inject constructor(
 
     private var newSearchQuery: FilterArgs? = null
     private var oldSearchQuery: FilterArgs? = null
+
+    var isLoading = false
+
+    var isLastPage = false
+        private set
 
     fun getBrowse(
         filterArgs: FilterArgs
@@ -79,6 +83,8 @@ class BrowseViewModel @Inject constructor(
         if (response.isSuccessful) {
             response.body()?.let { resultResponse ->
                 page++
+                isLastPage = resultResponse.page == resultResponse.total_pages
+
                 if (browseResponse == null || newSearchQuery != oldSearchQuery) {
                     page = 2
                     oldSearchQuery = newSearchQuery

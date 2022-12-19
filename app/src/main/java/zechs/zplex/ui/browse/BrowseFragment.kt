@@ -59,10 +59,9 @@ class BrowseFragment : Fragment() {
 
     private val filterModel by activityViewModels<FiltersViewModel>()
     private val browseViewModel by activityViewModels<BrowseViewModel>()
-    private lateinit var filtersDialog: FiltersDialog
 
-    private var isLoading = true
-    private var isLastPage = true
+    private var _filtersDialog: FiltersDialog? = null
+    private val filtersDialog: FiltersDialog get() = _filtersDialog!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -82,8 +81,9 @@ class BrowseFragment : Fragment() {
         setupKeywordsObserver()
 
         binding.btnFilters.setOnClickListener {
-            context?.let { it1 -> showFiltersDialog(it1) }
+            showFiltersDialog(context = requireContext())
         }
+
     }
 
     private fun keywordSearch(editText: EditText) {
@@ -114,7 +114,7 @@ class BrowseFragment : Fragment() {
             when (response) {
                 is Resource.Success -> response.data?.let { onSuccess(it) }
                 is Resource.Error -> response.message?.let { onError(it) }
-                is Resource.Loading -> isLoading = true
+                is Resource.Loading -> browseViewModel.isLoading = true
             }
         }
     }
@@ -122,11 +122,10 @@ class BrowseFragment : Fragment() {
     private fun setupKeywordsObserver() {
         browseViewModel.keywordsList.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let {
-                if (it.isNotEmpty() && ::filtersDialog.isInitialized) {
+                if (it.isNotEmpty()) {
                     setupKeywordList(requireContext(), filtersDialog, it)
                 }
                 Log.d(TAG, "Keywords list: $it")
-                Log.d(TAG, "FiltersDialog isInitialized=${::filtersDialog.isInitialized}")
             }
         }
     }
@@ -137,10 +136,11 @@ class BrowseFragment : Fragment() {
             rvBrowse.isVisible = true
         }
 
-        browseAdapter.submitList(showsResponse.results.toList())
-        isLastPage = showsResponse.page == showsResponse.total_pages
+        viewLifecycleOwner.lifecycleScope.launch {
+            browseAdapter.submitList(showsResponse.results.toList())
+        }
 
-        isLoading = false
+        browseViewModel.isLoading = false
 
         when (filterModel.getFilter()?.mediaType) {
             MediaType.movie -> {
@@ -165,7 +165,7 @@ class BrowseFragment : Fragment() {
         binding.errorView.apply {
             errorTxt.text = errorMsg
         }
-        isLoading = false
+        browseViewModel.isLoading = false
     }
 
     private fun setupFiltersObservers() {
@@ -187,11 +187,11 @@ class BrowseFragment : Fragment() {
                 Log.d(
                     "onScrolled",
                     "visibleItemCount=$visibleItemCount, itemCount=$itemCount," +
-                            " isLoading=$isLoading, isLastPage=$isLastPage," +
+                            " isLoading=${browseViewModel.isLoading}, isLastPage=${browseViewModel.isLastPage}," +
                             " filterArgs=${filterArgs == null}"
                 )
 
-                if (visibleItemCount >= itemCount && !isLoading && !isLastPage) {
+                if (visibleItemCount >= itemCount && !browseViewModel.isLoading && !browseViewModel.isLastPage) {
                     (filterArgs?.let { browseViewModel.getBrowse(it) })
                 }
             }
@@ -281,9 +281,9 @@ class BrowseFragment : Fragment() {
 
     private fun navigateToMedia(media: Media) {
         val mediaType = when {
-            media.name == null -> "movie"
-            media.title == null -> "tv"
-            else -> "tv"
+            media.name == null -> MediaType.movie
+            media.title == null -> MediaType.tv
+            else -> MediaType.tv
         }
         val action = BrowseFragmentDirections.actionDiscoverFragmentToFragmentMedia(
             media.copy(media_type = mediaType)
@@ -301,7 +301,10 @@ class BrowseFragment : Fragment() {
 
 
     private fun showFiltersDialog(context: Context) {
-        filtersDialog = FiltersDialog(context)
+        if (_filtersDialog == null) {
+            _filtersDialog = FiltersDialog(context = requireContext())
+        }
+
         filtersDialog.show()
 
         filtersDialog.window?.apply {
@@ -312,6 +315,9 @@ class BrowseFragment : Fragment() {
             )
         }
 
+        filtersDialog.setOnDismissListener {
+            _filtersDialog = null
+        }
 
         val dialogRoot = filtersDialog.findViewById<MaterialCardView>(R.id.dialog_root)
 
@@ -374,19 +380,21 @@ class BrowseFragment : Fragment() {
             setupSortMenu(context, filtersDialog)
         }
 
-        mediaChipGroup.setOnCheckedChangeListener { group, checkedId ->
-            TransitionManager.beginDelayedTransition(dialogRoot)
-            val mediaChecked = group.findViewById<Chip>(
-                checkedId
-            ).text.toString()
+        mediaChipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
+            checkedIds.forEach { checkedId ->
+                TransitionManager.beginDelayedTransition(dialogRoot)
+                val mediaChecked = group.findViewById<Chip>(
+                    checkedId
+                ).text.toString()
 
-            genreMenu.text = getString(R.string.select_genre)
+                genreMenu.text = getString(R.string.select_genre)
 
-            currentFilters?.let {
-                when (mediaChecked) {
-                    "Movies" -> setupGenresMenu(context, filtersDialog, moviesGenreList)
-                    "TV Shows" -> setupGenresMenu(context, filtersDialog, tvGenreList)
-                    else -> {}
+                currentFilters?.let {
+                    when (mediaChecked) {
+                        "Movies" -> setupGenresMenu(context, filtersDialog, moviesGenreList)
+                        "TV Shows" -> setupGenresMenu(context, filtersDialog, tvGenreList)
+                        else -> {}
+                    }
                 }
             }
         }
