@@ -25,7 +25,7 @@ class ColorManager {
             val threshold = 0.09000
             val isDark = luminance < threshold
             Log.d(
-                TAG, "color=$color, luminance=$luminance," +
+                TAG, "color=$color, luminance=$luminance, " +
                         "threshold=$threshold, isDark=$isDark"
             )
             return isDark
