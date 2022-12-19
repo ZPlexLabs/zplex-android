@@ -4,9 +4,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.databinding.ItemListBinding
-import zechs.zplex.ui.shared_adapters.SeasonsAdapter
 import zechs.zplex.ui.shared_adapters.casts.CastAdapter
 import zechs.zplex.ui.shared_adapters.detailed_media.DetailedMediaAdapter
+import zechs.zplex.ui.shared_adapters.season.SeasonsAdapter
 import zechs.zplex.ui.shared_adapters.video.VideoAdapter
 
 
@@ -17,9 +17,12 @@ class ListViewHolder(
 
     fun bindSeason(item: ListDataModel.Seasons) {
         val seasonsAdapter by lazy {
-            SeasonsAdapter(item.showName) {
-                listDataAdapter.listClickListener.onClickSeason(it)
-            }
+            SeasonsAdapter(
+                showName = item.showName,
+                seasonOnClick = {
+                    listDataAdapter.listClickListener.onClickSeason(it)
+                }
+            )
         }
         itemBinding.rvList.apply {
             adapter = seasonsAdapter
@@ -27,7 +30,7 @@ class ListViewHolder(
                 context, LinearLayoutManager.VERTICAL, false
             )
         }
-        seasonsAdapter.differ.submitList(item.seasons)
+        seasonsAdapter.submitList(item.seasons)
     }
 
     private val mediaAdapter by lazy {
