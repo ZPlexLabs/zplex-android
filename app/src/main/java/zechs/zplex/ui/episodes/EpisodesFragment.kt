@@ -20,12 +20,11 @@ import com.google.android.material.transition.MaterialFadeThrough
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
-import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.ui.cast.CastsFragmentDirections
-import zechs.zplex.ui.collection.FragmentCollectionDirections
 import zechs.zplex.ui.episodes.adapter.EpisodesDataAdapter
 import zechs.zplex.ui.image.BigImageViewModel
+import zechs.zplex.ui.shared_viewmodels.EpisodeViewModel
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
 import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
@@ -38,6 +37,7 @@ class EpisodesFragment : Fragment() {
 
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
     private val bigImageViewModel by activityViewModels<BigImageViewModel>()
+    private val episodeViewModel by activityViewModels<EpisodeViewModel>()
 
     private val episodesViewModel by lazy {
         ViewModelProvider(this)[EpisodesViewModel::class.java]
@@ -49,7 +49,14 @@ class EpisodesFragment : Fragment() {
     private var showPoster: String? = null
 
     private val episodeDataAdapter by lazy {
-        EpisodesDataAdapter()
+        EpisodesDataAdapter(
+            episodeOnClick = {
+                episodeViewModel.setShowEpisode(
+                    tmdbId, it.season_number, it.episode_number
+                )
+                findNavController().navigateSafe(R.id.action_episodesListFragment_to_watchFragment)
+            }
+        )
     }
 
     override fun onCreateView(
@@ -84,14 +91,6 @@ class EpisodesFragment : Fragment() {
         )
         findNavController().navigate(action, extras)
         Log.d("navigateToMedia", imageView.transitionName)
-    }
-
-    private fun navigateMedia(media: Media) {
-        val action = FragmentCollectionDirections.actionFragmentCollectionToFragmentMedia(
-            media.copy(media_type = media.media_type ?: "movie")
-        )
-        Log.d(TAG, "navigateMedia, invoked. ($media)")
-        findNavController().navigateSafe(action)
     }
 
     private fun setupEpisodesViewModel() {

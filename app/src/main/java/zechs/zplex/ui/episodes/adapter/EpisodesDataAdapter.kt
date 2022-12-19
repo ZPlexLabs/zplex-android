@@ -4,12 +4,13 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import zechs.zplex.R
+import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.databinding.ItemEpisodeBinding
 import zechs.zplex.databinding.ItemEpisodeHeaderBinding
 
-class EpisodesDataAdapter : ListAdapter<EpisodesDataModel, EpisodesViewHolder>(
-    EpisodesDataModelDiffCallback()
-) {
+class EpisodesDataAdapter(
+    val episodeOnClick: (Episode) -> Unit
+) : ListAdapter<EpisodesDataModel, EpisodesViewHolder>(EpisodesDataModelDiffCallback()) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup, viewType: Int
@@ -26,7 +27,8 @@ class EpisodesDataAdapter : ListAdapter<EpisodesDataModel, EpisodesViewHolder>(
             itemBinding = ItemEpisodeBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false
-            )
+            ),
+            episodesDataAdapter = this
         )
 
         return when (viewType) {
@@ -38,7 +40,6 @@ class EpisodesDataAdapter : ListAdapter<EpisodesDataModel, EpisodesViewHolder>(
 
     override fun onBindViewHolder(holder: EpisodesViewHolder, position: Int) {
         val item = getItem(position)
-
         when (holder) {
             is EpisodesViewHolder.HeaderViewHolder -> holder.bind(item as EpisodesDataModel.Header)
             is EpisodesViewHolder.EpisodeViewHolder -> holder.bind(item as EpisodesDataModel.Episode)

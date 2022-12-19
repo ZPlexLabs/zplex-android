@@ -7,6 +7,7 @@ import androidx.viewbinding.ViewBinding
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.data.model.StillSize
+import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.databinding.ItemEpisodeBinding
 import zechs.zplex.databinding.ItemEpisodeHeaderBinding
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
@@ -24,7 +25,7 @@ sealed class EpisodesViewHolder(
         fun bind(item: EpisodesDataModel.Header) {
             val posterUrl = if (item.seasonPosterPath != null) {
                 "${TMDB_IMAGE_PREFIX}/${PosterSize.w780}${item.seasonPosterPath}"
-            } else R.drawable.no_thumb
+            } else R.drawable.no_poster
 
             val overviewText = item.seasonOverview.ifEmpty { "No description" }
 
@@ -46,19 +47,19 @@ sealed class EpisodesViewHolder(
 
                 GlideApp.with(ivPoster)
                     .load(posterUrl)
-                    .placeholder(R.drawable.no_thumb)
+                    .placeholder(R.drawable.no_poster)
                     .into(ivPoster)
             }
         }
     }
 
     class EpisodeViewHolder(
-        private val itemBinding: ItemEpisodeBinding
+        private val itemBinding: ItemEpisodeBinding,
+        val episodesDataAdapter: EpisodesDataAdapter
     ) : EpisodesViewHolder(itemBinding) {
         fun bind(episode: EpisodesDataModel.Episode) {
 
             val episodeStillUrl = if (episode.still_path.isNullOrEmpty()) {
-                itemBinding.ivThumb.isGone = true
                 R.drawable.no_thumb
             } else {
                 "${TMDB_IMAGE_PREFIX}/${StillSize.original}${episode.still_path}"
@@ -91,21 +92,6 @@ sealed class EpisodesViewHolder(
                     tvEpisodeCount.text = count
                 }
 
-//                if (episode.file_id == null || btnPlay.tag == btnPlayTAG) {
-//                    btnPlay.apply {
-//                        tag = btnPlayTAG
-//                        text = context.getString(R.string.not_available)
-//                        setOnClickListener(null)
-//                        isGone = true
-//                    }
-//                } else {
-//                    btnPlay.apply {
-//                        tag = null
-//                        text = context.getString(R.string.play)
-//                        isVisible = true
-//                    }
-//                }
-
                 val overviewText = if (episode.overview.isNullOrEmpty()) {
                     "No description"
                 } else episode.overview
@@ -114,6 +100,19 @@ sealed class EpisodesViewHolder(
                     tvOverview, overviewText, 180, "...more", root
                 )
                 tvTitle.text = title
+                root.setOnClickListener {
+                    episodesDataAdapter.episodeOnClick.invoke(
+                        Episode(
+                            id = episode.id,
+                            name = episode.name,
+                            overview = episode.overview,
+                            episode_number = episode.episode_number,
+                            season_number = episode.season_number,
+                            still_path = episode.still_path,
+                            guest_stars = null
+                        )
+                    )
+                }
             }
         }
 
