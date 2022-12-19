@@ -1,6 +1,5 @@
 package zechs.zplex.ui.image
 
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,14 +9,11 @@ import android.view.animation.LinearInterpolator
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import androidx.transition.Fade
-import androidx.transition.Transition
-import androidx.transition.TransitionSet
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
-import com.google.android.material.transition.MaterialContainerTransform
+import com.google.android.material.transition.MaterialFadeThrough
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.databinding.FragmentBigImageBinding
@@ -33,26 +29,13 @@ class BigImageFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        sharedElementEnterTransition = MaterialContainerTransform().apply {
-            drawingViewId = R.id.mainNavHostFragment
-            scrimColor = Color.TRANSPARENT
-            duration = 350
-        }
-
-        enterTransition = TransitionSet().apply {
-            addTransition(Fade().apply {
-                interpolator = LinearInterpolator()
-            })
-
-            duration = 270
-            startDelay = (sharedElementEnterTransition as Transition).duration - duration
-        }
-
-        returnTransition = Fade().apply {
+        val transition = MaterialFadeThrough().apply {
             interpolator = LinearInterpolator()
             duration = 220
         }
+        enterTransition = transition.apply { duration = 270 }
+        exitTransition = transition
+        returnTransition = transition
     }
 
     override fun onCreateView(
@@ -106,8 +89,8 @@ class BigImageFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onDestroy() {
+        super.onDestroy()
         _binding = null
     }
 
