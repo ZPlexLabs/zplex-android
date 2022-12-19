@@ -36,10 +36,9 @@ class MediaViewHolder(
                     .load(mediaPosterUrl)
                     .placeholder(R.drawable.no_poster)
                     .into(this)
-
-                setOnClickListener {
-                    mediaAdapter.mediaOnClick.invoke(media)
-                }
+            }
+            root.setOnClickListener {
+                mediaAdapter.mediaOnClick.invoke(media)
             }
         }
 

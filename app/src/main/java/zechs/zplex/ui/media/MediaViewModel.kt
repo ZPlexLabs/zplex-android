@@ -9,14 +9,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Response
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.entities.Show
+import zechs.zplex.data.model.tmdb.media.MovieResponse
 import zechs.zplex.data.model.tmdb.media.TvResponse
 import zechs.zplex.data.model.tmdb.search.SearchResponse
 import zechs.zplex.data.repository.TmdbRepository
@@ -26,8 +27,6 @@ import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import zechs.zplex.utils.util.Converter
 import javax.inject.Inject
-
-typealias movieResponseTmdb = zechs.zplex.data.model.tmdb.media.MovieResponse
 
 @HiltViewModel
 class MediaViewModel @Inject constructor(
@@ -68,16 +67,31 @@ class MediaViewModel @Inject constructor(
     val mediaResponse: LiveData<Resource<List<MediaDataModel>>>
         get() = _mediaResponse
 
+    // Handling events or saving data
+    var hasLoaded = false
+
+    var tmdbId = 0
+        private set
+
+    var showName: String? = null
+        private set
+
+    var showPoster: String? = null
+        private set
+
+    var mediaType: MediaType = MediaType.tv
+
     fun getMedia(
         tmdbId: Int,
         mediaType: MediaType
-    ) = viewModelScope.launch(Dispatchers.IO) {
+    ) = viewModelScope.launch {
         _mediaResponse.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
                 when (mediaType) {
-                    MediaType.tv -> fetchShow(this, tmdbId)
-                    MediaType.movie -> fetchMovie(this, tmdbId)
+                    MediaType.tv -> fetchShow(tmdbId)
+                    MediaType.movie -> fetchMovie(tmdbId)
+                    else -> {}
                 }
             } else {
                 _mediaResponse.postValue(Resource.Error("No internet connection"))
@@ -88,65 +102,55 @@ class MediaViewModel @Inject constructor(
         }
     }
 
-    private fun fetchMovie(
-        scope: CoroutineScope, tmdbId: Int
-    ) = scope.launch {
+    private suspend fun fetchMovie(
+        tmdbId: Int
+    ) = withContext(Dispatchers.IO) {
         val page = 1
-        val movieResponse = async { tmdbRepository.getMovie(tmdbId) }
-        val movie = movieResponse.await()
-        var isCompany = false
+        val movie = tmdbRepository.getMovie(tmdbId)
 
         if (movie.isSuccessful && movie.body() != null) {
             movie.body()!!.production_companies?.let {
                 if (it.isNotEmpty()) {
-                    isCompany = true
-
-                    val moreFromCompany = async {
-                        tmdbRepository.getMoviesFromCompany(
-                            it[0].id, page
-                        )
-                    }
+                    val moreFromCompany = tmdbRepository.getMoviesFromCompany(
+                        it[0].id, page
+                    )
                     val handleMovieResponse = handleMovieResponse(
-                        movie, moreFromCompany.await()
+                        movie, moreFromCompany
                     )
                     _mediaResponse.postValue(handleMovieResponse)
+                    return@withContext
                 }
             }
         }
 
-        if (!isCompany) {
-            _mediaResponse.postValue(handleMovieResponse(movie, company = null))
-        }
+        _mediaResponse.postValue(handleMovieResponse(movie, company = null))
     }
 
-    private fun fetchShow(
-        scope: CoroutineScope, tmdbId: Int
-    ) = scope.launch {
+    private suspend fun fetchShow(
+        tmdbId: Int
+    ) = withContext(Dispatchers.IO) {
         val page = 1
-        val tvResponse = async { tmdbRepository.getShow(tmdbId) }
-        val tv = tvResponse.await()
-        var isCompany = false
+        val tv = tmdbRepository.getShow(tmdbId)
 
         if (tv.isSuccessful && tv.body() != null) {
-            tv.body()!!.production_companies?.let {
-                if (it.isNotEmpty()) {
-                    isCompany = true
+            tv.body()!!.production_companies?.let { companies ->
+                if (companies.isNotEmpty()) {
                     val moreFromCompany = async {
                         tmdbRepository.getShowsFromCompany(
-                            it[0].id, page
+                            company_id = companies[0].id,
+                            page = page
                         )
                     }
                     val handleTvResponse = handleTvResponse(
                         tv, moreFromCompany.await()
                     )
                     _mediaResponse.postValue(handleTvResponse)
+                    return@withContext
                 }
             }
         }
 
-        if (!isCompany) {
-            _mediaResponse.postValue(handleTvResponse(tv, company = null))
-        }
+        _mediaResponse.postValue(handleTvResponse(tv, company = null))
     }
 
 
@@ -158,6 +162,11 @@ class MediaViewModel @Inject constructor(
         if (response.isSuccessful && response.body() != null) {
             val result = response.body()!!
             val mediaDataModel = mutableListOf<MediaDataModel>()
+
+            this@MediaViewModel.showPoster = result.poster_path
+            this@MediaViewModel.tmdbId = result.id
+            this@MediaViewModel.mediaType = MediaType.tv
+            this@MediaViewModel.showName = result.name
 
             val year = result.first_air_date?.take(4)?.toInt()
 
@@ -176,10 +185,12 @@ class MediaViewModel @Inject constructor(
                     backdropPath = result.backdrop_path,
                     posterPath = result.poster_path,
                     rating = result.vote_average?.div(2) ?: 0.toDouble(),
-                    genre = result.genres?.take(3)?.joinToString(
-                        truncated = "",
-                        separator = ", ",
-                    ) { it.name }!!,
+                    genre = result.genres
+                        ?.take(3)
+                        ?.joinToString(
+                            truncated = "",
+                            separator = ", ",
+                        ) { it.name }!!,
                     runtime = runtime
                 )
             )
@@ -217,7 +228,7 @@ class MediaViewModel @Inject constructor(
                     formattedDate?.let {
                         premiered += " premiered on $formattedDate."
                     }
-                    val seasonPlot = if (it.overview == null || it.overview.toString() == "") {
+                    val seasonPlot = if (it.overview.isNullOrEmpty()) {
                         premiered
                     } else it.overview
 
@@ -303,12 +314,17 @@ class MediaViewModel @Inject constructor(
     }
 
     private fun handleMovieResponse(
-        response: Response<movieResponseTmdb>,
+        response: Response<MovieResponse>,
         company: Response<SearchResponse>?
     ): Resource<List<MediaDataModel>> {
         if (response.isSuccessful && response.body() != null) {
             val result = response.body()!!
             val mediaDataModel = mutableListOf<MediaDataModel>()
+
+            this@MediaViewModel.showPoster = result.poster_path
+            this@MediaViewModel.tmdbId = result.id
+            this@MediaViewModel.mediaType = MediaType.movie
+            this@MediaViewModel.showName = result.title
 
             val year: Int? = result.release_date?.let { firstAired ->
                 if (firstAired.isNotBlank()) {
@@ -417,6 +433,7 @@ class MediaViewModel @Inject constructor(
                 }
             }
 
+            hasLoaded = true
             return Resource.Success(mediaDataModel.toList())
         }
         return Resource.Error(response.message())

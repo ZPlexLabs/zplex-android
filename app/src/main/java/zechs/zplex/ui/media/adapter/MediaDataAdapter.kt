@@ -1,6 +1,5 @@
 package zechs.zplex.ui.media.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
@@ -8,7 +7,6 @@ import zechs.zplex.R
 import zechs.zplex.databinding.*
 
 class MediaDataAdapter(
-    val context: Context,
     val mediaClickListener: MediaClickListener
 ) : ListAdapter<MediaDataModel, MediaViewHolder>(MediaDataModelDiffCallback()) {
 
@@ -17,7 +15,6 @@ class MediaDataAdapter(
     ): MediaViewHolder {
 
         val headerViewHolder = MediaViewHolder.HeaderViewHolder(
-            context = context,
             itemBinding = ItemMediaHeaderBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false
@@ -26,7 +23,6 @@ class MediaDataAdapter(
         )
 
         val titleViewHolder = MediaViewHolder.TitleViewHolder(
-            context = context,
             itemBinding = ItemMediaTitleBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false
@@ -34,7 +30,6 @@ class MediaDataAdapter(
         )
 
         val lastSeasonViewHolder = MediaViewHolder.LatestSeasonViewHolder(
-            context = context,
             itemBinding = ItemMediaSeasonBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false
@@ -43,7 +38,6 @@ class MediaDataAdapter(
         )
 
         val partOfCollectionViewHolder = MediaViewHolder.PartOfCollectionViewHolder(
-            context = context,
             itemBinding = ItemMediaCollectionBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false
@@ -52,7 +46,6 @@ class MediaDataAdapter(
         )
 
         val buttonViewHolder = MediaViewHolder.ButtonViewHolder(
-            context = context,
             itemBinding = ItemMediaButtonsBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false
@@ -61,7 +54,6 @@ class MediaDataAdapter(
         )
 
         val listViewHolder = MediaViewHolder.ListViewHolder(
-            context = context,
             itemBinding = ItemListWithHeadingBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent, false

@@ -58,7 +58,7 @@
 
     <fragment
         android:id="@+id/fragmentMedia"
-        android:name="zechs.zplex.ui.media.FragmentMedia"
+        android:name="zechs.zplex.ui.media.MediaFragment"
         android:label="Fragment Media"
         tools:layout="@layout/fragment_list">
         <argument

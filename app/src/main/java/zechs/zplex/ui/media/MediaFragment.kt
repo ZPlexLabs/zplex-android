@@ -12,7 +12,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RatingBar
-import android.widget.Toast
+import androidx.annotation.Keep
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
@@ -23,6 +24,7 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
@@ -53,35 +55,25 @@ import zechs.zplex.utils.util.ColorManager.Companion.lightUpColor
 import java.util.*
 
 @AndroidEntryPoint
-class FragmentMedia : Fragment(), MediaClickListener {
+class MediaFragment : Fragment(), MediaClickListener {
+
+    companion object {
+        const val TAG = "MediaFragment"
+    }
 
     private var _binding: FragmentListBinding? = null
     private val binding get() = _binding!!
 
-    private val mediaDataAdapter by lazy {
-        MediaDataAdapter(
-            context = requireContext(),
-            mediaClickListener = this
-        )
-    }
-
     // View models
-
+    private val seasonViewModel by activityViewModels<SeasonViewModel>()
+    private val bigImageViewModel by activityViewModels<BigImageViewModel>()
+    private val listDataViewModel by activityViewModels<ListViewModel>()
     private val mediaViewModel by lazy {
         ViewModelProvider(this)[MediaViewModel::class.java]
     }
-    private val seasonViewModel by activityViewModels<SeasonViewModel>()
-    private val bigImageViewModel by activityViewModels<BigImageViewModel>()
-    private val listViewModel by activityViewModels<ListViewModel>()
-    private val args by navArgs<FragmentMediaArgs>()
 
-    // Handling events or saving data
-    private var tmdbId: Int? = null
-    private var showName: String? = null
-    private var showPoster: String? = null
-    private var hasLoaded: Boolean = false
-
-    private lateinit var mediaType: MediaType
+    // Nav-args
+    private val args by navArgs<MediaFragmentArgs>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -95,72 +87,67 @@ class FragmentMedia : Fragment(), MediaClickListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupRecyclerView()
-
         val media = args.media
+        mediaViewModel.mediaType = when {
+            media.name != null -> MediaType.tv
+            media.title != null -> MediaType.movie
+            else -> media.media_type!!
+        }
 
-        mediaType = MediaType.valueOf(
-            media.media_type ?: when {
-                media.name != null -> "tv"
-                media.title != null -> "movie"
-                else -> media.media_type
-            }!!
-        )
-
-        setupMediaViewModel(media.id, mediaType)
+        setupRecyclerView()
+        setupMediaViewModel(media.id, mediaViewModel.mediaType)
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
-        tmdbId = media.id
-        showName = media.name ?: media.title
-        showPoster = media.poster_path
-    }
-
-    private fun openImageFullSize(posterPath: String, imageView: ImageView) {
-        imageView.transitionName = posterPath
-        this.exitTransition = null
-        bigImageViewModel.setImagePath(posterPath)
-
-        val action = FragmentMediaDirections.actionFragmentMediaToBigImageFragment()
-        val extras = FragmentNavigatorExtras(
-            imageView to imageView.transitionName
-        )
-        findNavController().navigate(action, extras)
-        Log.d("navigateToMedia", imageView.transitionName)
     }
 
     private fun setupMediaViewModel(tmdbId: Int, mediaType: MediaType) {
-        if (!hasLoaded) {
+        if (!mediaViewModel.hasLoaded) {
             mediaViewModel.getMedia(tmdbId, mediaType)
         }
         mediaViewModel.mediaResponse.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Resource.Success -> response.data?.let {
-                    TransitionManager.beginDelayedTransition(
-                        binding.root,
-                        MaterialFadeThrough()
-                    )
+            handleMediaResponse(response)
+        }
+    }
 
-                    viewLifecycleOwner
-                        .lifecycleScope
-                        .launch { mediaDataAdapter.submitList(it) }
+    private fun handleMediaResponse(
+        response: Resource<List<MediaDataModel>>
+    ) {
+        when (response) {
+            is Resource.Success -> response.data?.let {
+                TransitionManager.beginDelayedTransition(
+                    binding.root,
+                    MaterialFadeThrough()
+                )
 
-                    isLoading(false)
-                    hasLoaded = true
-                }
-                is Resource.Error -> {
-                    showToast(response.message)
-                    isLoading(false)
-                    hasLoaded = true
-                }
-                is Resource.Loading -> {
-                    if (!hasLoaded) {
-                        mediaViewModel.setDominantColor(
-                            Color.parseColor("#EADDFF")
+                viewLifecycleOwner
+                    .lifecycleScope
+                    .launch { mediaDataAdapter.submitList(it) }
+
+                isLoading(false)
+                mediaViewModel.hasLoaded = true
+            }
+            is Resource.Error -> {
+                showSnackBar(
+                    message = response.message,
+                    action = SnackBarAction(R.string.retry) {
+                        mediaViewModel.getMedia(
+                            mediaViewModel.tmdbId,
+                            mediaViewModel.mediaType
                         )
-                        isLoading(true)
                     }
+
+                )
+                isLoading(false)
+                mediaViewModel.hasLoaded = true
+            }
+            is Resource.Loading -> {
+                if (!mediaViewModel.hasLoaded) {
+                    mediaViewModel.setDominantColor(
+                        Color.parseColor("#EADDFF")
+                    )
+                    isLoading(true)
                 }
             }
         }
@@ -173,28 +160,41 @@ class FragmentMedia : Fragment(), MediaClickListener {
         }
     }
 
-    private fun openWebLink(webUrl: String) {
-        val launchWebIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
-        startActivity(launchWebIntent)
+    private val mediaDataAdapter by lazy {
+        MediaDataAdapter(this)
     }
 
     private fun setupRecyclerView() {
         binding.rvList.apply {
             adapter = mediaDataAdapter
             layoutManager = LinearLayoutManager(
-                activity, LinearLayoutManager.VERTICAL, false
+                activity, RecyclerView.VERTICAL, false
             )
+            setItemViewCacheSize(15)
         }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding.rvList.adapter = null
-        _binding = null
+    private fun openWebLink(webUrl: String) {
+        val launchWebIntent = Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
+        startActivity(launchWebIntent)
+    }
+
+    private fun openImageFullSize(posterPath: String, imageView: ImageView) {
+        imageView.transitionName = posterPath
+        this.exitTransition = null
+        bigImageViewModel.setImagePath(posterPath)
+
+        val action = MediaFragmentDirections.actionFragmentMediaToBigImageFragment()
+        val extras = FragmentNavigatorExtras(
+            imageView to imageView.transitionName
+        )
+        findNavController().navigate(action, extras)
+        Log.d("navigateToMedia", imageView.transitionName)
     }
 
     private fun shareIntent() {
-        val action = FragmentMediaDirections.actionFragmentMediaToShareBottomSheet()
+        val action = MediaFragmentDirections
+            .actionFragmentMediaToShareBottomSheet()
         findNavController().navigateSafe(action)
     }
 
@@ -212,18 +212,6 @@ class FragmentMedia : Fragment(), MediaClickListener {
         sendIntent.type = "text/plain"
         val shareIntent = Intent.createChooser(sendIntent, showName)
         startActivity(shareIntent)
-    }
-
-    private fun playMovie() {
-//        val intent = Intent(activity, PlayerActivity::class.java)
-//        intent.putExtra("fileId", player.fileId)
-//        intent.putExtra("title", showName!!)
-//        intent.putExtra("accessToken", player.accessToken)
-//        intent.putExtra("tmdbId", tmdbId!!)
-//        intent.putExtra("name", showName!!)
-//        intent.putExtra("posterPath", args.media.poster_path)
-//        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-//        activity?.startActivity(intent)
     }
 
     private fun navigateToSeason(
@@ -246,48 +234,65 @@ class FragmentMedia : Fragment(), MediaClickListener {
     }
 
     private fun setSeasonsList(seasons: List<Season>) {
-        if (tmdbId != null && showName != null) {
-            listViewModel.setSeasonsList(
-                tmdbId!!,
-                showName!!,
-                showPoster,
+        if (mediaViewModel.showName != null) {
+            listDataViewModel.setSeasonsList(
+                mediaViewModel.tmdbId,
+                mediaViewModel.showName!!,
+                mediaViewModel.showPoster,
                 seasons = seasons
             )
             findNavController().navigate(R.id.action_fragmentMedia_to_fragmentList)
+        } else {
+            showSnackBar()
         }
     }
 
+    @Keep
+    private data class SnackBarAction(
+        @StringRes val resId: Int,
+        val listener: View.OnClickListener
+    )
+
+    private fun showSnackBar(
+        message: String? = null,
+        duration: Int = Snackbar.LENGTH_SHORT,
+        action: SnackBarAction? = null
+    ) {
+        Snackbar.make(
+            binding.root,
+            message ?: resources.getString(R.string.something_went_wrong),
+            Snackbar.LENGTH_SHORT
+        ).also {
+            action?.let { a ->
+                it.setAction(a.resId, a.listener)
+            }
+            it.duration = duration
+        }.show()
+    }
+
     private fun setCastsList(casts: List<Cast>) {
-        listViewModel.setCasts(casts = casts)
+        listDataViewModel.setCasts(casts = casts)
         findNavController().navigateSafe(R.id.action_fragmentMedia_to_fragmentList)
     }
 
     private fun setMediaList(heading: String, media: List<Media>) {
-        listViewModel.setMedia(heading, media)
+        listDataViewModel.setMedia(heading, media)
         findNavController().navigateSafe(R.id.action_fragmentMedia_to_fragmentList)
     }
 
     private fun setVideoList(videos: List<Video>) {
-        listViewModel.setVideo(videos)
+        listDataViewModel.setVideo(videos)
         findNavController().navigateSafe(R.id.action_fragmentMedia_to_fragmentList)
     }
 
     private fun navigateToCollection(collectionId: Int) {
-        val action = FragmentMediaDirections.actionFragmentMediaToFragmentCollection(collectionId)
+        val action = MediaFragmentDirections
+            .actionFragmentMediaToFragmentCollection(
+                collectionId
+            )
         findNavController().navigateSafe(action)
     }
 
-    companion object {
-        const val TAG = "FragmentMedia"
-    }
-
-    private fun showToast(message: String?) {
-        Toast.makeText(
-            context,
-            message ?: resources.getString(R.string.something_went_wrong),
-            Toast.LENGTH_SHORT
-        ).show()
-    }
 
     override fun onClickViewAll(listDataModel: ListDataModel) {
         when (listDataModel) {
@@ -299,7 +304,7 @@ class FragmentMedia : Fragment(), MediaClickListener {
     }
 
     override fun onClickMedia(media: Media) {
-        val action = FragmentMediaDirections.actionFragmentMediaSelf(media)
+        val action = MediaFragmentDirections.actionFragmentMediaSelf(media)
         findNavController().navigate(action)
     }
 
@@ -308,7 +313,7 @@ class FragmentMedia : Fragment(), MediaClickListener {
     }
 
     override fun onClickCast(cast: Cast) {
-        val action = FragmentMediaDirections.actionFragmentMediaToCastsFragment(cast)
+        val action = MediaFragmentDirections.actionFragmentMediaToCastsFragment(cast)
         findNavController().navigateSafe(action)
     }
 
@@ -361,6 +366,7 @@ class FragmentMedia : Fragment(), MediaClickListener {
     }
 
     override fun movieWatchNow(tmdbId: Int) {
+        showSnackBar(message = "To be implemented")
     }
 
     override fun movieShare(movie: Movie) {
@@ -386,89 +392,91 @@ class FragmentMedia : Fragment(), MediaClickListener {
     private fun setupShowDatabaseObserver(show: Show, view: MaterialButton) {
         var updateSaved = false
         Log.d(TAG, "${UUID.randomUUID()} getShow(), invoked")
+
         mediaViewModel.getShow(show.id).observe(viewLifecycleOwner) { isSaved ->
             Log.d(TAG, "${UUID.randomUUID()} getShow(), isSaved=$isSaved")
-            view.apply {
-                icon = ContextCompat.getDrawable(
-                    context,
-                    if (isSaved) {
-                        R.drawable.ic_round_playlist_add_check_24
-                    } else R.drawable.ic_add_24
-                )
-                setOnClickListener {
-                    if (isSaved) {
-                        mediaViewModel.deleteShow(show)
-                        val snackBar = Snackbar.make(
-                            binding.rvList, "${show.name} removed from your library",
-                            Snackbar.LENGTH_SHORT
-                        )
-                        snackBar.setAction(
-                            R.string.undo
-                        ) {
-                            mediaViewModel.saveShow(show)
-                        }
-                        snackBar.show()
-                    } else {
+
+            view.icon = ContextCompat.getDrawable(
+                view.context,
+                if (isSaved) {
+                    R.drawable.ic_saved_24
+                } else R.drawable.ic_add_24
+            )
+
+            view.setOnClickListener {
+                if (isSaved) {
+                    mediaViewModel.deleteShow(show)
+                    val snackBar = Snackbar.make(
+                        binding.rvList, "${show.name} removed from your library",
+                        Snackbar.LENGTH_SHORT
+                    )
+                    snackBar.setAction(
+                        R.string.undo
+                    ) {
                         mediaViewModel.saveShow(show)
-                        val snackBar = Snackbar.make(
-                            binding.rvList, "${show.name} added to your library",
-                            Snackbar.LENGTH_SHORT
-                        )
-                        snackBar.setAction(
-                            R.string.undo
-                        ) {
-                            mediaViewModel.deleteShow(show)
-                        }
-                        snackBar.show()
                     }
+                    snackBar.show()
+                } else {
+                    mediaViewModel.saveShow(show)
+                    val snackBar = Snackbar.make(
+                        binding.rvList, "${show.name} added to your library",
+                        Snackbar.LENGTH_SHORT
+                    )
+                    snackBar.setAction(
+                        R.string.undo
+                    ) {
+                        mediaViewModel.deleteShow(show)
+                    }
+                    snackBar.show()
                 }
             }
+
             if (isSaved && !updateSaved) {
                 mediaViewModel.saveShow(show)
                 updateSaved = true
             }
-
         }
     }
 
     private fun setupMovieDatabaseObserver(movie: Movie, view: MaterialButton) {
         var updateSaved = false
         Log.d(TAG, "${UUID.randomUUID()} getMovie(), invoked")
+
         mediaViewModel.getMovie(movie.id).observe(viewLifecycleOwner) { isSaved ->
             Log.d(TAG, "${UUID.randomUUID()} getMovie(), isSaved=$isSaved")
-            view.apply {
-                icon = ContextCompat.getDrawable(
-                    context,
-                    if (isSaved) {
-                        R.drawable.ic_round_playlist_add_check_24
-                    } else R.drawable.ic_add_24
-                )
-                setOnClickListener {
-                    if (isSaved) {
-                        mediaViewModel.deleteMovie(movie)
-                        val snackBar = Snackbar.make(
-                            binding.rvList, "${movie.title} removed from your library",
-                            Snackbar.LENGTH_SHORT
-                        )
-                        snackBar.setAction(
-                            R.string.undo
-                        ) {
-                            mediaViewModel.saveMovie(movie)
-                        }
-                        snackBar.show()
-                    } else {
+
+            view.icon = ContextCompat.getDrawable(
+                view.context,
+                if (isSaved) {
+                    R.drawable.ic_saved_24
+                } else R.drawable.ic_add_24
+            )
+
+            view.setOnClickListener {
+                if (isSaved) {
+                    mediaViewModel.deleteMovie(movie)
+                    val snackBar = Snackbar.make(
+                        binding.rvList, "${movie.title} removed from your library",
+                        Snackbar.LENGTH_SHORT
+                    )
+                    snackBar.setAction(
+                        R.string.undo
+                    ) {
                         mediaViewModel.saveMovie(movie)
-                        val snackBar = Snackbar.make(
-                            binding.rvList, "${movie.title} added to your library",
-                            Snackbar.LENGTH_SHORT
-                        )
-                        snackBar.setAction(
-                            R.string.undo
-                        ) {
-                            mediaViewModel.deleteMovie(movie)
-                        }
-                        snackBar.show()
                     }
+                    snackBar.show()
+                } else {
+                    mediaViewModel.saveMovie(movie)
+                    val snackBar = Snackbar.make(
+                        binding.rvList, "${movie.title} added to your library",
+                        Snackbar.LENGTH_SHORT
+                    )
+                    snackBar.setAction(
+                        R.string.undo
+                    ) {
+                        mediaViewModel.deleteMovie(movie)
+                    }
+                    snackBar.show()
                 }
             }
             if (isSaved && !updateSaved) {
@@ -477,4 +485,11 @@ class FragmentMedia : Fragment(), MediaClickListener {
             }
         }
     }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.rvList.adapter = null
+        _binding = null
+    }
+
 }

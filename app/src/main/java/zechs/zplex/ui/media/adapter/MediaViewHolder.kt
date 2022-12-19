@@ -1,11 +1,11 @@
 package zechs.zplex.ui.media.adapter
 
-import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.bumptech.glide.load.DataSource
@@ -25,15 +25,13 @@ import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.util.SpannableTextView.spannablePlotText
 
 sealed class MediaViewHolder(
-    val context: Context,
     binding: ViewBinding
 ) : RecyclerView.ViewHolder(binding.root) {
 
     class HeaderViewHolder(
-        context: Context,
         private val itemBinding: ItemMediaHeaderBinding,
         mediaDataAdapter: MediaDataAdapter
-    ) : MediaViewHolder(context, itemBinding) {
+    ) : MediaViewHolder(itemBinding) {
 
         private val listener = mediaDataAdapter.mediaClickListener
         private var hasLoadedResource = false
@@ -104,9 +102,8 @@ sealed class MediaViewHolder(
     }
 
     class TitleViewHolder(
-        context: Context,
         private val itemBinding: ItemMediaTitleBinding
-    ) : MediaViewHolder(context, itemBinding) {
+    ) : MediaViewHolder(itemBinding) {
 
         fun bind(item: MediaDataModel.Title) {
             itemBinding.apply {
@@ -117,10 +114,9 @@ sealed class MediaViewHolder(
     }
 
     class LatestSeasonViewHolder(
-        context: Context,
         private val itemBinding: ItemMediaSeasonBinding,
         private val mediaDataAdapter: MediaDataAdapter
-    ) : MediaViewHolder(context, itemBinding) {
+    ) : MediaViewHolder(itemBinding) {
         fun bind(item: MediaDataModel.LatestSeason) {
             val seasonPosterUrl = if (item.seasonPosterPath == null) R.drawable.no_poster else {
                 "$TMDB_IMAGE_PREFIX/${PosterSize.w342}${item.seasonPosterPath}"
@@ -141,10 +137,9 @@ sealed class MediaViewHolder(
     }
 
     class PartOfCollectionViewHolder(
-        context: Context,
         private val itemBinding: ItemMediaCollectionBinding,
         private val mediaDataAdapter: MediaDataAdapter
-    ) : MediaViewHolder(context, itemBinding) {
+    ) : MediaViewHolder(itemBinding) {
         fun bind(item: MediaDataModel.PartOfCollection) {
             itemBinding.apply {
                 val bannerUrl = if (item.bannerPoster == null) R.drawable.no_thumb else {
@@ -164,13 +159,12 @@ sealed class MediaViewHolder(
     }
 
     class ButtonViewHolder(
-        context: Context,
         private val itemBinding: ItemMediaButtonsBinding,
         mediaDataAdapter: MediaDataAdapter
-    ) : MediaViewHolder(context, itemBinding) {
+    ) : MediaViewHolder(itemBinding) {
 
         private fun getDrawable(@DrawableRes drawable: Int): Drawable? {
-            return ContextCompat.getDrawable(context, drawable)
+            return ContextCompat.getDrawable(itemBinding.root.context, drawable)
         }
 
         private val listener = mediaDataAdapter.mediaClickListener
@@ -190,7 +184,6 @@ sealed class MediaViewHolder(
                     tag = btnWatchNowTag
                 }
 
-
                 btnSave.apply {
                     if (tag != item.show.id) {
                         listener.showWatchlist(this, item.show)
@@ -208,10 +201,10 @@ sealed class MediaViewHolder(
             itemBinding.apply {
                 btnWatchNow.apply {
                     text = context.getString(R.string.watch_now)
-                    icon = getDrawable(R.drawable.ic_round_play_circle_outline_24)
-                    setOnClickListener {
-                        listener.movieWatchNow(item.movie.id)
-                    }
+                    icon = getDrawable(R.drawable.ic_play_circle_24)
+//                    setOnClickListener {
+//                        listener.movieWatchNow(item.movie.id)
+//                    }
 
                     val btnWatchNowTag = "btnWatchNowTAG"
                     if (tag != btnWatchNowTag) {
@@ -235,25 +228,23 @@ sealed class MediaViewHolder(
     }
 
     class ListViewHolder(
-        context: Context,
         private val itemBinding: ItemListWithHeadingBinding,
         private val mediaDataAdapter: MediaDataAdapter
-    ) : MediaViewHolder(context, itemBinding) {
+    ) : MediaViewHolder(itemBinding) {
 
-        private val mediaAdapter by lazy {
-            MediaAdapter {
-                mediaDataAdapter.mediaClickListener.onClickMedia(it)
-            }
-        }
-
-        private val linearLayoutManager = object : LinearLayoutManager(
-            context, HORIZONTAL, false
-        ) {
+        private val context = itemBinding.rvList.context
+        private val linearLayoutManager = object : LinearLayoutManager(context, HORIZONTAL, false) {
             override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
                 return lp?.let {
                     it.width = (0.30 * width).toInt()
                     true
                 } ?: super.checkLayoutParams(lp)
+            }
+        }
+
+        private val mediaAdapter by lazy {
+            MediaAdapter {
+                mediaDataAdapter.mediaClickListener.onClickMedia(it)
             }
         }
 
@@ -347,9 +338,7 @@ sealed class MediaViewHolder(
                 }
                 rvList.apply {
                     adapter = videoAdapter
-                    layoutManager = LinearLayoutManager(
-                        context, LinearLayoutManager.HORIZONTAL, false
-                    )
+                    layoutManager = LinearLayoutManager(this.context, HORIZONTAL, false)
                 }
             }
 
