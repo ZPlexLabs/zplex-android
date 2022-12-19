@@ -104,8 +104,7 @@ class SearchFragment : Fragment() {
                         }
 
                         val searchList = search.results.filter {
-                            it.media_type == "tv" || it.media_type == "movie"
-                                    && it.poster_path != null
+                            it.media_type != null && it.poster_path != null
                         }
 
                         viewLifecycleOwner.lifecycleScope.launch {

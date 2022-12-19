@@ -9,7 +9,12 @@ import zechs.zplex.data.model.entities.WatchedShow
 
 
 @Database(
-    entities = [Movie::class, Show::class, WatchedMovie::class, WatchedShow::class],
+    entities = [
+        Movie::class,
+        Show::class,
+        WatchedMovie::class,
+        WatchedShow::class
+    ],
     version = 4,
     exportSchema = false
 )

@@ -20,6 +20,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import zechs.zplex.R
+import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.entities.Show
 import zechs.zplex.data.model.tmdb.entities.Media
@@ -112,11 +113,11 @@ class MyShowsFragment : Fragment() {
                     Snackbar.LENGTH_SHORT
                 )
                 when (media.media_type) {
-                    "tv" -> {
+                    MediaType.tv -> {
                         val show = Show(
                             id = media.id,
                             name = media.name ?: "",
-                            media_type = media.media_type,
+                            media_type = media.media_type.name,
                             poster_path = media.poster_path,
                             vote_average = media.vote_average
                         )
@@ -126,11 +127,11 @@ class MyShowsFragment : Fragment() {
                             myShowsViewModel.saveShow(show)
                         }
                     }
-                    "movie" -> {
+                    MediaType.movie -> {
                         val movie = Movie(
                             id = media.id,
                             title = media.title ?: "",
-                            media_type = media.media_type,
+                            media_type = media.media_type.name,
                             poster_path = media.poster_path,
                             vote_average = media.vote_average
                         )
@@ -140,6 +141,7 @@ class MyShowsFragment : Fragment() {
                             myShowsViewModel.saveMovie(movie)
                         }
                     }
+                    else -> {}
                 }
 
                 bottomNavView?.let {
@@ -225,7 +227,7 @@ class MyShowsFragment : Fragment() {
                 return lp?.let {
                     it.width = (0.30 * width).toInt()
                     true
-                } ?: super.checkLayoutParams(lp)
+                } ?: super.checkLayoutParams(null)
             }
         }
 

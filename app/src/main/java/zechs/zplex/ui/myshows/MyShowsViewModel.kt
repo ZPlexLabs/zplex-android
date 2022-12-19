@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.entities.Show
 import zechs.zplex.data.model.tmdb.entities.Media
@@ -35,10 +36,6 @@ class MyShowsViewModel @Inject constructor(
     val movies = tmdbRepository.getSavedMovies()
     val shows = tmdbRepository.getSavedShows()
 
-    val savedMedia = movies.combineWith(shows) { movie, show ->
-        movie?.let { show?.let { it1 -> handleSavedMedia(it, it1) } }
-    }
-
     private fun handleSavedMedia(
         movies: List<Movie>,
         shows: List<Show>
@@ -46,7 +43,7 @@ class MyShowsViewModel @Inject constructor(
         val movie: List<Media> = movies.map {
             Media(
                 id = it.id,
-                media_type = "movie",
+                media_type = MediaType.movie,
                 name = null,
                 poster_path = it.poster_path,
                 title = it.title,
@@ -61,7 +58,7 @@ class MyShowsViewModel @Inject constructor(
         val show: List<Media> = shows.map {
             Media(
                 id = it.id,
-                media_type = "tv",
+                media_type = MediaType.tv,
                 name = it.name,
                 poster_path = it.poster_path,
                 title = null,

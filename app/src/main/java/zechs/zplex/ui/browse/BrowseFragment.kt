@@ -374,6 +374,7 @@ class BrowseFragment : Fragment() {
                             genreMenu.text = getGenre(currentFilters.withGenres, getTvGenre())
                         }
                     }
+                    else -> {}
                 }
                 sortMenu.text = getSort(currentFilters.sortBy.name)
             }

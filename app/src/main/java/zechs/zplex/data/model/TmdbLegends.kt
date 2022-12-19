@@ -1,11 +1,13 @@
 package zechs.zplex.data.model
 
+import androidx.annotation.Keep
+
 
 enum class BackdropSize {
     w300,
     w780,
     w1280,
-    original,
+    original
 }
 
 enum class PosterSize {
@@ -15,21 +17,21 @@ enum class PosterSize {
     w342,
     w500,
     w780,
-    original,
+    original
 }
 
 enum class ProfileSize {
     w45,
     w185,
     h632,
-    original,
+    original
 }
 
 enum class StillSize {
     w92,
     w185,
     w300,
-    original,
+    original
 }
 
 
@@ -47,6 +49,7 @@ enum class Order {
     asc, desc
 }
 
+@Keep
 enum class MediaType {
-    tv, movie
+    tv, movie, person
 }

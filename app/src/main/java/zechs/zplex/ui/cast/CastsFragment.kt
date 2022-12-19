@@ -17,6 +17,7 @@ import androidx.transition.TransitionManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import zechs.zplex.R
+import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.ui.cast.adapter.CastDataAdapter
@@ -79,7 +80,7 @@ class CastsFragment : Fragment() {
 
     private fun navigateMedia(media: Media) {
         val action = CastsFragmentDirections.actionCastsFragmentToFragmentMedia(
-            media.copy(media_type = media.media_type ?: "movie")
+            media.copy(media_type = media.media_type ?: MediaType.movie)
         )
         findNavController().navigateSafe(action)
     }
@@ -136,8 +137,8 @@ class CastsFragment : Fragment() {
         ).show()
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onDestroy() {
+        super.onDestroy()
         binding.rvList.adapter = null
         _binding = null
     }

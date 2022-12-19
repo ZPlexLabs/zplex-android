@@ -2,6 +2,7 @@ package zechs.zplex.data.model.entities
 
 import androidx.annotation.Keep
 import androidx.room.Entity
+import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.tmdb.entities.Media
 
 @Entity(
@@ -16,9 +17,10 @@ data class Show(
     val poster_path: String?,
     val vote_average: Double?
 ) {
+
     fun toMedia() = Media(
         id = id,
-        media_type = "tv",
+        media_type = MediaType.tv,
         name = name,
         poster_path = poster_path,
         title = null,
@@ -28,4 +30,5 @@ data class Show(
         release_date = null,
         first_air_date = null
     )
+
 }

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import zechs.zplex.R
+import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.FragmentUpcomingBinding
 import zechs.zplex.ui.shared_adapters.detailed_media.DetailedMediaAdapter
@@ -131,16 +132,14 @@ class UpcomingFragment : Fragment() {
 
     private fun navigateMedia(media: Media) {
         val action = UpcomingFragmentDirections.actionUpcomingFragmentToFragmentMedia(
-            media.copy(media_type = media.media_type ?: "movie")
+            media.copy(media_type = media.media_type ?: MediaType.movie)
         )
         findNavController().navigateSafe(action)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding.apply {
-            rvBrowse.adapter = null
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        binding.rvBrowse.adapter = null
         _binding = null
     }
 

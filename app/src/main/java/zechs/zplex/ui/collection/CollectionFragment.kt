@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import com.google.android.material.transition.MaterialFadeThrough
 import zechs.zplex.R
+import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.ui.cast.CastsFragmentDirections
@@ -79,7 +80,7 @@ class FragmentCollection : Fragment() {
 
     private fun navigateMedia(media: Media) {
         val action = FragmentCollectionDirections.actionFragmentCollectionToFragmentMedia(
-            media.copy(media_type = media.media_type ?: "movie")
+            media.copy(media_type = media.media_type ?: MediaType.movie)
         )
         Log.d(TAG, "navigateMedia, invoked. ($media)")
         findNavController().navigateSafe(action)
