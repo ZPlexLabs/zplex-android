@@ -91,36 +91,6 @@ interface TmdbApi {
         language: String = "en-US"
     ): Response<CollectionsResponse>
 
-    @GET("3/person/{person_id}")
-    suspend fun getPeople(
-        @Path("person_id")
-        person_id: Int,
-        @Query("api_key")
-        api_key: String = TMDB_API_KEY,
-        @Query("language")
-        language: String = "en-US"
-    ): Response<PersonResponse>
-
-    @GET("3/discover/{media_type}")
-    suspend fun getDiscover(
-        @Path("media_type")
-        media_type: String,
-        @Query("api_key")
-        api_key: String = TMDB_API_KEY,
-        @Query("language")
-        language: String = "en-US",
-        @Query("sort_by")
-        sort_by: String,
-        @Query("page")
-        page: Int,
-        @Query("with_keywords")
-        with_keywords: Int?,
-        @Query("with_genres")
-        with_genres: Int?,
-        @Query("first_air_date_year")
-        first_air_date_year: Int?
-    ): Response<SearchResponse>
-
     @GET("3/discover/{media_type}")
     suspend fun getBrowse(
         @Path("media_type")

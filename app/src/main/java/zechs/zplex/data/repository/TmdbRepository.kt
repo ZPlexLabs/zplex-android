@@ -22,6 +22,10 @@ class TmdbRepository @Inject constructor(
     private val showDao: ShowDao
 ) {
 
+    companion object {
+        private const val TAG = "TmdbRepository"
+    }
+
     suspend fun upsertMovie(
         movie: Movie
     ) = movieDao.upsertMovie(movie)
@@ -63,29 +67,6 @@ class TmdbRepository @Inject constructor(
         seasonNumber: Int
     ) = tmdbApi.getSeason(tvId, seasonNumber)
 
-    suspend fun getPopularMovie(
-        year: Int,
-    ) = tmdbApi.getDiscover(
-        media_type = "movie",
-        sort_by = "popularity.desc",
-        page = 1,
-        with_keywords = null,
-        with_genres = null,
-        first_air_date_year = year
-    )
-
-    suspend fun getPopularShow(
-        year: Int,
-        keyword: Int?
-    ) = tmdbApi.getDiscover(
-        media_type = "tv",
-        sort_by = "popularity.desc",
-        page = 1,
-        with_keywords = keyword,
-        with_genres = null,
-        first_air_date_year = year
-    )
-
     suspend fun getEpisode(
         tvId: Int,
         seasonNumber: Int,
@@ -100,10 +81,6 @@ class TmdbRepository @Inject constructor(
     suspend fun getCollection(
         collectionId: Int
     ) = tmdbApi.getCollection(collection_id = collectionId)
-
-    suspend fun getPeople(
-        person_id: Int
-    ) = tmdbApi.getPeople(person_id = person_id)
 
     suspend fun getTrending(
         time_window: String
@@ -124,7 +101,7 @@ class TmdbRepository @Inject constructor(
                 ?.map { keyword -> keyword.id }
                 ?.joinToString(separator = ",")
         } catch (e: Exception) {
-            Log.d("TmdbRepository", e.message ?: "Unable to parse keywords")
+            Log.d(TAG, e.message ?: "Unable to parse keywords")
             null
         }
         return tmdbApi.getBrowse(
