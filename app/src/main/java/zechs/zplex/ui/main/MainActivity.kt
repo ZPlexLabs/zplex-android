@@ -1,10 +1,13 @@
 package zechs.zplex.ui.main
 
+import android.animation.ValueAnimator
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.TranslateAnimation
+import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -42,14 +45,31 @@ class MainActivity : AppCompatActivity() {
                 R.id.episodesListFragment, R.id.fragmentList,
                 R.id.fragmentCollection, R.id.shareBottomSheet,
                 R.id.watchFragment, R.id.bigImageFragment -> {
+                    animationNavColorChange(R.color.statusBarColor)
                     hideSlideDown(binding.bottomNavigationView)
                 }
                 else -> {
+                    animationNavColorChange(R.color.fadedColor)
                     showSlideUp(binding.bottomNavigationView)
                 }
             }
         }
 
+    }
+
+    private fun animationNavColorChange(
+        @ColorRes color: Int
+    ) = lifecycleScope.launch {
+        val from = window.navigationBarColor
+        val to = ContextCompat.getColor(applicationContext, color)
+        ValueAnimator
+            .ofArgb(from, to)
+            .also {
+                it.addUpdateListener { animator ->
+                    window.navigationBarColor = (animator.animatedValue as Int)
+                }
+                it.start()
+            }
     }
 
     private fun showSlideUp(
