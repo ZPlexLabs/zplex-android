@@ -16,7 +16,7 @@
         android:padding="12dp"
         android:text="@string/watch_now"
         android:textSize="16sp"
-        app:icon="@drawable/ic_round_play_circle_outline_24"
+        app:icon="@drawable/ic_play_circle_24"
         app:iconGravity="textStart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"

@@ -80,7 +80,7 @@
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/episode_count"
-        app:srcCompat="@drawable/ic_round_star_24"
+        app:srcCompat="@drawable/ic_star_24"
         app:tint="@color/textColor_74" />
 
     <androidx.constraintlayout.widget.Group

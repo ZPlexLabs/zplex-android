@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:theme="@style/MenuTheme"
-            app:navigationIcon="@drawable/ic_round_keyboard_backspace_24"
+            app:navigationIcon="@drawable/ic_back_24"
             app:navigationIconTint="@color/textColor"
             app:subtitleCentered="true"
             app:subtitleTextAppearance="@style/seasonSubtitleTextAppearance"

@@ -61,7 +61,7 @@
             android:elevation="1dp"
             android:theme="@style/MenuTheme"
             app:layout_collapseMode="pin"
-            app:navigationIcon="@drawable/ic_round_keyboard_backspace_24"
+            app:navigationIcon="@drawable/ic_back_24"
             app:navigationIconTint="@color/textColor"
             app:subtitleCentered="true"
             app:subtitleTextAppearance="@style/seasonSubtitleTextAppearance"

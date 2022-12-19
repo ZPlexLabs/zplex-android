@@ -11,12 +11,6 @@
     <string name="discover">Discover</string>
     <string name="your_library_is_empty">Your library is empty</string>
     <string name="watch_now">Watch now</string>
-    <string name="please_wait">Please wait</string>
-    <string name="request_movie_description">Unfortunately we do not have this movie in our database.\nWould you like to put in a request for this movie?\n\nThis is an automated process and should retrieve the movie within 10 mins</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="request_movie">Request movie</string>
-    <string name="ok">OK</string>
     <string name="undo">Undo</string>
     <string name="share_links">Share links</string>
     <string name="library">Library</string>

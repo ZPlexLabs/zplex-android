@@ -45,7 +45,7 @@
                     android:insetRight="0dp"
                     android:insetBottom="0dp"
                     app:cornerRadius="24dp"
-                    app:icon="@drawable/ic_round_filter_list_24"
+                    app:icon="@drawable/ic_filter_24"
                     app:iconGravity="textStart"
                     app:iconPadding="0dp"
                     app:iconSize="20dp"
