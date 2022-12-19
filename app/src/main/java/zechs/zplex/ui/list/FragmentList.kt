@@ -79,7 +79,7 @@ class FragmentList : Fragment(), ListClickListener {
             subtitle = it.showName
         }
 
-        lifecycleScope.launch {
+        viewLifecycleOwner.lifecycleScope.launch {
             listAdapter.submitList(listOf(it))
         }
     }
@@ -168,7 +168,7 @@ class FragmentList : Fragment(), ListClickListener {
             seasonPosterPath = posterPath,
             showPoster = showPoster
         )
-        findNavController().navigate(R.id.action_fragmentList_to_episodesListFragment)
+        findNavController().navigateSafe(R.id.action_fragmentList_to_episodesListFragment)
     }
 
     private fun openWebLink(webUrl: String) {
@@ -178,6 +178,7 @@ class FragmentList : Fragment(), ListClickListener {
 
     override fun onDestroy() {
         super.onDestroy()
+        binding.rvList.adapter = null
         _binding = null
     }
 
