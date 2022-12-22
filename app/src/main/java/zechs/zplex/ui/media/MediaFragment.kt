@@ -192,12 +192,6 @@ class MediaFragment : Fragment(), MediaClickListener {
         Log.d("navigateToMedia", imageView.transitionName)
     }
 
-    private fun shareIntent() {
-        val action = MediaFragmentDirections
-            .actionFragmentMediaToShareBottomSheet()
-        findNavController().navigateSafe(action)
-    }
-
     private fun shareIntent(
         tmdbId: Int,
         showName: String,

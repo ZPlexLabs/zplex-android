@@ -43,8 +43,8 @@ class MainActivity : AppCompatActivity() {
             when (destination.id) {
                 R.id.fragmentMedia, R.id.castsFragment,
                 R.id.episodesListFragment, R.id.fragmentList,
-                R.id.fragmentCollection, R.id.shareBottomSheet,
-                R.id.watchFragment, R.id.bigImageFragment -> {
+                R.id.fragmentCollection, R.id.watchFragment,
+                R.id.bigImageFragment -> {
                     animationNavColorChange(R.color.statusBarColor)
                     hideSlideDown(binding.bottomNavigationView)
                 }

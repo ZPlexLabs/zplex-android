@@ -84,9 +84,6 @@
                 app:argType="zechs.zplex.data.model.tmdb.entities.Media" />
         </action>
         <action
-            android:id="@+id/action_fragmentMedia_to_shareBottomSheet"
-            app:destination="@id/shareBottomSheet" />
-        <action
             android:id="@+id/action_fragmentMedia_to_fragmentList"
             app:destination="@id/fragmentList" />
         <action
@@ -132,11 +129,6 @@
             android:id="@+id/action_castsFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />
     </fragment>
-    <dialog
-        android:id="@+id/shareBottomSheet"
-        android:name="zechs.zplex.ui.sheet.ShareBottomSheet"
-        android:label="ShareBottomSheet"
-        tools:layout="@layout/sheet_share" />
     <fragment
         android:id="@+id/fragmentList"
         android:name="zechs.zplex.ui.list.FragmentList"
