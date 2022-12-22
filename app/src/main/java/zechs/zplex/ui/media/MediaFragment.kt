@@ -55,7 +55,7 @@ import zechs.zplex.utils.util.ColorManager.Companion.lightUpColor
 import java.util.*
 
 @AndroidEntryPoint
-class MediaFragment : Fragment(), MediaClickListener {
+class MediaFragment : Fragment() {
 
     companion object {
         const val TAG = "MediaFragment"
@@ -161,7 +161,106 @@ class MediaFragment : Fragment(), MediaClickListener {
     }
 
     private val mediaDataAdapter by lazy {
-        MediaDataAdapter(this)
+        MediaDataAdapter(mediaClickListener = object : MediaClickListener {
+            override fun onClickViewAll(listDataModel: ListDataModel) {
+                when (listDataModel) {
+                    is ListDataModel.Casts -> setCastsList(listDataModel.casts)
+                    is ListDataModel.Media -> setMediaList(
+                        listDataModel.heading,
+                        listDataModel.media
+                    )
+                    is ListDataModel.Videos -> setVideoList(listDataModel.videos)
+                    else -> {}
+                }
+            }
+
+            override fun onClickMedia(media: Media) {
+                val action = MediaFragmentDirections.actionFragmentMediaSelf(media)
+                findNavController().navigate(action)
+            }
+
+            override fun onClickVideo(video: Video) {
+                openWebLink(video.watchUrl)
+            }
+
+            override fun onClickCast(cast: Cast) {
+                val action = MediaFragmentDirections.actionFragmentMediaToCastsFragment(cast)
+                findNavController().navigateSafe(action)
+            }
+
+            override fun setImageResource(image: Drawable) {
+                Log.d(TAG, "${UUID.randomUUID()} setImageResource(), invoked")
+                mediaViewModel.calcDominantColor(image) { color ->
+                    Log.d(TAG, "${UUID.randomUUID()} setImageResource(), color=$color")
+                    mediaViewModel.setDominantColor(color)
+                }
+            }
+
+            override fun setRatingBarView(ratingBar: RatingBar) {
+                Log.d(TAG, "${UUID.randomUUID()} setRatingBarView(), invoked")
+                mediaViewModel.dominantColor.observe(viewLifecycleOwner) { c ->
+                    Log.d(TAG, "${UUID.randomUUID()} setRatingBarView(), color=$c")
+                    val color = if (isDark(c)) lightUpColor(c) else c
+                    val tintColor = ColorStateList.valueOf(color)
+                    ratingBar.progressTintList = tintColor
+                    ratingBar.progressBackgroundTintList = tintColor
+                    ratingBar.secondaryProgressTintList = tintColor
+                }
+            }
+
+            override fun setButtonView(button: MaterialButton) {
+                Log.d(TAG, "${UUID.randomUUID()} setButtonView(), invoked")
+                mediaViewModel.dominantColor.observe(viewLifecycleOwner) { c ->
+                    Log.d(TAG, "${UUID.randomUUID()} setButtonView(), color=$c")
+                    val color = if (isDark(c)) lightUpColor(c) else c
+                    val tintColor = ColorStateList.valueOf(color)
+                    val contrastColor = getContrastColor(color)
+                    button.backgroundTintList = tintColor
+                    button.iconTint = ColorStateList.valueOf(contrastColor)
+                    button.setTextColor(contrastColor)
+                }
+            }
+
+            override fun lastSeasonClick(lastSeason: MediaDataModel.LatestSeason) {
+                navigateToSeason(
+                    tmdbId = lastSeason.showTmdbId,
+                    seasonName = lastSeason.seasonName,
+                    seasonNumber = lastSeason.seasonNumber,
+                    showName = lastSeason.showName,
+                    seasonPosterPath = lastSeason.seasonPosterPath,
+                    showPoster = lastSeason.showPoster
+                )
+            }
+
+            override fun collectionClick(collectionId: Int) {
+                navigateToCollection(collectionId)
+            }
+
+            override fun movieWatchNow(tmdbId: Int) {
+                showSnackBar(message = "To be implemented")
+            }
+
+            override fun movieShare(movie: Movie) {
+                shareIntent(movie.id, movie.title, MediaType.movie)
+            }
+
+            override fun showWatchNow(seasons: List<Season>) {
+                setSeasonsList(seasons)
+            }
+
+            override fun showShare(show: Show) {
+                shareIntent(show.id, show.name, MediaType.tv)
+            }
+
+            override fun showWatchlist(view: MaterialButton, show: Show) {
+                setupShowDatabaseObserver(show, view)
+            }
+
+            override fun movieWatchlist(view: MaterialButton, movie: Movie) {
+                setupMovieDatabaseObserver(movie, view)
+            }
+        }
+        )
     }
 
     private fun setupRecyclerView() {
@@ -287,101 +386,6 @@ class MediaFragment : Fragment(), MediaClickListener {
         findNavController().navigateSafe(action)
     }
 
-
-    override fun onClickViewAll(listDataModel: ListDataModel) {
-        when (listDataModel) {
-            is ListDataModel.Casts -> setCastsList(listDataModel.casts)
-            is ListDataModel.Media -> setMediaList(listDataModel.heading, listDataModel.media)
-            is ListDataModel.Videos -> setVideoList(listDataModel.videos)
-            else -> {}
-        }
-    }
-
-    override fun onClickMedia(media: Media) {
-        val action = MediaFragmentDirections.actionFragmentMediaSelf(media)
-        findNavController().navigate(action)
-    }
-
-    override fun onClickVideo(video: Video) {
-        openWebLink(video.watchUrl)
-    }
-
-    override fun onClickCast(cast: Cast) {
-        val action = MediaFragmentDirections.actionFragmentMediaToCastsFragment(cast)
-        findNavController().navigateSafe(action)
-    }
-
-    override fun setImageResource(image: Drawable) {
-        Log.d(TAG, "${UUID.randomUUID()} setImageResource(), invoked")
-        mediaViewModel.calcDominantColor(image) { color ->
-            Log.d(TAG, "${UUID.randomUUID()} setImageResource(), color=$color")
-            mediaViewModel.setDominantColor(color)
-        }
-    }
-
-    override fun setRatingBarView(ratingBar: RatingBar) {
-        Log.d(TAG, "${UUID.randomUUID()} setRatingBarView(), invoked")
-        mediaViewModel.dominantColor.observe(viewLifecycleOwner) { c ->
-            Log.d(TAG, "${UUID.randomUUID()} setRatingBarView(), color=$c")
-            val color = if (isDark(c)) lightUpColor(c) else c
-            val tintColor = ColorStateList.valueOf(color)
-            ratingBar.progressTintList = tintColor
-            ratingBar.progressBackgroundTintList = tintColor
-            ratingBar.secondaryProgressTintList = tintColor
-        }
-    }
-
-    override fun setButtonView(button: MaterialButton) {
-        Log.d(TAG, "${UUID.randomUUID()} setButtonView(), invoked")
-        mediaViewModel.dominantColor.observe(viewLifecycleOwner) { c ->
-            Log.d(TAG, "${UUID.randomUUID()} setButtonView(), color=$c")
-            val color = if (isDark(c)) lightUpColor(c) else c
-            val tintColor = ColorStateList.valueOf(color)
-            val contrastColor = getContrastColor(color)
-            button.backgroundTintList = tintColor
-            button.iconTint = ColorStateList.valueOf(contrastColor)
-            button.setTextColor(contrastColor)
-        }
-    }
-
-    override fun lastSeasonClick(lastSeason: MediaDataModel.LatestSeason) {
-        navigateToSeason(
-            tmdbId = lastSeason.showTmdbId,
-            seasonName = lastSeason.seasonName,
-            seasonNumber = lastSeason.seasonNumber,
-            showName = lastSeason.showName,
-            seasonPosterPath = lastSeason.seasonPosterPath,
-            showPoster = lastSeason.showPoster
-        )
-    }
-
-    override fun collectionClick(collectionId: Int) {
-        navigateToCollection(collectionId)
-    }
-
-    override fun movieWatchNow(tmdbId: Int) {
-        showSnackBar(message = "To be implemented")
-    }
-
-    override fun movieShare(movie: Movie) {
-        shareIntent(movie.id, movie.title, MediaType.movie)
-    }
-
-    override fun showWatchNow(seasons: List<Season>) {
-        setSeasonsList(seasons)
-    }
-
-    override fun showShare(show: Show) {
-        shareIntent(show.id, show.name, MediaType.tv)
-    }
-
-    override fun showWatchlist(view: MaterialButton, show: Show) {
-        setupShowDatabaseObserver(show, view)
-    }
-
-    override fun movieWatchlist(view: MaterialButton, movie: Movie) {
-        setupMovieDatabaseObserver(movie, view)
-    }
 
     private fun setupShowDatabaseObserver(show: Show, view: MaterialButton) {
         var updateSaved = false
