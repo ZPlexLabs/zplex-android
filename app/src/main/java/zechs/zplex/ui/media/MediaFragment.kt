@@ -162,7 +162,10 @@ class MediaFragment : Fragment() {
 
     private val mediaDataAdapter by lazy {
         MediaDataAdapter(mediaClickListener = object : MediaClickListener {
-            override fun onClickViewAll(listDataModel: ListDataModel) {
+
+            override fun onClickViewAll(
+                listDataModel: ListDataModel
+            ) {
                 when (listDataModel) {
                     is ListDataModel.Casts -> setCastsList(listDataModel.casts)
                     is ListDataModel.Media -> setMediaList(
@@ -175,7 +178,8 @@ class MediaFragment : Fragment() {
             }
 
             override fun onClickMedia(media: Media) {
-                val action = MediaFragmentDirections.actionFragmentMediaSelf(media)
+                val action = MediaFragmentDirections
+                    .actionFragmentMediaSelf(media)
                 findNavController().navigate(action)
             }
 
@@ -184,7 +188,8 @@ class MediaFragment : Fragment() {
             }
 
             override fun onClickCast(cast: Cast) {
-                val action = MediaFragmentDirections.actionFragmentMediaToCastsFragment(cast)
+                val action = MediaFragmentDirections
+                    .actionFragmentMediaToCastsFragment(cast)
                 findNavController().navigateSafe(action)
             }
 
@@ -221,7 +226,9 @@ class MediaFragment : Fragment() {
                 }
             }
 
-            override fun lastSeasonClick(lastSeason: MediaDataModel.LatestSeason) {
+            override fun lastSeasonClick(
+                lastSeason: MediaDataModel.LatestSeason
+            ) {
                 navigateToSeason(
                     tmdbId = lastSeason.showTmdbId,
                     seasonName = lastSeason.seasonName,
@@ -252,11 +259,17 @@ class MediaFragment : Fragment() {
                 shareIntent(show.id, show.name, MediaType.tv)
             }
 
-            override fun showWatchlist(view: MaterialButton, show: Show) {
+            override fun showWatchlist(
+                view: MaterialButton,
+                show: Show
+            ) {
                 setupShowDatabaseObserver(show, view)
             }
 
-            override fun movieWatchlist(view: MaterialButton, movie: Movie) {
+            override fun movieWatchlist(
+                view: MaterialButton,
+                movie: Movie
+            ) {
                 setupMovieDatabaseObserver(movie, view)
             }
 
