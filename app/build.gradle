@@ -6,8 +6,6 @@ plugins {
     id "kotlin-kapt"
 }
 
-def gitCommitHash = "git rev-parse --verify --short HEAD".execute().text.trim()
-
 android {
 
     Properties properties = new Properties()
@@ -23,8 +21,8 @@ android {
         applicationId "zechs.zplex"
         minSdk 26
         targetSdk 33
-        versionCode 21
-        versionName "v4-$gitCommitHash"
+        versionCode 22
+        versionName "4.0"
         archivesBaseName = "${applicationId}-${versionCode}"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
