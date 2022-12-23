@@ -97,6 +97,20 @@ sealed class MediaViewHolder(
                     listener.setRatingBarView(rbRating)
                 }
                 rbRating.tag = rbRatingTag
+
+                ivPoster.setOnClickListener {
+                    listener.openImageInBig(
+                        imagePath = item.posterPath,
+                        imageView = ivPoster
+                    )
+                }
+
+                ivBackdrop.setOnClickListener {
+                    listener.openImageInBig(
+                        imagePath = item.backdropPath,
+                        imageView = ivBackdrop
+                    )
+                }
             }
         }
     }

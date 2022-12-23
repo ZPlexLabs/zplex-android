@@ -1,6 +1,7 @@
 package zechs.zplex.ui.media.adapter
 
 import android.graphics.drawable.Drawable
+import android.widget.ImageView
 import android.widget.RatingBar
 import com.google.android.material.button.MaterialButton
 import zechs.zplex.data.model.entities.Movie
@@ -33,5 +34,7 @@ interface MediaClickListener {
     fun showWatchNow(seasons: List<Season>)
     fun showWatchlist(view: MaterialButton, show: Show)
     fun showShare(show: Show)
+
+    fun openImageInBig(imagePath: String?, imageView: ImageView)
 
 }

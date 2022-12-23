@@ -259,8 +259,14 @@ class MediaFragment : Fragment() {
             override fun movieWatchlist(view: MaterialButton, movie: Movie) {
                 setupMovieDatabaseObserver(movie, view)
             }
-        }
-        )
+
+            override fun openImageInBig(
+                imagePath: String?,
+                imageView: ImageView
+            ) {
+                imagePath?.let { openImageFullSize(imagePath, imageView) }
+            }
+        })
     }
 
     private fun setupRecyclerView() {
