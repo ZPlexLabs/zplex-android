@@ -5,6 +5,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="top"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:theme="@style/MenuTheme"
+            app:navigationIcon="@drawable/ic_back_24"
+            app:navigationIconTint="@color/textColor"
+            app:subtitleCentered="true"
+            app:subtitleTextAppearance="@style/seasonSubtitleTextAppearance"
+            app:subtitleTextColor="@color/textColor_87"
+            app:titleCentered="true"
+            app:titleTextAppearance="@style/seasonTitleTextAppearance"
+            app:titleTextColor="@color/textColor_87"
+            tools:subtitle="Subtitle text"
+            tools:title="Title text" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
     <ImageView
         android:id="@+id/iv_backdrop"
         android:layout_width="0dp"
@@ -15,7 +42,7 @@
         app:layout_constraintBottom_toTopOf="@+id/guideline2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
         tools:src="@drawable/no_thumb" />
 
     <androidx.constraintlayout.widget.Guideline
@@ -23,7 +50,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_percent=".3" />
+        app:layout_constraintGuide_percent=".4" />
 
     <TextView
         android:id="@+id/tv_seasonEpisode"
@@ -66,7 +93,7 @@
         android:layout_height="4dp"
         android:layout_marginTop="16dp"
         android:alpha="0.7"
-        android:background="@color/cardColor"
+        android:background="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="@+id/tv_title"
         app:layout_constraintStart_toStartOf="@+id/tv_title"
         app:layout_constraintTop_toBottomOf="@+id/tv_title" />

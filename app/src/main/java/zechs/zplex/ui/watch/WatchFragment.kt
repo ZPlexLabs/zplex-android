@@ -1,55 +1,63 @@
 package zechs.zplex.ui.watch
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
-import com.google.android.material.transition.MaterialSharedAxis
+import dagger.hilt.android.AndroidEntryPoint
 import zechs.zplex.R
 import zechs.zplex.data.model.StillSize
+import zechs.zplex.data.model.tmdb.entities.Cast
 import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.databinding.FragmentWatchBinding
+import zechs.zplex.ui.shared_adapters.casts.CastAdapter
 import zechs.zplex.ui.shared_viewmodels.EpisodeViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.GlideApp
+import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
-import java.text.DecimalFormat
 
-class WatchFragment : Fragment(R.layout.fragment_watch) {
+@AndroidEntryPoint
+class WatchFragment : Fragment() {
 
     private var _binding: FragmentWatchBinding? = null
     private val binding get() = _binding!!
 
     private val episodeViewModel by activityViewModels<EpisodeViewModel>()
-    private val watchViewModel by activityViewModels<WatchViewModel>()
-//    private val castAdapter by lazy { CastAdapter() }
+    private val watchViewModel by lazy {
+        ViewModelProvider(this)[WatchViewModel::class.java]
+    }
+    private val castAdapter by lazy {
+        CastAdapter(castOnClick = {
+            WatchFragmentDirections
+                .actionWatchFragmentToCastsFragment(cast = it)
+                .also {
+                    findNavController().navigateSafe(it)
+                }
+        })
+    }
 
     private var tmdbId: Int? = null
     private var seasonEpisodeText: String? = null
 
-    private val thisTAG = "WatchFragment"
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        enterTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, true
-        ).apply {
-            duration = 500L
-        }
-
-        exitTransition = MaterialSharedAxis(
-            MaterialSharedAxis.Y, false
-        ).apply {
-            duration = 500L
-        }
-        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.Y, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentWatchBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentWatchBinding.bind(view)
 
         setupRecyclerView()
 
@@ -94,54 +102,39 @@ class WatchFragment : Fragment(R.layout.fragment_watch) {
             }
         }
 
-        GlideApp.with(requireContext())
+        GlideApp.with(binding.ivBackdrop)
             .asBitmap()
             .load(episodeStillUrl)
             .placeholder(R.drawable.no_thumb)
             .into(binding.ivBackdrop)
 
-
-//        val castList = episode.guest_stars?.map {
-//            AboutDataModel.Cast(
-//                character = it.character,
-//                credit_id = it.credit_id,
-//                person_id = it.id,
-//                name = it.name,
-//                profile_path = it.profile_path
-//            )
-//        } ?: listOf()
-//
-//        binding.apply {
-//            rvCasts.isInvisible = castList.isEmpty()
-//            textView1.isInvisible = castList.isEmpty()
-//        }
-
-        // castAdapter.differ.submitList(castList)
-
-        val formatter = DecimalFormat("00")
-        val seasonEpisode = "S${
-            formatter.format(
-                episode.season_number
+        val castList = episode.guest_stars?.map {
+            Cast(
+                character = it.character,
+                credit_id = it.credit_id,
+                id = it.id,
+                name = it.name,
+                profile_path = it.profile_path
             )
-        }E${formatter.format(episode.episode_number)}"
+        } ?: listOf()
+
+        binding.apply {
+            rvCasts.isInvisible = castList.isEmpty()
+            textView1.isInvisible = castList.isEmpty()
+        }
+
+        castAdapter.submitList(castList)
     }
 
     private fun setupRecyclerView() {
-//        binding.rvCasts.apply {
-//            adapter = castAdapter
-//            layoutManager = LinearLayoutManager(
-//                activity, LinearLayoutManager.HORIZONTAL, false
-//            )
-//            itemAnimator = null
-//        }
-//        castAdapter.setOnItemClickListener {
-//            val action = WatchFragmentDirections.actionWatchFragmentToCastsFragment(
-//                CastArgs(it.credit_id, it.person_id, it.name, it.profile_path)
-//            )
-//            findNavController().navigate(action)
-//        }
+        binding.rvCasts.apply {
+            adapter = castAdapter
+            layoutManager = LinearLayoutManager(
+                activity, LinearLayoutManager.HORIZONTAL, false
+            )
+            itemAnimator = null
+        }
     }
-
 
     override fun onDestroy() {
         super.onDestroy()
