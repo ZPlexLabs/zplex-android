@@ -7,15 +7,17 @@ This project is for focusing especially on the Retrofit, MVVM Architectural Desi
 
 ## Preview
 
-Home|Search|My Shows
-:-----:|:--------------:|:-----------:|
-![Home](/images/home.png)|![Search](/images/search.png)|![My Shows](/images/my_shows.png)
-About|Episodes|Casts
-![About](/images/about.png)|![Episodes](/images/episodes.png)|![Casts](/images/casts.png)
+Home|Browse|Library
+:-----:|:-------------------------------:|:-----------:|
+![Home](/images/home.png)|![Browse](/images/browse.png)|![Library](/images/library.png)
+Media|Details|Cast
+![Media](/images/media.png)|![Details](/images/details.png)|![Cast](/images/cast.png)
+Search|Seasons|Episodes
+![Search](/images/search.png)|![Seasons](/images/seasons.png)|![Episodes](/images/episodes.png)
 
 ## Download
 
-Go to the [Releases](https://github.com/itsZECHS/ZPlex/releases) to download the latest APK.
+Go to the [Releases](https://github.com/itszechs/ZPlex/releases) to download the latest APK.
 
 ## Tech stack
 
@@ -37,8 +39,3 @@ Go to the [Releases](https://github.com/itsZECHS/ZPlex/releases) to download the
 - Glide - loading images.
 - Palette - Generating color palette from images.
 - Material-Components - Material design components like ripple animation, cardView.
-
-## MAD Score
-
-<img src="/images/summary.png"/>
-<img src="/images/kotlin.png"/>
