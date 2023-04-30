@@ -37,8 +37,8 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile(
-                    'proguard-android-optimize.txt'
-            ), 'proguard-rules.pro'
+                    "proguard-android-optimize.txt"
+            ), "proguard-rules.pro"
         }
     }
 
@@ -48,7 +48,7 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = "1.8"
     }
 
     buildFeatures {
@@ -59,11 +59,11 @@ android {
 
 dependencies {
 
-    def hilt_version = "2.44.2"
-    def moshi_version = "1.13.0"
+    def hilt_version = "2.45"
+    def moshi_version = "1.14.0"
     def retrofit_version = "2.9.0"
-    def room_version = "2.4.3"
-    def lifecycle_version = "2.5.1"
+    def room_version = "2.5.1"
+    def lifecycle_version = "2.6.1"
 
     // Room
     implementation "androidx.room:room-runtime:$room_version"
@@ -88,15 +88,15 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit_version"
 
     // Gson
-    implementation "com.google.code.gson:gson:2.9.0"
+    implementation "com.google.code.gson:gson:2.10.1"
 
     // Glide
-    implementation "com.github.bumptech.glide:glide:4.13.2"
-    implementation("com.github.bumptech.glide:okhttp3-integration:4.12.0") {
-        exclude group: 'glide-parent'
+    implementation "com.github.bumptech.glide:glide:4.14.2"
+    implementation("com.github.bumptech.glide:okhttp3-integration:4.14.2") {
+        exclude group: "glide-parent"
     }
-    kapt "com.github.bumptech.glide:compiler:4.12.0"
-    implementation 'jp.wasabeef:glide-transformations:4.3.0'
+    kapt "com.github.bumptech.glide:compiler:4.14.2"
+    implementation "jp.wasabeef:glide-transformations:4.3.0"
 
     // OkHttp
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.3"))
@@ -113,19 +113,19 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
 
     // Kotlin
-    implementation "androidx.core:core-ktx:1.9.0"
+    implementation "androidx.core:core-ktx:1.10.0"
 
     // Palette
     implementation "androidx.palette:palette-ktx:1.0.0"
 
     // AndroidX
-    implementation "androidx.appcompat:appcompat:1.5.1"
+    implementation "androidx.appcompat:appcompat:1.6.1"
     implementation "androidx.preference:preference-ktx:1.2.0"
-    implementation "com.google.android.material:material:1.8.0-beta01"
+    implementation "com.google.android.material:material:1.8.0"
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
 
     // Tests
     testImplementation "junit:junit:4.13.2"
-    androidTestImplementation "androidx.test.ext:junit:1.1.4"
-    androidTestImplementation "androidx.test.espresso:espresso-core:3.5.0"
+    androidTestImplementation "androidx.test.ext:junit:1.1.5"
+    androidTestImplementation "androidx.test.espresso:espresso-core:3.5.1"
 }
