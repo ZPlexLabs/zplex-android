@@ -1,5 +1,7 @@
 package zechs.zplex.ui.media
 
+import android.animation.ArgbEvaluator
+import android.animation.ValueAnimator
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -10,6 +12,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnticipateInterpolator
 import android.widget.ImageView
 import android.widget.RatingBar
 import androidx.annotation.Keep
@@ -52,7 +55,8 @@ import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.util.ColorManager.Companion.getContrastColor
 import zechs.zplex.utils.util.ColorManager.Companion.isDark
 import zechs.zplex.utils.util.ColorManager.Companion.lightUpColor
-import java.util.*
+import java.util.UUID
+
 
 @AndroidEntryPoint
 class MediaFragment : Fragment() {
@@ -206,10 +210,27 @@ class MediaFragment : Fragment() {
                 mediaViewModel.dominantColor.observe(viewLifecycleOwner) { c ->
                     Log.d(TAG, "${UUID.randomUUID()} setRatingBarView(), color=$c")
                     val color = if (isDark(c)) lightUpColor(c) else c
-                    val tintColor = ColorStateList.valueOf(color)
-                    ratingBar.progressTintList = tintColor
-                    ratingBar.progressBackgroundTintList = tintColor
-                    ratingBar.secondaryProgressTintList = tintColor
+                    val sourceColor = ContextCompat.getColor(
+                        requireContext(),
+                        R.color.colorAccent
+                    )
+                    with(
+                        ValueAnimator.ofObject(
+                            ArgbEvaluator(),
+                            sourceColor, color
+                        )
+                    ) {
+                        interpolator = AnticipateInterpolator()
+                        duration = 500L // milliseconds
+                        addUpdateListener { animator ->
+                            val tintColor = ColorStateList.valueOf(animator.animatedValue as Int)
+                            ratingBar.progressTintList = tintColor
+                            ratingBar.progressBackgroundTintList = tintColor
+                            ratingBar.secondaryProgressTintList = tintColor
+                        }
+                        start()
+                    }
+
                 }
             }
 
@@ -218,9 +239,25 @@ class MediaFragment : Fragment() {
                 mediaViewModel.dominantColor.observe(viewLifecycleOwner) { c ->
                     Log.d(TAG, "${UUID.randomUUID()} setButtonView(), color=$c")
                     val color = if (isDark(c)) lightUpColor(c) else c
-                    val tintColor = ColorStateList.valueOf(color)
                     val contrastColor = getContrastColor(color)
-                    button.backgroundTintList = tintColor
+                    val sourceColor = ContextCompat.getColor(
+                        requireContext(),
+                        R.color.colorAccent
+                    )
+                    with(
+                        ValueAnimator.ofObject(
+                            ArgbEvaluator(),
+                            sourceColor, color
+                        )
+                    ) {
+                        interpolator = AnticipateInterpolator()
+                        duration = 500L // milliseconds
+                        addUpdateListener { animator ->
+                            val tintColor = ColorStateList.valueOf(animator.animatedValue as Int)
+                            button.backgroundTintList = tintColor
+                        }
+                        start()
+                    }
                     button.iconTint = ColorStateList.valueOf(contrastColor)
                     button.setTextColor(contrastColor)
                 }
