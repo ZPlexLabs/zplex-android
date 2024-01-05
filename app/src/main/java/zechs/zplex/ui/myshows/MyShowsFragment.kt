@@ -191,7 +191,7 @@ class MyShowsFragment : Fragment() {
     private fun observeMovies() {
         myShowsViewModel.movies.observe(viewLifecycleOwner) { media ->
             handleLibrary(media)
-            mediaAdapter.submitList(media.map { it.toMedia() })
+            mediaAdapter.submitList(media.sortedBy { it.title }.map { it.toMedia() })
         }
         myShowsViewModel.shows.removeObservers(viewLifecycleOwner)
     }
@@ -199,7 +199,7 @@ class MyShowsFragment : Fragment() {
     private fun observeShows() {
         myShowsViewModel.shows.observe(viewLifecycleOwner) { media ->
             handleLibrary(media)
-            mediaAdapter.submitList(media.map { it.toMedia() })
+            mediaAdapter.submitList(media.sortedBy { it.name }.map { it.toMedia() })
         }
 
         myShowsViewModel.movies.removeObservers(viewLifecycleOwner)
