@@ -108,6 +108,9 @@ dependencies {
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
 
+    // Datastore
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
     // Networking with OkHttp
     implementation(platform("com.squareup.okhttp3:okhttp-bom:$okhttpVersion"))
     implementation("com.squareup.okhttp3:okhttp")
