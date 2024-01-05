@@ -3,8 +3,6 @@
     <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
         <item name="chipStyle">@style/Widget.App.Chip</item>
         <item name="popupMenuBackground">@drawable/popup_menu_bg</item>
-        <item name="materialAlertDialogTheme">@style/ThemeOverlay.App.MaterialAlertDialog</item>
-        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
         <item name="android:listPopupWindowStyle">@style/MyListPopupWindow</item>
         <item name="materialCardViewStyle">@style/Widget.App.Card</item>
         <item name="android:statusBarColor">@color/statusBarColor</item>
@@ -22,7 +20,6 @@
         <item name="selectableItemBackgroundBorderless">?android:selectableItemBackground</item>
     </style>
 
-
     <style name="chipTextAppearance" parent="TextAppearance.MaterialComponents.Chip">>
         <item name="fontFamily">@font/open_sans</item>
     </style>
@@ -32,7 +29,6 @@
         <item name="fontFamily">@font/roboto_black</item>
         <item name="android:textSize">18sp</item>
     </style>
-
 
     <style name="tabTitleTextAppearance">
         <item name="fontFamily">@font/roboto_bold</item>
@@ -69,16 +65,7 @@
         <item name="chipSurfaceColor">@android:color/transparent</item>
     </style>
 
-
     <style name="Widget.App.Card" parent="Widget.Material3.CardView.Elevated" />
-
-
-    <style name="ThemeOverlay.App.MaterialAlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
-        <item name="materialAlertDialogTitleTextStyle">@style/MaterialAlertDialog.App.Title.Text
-        </item>
-        <item name="materialAlertDialogBodyTextStyle">@style/MaterialAlertDialog.App.Body.Text
-        </item>
-    </style>
 
     <style name="MaterialAlertDialog.App.Title.Text" parent="MaterialAlertDialog.MaterialComponents.Title.Text">
         <item name="fontFamily">@font/open_sans_semibold</item>
@@ -100,18 +87,6 @@
         <item name="android:textSize">21sp</item>
         <item name="android:maxLines">3</item>
         <item name="android:ellipsize">end</item>
-    </style>
-
-
-    <style name="AppModalStyle" parent="Widget.Design.BottomSheet.Modal">
-        <item name="android:background">@drawable/sheet_background_round</item>
-    </style>
-
-    <style name="AppBottomSheetDialogTheme" parent="Theme.Design.BottomSheetDialog">
-        <item name="bottomSheetStyle">@style/AppModalStyle</item>
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
     </style>
 
     <style name="MyListPopupWindow">
