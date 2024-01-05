@@ -466,7 +466,7 @@ class BrowseFragment : Fragment() {
 
         val listPopupGenres = ListPopupWindow(
             context, null,
-            R.attr.listPopupWindowStyle
+            androidx.appcompat.R.attr.listPopupWindowStyle
         )
 
         listPopupGenres.setAdapter(null)
@@ -503,7 +503,7 @@ class BrowseFragment : Fragment() {
 
         val listPopupSortBy = ListPopupWindow(
             context, null,
-            R.attr.listPopupWindowStyle
+            androidx.appcompat.R.attr.listPopupWindowStyle
         )
 
         listPopupSortBy.setAdapter(null)
@@ -542,7 +542,7 @@ class BrowseFragment : Fragment() {
 
         val listPopupKeyword = ListPopupWindow(
             context, null,
-            R.attr.listPopupWindowStyle
+            androidx.appcompat.R.attr.listPopupWindowStyle
         )
 
         listPopupKeyword.setAdapter(null)
