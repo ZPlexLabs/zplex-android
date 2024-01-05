@@ -9,7 +9,6 @@ import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.entities.Show
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.data.repository.TmdbRepository
-import zechs.zplex.utils.ext.combineWith
 import javax.inject.Inject
 
 @HiltViewModel
