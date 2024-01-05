@@ -1,12 +1,12 @@
 package zechs.zplex.ui.shared_adapters.casts
 
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import zechs.zplex.R
 import zechs.zplex.data.model.ProfileSize
 import zechs.zplex.data.model.tmdb.entities.Cast
 import zechs.zplex.databinding.ItemCastBinding
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.GlideApp
 
 class CastViewHolder(
     private val itemBinding: ItemCastBinding,
@@ -20,11 +20,9 @@ class CastViewHolder(
             R.drawable.no_actor
         }
         itemBinding.apply {
-            GlideApp.with(actorImage)
-                .load(imageUrl)
-                .placeholder(R.drawable.no_actor)
-                .into(actorImage)
-
+            actorImage.load(imageUrl) {
+                placeholder(R.drawable.no_actor)
+            }
             actorName.text = cast.name
             role.text = cast.character.split("/")[0]
             root.setOnClickListener {

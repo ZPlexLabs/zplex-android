@@ -4,6 +4,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import coil.load
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.data.model.StillSize
@@ -11,7 +12,6 @@ import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.databinding.ItemEpisodeBinding
 import zechs.zplex.databinding.ItemEpisodeHeaderBinding
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.util.SpannableTextView
 
 
@@ -44,11 +44,9 @@ sealed class EpisodesViewHolder(
                 }
 
                 tvSeasonName.isGone = tvSeasonName.tag == tvSeasonNameTAG
-
-                GlideApp.with(ivPoster)
-                    .load(posterUrl)
-                    .placeholder(R.drawable.no_poster)
-                    .into(ivPoster)
+                ivPoster.load(posterUrl) {
+                    placeholder(R.drawable.no_poster)
+                }
             }
         }
     }
@@ -77,11 +75,9 @@ sealed class EpisodesViewHolder(
                     ivThumb.isGone = true
                 } else {
                     ivThumb.tag = null
-                    GlideApp.with(ivThumb)
-                        .asBitmap()
-                        .load(episodeStillUrl)
-                        .placeholder(R.drawable.no_thumb)
-                        .into(ivThumb)
+                    ivThumb.load(episodeStillUrl) {
+                        placeholder(R.drawable.no_thumb)
+                    }
                 }
 
                 if (count == title || tvEpisodeCount.tag == tvEpisodeCountTAG) {

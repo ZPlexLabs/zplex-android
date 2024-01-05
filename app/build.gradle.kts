@@ -60,7 +60,7 @@ dependencies {
     val retrofitVersion = "2.9.0"
     val roomVersion = "2.6.1"
     val lifecycleVersion = "2.6.2"
-    val glideVersion = "4.13.2"
+    val glideVersion = "4.16.0"
     val okhttpVersion = "4.12.0"
 
     // Core dependencies
@@ -93,16 +93,15 @@ dependencies {
     // Gson for JSON parsing
     implementation("com.google.code.gson:gson:2.10.1")
 
+    // Coil for image loading
+    implementation("io.coil-kt:coil:2.5.0")
+
     // Glide for image loading
     // DO NOT UPGRADE Glide to versions beyond 4.13.2
     implementation("com.github.bumptech.glide:glide:$glideVersion")
-    //noinspection GradleDependency
-    implementation("com.github.bumptech.glide:okhttp3-integration:4.12.0") {
-        exclude(group = "glide-parent")
-    }
-    //noinspection GradleDependency
-    ksp("com.github.bumptech.glide:compiler:4.12.0")
-    implementation("jp.wasabeef:glide-transformations:4.3.0")
+
+    // Renderscript intrinsics replacement toolkit
+    implementation("com.github.necatisozer:renderscript-intrinsics-replacement-toolkit:0.8-beta")
 
     // Room database
     implementation("androidx.room:room-runtime:$roomVersion")

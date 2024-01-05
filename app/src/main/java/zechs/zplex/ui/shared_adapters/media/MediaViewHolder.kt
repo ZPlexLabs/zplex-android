@@ -2,12 +2,12 @@ package zechs.zplex.ui.shared_adapters.media
 
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.ItemMediaBinding
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.GlideApp
 
 class MediaViewHolder(
     private val itemBinding: ItemMediaBinding,
@@ -30,12 +30,8 @@ class MediaViewHolder(
             if (mediaAdapter.rating) {
                 ratingView.isVisible = true
             }
-
-            itemPoster.apply {
-                GlideApp.with(this)
-                    .load(mediaPosterUrl)
-                    .placeholder(R.drawable.no_poster)
-                    .into(this)
+            itemPoster.load(mediaPosterUrl) {
+                placeholder(R.drawable.no_poster)
             }
             root.setOnClickListener {
                 mediaAdapter.mediaOnClick.invoke(media)

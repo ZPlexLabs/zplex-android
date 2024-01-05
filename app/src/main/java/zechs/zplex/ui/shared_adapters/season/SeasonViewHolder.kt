@@ -1,12 +1,12 @@
 package zechs.zplex.ui.shared_adapters.season
 
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.data.model.tmdb.entities.Season
 import zechs.zplex.databinding.ItemDetailedMediaBinding
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.util.Converter
 
 class SeasonViewHolder(
@@ -22,10 +22,9 @@ class SeasonViewHolder(
                 "${TMDB_IMAGE_PREFIX}/${PosterSize.w342}${season.poster_path}"
             }
 
-            GlideApp.with(ivPoster)
-                .load(seasonPosterUrl)
-                .placeholder(R.drawable.no_poster)
-                .into(ivPoster)
+            ivPoster.load(seasonPosterUrl) {
+                placeholder(R.drawable.no_poster)
+            }
 
             val seasonName = "Season ${season.season_number}"
             tvTitle.text = season.name

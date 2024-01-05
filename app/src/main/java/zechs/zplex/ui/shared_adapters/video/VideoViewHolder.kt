@@ -1,10 +1,10 @@
 package zechs.zplex.ui.shared_adapters.video
 
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import zechs.zplex.R
 import zechs.zplex.data.model.tmdb.entities.Video
 import zechs.zplex.databinding.ItemVideoBinding
-import zechs.zplex.utils.GlideApp
 
 class VideoViewHolder(
     private val itemBinding: ItemVideoBinding,
@@ -14,11 +14,8 @@ class VideoViewHolder(
     fun bind(video: Video) {
 
         itemBinding.apply {
-            ivBackdrop.apply {
-                GlideApp.with(this)
-                    .load(video.thumbUrl)
-                    .placeholder(R.drawable.no_thumb)
-                    .into(ivBackdrop)
+            ivBackdrop.load(video.thumbUrl) {
+                placeholder(R.drawable.no_thumb)
             }
 
             tvSource.text = video.site

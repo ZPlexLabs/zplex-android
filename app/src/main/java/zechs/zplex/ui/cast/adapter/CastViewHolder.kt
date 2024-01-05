@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
+import coil.load
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import zechs.zplex.R
@@ -18,7 +19,6 @@ import zechs.zplex.databinding.ItemHeadingBinding
 import zechs.zplex.databinding.ItemListBinding
 import zechs.zplex.ui.shared_adapters.media.MediaAdapter
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.GlideApp
 
 
 sealed class CastViewHolder(
@@ -43,10 +43,9 @@ sealed class CastViewHolder(
                 "$TMDB_IMAGE_PREFIX/${ProfileSize.h632}${item.profilePath}"
             }
             itemBinding.apply {
-                GlideApp.with(ivPoster)
-                    .load(posterUrl)
-                    .placeholder(R.drawable.no_poster)
-                    .into(ivPoster)
+                ivPoster.load(posterUrl) {
+                    placeholder(R.drawable.no_poster)
+                }
                 tvName.text = item.name
 
                 val lineLimit = 7 - tvName.lineCount
