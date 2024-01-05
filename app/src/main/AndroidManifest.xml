@@ -29,6 +29,12 @@
 
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.folder_picker.FolderPickerActivity"
+            android:exported="false"
+            android:launchMode="singleTask" />
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
