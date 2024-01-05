@@ -67,19 +67,18 @@ class UpcomingViewModel @Inject constructor(
                 }
                 var responseList = upcomingResponse ?: resultResponse
                 responseList = responseList.copy(
-                    results = responseList.results.asSequence().filter {
-                        it.releasedDate() != null
-                    }.filter {
-                        Converter.dateToLocalDate(
-                            it.releasedDate()!!
-                        ).isAfter(LocalDate.now())
-                    }.sortedBy {
-                        Converter.dateToLocalDate(
-                            it.releasedDate()!!
-                        )
-                    }.distinctBy {
-                        it.id
-                    }.toMutableList()
+                    results = responseList
+                        .results
+                        .asSequence()
+                        .filter { it.releasedDate() != null }
+                        .filter {
+                            Converter.dateToLocalDate(
+                                it.releasedDate()!!
+                            ).isAfter(LocalDate.now())
+                        }
+                        .sortedBy { Converter.dateToLocalDate(it.releasedDate()!!) }
+                        .distinctBy { it.id }
+                        .toMutableList()
                 )
                 if (responseList.results.size < 5 && count <= 5) {
                     count++
