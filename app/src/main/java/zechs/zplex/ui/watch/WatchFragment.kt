@@ -60,6 +60,10 @@ class WatchFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentWatchBinding.bind(view)
 
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
+
         setupRecyclerView()
 
         episodeViewModel.showEpisode.observe(viewLifecycleOwner) {
