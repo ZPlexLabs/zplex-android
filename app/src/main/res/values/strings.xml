@@ -49,4 +49,8 @@
     <string name="authorization_url">Authorization url</string>
     <string name="authorization_url_hint">Authorization url</string>
     <string name="submit">Submit</string>
+    <string name="choose_media_folders">Choose media folders</string>
+    <string name="choose_movies_folder">Choose movies folder</string>
+    <string name="choose_shows_folder">Choose shows folder</string>
+    <string name="done">Done</string>
 </resources>
