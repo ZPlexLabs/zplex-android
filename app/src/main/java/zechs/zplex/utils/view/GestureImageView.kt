@@ -203,20 +203,20 @@ class GestureImageView : AppCompatImageView, View.OnTouchListener,
     }
 
     override fun onScroll(
-        motionEvent: MotionEvent,
+        motionEvent: MotionEvent?,
         motionEvent1: MotionEvent,
-        v: Float,
-        v1: Float
+        distanceX: Float,
+        distanceY: Float
     ): Boolean {
         return false
     }
 
     override fun onLongPress(motionEvent: MotionEvent) {}
     override fun onFling(
-        motionEvent: MotionEvent,
+        motionEvent: MotionEvent?,
         motionEvent1: MotionEvent,
-        v: Float,
-        v1: Float
+        velocityX: Float,
+        velocityY: Float
     ): Boolean {
         return false
     }
