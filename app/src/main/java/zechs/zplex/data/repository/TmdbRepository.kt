@@ -30,6 +30,10 @@ class TmdbRepository @Inject constructor(
         movie: Movie
     ) = movieDao.upsertMovie(movie)
 
+    suspend fun fetchMovieById(
+        id: Int
+    ) = movieDao.getMovieById(id)
+
     fun fetchMovie(
         id: Int
     ) = movieDao.getMovie(id)
@@ -43,6 +47,10 @@ class TmdbRepository @Inject constructor(
     suspend fun upsertShow(
         show: Show
     ) = showDao.upsertShow(show)
+
+    suspend fun fetchShowById(
+        id: Int
+    ) = showDao.getShowById(id)
 
     fun fetchShow(
         id: Int

@@ -117,6 +117,7 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor")
 
     // Lifecycle and Navigational Components
+    implementation("androidx.lifecycle:lifecycle-service:2.6.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.6")

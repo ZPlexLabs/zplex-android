@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="zechs.zplex">
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
@@ -35,6 +37,10 @@
             android:exported="false"
             android:launchMode="singleTask" />
 
+        <service
+            android:name=".service.RemoteLibraryIndexingService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

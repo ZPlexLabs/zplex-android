@@ -1,6 +1,7 @@
 package zechs.zplex.ui.main
 
 import android.animation.ValueAnimator
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -22,6 +23,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.ActivityMainBinding
+import zechs.zplex.service.RemoteLibraryIndexingService
 
 
 @AndroidEntryPoint
@@ -64,6 +66,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         folderSelectionObserver()
+        startService(Intent(this, RemoteLibraryIndexingService::class.java))
     }
 
     private fun animationNavColorChange(
