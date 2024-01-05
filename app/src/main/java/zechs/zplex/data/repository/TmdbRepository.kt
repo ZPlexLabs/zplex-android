@@ -41,16 +41,16 @@ class TmdbRepository @Inject constructor(
     fun getSavedMovies() = movieDao.getAllMovies()
 
     suspend fun upsertShow(
-        Show: Show
-    ) = showDao.upsertShow(Show)
+        show: Show
+    ) = showDao.upsertShow(show)
 
     fun fetchShow(
         id: Int
     ) = showDao.getShow(id)
 
     suspend fun deleteShow(
-        Show: Show
-    ) = showDao.deleteShow(Show)
+        show: Show
+    ) = showDao.deleteShow(show)
 
     fun getSavedShows() = showDao.getAllShows()
 
@@ -85,8 +85,8 @@ class TmdbRepository @Inject constructor(
     ) = tmdbApi.getCollection(collection_id = collectionId)
 
     suspend fun getTrending(
-        time_window: String
-    ) = tmdbApi.getTrending(time_window)
+        timeWindow: String
+    ) = tmdbApi.getTrending(timeWindow)
 
     suspend fun getUpcoming(page: Int) = tmdbApi.getUpcoming(page = page)
 
@@ -116,38 +116,36 @@ class TmdbRepository @Inject constructor(
     }
 
     suspend fun getInTheatres(
-        dateStart: String, dateEnd: String
+        dateStart: String,
+        dateEnd: String
     ) = tmdbApi.getInTheatres(
         release_date_start = dateStart,
         release_date_end = dateEnd
     )
 
-    suspend fun getPopularOnStreaming(
-    ) = tmdbApi.getPopularOnStreaming()
+    suspend fun getPopularOnStreaming() = tmdbApi.getPopularOnStreaming()
 
     suspend fun getShowsFromCompany(
-        company_id: Int,
+        companyId: Int,
         page: Int
     ) = tmdbApi.getFromCompany(
         media_type = MediaType.tv,
-        with_companies = company_id,
+        with_companies = companyId,
         page = page
     )
 
     suspend fun getMoviesFromCompany(
-        company_id: Int,
+        companyId: Int,
         page: Int
     ) = tmdbApi.getFromCompany(
         media_type = MediaType.movie,
-        with_companies = company_id,
+        with_companies = companyId,
         page = page
     )
 
     suspend fun getPerson(
-        person_id: Int
-    ) = tmdbApi.getPerson(
-        person_id = person_id
-    )
+        personId: Int
+    ) = tmdbApi.getPerson(personId)
 
     suspend fun searchKeyword(
         query: String
