@@ -1,5 +1,6 @@
 package zechs.zplex.ui.files
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -30,6 +31,9 @@ import zechs.zplex.data.model.drive.DriveFile
 import zechs.zplex.databinding.FragmentFilesBinding
 import zechs.zplex.ui.files.adapter.FilesAdapter
 import zechs.zplex.ui.files.adapter.FilesDataModel
+import zechs.zplex.ui.folder_picker.FolderPickerActivity
+import zechs.zplex.ui.setup.FolderPickerResultContract
+import zechs.zplex.ui.setup.FolderType
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.util.DriveApiQueryBuilder
 
@@ -121,7 +125,23 @@ class FilesFragment : Fragment() {
     }
 
     private fun handleFolderSelection() {
-        TODO("Not yet implemented")
+        val data = Intent().also {
+            it.putExtra("id", args.id)
+            it.putExtra("name", args.name)
+        }
+        val type = requireActivity().intent!!.getStringExtra(FolderPickerActivity.EXTRA_TYPE)!!
+        when (FolderType.valueOf(type)) {
+            FolderType.MOVIES -> requireActivity().setResult(
+                FolderPickerResultContract.RESULT_MOVIE_FOLDER,
+                data
+            )
+
+            FolderType.SHOWS -> requireActivity().setResult(
+                FolderPickerResultContract.RESULT_SHOW_FOLDER,
+                data
+            )
+        }
+        requireActivity().finish()
     }
 
     private fun setupFilesObserver() {

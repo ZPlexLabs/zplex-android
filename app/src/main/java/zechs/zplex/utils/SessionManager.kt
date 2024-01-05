@@ -7,7 +7,10 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import zechs.zplex.data.model.drive.DriveClient
 import zechs.zplex.data.model.drive.TokenResponse
 import javax.inject.Inject
@@ -80,6 +83,62 @@ class SessionManager @Inject constructor(
         return value
     }
 
+    suspend fun saveMovieFolder(movieFolderId: String) {
+        val dataStoreKey = stringPreferencesKey(MOVIE_FOLDER)
+        sessionStore.edit { settings ->
+            settings[dataStoreKey] = movieFolderId
+        }
+        Log.d(TAG, "saveMovieFolder: $movieFolderId")
+    }
+
+    suspend fun fetchMovieFolder(): String? {
+        val dataStoreKey = stringPreferencesKey(MOVIE_FOLDER)
+        val preferences = sessionStore.data.first()
+        val value = preferences[dataStoreKey]
+        Log.d(TAG, "fetchMovieFolder: $value")
+        return value
+    }
+
+    suspend fun saveShowsFolder(showsFolderId: String) {
+        val dataStoreKey = stringPreferencesKey(SHOWS_FOLDER)
+        sessionStore.edit { settings ->
+            settings[dataStoreKey] = showsFolderId
+        }
+        Log.d(TAG, "saveMovieFolder: $showsFolderId")
+    }
+
+    suspend fun fetchShowsFolder(): String? {
+        val dataStoreKey = stringPreferencesKey(SHOWS_FOLDER)
+        val preferences = sessionStore.data.first()
+        val value = preferences[dataStoreKey]
+        Log.d(TAG, "fetchShowsFolder: $value")
+        return value
+    }
+
+    fun hasBothFolders(): Flow<Boolean> {
+        val moviesFolder: Flow<String?> = sessionStore.data.map { preferences ->
+            preferences[stringPreferencesKey(MOVIE_FOLDER)]
+        }
+
+        val showsFolder: Flow<String?> = sessionStore.data.map { preferences ->
+            preferences[stringPreferencesKey(SHOWS_FOLDER)]
+        }
+
+        return moviesFolder.combine(showsFolder) { movies, shows ->
+            movies != null && shows != null
+        }
+    }
+
+    fun needToPickFolder(): Flow<Boolean> {
+        val driveClient: Flow<String?> = sessionStore.data.map { preferences ->
+            preferences[stringPreferencesKey(DRIVE_CLIENT)]
+        }
+
+        return driveClient.combine(hasBothFolders()) { client, hasBothFolders ->
+            client != null && !hasBothFolders
+        }
+    }
+
     suspend fun resetDataStore() {
         sessionStore.edit { it.clear() }
     }
@@ -92,6 +151,8 @@ class SessionManager @Inject constructor(
         const val DRIVE_CLIENT = "DRIVE_CLIENT"
         const val ACCESS_TOKEN = "ACCESS_TOKEN"
         const val REFRESH_TOKEN = "REFRESH_TOKEN"
+        const val MOVIE_FOLDER = "MOVIE_FOLDER"
+        const val SHOWS_FOLDER = "SHOWS_FOLDER"
     }
 
 }

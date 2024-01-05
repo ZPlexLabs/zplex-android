@@ -12,6 +12,8 @@ import zechs.zplex.databinding.ActivityFolderPickerBinding
 class FolderPickerActivity : AppCompatActivity() {
 
     companion object {
+        const val EXTRA_TITLE = "title"
+        const val EXTRA_TYPE = "type"
         const val TAG = "FolderPickerActivity"
     }
 

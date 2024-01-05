@@ -2,15 +2,19 @@ package zechs.zplex.ui.main
 
 import android.animation.ValueAnimator
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.TranslateAnimation
+import androidx.activity.viewModels
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -25,6 +29,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
+
+    private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,10 +50,12 @@ class MainActivity : AppCompatActivity() {
                 R.id.fragmentMedia, R.id.castsFragment,
                 R.id.episodesListFragment, R.id.fragmentList,
                 R.id.fragmentCollection, R.id.watchFragment,
-                R.id.bigImageFragment -> {
+                R.id.bigImageFragment, R.id.signInFragment,
+                R.id.setupFragment -> {
                     animationNavColorChange(R.color.statusBarColor)
                     hideSlideDown(binding.bottomNavigationView)
                 }
+
                 else -> {
                     animationNavColorChange(R.color.fadedColor)
                     showSlideUp(binding.bottomNavigationView)
@@ -55,6 +63,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        folderSelectionObserver()
     }
 
     private fun animationNavColorChange(
@@ -110,21 +119,19 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
-//    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-//        if (event.action == MotionEvent.ACTION_DOWN) {
-//            val v: View? = currentFocus
-//            if (v is EditText) {
-//                val outRect = Rect()
-//                v.getGlobalVisibleRect(outRect)
-//                if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
-//                    v.clearFocus()
-//                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-//                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0)
-//                }
-//            }
-//        }
-//        return super.dispatchTouchEvent(event)
-//    }
+
+    private fun folderSelectionObserver() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.needToPickFolder.collect { needToPickFolder ->
+                    if (needToPickFolder && navController.currentDestination?.id != R.id.setupFragment) {
+                        navController.navigate(R.id.setupFragment)
+                    }
+                    Log.d(TAG, "folderSelectionObserver: (needToPickFolder=$needToPickFolder)")
+                }
+            }
+        }
+    }
 
     companion object {
         const val TAG = "MainActivity"
