@@ -114,7 +114,15 @@ class HomeFragment : Fragment() {
         homeDataAdapter.submitList(listResponse)
 
         homeViewModel.watchedMedia.observe(viewLifecycleOwner) { watchedList ->
-            watchedList?.let { setupWatchedList(it) }
+            watchedList?.let {
+                val sortedList = it.sortedByDescending { watchedData ->
+                    when (watchedData) {
+                        is WatchedDataModel.Show -> watchedData.show.createdAt
+                        is WatchedDataModel.Movie -> watchedData.movie.createdAt
+                    }
+                }
+                setupWatchedList(sortedList)
+            }
         }
     }
 

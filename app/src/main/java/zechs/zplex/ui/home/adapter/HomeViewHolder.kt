@@ -70,7 +70,7 @@ sealed class HomeViewHolder(
                 ) {
                     override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
                         return lp?.let {
-                            it.width = (0.33 * width).toInt()
+                            it.width = (0.40 * width).toInt()
                             true
                         } ?: super.checkLayoutParams(lp)
                     }

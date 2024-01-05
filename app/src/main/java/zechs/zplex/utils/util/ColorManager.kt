@@ -39,6 +39,14 @@ class ColorManager {
             Log.d(TAG, "litColor=$litColor")
             return litColor
         }
+        fun darkenColor(color: Int): Int {
+            val darkColor = Color.HSVToColor(FloatArray(3).apply {
+                Color.colorToHSV(color, this)
+                this[2] *= 0.5f
+            })
+            Log.d(TAG, "darkColor=$darkColor")
+            return darkColor
+        }
 
     }
 
