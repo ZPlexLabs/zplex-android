@@ -51,9 +51,22 @@ android {
         buildConfig = true
     }
 
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("x86", "x86_64", "armeabi-v7a", "arm64-v8a")
+            isUniversalApk = false
+        }
+    }
+
 }
 
 dependencies {
+
+    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("extension-*.aar"))))
+    implementation(project(":mpv"))
+
     // Dependency versions
     val hiltVersion = "2.50"
     val moshiVersion = "1.15.0"

@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ZPlex"
 include(":app")
+include(":mpv")
