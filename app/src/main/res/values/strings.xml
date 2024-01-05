@@ -59,4 +59,24 @@
     <string name="starred">Starred</string>
     <string name="select">Select</string>
     <string name="no_files_found">No files found</string>
+    <string name="lock">Lock</string>
+    <string name="unlock">Unlock</string>
+    <string name="rewind_10_seconds">Rewind 10 seconds</string>
+    <string name="skip_10_seconds">Skip 10 seconds</string>
+    <string name="pip_mode">PiP Mode</string>
+    <string name="rotate">Rotate</string>
+    <string name="playback_speed">Playback speed</string>
+    <string name="resize">Resize</string>
+    <string name="chapters">Chapters</string>
+    <string name="subtitles">Subtitles</string>
+    <string name="audio">Audio</string>
+    <string name="video">Video</string>
+    <string name="track_off">Off</string>
+    <string name="ui_chapter_fallback">Chapter %1$d (%2$s)</string>
+    <string name="ui_chapter">%1$s (%2$s)</string>
+    <string name="portrait">Portrait</string>
+    <string name="landscape">Landscape</string>
+    <string name="select_subtitle">Select subtitle track</string>
+    <string name="select_audio">Select audio track</string>
+    <string name="select_speed">Playback speed</string>
 </resources>

@@ -1,5 +1,12 @@
 <resources>
 
+    <style name="Theme.Fullscreen" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
     <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
         <item name="chipStyle">@style/Widget.App.Chip</item>
         <item name="popupMenuBackground">@drawable/popup_menu_bg</item>
@@ -103,6 +110,17 @@
         <item name="cornerRadius">0dp</item>
         <item name="iconSize">24dp</item>
         <item name="iconTint">@color/textColor_87</item>
+    </style>
+
+    <style name="Widget.Material3.Button.TonalButton.Icon.Only" parent="Widget.Material3.Button.IconButton">
+        <item name="materialThemeOverlay">@style/ThemeOverlay.Material3.Button.TonalButton</item>
+    </style>
+
+    <style name="subtitleTextAppearance" parent="TextAppearance.MaterialComponents.Headline1">
+        <item name="android:textColor">@color/textColor_87</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textAlignment">center</item>
     </style>
 
 </resources>
