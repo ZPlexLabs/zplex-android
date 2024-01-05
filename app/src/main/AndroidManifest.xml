@@ -50,6 +50,11 @@
             android:exported="false"
             android:launchMode="singleTask" />
 
+        <activity
+            android:name=".ui.error.ErrorActivity"
+            android:exported="false"
+            android:launchMode="singleTask" />
+
         <service
             android:name=".service.RemoteLibraryIndexingService"
             android:exported="false"

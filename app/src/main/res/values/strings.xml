@@ -82,4 +82,5 @@
     <string name="remove_from_watched">Remove from history?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="unknown_error">Unknown error!</string>
 </resources>
