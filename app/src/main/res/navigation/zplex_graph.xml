@@ -168,5 +168,21 @@
             android:id="@+id/action_upcomingFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />
     </fragment>
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="zechs.zplex.ui.signin.SignInFragment"
+        android:label="SignInFragment"
+        tools:layout="@layout/fragment_sign_in" >
+        <action
+            android:id="@+id/action_signInFragment_to_setupFragment"
+            app:destination="@id/setupFragment"
+            app:popUpTo="@id/fragmentMedia"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/setupFragment"
+        android:name="zechs.zplex.ui.setup.SetupFragment"
+        android:label="SetupFragment"
+        tools:layout="@layout/fragment_setup" />
 
 </navigation>

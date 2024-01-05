@@ -14,6 +14,7 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import zechs.zplex.R
@@ -22,6 +23,7 @@ import zechs.zplex.databinding.FragmentSignInBinding
 import zechs.zplex.ui.code.DialogCode
 import zechs.zplex.utils.Constants.GUIDE_TO_MAKE_DRIVE_CLIENT
 import zechs.zplex.utils.ext.hideKeyboardWhenOffFocus
+import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
 
 
@@ -93,7 +95,7 @@ class SignInFragment : Fragment() {
         viewModel.loginStatus.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Resource.Success -> {
-                    // TODO: Take user to next step
+                    findNavController().navigateSafe(R.id.action_signInFragment_to_setupFragment)
                 }
 
                 is Resource.Error -> {
