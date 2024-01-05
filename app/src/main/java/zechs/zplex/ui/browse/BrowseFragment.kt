@@ -74,6 +74,7 @@ class BrowseFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentBrowseBinding.bind(view)
 
         setupRecyclerView()
         setupFiltersObservers()

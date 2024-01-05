@@ -70,6 +70,7 @@ class EpisodesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentListBinding.bind(view)
 
         setupRecyclerView()
 

@@ -90,6 +90,7 @@ class MediaFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentListBinding.bind(view)
 
         val media = args.media
         mediaViewModel.mediaType = when {
