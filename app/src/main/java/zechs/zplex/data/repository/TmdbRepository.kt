@@ -55,12 +55,14 @@ class TmdbRepository @Inject constructor(
     fun getSavedShows() = showDao.getAllShows()
 
     suspend fun getShow(
-        tvId: Int
-    ) = tmdbApi.getShow(tvId)
+        tvId: Int,
+        appendToQuery: String? = "credits,recommendations,videos"
+    ) = tmdbApi.getShow(tvId, append_to_response = appendToQuery)
 
     suspend fun getMovie(
-        movieId: Int
-    ) = tmdbApi.getMovie(movieId)
+        movieId: Int,
+        appendToQuery: String? = "credits,recommendations,videos"
+    ) = tmdbApi.getMovie(movieId, append_to_response = appendToQuery)
 
     suspend fun getSeason(
         tvId: Int,
