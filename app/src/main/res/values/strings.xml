@@ -57,4 +57,5 @@
     <string name="shared_drives">Shared drives</string>
     <string name="shared_with_me">Shared with me</string>
     <string name="starred">Starred</string>
+    <string name="select">Select</string>
 </resources>
