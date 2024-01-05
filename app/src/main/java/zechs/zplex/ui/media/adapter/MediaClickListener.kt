@@ -27,7 +27,7 @@ interface MediaClickListener {
     fun lastSeasonClick(lastSeason: MediaDataModel.LatestSeason)
     fun collectionClick(collectionId: Int)
 
-    fun movieWatchNow(tmdbId: Int)
+    fun movieWatchNow(tmdbId: Int, year: Int?)
     fun movieWatchlist(view: MaterialButton, movie: Movie)
     fun movieShare(movie: Movie)
 

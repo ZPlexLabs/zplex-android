@@ -20,9 +20,12 @@ import zechs.zplex.data.model.entities.Show
 import zechs.zplex.data.model.tmdb.media.MovieResponse
 import zechs.zplex.data.model.tmdb.media.TvResponse
 import zechs.zplex.data.model.tmdb.search.SearchResponse
+import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.media.adapter.MediaDataModel
+import zechs.zplex.utils.SessionManager
+import zechs.zplex.utils.state.Event
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import zechs.zplex.utils.util.Converter
@@ -31,7 +34,9 @@ import javax.inject.Inject
 @HiltViewModel
 class MediaViewModel @Inject constructor(
     app: Application,
-    private val tmdbRepository: TmdbRepository
+    private val tmdbRepository: TmdbRepository,
+    private val sessionManager: SessionManager,
+    private val driveRepository: DriveRepository
 ) : BaseAndroidViewModel(app) {
 
     private val _dominantColor = MutableLiveData<Int>()
@@ -137,7 +142,7 @@ class MediaViewModel @Inject constructor(
                 if (companies.isNotEmpty()) {
                     val moreFromCompany = async {
                         tmdbRepository.getShowsFromCompany(
-                            company_id = companies[0].id,
+                            companyId = companies[0].id,
                             page = page
                         )
                     }
@@ -154,7 +159,7 @@ class MediaViewModel @Inject constructor(
     }
 
 
-    private fun handleTvResponse(
+    private suspend fun handleTvResponse(
         response: Response<TvResponse>,
         company: Response<SearchResponse>?
     ): Resource<List<MediaDataModel>> {
@@ -168,7 +173,11 @@ class MediaViewModel @Inject constructor(
             this@MediaViewModel.mediaType = MediaType.tv
             this@MediaViewModel.showName = result.name
 
-            val year = result.first_air_date?.take(4)?.toInt()
+            val year: Int? = result.first_air_date?.let { firstAired ->
+                if (firstAired.isNotBlank()) {
+                    firstAired.take(4).toInt()
+                } else null
+            }
 
             var runtime = "${
                 if (result.episode_run_time?.isNotEmpty() == true) {
@@ -247,6 +256,8 @@ class MediaViewModel @Inject constructor(
                 }
             }
 
+            val saved = tmdbRepository.fetchShowById(result.id)
+
             mediaDataModel.add(
                 MediaDataModel.ShowButton(
                     show = Show(
@@ -255,12 +266,13 @@ class MediaViewModel @Inject constructor(
                         name = result.name,
                         poster_path = result.poster_path,
                         vote_average = result.vote_average,
+                        fileId = saved?.fileId
                     ),
                     seasons = seasonList
                 )
             )
 
-            result.credits.cast?.let {
+            result.credits?.cast?.let {
                 if (it.isNotEmpty()) {
                     mediaDataModel.add(
                         MediaDataModel.Casts(
@@ -313,7 +325,7 @@ class MediaViewModel @Inject constructor(
         return Resource.Error(response.message())
     }
 
-    private fun handleMovieResponse(
+    private suspend fun handleMovieResponse(
         response: Response<MovieResponse>,
         company: Response<SearchResponse>?
     ): Resource<List<MediaDataModel>> {
@@ -326,9 +338,9 @@ class MediaViewModel @Inject constructor(
             this@MediaViewModel.mediaType = MediaType.movie
             this@MediaViewModel.showName = result.title
 
-            val year: Int? = result.release_date?.let { firstAired ->
-                if (firstAired.isNotBlank()) {
-                    firstAired.take(4).toInt()
+            val year: Int? = result.release_date?.let { releaseDate ->
+                if (releaseDate.isNotBlank()) {
+                    releaseDate.take(4).toInt()
                 } else null
             }
 
@@ -374,6 +386,8 @@ class MediaViewModel @Inject constructor(
                 )
             }
 
+            val saved = tmdbRepository.fetchMovieById(result.id)
+
             mediaDataModel.add(
                 MediaDataModel.MovieButton(
                     movie = Movie(
@@ -381,12 +395,14 @@ class MediaViewModel @Inject constructor(
                         media_type = "movie",
                         title = result.title,
                         poster_path = result.poster_path,
-                        vote_average = result.vote_average
-                    )
+                        vote_average = result.vote_average,
+                        fileId = saved?.fileId
+                    ),
+                    year = year
                 )
             )
 
-            result.credits.cast?.let {
+            result.credits?.cast?.let {
                 if (it.isNotEmpty()) {
                     mediaDataModel.add(
                         MediaDataModel.Casts(
@@ -450,6 +466,68 @@ class MediaViewModel @Inject constructor(
             } catch (npe: NullPointerException) {
                 onFinish(6770852)
             }
+        }
+    }
+
+    var hasLoggedIn = false
+        private set
+
+    fun updateStatus() = viewModelScope.launch {
+        hasLoggedIn = getLoginStatus()
+    }
+
+    private suspend fun getLoginStatus(): Boolean {
+        sessionManager.fetchClient() ?: return false
+        sessionManager.fetchRefreshToken() ?: return false
+        return true
+    }
+
+    private val _token = MutableLiveData<Event<Resource<FileToken>>>()
+    val mpvFile: LiveData<Event<Resource<FileToken>>>
+        get() = _token
+
+    data class FileToken(
+        val fileId: String,
+        val fileName: String,
+        val accessToken: String
+    )
+
+    private fun fetchToken(title: String, fileId: String) = viewModelScope.launch {
+        _token.postValue(Event(Resource.Loading()))
+
+        val client = sessionManager.fetchClient() ?: run {
+            _token.postValue(Event(Resource.Error("Client not found")))
+            return@launch
+        }
+        val tokenResponse = driveRepository.fetchAccessToken(client)
+
+        when (tokenResponse) {
+            is Resource.Success -> {
+                val fileToken = FileToken(
+                    fileId = fileId,
+                    fileName = title,
+                    accessToken = tokenResponse.data!!.accessToken
+                )
+                _token.postValue(Event(Resource.Success(fileToken)))
+            }
+
+            is Resource.Error -> {
+                _token.postValue(
+                    Event(Resource.Error(tokenResponse.message!!))
+                )
+            }
+
+            else -> {}
+        }
+    }
+
+    fun playMovie(tmdbId: Int, year: Int?) = viewModelScope.launch {
+        val saved = tmdbRepository.fetchMovieById(tmdbId)
+        if (saved?.fileId == null) {
+            _token.postValue(Event(Resource.Error("Movie not found")))
+            return@launch
+        } else {
+            fetchToken("${saved.title}${if (year != null) " (${year})" else ""}", saved.fileId)
         }
     }
 }

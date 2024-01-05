@@ -1,5 +1,6 @@
 package zechs.zplex.ui.episodes
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -16,6 +17,7 @@ import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -24,6 +26,7 @@ import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.ui.cast.CastsFragmentDirections
 import zechs.zplex.ui.episodes.adapter.EpisodesDataAdapter
 import zechs.zplex.ui.image.BigImageViewModel
+import zechs.zplex.ui.player.MPVActivity
 import zechs.zplex.ui.shared_viewmodels.EpisodeViewModel
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
 import zechs.zplex.utils.ext.navigateSafe
@@ -50,9 +53,27 @@ class EpisodesFragment : Fragment() {
 
     private val episodeDataAdapter by lazy {
         EpisodesDataAdapter(
-            episodeOnClick = { episode ->
+            episodeOnClick = { episode, isLastEpisode ->
                 if (episode.fileId != null) {
-                    // TODO: Implement video playback
+                    val titleBuilder = StringBuilder()
+                    if (showName != null) {
+                        titleBuilder.append("$showName - ")
+                    }
+                    titleBuilder.append(
+                        "S%02dE%02d - ".format(
+                            episode.season_number,
+                            episode.episode_number
+                        )
+                    )
+                    titleBuilder.append(episode.name)
+
+                    episodesViewModel.playEpisode(
+                        titleBuilder.toString(),
+                        episode.season_number,
+                        episode.episode_number,
+                        isLastEpisode,
+                        episode.fileId,
+                    )
                 } else {
                     if (!episodesViewModel.hasLoggedIn) {
                         findNavController().navigateSafe(R.id.action_episodesListFragment_to_signInFragment)
@@ -89,6 +110,7 @@ class EpisodesFragment : Fragment() {
         }
 
         setupEpisodesViewModel()
+        mpvObserver()
     }
 
     private fun openImageFullSize(posterPath: String?, imageView: ImageView) {
@@ -163,6 +185,48 @@ class EpisodesFragment : Fragment() {
             message ?: resources.getString(R.string.something_went_wrong),
             Toast.LENGTH_SHORT
         ).show()
+    }
+
+    private fun mpvObserver() {
+        episodesViewModel.mpvFile.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { res ->
+                when (res) {
+                    is Resource.Success -> {
+                        launchMpv(res.data!!)
+                    }
+
+                    is Resource.Error -> {
+                        Snackbar.make(
+                            binding.root,
+                            res.message ?: resources.getString(R.string.something_went_wrong),
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    private fun launchMpv(fileToken: EpisodesViewModel.FileToken) {
+        Intent(
+            requireContext(), MPVActivity::class.java
+        ).apply {
+            putExtra("fileId", fileToken.fileId)
+            putExtra("title", fileToken.fileName)
+            putExtra("accessToken", fileToken.accessToken)
+            putExtra("isTV", true)
+            putExtra("tmdbId", tmdbId)
+            putExtra("name", showName ?: "")
+            putExtra("posterPath", showPoster ?: "")
+
+            putExtra("seasonNumber", fileToken.seasonNumber)
+            putExtra("episodeNumber", fileToken.episodeNumber)
+            putExtra("isLastEpisode", fileToken.isLastEpisode)
+
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }.also { startActivity(it) }
     }
 
     override fun onDestroy() {

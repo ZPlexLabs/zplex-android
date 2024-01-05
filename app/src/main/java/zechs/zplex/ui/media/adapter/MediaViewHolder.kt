@@ -193,9 +193,9 @@ sealed class MediaViewHolder(
                 btnWatchNow.apply {
                     text = context.getString(R.string.watch_now)
                     icon = getDrawable(R.drawable.ic_play_circle_24)
-//                    setOnClickListener {
-//                        listener.movieWatchNow(item.movie.id)
-//                    }
+                    setOnClickListener {
+                        listener.movieWatchNow(item.movie.id, item.year)
+                    }
 
                     val btnWatchNowTag = "btnWatchNowTAG"
                     if (tag != btnWatchNowTag) {

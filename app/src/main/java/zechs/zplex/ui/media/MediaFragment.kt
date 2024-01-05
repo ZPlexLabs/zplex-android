@@ -49,6 +49,7 @@ import zechs.zplex.ui.list.adapter.ListDataModel
 import zechs.zplex.ui.media.adapter.MediaClickListener
 import zechs.zplex.ui.media.adapter.MediaDataAdapter
 import zechs.zplex.ui.media.adapter.MediaDataModel
+import zechs.zplex.ui.player.MPVActivity
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
 import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
@@ -105,6 +106,7 @@ class MediaFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
+        mpvObserver()
     }
 
     private fun setupMediaViewModel(tmdbId: Int, mediaType: MediaType) {
@@ -283,7 +285,7 @@ class MediaFragment : Fragment() {
 
             override fun movieWatchNow(tmdbId: Int, year: Int?) {
                 if (mediaViewModel.hasLoggedIn) {
-                    // TODO: Implement video playback
+                    mediaViewModel.playMovie(tmdbId, year)
                 } else {
                     findNavController().navigateSafe(R.id.action_fragmentMedia_to_signInFragment)
                 }
@@ -543,6 +545,44 @@ class MediaFragment : Fragment() {
                 updateSaved = true
             }
         }
+    }
+
+    private fun mpvObserver() {
+        mediaViewModel.mpvFile.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { res ->
+                when (res) {
+                    is Resource.Success -> {
+                        launchMpv(res.data!!)
+                    }
+
+                    is Resource.Error -> {
+                        showSnackBar(res.message!!)
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    private fun launchMpv(fileToken: MediaViewModel.FileToken) {
+        Intent(
+            requireContext(), MPVActivity::class.java
+        ).apply {
+            putExtra("fileId", fileToken.fileId)
+            putExtra("title", fileToken.fileName)
+            putExtra("accessToken", fileToken.accessToken)
+            putExtra("isTV", false)
+            putExtra("tmdbId", mediaViewModel.tmdbId)
+            putExtra("name", mediaViewModel.showName ?: "")
+            putExtra("posterPath", mediaViewModel.showPoster ?: "")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }.also { startActivity(it) }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mediaViewModel.updateStatus()
     }
 
     override fun onDestroy() {

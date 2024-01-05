@@ -96,6 +96,7 @@ sealed class EpisodesViewHolder(
                     tvOverview, overviewText, 180, "...more", root
                 )
                 tvTitle.text = title
+                val isLastEpisode = episode.episode_number == episodesDataAdapter.itemCount
                 root.setOnClickListener {
                     episodesDataAdapter.episodeOnClick.invoke(
                         Episode(
@@ -107,7 +108,8 @@ sealed class EpisodesViewHolder(
                             still_path = episode.still_path,
                             guest_stars = null,
                             fileId = episode.fileId
-                        )
+                        ),
+                        isLastEpisode
                     )
                 }
             }

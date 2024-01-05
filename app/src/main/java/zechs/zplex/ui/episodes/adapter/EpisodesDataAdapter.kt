@@ -9,7 +9,7 @@ import zechs.zplex.databinding.ItemEpisodeBinding
 import zechs.zplex.databinding.ItemEpisodeHeaderBinding
 
 class EpisodesDataAdapter(
-    val episodeOnClick: (Episode) -> Unit
+    val episodeOnClick: (Episode, Boolean) -> Unit
 ) : ListAdapter<EpisodesDataModel, EpisodesViewHolder>(EpisodesDataModelDiffCallback()) {
 
     override fun onCreateViewHolder(
