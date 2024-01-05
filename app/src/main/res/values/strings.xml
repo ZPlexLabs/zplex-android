@@ -53,4 +53,8 @@
     <string name="choose_movies_folder">Choose movies folder</string>
     <string name="choose_shows_folder">Choose shows folder</string>
     <string name="done">Done</string>
+    <string name="my_drive">My drive</string>
+    <string name="shared_drives">Shared drives</string>
+    <string name="shared_with_me">Shared with me</string>
+    <string name="starred">Starred</string>
 </resources>

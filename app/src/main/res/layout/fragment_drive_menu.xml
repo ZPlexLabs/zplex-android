@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:layout_gravity="top"
+        android:elevation="16dp"
+        app:elevation="16dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            style="@style/MenuTheme"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            tools:title="Folder Picker" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnMyDrive"
+            style="@style/IconButtonTheme"
+            android:text="@string/my_drive"
+            app:icon="@drawable/ic_my_drive_24" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSharedDrives"
+            style="@style/IconButtonTheme"
+            android:text="@string/shared_drives"
+            app:icon="@drawable/ic_shared_drive_24" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSharedWithMe"
+            style="@style/IconButtonTheme"
+            android:text="@string/shared_with_me"
+            app:icon="@drawable/ic_shared_me_24" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStarred"
+            style="@style/IconButtonTheme"
+            android:text="@string/starred"
+            app:icon="@drawable/ic_starred_24" />
+
+    </LinearLayout>
+</LinearLayout>
+
+

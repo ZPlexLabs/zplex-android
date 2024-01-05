@@ -93,4 +93,16 @@
         <item name="android:popupBackground">@color/cardColor</item>
     </style>
 
+    <style name="IconButtonTheme" parent="Widget.Material3.Button.IconButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAlignment">viewStart</item>
+        <item name="android:textColor">@color/textColor_87</item>
+        <item name="android:padding">16dp</item>
+        <item name="iconPadding">24dp</item>
+        <item name="cornerRadius">0dp</item>
+        <item name="iconSize">24dp</item>
+        <item name="iconTint">@color/textColor_87</item>
+    </style>
+
 </resources>
