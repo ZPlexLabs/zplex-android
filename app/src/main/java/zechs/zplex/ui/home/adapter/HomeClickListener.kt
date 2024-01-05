@@ -7,5 +7,5 @@ interface HomeClickListener {
 
     fun onClickMedia(media: Media)
     fun onClickWatched(watched: WatchedDataModel)
-
+    fun onLongClickWatched(watched: WatchedDataModel)
 }

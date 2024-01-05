@@ -8,7 +8,8 @@ import androidx.recyclerview.widget.RecyclerView
 import zechs.zplex.databinding.ItemWatchedBinding
 
 class WatchedDataAdapter(
-    val watchedOnClick: (WatchedDataModel) -> Unit
+    val watchedOnClick: (WatchedDataModel) -> Unit,
+    val watchedOnLongClick: (WatchedDataModel) -> Unit
 ) : RecyclerView.Adapter<WatchedViewHolder>() {
 
     private val differCallback = object : DiffUtil.ItemCallback<WatchedDataModel>() {

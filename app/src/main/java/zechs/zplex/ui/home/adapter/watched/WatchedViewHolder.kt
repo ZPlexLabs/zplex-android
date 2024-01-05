@@ -167,8 +167,15 @@ class WatchedViewHolder(
             }
         }
 
-        itemBinding.root.setOnClickListener {
-            watchedDataAdapter.watchedOnClick.invoke(watchedDataModel)
+        itemBinding.root.apply {
+            setOnClickListener {
+                watchedDataAdapter.watchedOnClick.invoke(watchedDataModel)
+
+            }
+            setOnLongClickListener {
+                watchedDataAdapter.watchedOnLongClick.invoke(watchedDataModel)
+                true
+            }
         }
     }
 }

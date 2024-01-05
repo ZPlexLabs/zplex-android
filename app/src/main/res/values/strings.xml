@@ -79,4 +79,7 @@
     <string name="select_subtitle">Select subtitle track</string>
     <string name="select_audio">Select audio track</string>
     <string name="select_speed">Playback speed</string>
+    <string name="remove_from_watched">Remove from history?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

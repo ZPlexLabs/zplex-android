@@ -39,9 +39,14 @@ sealed class HomeViewHolder(
         }
 
         private val watchedAdapter by lazy {
-            WatchedDataAdapter {
-                homeDataAdapter.homeClickListener.onClickWatched(it)
-            }
+            WatchedDataAdapter(
+                watchedOnClick = {
+                    homeDataAdapter.homeClickListener.onClickWatched(it)
+                },
+                watchedOnLongClick = {
+                    homeDataAdapter.homeClickListener.onLongClickWatched(it)
+                }
+            )
         }
 
         fun bindMedia(item: HomeDataModel.Media) {

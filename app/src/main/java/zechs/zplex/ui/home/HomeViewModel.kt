@@ -165,4 +165,11 @@ class HomeViewModel @Inject constructor(
 
         return Resource.Error(theatres.message())
     }
+
+    fun removeWatchedMedia(watched: WatchedDataModel) = viewModelScope.launch {
+        when (watched) {
+            is WatchedDataModel.Movie -> watchedRepository.deleteWatchedMovie(watched.movie.tmdbId)
+            is WatchedDataModel.Show -> watchedRepository.deleteWatchedShow(watched.show.tmdbId)
+        }
+    }
 }

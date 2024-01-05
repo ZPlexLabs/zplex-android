@@ -11,6 +11,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import zechs.zplex.R
@@ -107,6 +108,16 @@ class HomeFragment : Fragment() {
                 is WatchedDataModel.Movie -> navigateToMedia(watched.movie.toMedia())
                 is WatchedDataModel.Show -> navigateToSeason(watched.show)
             }
+        }
+
+        override fun onLongClickWatched(watched: WatchedDataModel) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.remove_from_watched))
+                .setPositiveButton(getString(R.string.yes)) { _, _ ->
+                    homeViewModel.removeWatchedMedia(watched)
+                }
+                .setNegativeButton(getString(R.string.no)) { _, _ -> }
+                .show()
         }
     }
 
