@@ -15,6 +15,7 @@ data class WatchedMovie(
     val posterPath: String?,
     val watchedDuration: Long,
     val totalDuration: Long,
+    val createdAt: Long,
     @PrimaryKey(autoGenerate = true) val id: Int? = null
 ) {
 

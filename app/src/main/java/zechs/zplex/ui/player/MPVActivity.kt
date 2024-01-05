@@ -17,6 +17,7 @@ import android.util.Log
 import android.view.View
 import android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
 import android.widget.SeekBar
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
@@ -24,12 +25,17 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 import androidx.core.view.isVisible
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.transition.AutoTransition
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.launch
 import zechs.mpv.MPVLib
 import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART
 import zechs.mpv.MPVView
@@ -61,6 +67,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
     private lateinit var binding: ActivityMpvBinding
     private lateinit var player: MPVView
     private lateinit var controller: PlayerControlViewBinding
+
+    private val viewModel by viewModels<PlayerViewModel>()
 
     // States
     private var activityIsForeground = true
@@ -156,6 +164,14 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         }
 
         updateOrientation(resources.configuration)
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.startDuration.consumeAsFlow().collect { startPosition ->
+                    resumeVideo(startPosition)
+                }
+            }
+        }
     }
 
     private val seekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
@@ -233,6 +249,19 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             "http-header-fields",
             "Authorization: Bearer $accessToken"
         )
+
+        val tmdbId = intent.getIntExtra("tmdbId", 0)
+        val isTV = intent.getBooleanExtra("isTV", false)
+
+        val seasonNumber = intent.getIntExtra("seasonNumber", -1)
+        val episodeNumber = intent.getIntExtra("episodeNumber", -1)
+        viewModel.getWatch(tmdbId, isTV, seasonNumber, episodeNumber)
+    }
+
+    private fun resumeVideo(startPosition: Long) {
+        val startPositionInSeconds = startPosition / 1000
+        Log.d(TAG, "MPV(resumeVideo=${Utils.prettyTime(startPositionInSeconds.toInt())})")
+        MPVLib.setOptionString("start", Utils.prettyTime(startPositionInSeconds.toInt()))
     }
 
     private fun getStreamUrl(fileId: String): String {
@@ -487,6 +516,50 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         }
     }
 
+    private fun saveProgress() {
+        val watchedDuration = player.timePos ?: return
+        val totalDuration = player.duration ?: return
+        Log.d(TAG, "MPV(current=$watchedDuration, total=$totalDuration)")
+        // convert these two values from seconds to milliseconds
+        val watchedDurationInMills = (watchedDuration * 1000).toLong()
+        val totalDurationInMills = (totalDuration * 1000).toLong()
+        Log.d(TAG, "MPV(current=$watchedDurationInMills, total=$totalDurationInMills)")
+        Log.d(TAG, "MPV(saveProgress=${Utils.prettyTime(watchedDuration)})")
+
+        val watchProgress = (watchedDuration.toDouble() / totalDuration.toDouble()).toFloat() * 100
+        val minWatchingThresholdPercent = 1
+        if (watchProgress > minWatchingThresholdPercent) {
+            val isTV = intent.getBooleanExtra("isTV", false)
+            val tmdbId = intent.getIntExtra("tmdbId", 0)
+            val name = intent.getStringExtra("name")!!
+            val posterPath = intent.getStringExtra("posterPath")
+
+            Log.d(TAG, "MPV(isTV=$isTV, tmdbId=$tmdbId, name=$name, posterPath=$posterPath)")
+            if (isTV) {
+                val seasonNumber = intent.getIntExtra("seasonNumber", 0)
+                val episodeNumber = intent.getIntExtra("episodeNumber", 0)
+                val isLastEpisode = intent.getBooleanExtra("isLastEpisode", false)
+                Log.d(TAG, "MPV(seasonNumber=$seasonNumber, episodeNumber=$episodeNumber, isLastEpisode=$isLastEpisode)")
+                viewModel.upsertWatchedShow(
+                    tmdbId,
+                    name,
+                    posterPath,
+                    seasonNumber,
+                    episodeNumber,
+                    watchedDurationInMills,
+                    totalDurationInMills
+                )
+            } else {
+                viewModel.upsertWatchedMovie(
+                    tmdbId,
+                    name,
+                    posterPath,
+                    watchedDurationInMills,
+                    totalDurationInMills,
+                )
+            }
+        }
+    }
     ////////////////    MPV EVENTS    ////////////////
 
     override fun eventProperty(property: String, value: Boolean) {
@@ -531,6 +604,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
 
     override fun onPause() {
+        saveProgress()
+
         activityIsForeground = false
 
         if (isFinishing) {

@@ -7,6 +7,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import zechs.zplex.data.local.WatchedMovieDao
+import zechs.zplex.data.local.WatchedShowDao
+import zechs.zplex.data.repository.WatchedRepository
 import zechs.zplex.utils.SessionManager
 import javax.inject.Singleton
 
@@ -26,5 +29,12 @@ object AppModule {
         @ApplicationContext appContext: Context,
         gson: Gson
     ): SessionManager = SessionManager(appContext, gson)
+
+    @Singleton
+    @Provides
+    fun provideWatchedRepository(
+        watchedShowDao: WatchedShowDao,
+        watchedMovieDao: WatchedMovieDao
+    ) = WatchedRepository(watchedShowDao, watchedMovieDao)
 
 }

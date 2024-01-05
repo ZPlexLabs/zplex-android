@@ -5,21 +5,19 @@ import zechs.zplex.data.local.WatchedShowDao
 import zechs.zplex.data.model.entities.WatchedMovie
 import zechs.zplex.data.model.entities.WatchedShow
 import javax.inject.Inject
-import javax.inject.Singleton
 
 
-@Singleton
 class WatchedRepository @Inject constructor(
-    private val watchedMovieDao: WatchedMovieDao,
-    private val watchedShowDao: WatchedShowDao
+    private val watchedShowDao: WatchedShowDao,
+    private val watchedMovieDao: WatchedMovieDao
 ) {
     suspend fun upsertWatchedMovie(
-        WatchedMovie: WatchedMovie
-    ) = watchedMovieDao.upsertWatchedMovie(WatchedMovie)
+        watchedMovie: WatchedMovie
+    ) = watchedMovieDao.upsertWatchedMovie(watchedMovie)
 
     suspend fun deleteWatchedMovie(
-        WatchedMovie: WatchedMovie
-    ) = watchedMovieDao.deleteWatchedMovie(WatchedMovie)
+        tmdbId: Int
+    ) = watchedMovieDao.deleteWatchedMovie(tmdbId)
 
     suspend fun getWatchedMovie(
         tmdbId: Int
@@ -28,16 +26,18 @@ class WatchedRepository @Inject constructor(
     fun getAllWatchedMovies() = watchedMovieDao.getAllWatchedMovies()
 
     suspend fun upsertWatchedShow(
-        WatchedShow: WatchedShow
-    ) = watchedShowDao.upsertWatchedShow(WatchedShow)
+        watchedShow: WatchedShow
+    ) = watchedShowDao.upsertWatchedShow(watchedShow)
 
     suspend fun deleteWatchedShow(
-        WatchedShow: WatchedShow
-    ) = watchedShowDao.deleteWatchedShow(WatchedShow)
+        tmdbId: Int
+    ) = watchedShowDao.deleteWatchedShow(tmdbId)
 
     suspend fun getWatchedShow(
-        tmdbId: Int
-    ) = watchedShowDao.getWatchedShow(tmdbId)
+        tmdbId: Int,
+        season: Int,
+        episode: Int
+    ) = watchedShowDao.getWatchedShow(tmdbId, season, episode)
 
     fun getAllWatchedShows() = watchedShowDao.getAllWatchedShows()
 

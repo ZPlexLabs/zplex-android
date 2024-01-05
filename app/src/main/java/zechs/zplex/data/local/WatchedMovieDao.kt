@@ -2,7 +2,10 @@ package zechs.zplex.data.local
 
 
 import androidx.lifecycle.LiveData
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import zechs.zplex.data.model.entities.WatchedMovie
 
 @Dao
@@ -21,7 +24,7 @@ interface WatchedMovieDao {
     )
     suspend fun getWatchedMovie(tmdbId: Int): WatchedMovie?
 
-    @Delete
-    suspend fun deleteWatchedMovie(watchedMovie: WatchedMovie)
+    @Query("DELETE FROM `watched_movies` WHERE tmdbId = :tmdbId")
+    suspend fun deleteWatchedMovie(tmdbId: Int)
 
 }
