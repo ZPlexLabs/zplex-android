@@ -50,11 +50,21 @@ class EpisodesFragment : Fragment() {
 
     private val episodeDataAdapter by lazy {
         EpisodesDataAdapter(
-            episodeOnClick = {
-                episodeViewModel.setShowEpisode(
-                    tmdbId, it.season_number, it.episode_number
-                )
-                findNavController().navigateSafe(R.id.action_episodesListFragment_to_watchFragment)
+            episodeOnClick = { episode ->
+                if (episode.fileId != null) {
+                    // TODO: Implement video playback
+                } else {
+                    if (!episodesViewModel.hasLoggedIn) {
+                        findNavController().navigateSafe(R.id.action_episodesListFragment_to_signInFragment)
+                    } else {
+                        episodeViewModel.setShowEpisode(
+                            tmdbId,
+                            episode.season_number,
+                            episode.episode_number
+                        )
+                        findNavController().navigateSafe(R.id.action_episodesListFragment_to_watchFragment)
+                    }
+                }
             }
         )
     }
@@ -159,6 +169,11 @@ class EpisodesFragment : Fragment() {
         super.onDestroy()
         binding.rvList.adapter = null
         _binding = null
+    }
+
+    override fun onStart() {
+        super.onStart()
+        episodesViewModel.updateStatus()
     }
 
     companion object {

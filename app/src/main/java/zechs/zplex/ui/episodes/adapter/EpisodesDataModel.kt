@@ -19,7 +19,8 @@ sealed class EpisodesDataModel {
         val overview: String?,
         val episode_number: Int,
         val season_number: Int,
-        val still_path: String?
+        val still_path: String?,
+        val fileId: String?
     ) : EpisodesDataModel()
 
 }

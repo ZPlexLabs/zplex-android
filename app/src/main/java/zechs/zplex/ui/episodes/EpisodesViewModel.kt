@@ -11,6 +11,7 @@ import retrofit2.Response
 import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.episodes.adapter.EpisodesDataModel
+import zechs.zplex.utils.SessionManager
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import javax.inject.Inject
@@ -20,8 +21,23 @@ typealias seasonResponseTmdb = zechs.zplex.data.model.tmdb.season.SeasonResponse
 @HiltViewModel
 class EpisodesViewModel @Inject constructor(
     app: Application,
-    private val tmdbRepository: TmdbRepository
+    private val tmdbRepository: TmdbRepository,
+    private val sessionManager: SessionManager
 ) : BaseAndroidViewModel(app) {
+
+    var hasLoggedIn = false
+        private set
+
+    fun updateStatus() = viewModelScope.launch {
+        hasLoggedIn = getLoginStatus()
+    }
+
+    private suspend fun getLoginStatus(): Boolean {
+        sessionManager.fetchClient() ?: return false
+        sessionManager.fetchRefreshToken() ?: return false
+        return true
+    }
+
 
     private val _seasonResponse = MutableLiveData<Resource<List<EpisodesDataModel>>>()
     val episodesResponse: LiveData<Resource<List<EpisodesDataModel>>>
@@ -69,7 +85,9 @@ class EpisodesViewModel @Inject constructor(
                         overview = it.name,
                         episode_number = it.episode_number,
                         season_number = it.season_number,
-                        still_path = it.still_path
+                        still_path = it.still_path,
+                        // TODO: Need to change this
+                        fileId = null
                     )
                 )
             }

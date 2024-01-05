@@ -281,8 +281,12 @@ class MediaFragment : Fragment() {
                 navigateToCollection(collectionId)
             }
 
-            override fun movieWatchNow(tmdbId: Int) {
-                showSnackBar(message = "To be implemented")
+            override fun movieWatchNow(tmdbId: Int, year: Int?) {
+                if (mediaViewModel.hasLoggedIn) {
+                    // TODO: Implement video playback
+                } else {
+                    findNavController().navigateSafe(R.id.action_fragmentMedia_to_signInFragment)
+                }
             }
 
             override fun movieShare(movie: Movie) {

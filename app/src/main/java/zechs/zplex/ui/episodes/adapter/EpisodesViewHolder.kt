@@ -105,7 +105,8 @@ sealed class EpisodesViewHolder(
                             episode_number = episode.episode_number,
                             season_number = episode.season_number,
                             still_path = episode.still_path,
-                            guest_stars = null
+                            guest_stars = null,
+                            fileId = episode.fileId
                         )
                     )
                 }

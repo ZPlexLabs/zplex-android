@@ -89,6 +89,9 @@
         <action
             android:id="@+id/action_fragmentMedia_to_fragmentCollection"
             app:destination="@id/fragmentCollection" />
+        <action
+            android:id="@+id/action_fragmentMedia_to_signInFragment"
+            app:destination="@id/signInFragment" />
     </fragment>
 
     <fragment
@@ -102,6 +105,9 @@
         <action
             android:id="@+id/action_episodesListFragment_to_bigImageFragment"
             app:destination="@id/bigImageFragment" />
+        <action
+            android:id="@+id/action_episodesListFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
     </fragment>
 
     <fragment
