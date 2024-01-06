@@ -1,12 +1,15 @@
 package zechs.zplex.ui.settings
 
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
+import androidx.constraintlayout.widget.Constraints
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -19,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.FragmentSettingsBinding
+import zechs.zplex.ui.settings.dialog.LoadingDialog
 import zechs.zplex.utils.FolderPickerResultContract
 import zechs.zplex.utils.FolderType
 import zechs.zplex.utils.SelectedFolder
@@ -36,6 +40,8 @@ class SettingsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel by activityViewModels<SettingsViewModel>()
+
+    private var loadingDialog: LoadingDialog? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,7 +111,10 @@ class SettingsFragment : Fragment() {
             )
         }
 
+        binding.settingLogOut.setOnClickListener { logoutDialog() }
+
         observerBothFolders()
+        loadingObserver()
     }
 
     private fun showFolderPickerDialog(
@@ -190,6 +199,50 @@ class SettingsFragment : Fragment() {
                     Log.d(TAG, "hasShowsFolder: $folder")
                 }
             }
+        }
+    }
+
+    private fun logoutDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.logout_title))
+            .setPositiveButton(getString(R.string.yes)) { _, _ ->
+                viewModel.logOut()
+            }
+            .setNegativeButton(getString(R.string.no)) { _, _ -> }
+            .show()
+    }
+
+    private fun loadingObserver() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.loading.collect { loading ->
+                    if (loading) {
+                        showLoadingDialog()
+                    } else {
+                        loadingDialog?.dismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun showLoadingDialog() {
+        if (loadingDialog == null) {
+            loadingDialog = LoadingDialog(context = requireContext())
+        }
+
+        loadingDialog?.show()
+
+        loadingDialog?.window?.apply {
+            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+            setLayout(
+                Constraints.LayoutParams.MATCH_PARENT,
+                Constraints.LayoutParams.WRAP_CONTENT
+            )
+        }
+
+        loadingDialog?.setOnDismissListener {
+            loadingDialog = null
         }
     }
 
