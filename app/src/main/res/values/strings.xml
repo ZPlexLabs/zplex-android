@@ -89,7 +89,6 @@
     <string name="configure_drive_client">Configure your client id, client secret and redirect uri</string>
     <string name="go_to_settings">Go to settings</string>
     <string name="login_to_google_drive">Please login to your Google Drive account</string>
-    <string name="logged_in_success">Successfully logged in, please go back and select folders</string>
     <string name="select_movies_folder">Select movies folder</string>
     <string name="select_movies">Select the folder where your movies are stored</string>
     <string name="select_shows_folder">Select shows folder</string>

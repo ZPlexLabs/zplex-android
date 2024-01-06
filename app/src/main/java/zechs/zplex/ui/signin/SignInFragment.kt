@@ -14,13 +14,15 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.animation.LinearInterpolator
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialSharedAxis
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import zechs.zplex.R
@@ -30,7 +32,7 @@ import zechs.zplex.utils.Constants.GUIDE_TO_MAKE_DRIVE_CLIENT
 import zechs.zplex.utils.ext.hideKeyboardWhenOffFocus
 import zechs.zplex.utils.state.Resource
 
-
+@AndroidEntryPoint
 class SignInFragment : Fragment() {
 
     companion object {
@@ -43,7 +45,9 @@ class SignInFragment : Fragment() {
     private var _codeDialog: DialogCode? = null
     private val codeDialog get() = _codeDialog!!
 
-    private val viewModel by activityViewModels<SignInViewModel>()
+    private val viewModel by lazy {
+        ViewModelProvider(this)[SignInViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,11 +134,7 @@ class SignInFragment : Fragment() {
         viewModel.loginStatus.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Resource.Success -> {
-                    Snackbar.make(
-                        binding.root,
-                        getString(R.string.logged_in_success),
-                        Snackbar.LENGTH_LONG
-                    ).show()
+                    findNavController().navigateUp()
                 }
 
                 is Resource.Error -> {
