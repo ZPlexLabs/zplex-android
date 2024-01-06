@@ -11,7 +11,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import zechs.zplex.data.remote.RemoteLibrary
+import zechs.zplex.utils.IndexingServiceAction
+import zechs.zplex.utils.IndexingServiceManager
 import javax.inject.Inject
+import javax.inject.Named
 
 @AndroidEntryPoint
 class RemoteLibraryIndexingService : LifecycleService() {
@@ -49,6 +52,10 @@ class RemoteLibraryIndexingService : LifecycleService() {
     @Inject
     lateinit var notificationManager: NotificationManager
 
+    @Named("IndexingServiceManagerServiceScoped")
+    @Inject
+    lateinit var indexingServiceManager: IndexingServiceManager
+
     private var job: Job? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -63,8 +70,10 @@ class RemoteLibraryIndexingService : LifecycleService() {
 
     private fun doWork() {
         job = lifecycleScope.launch(Dispatchers.IO) {
+            indexingServiceManager.setStatus(IndexingServiceAction.START)
             indexer.indexMovies()
             indexer.indexShows()
+            indexingServiceManager.setStatus(IndexingServiceAction.STOP)
             stopSelf()
         }
     }
