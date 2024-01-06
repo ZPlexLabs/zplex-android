@@ -29,7 +29,8 @@ data class Movie(
         backdrop_path = null,
         overview = null,
         release_date = null,
-        first_air_date = null
+        first_air_date = null,
+        fileId = fileId
     )
 
 }

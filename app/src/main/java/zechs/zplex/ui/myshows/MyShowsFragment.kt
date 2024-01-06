@@ -97,7 +97,7 @@ class MyShowsFragment : Fragment() {
             }
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.absoluteAdapterPosition
+                val position = viewHolder.adapterPosition
                 val media = mediaAdapter.currentList[position]
 
                 val bottomNavView = activity?.findViewById(
@@ -120,8 +120,7 @@ class MyShowsFragment : Fragment() {
                             media_type = media.media_type.name,
                             poster_path = media.poster_path,
                             vote_average = media.vote_average,
-                            // TODO: Need to change this.
-                            fileId = null
+                            fileId = media.fileId
                         )
                         myShowsViewModel.deleteShow(media.id)
                         snackBar.setAction(R.string.undo) {
@@ -136,8 +135,7 @@ class MyShowsFragment : Fragment() {
                             media_type = media.media_type.name,
                             poster_path = media.poster_path,
                             vote_average = media.vote_average,
-                            // TODO: Need to change this.
-                            fileId = null
+                            fileId = media.fileId
                         )
                         myShowsViewModel.deleteMovie(movie.id)
                         snackBar.setAction(R.string.undo) {
@@ -246,8 +244,9 @@ class MyShowsFragment : Fragment() {
         findNavController().navigateSafe(action)
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+    override fun onDestroy() {
+        super.onDestroy()
+        removeAllObservers()
         binding.rvMyShows.adapter = null
         _binding = null
     }
