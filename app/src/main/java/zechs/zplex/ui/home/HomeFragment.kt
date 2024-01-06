@@ -59,6 +59,17 @@ class HomeFragment : Fragment() {
             isTitleCentered = false
             setTitleTextAppearance(context, R.style.homeTitleTextAppearance)
             title = resources.getString(R.string.app_name)
+            inflateMenu(R.menu.main_menu)
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_settings -> {
+                        findNavController().navigateSafe(R.id.action_homeFragment_to_settingsFragment)
+                        true
+                    }
+
+                    else -> false
+                }
+            }
         }
 
         setupRecyclerView()

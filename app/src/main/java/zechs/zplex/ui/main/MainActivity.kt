@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.episodesListFragment, R.id.fragmentList,
                 R.id.fragmentCollection, R.id.watchFragment,
                 R.id.bigImageFragment, R.id.signInFragment,
-                R.id.setupFragment -> {
+                R.id.setupFragment, R.id.settingsFragment -> {
                     animationNavColorChange(R.color.statusBarColor)
                     hideSlideDown(binding.bottomNavigationView)
                 }

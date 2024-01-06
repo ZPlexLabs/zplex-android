@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_homeFragment_to_episodesListFragment"
             app:destination="@id/episodesListFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -190,5 +193,11 @@
         android:name="zechs.zplex.ui.setup.SetupFragment"
         android:label="SetupFragment"
         tools:layout="@layout/fragment_setup" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="zechs.zplex.ui.settings.SettingsFragment"
+        android:label="SettingsFragment"
+        tools:layout="@layout/fragment_settings" />
 
 </navigation>
