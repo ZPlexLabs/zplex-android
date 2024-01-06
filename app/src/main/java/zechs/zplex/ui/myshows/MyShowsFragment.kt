@@ -246,7 +246,6 @@ class MyShowsFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        removeAllObservers()
         binding.rvMyShows.adapter = null
         _binding = null
     }
