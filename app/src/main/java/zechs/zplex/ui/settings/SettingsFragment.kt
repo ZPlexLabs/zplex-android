@@ -4,12 +4,14 @@ package zechs.zplex.ui.settings
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.transition.TransitionManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import androidx.constraintlayout.widget.Constraints
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -115,6 +117,7 @@ class SettingsFragment : Fragment() {
 
         observerBothFolders()
         loadingObserver()
+        loginStatusObserver()
     }
 
     private fun showFolderPickerDialog(
@@ -243,6 +246,21 @@ class SettingsFragment : Fragment() {
 
         loadingDialog?.setOnDismissListener {
             loadingDialog = null
+        }
+    }
+
+    private fun loginStatusObserver() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.isLoggedIn.collect { loggedIn ->
+                    launch(Dispatchers.Main) {
+                        TransitionManager.beginDelayedTransition(binding.root, null)
+                        binding.settingSelectMoviesFolder.isGone = !loggedIn
+                        binding.settingsSelectShowsFolder.isGone = !loggedIn
+                        binding.settingLogOut.isGone = !loggedIn
+                    }
+                }
+            }
         }
     }
 

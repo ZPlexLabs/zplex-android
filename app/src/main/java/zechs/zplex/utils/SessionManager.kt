@@ -93,6 +93,13 @@ class SessionManager @Inject constructor(
         return value
     }
 
+    fun isLoggedIn(): Flow<Boolean> {
+        return sessionStore.data.map { preferences ->
+            val value = preferences[stringPreferencesKey(ACCESS_TOKEN)]
+            return@map value != null
+        }
+    }
+
     suspend fun saveMovieFolder(movieFolderId: String) {
         val dataStoreKey = stringPreferencesKey(MOVIE_FOLDER)
         sessionStore.edit { settings ->

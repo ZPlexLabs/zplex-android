@@ -59,4 +59,5 @@ class SettingsViewModel @Inject constructor(
         _loading.value = false
     }
 
+    val isLoggedIn = sessionManager.isLoggedIn()
 }
