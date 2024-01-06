@@ -1,4 +1,4 @@
-package zechs.zplex.ui.setup
+package zechs.zplex.utils
 
 import android.content.Context
 import android.content.Intent

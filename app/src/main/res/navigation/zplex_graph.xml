@@ -182,11 +182,6 @@
         android:name="zechs.zplex.ui.signin.SignInFragment"
         android:label="SignInFragment"
         tools:layout="@layout/fragment_sign_in" />
-    <fragment
-        android:id="@+id/setupFragment"
-        android:name="zechs.zplex.ui.setup.SetupFragment"
-        android:label="SetupFragment"
-        tools:layout="@layout/fragment_setup" />
 
     <fragment
         android:id="@+id/settingsFragment"

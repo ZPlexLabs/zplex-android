@@ -32,8 +32,8 @@ import zechs.zplex.databinding.FragmentFilesBinding
 import zechs.zplex.ui.files.adapter.FilesAdapter
 import zechs.zplex.ui.files.adapter.FilesDataModel
 import zechs.zplex.ui.folder_picker.FolderPickerActivity
-import zechs.zplex.ui.setup.FolderPickerResultContract
-import zechs.zplex.ui.setup.FolderType
+import zechs.zplex.utils.FolderPickerResultContract
+import zechs.zplex.utils.FolderType
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.util.DriveApiQueryBuilder
 

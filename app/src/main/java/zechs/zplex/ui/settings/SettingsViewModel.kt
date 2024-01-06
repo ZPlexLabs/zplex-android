@@ -1,4 +1,4 @@
-package zechs.zplex.ui.setup
+package zechs.zplex.ui.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,12 +8,12 @@ import zechs.zplex.utils.SessionManager
 import javax.inject.Inject
 
 @HiltViewModel
-class SetupViewModel @Inject constructor(
+class SettingsViewModel @Inject constructor(
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
     companion object {
-        const val TAG = "SetupViewModel"
+        const val TAG = "SettingsViewModel"
     }
 
     fun saveMoviesFolder(id: String) = viewModelScope.launch {
@@ -24,6 +24,7 @@ class SetupViewModel @Inject constructor(
         sessionManager.saveShowsFolder(id)
     }
 
-    val hasBothFolders = sessionManager.hasBothFolders()
+    val hasMovieFolder = sessionManager.fetchMovieFolderFlow()
+    val hasShowsFolder = sessionManager.fetchShowsFolderFlow()
 
 }

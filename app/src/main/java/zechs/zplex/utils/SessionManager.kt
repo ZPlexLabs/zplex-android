@@ -8,7 +8,6 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import zechs.zplex.data.model.drive.DriveClient
@@ -126,17 +125,15 @@ class SessionManager @Inject constructor(
         return value
     }
 
-    fun hasBothFolders(): Flow<Boolean> {
-        val moviesFolder: Flow<String?> = sessionStore.data.map { preferences ->
+    fun fetchMovieFolderFlow(): Flow<String?> {
+        return sessionStore.data.map { preferences ->
             preferences[stringPreferencesKey(MOVIE_FOLDER)]
         }
+    }
 
-        val showsFolder: Flow<String?> = sessionStore.data.map { preferences ->
+    fun fetchShowsFolderFlow(): Flow<String?> {
+        return sessionStore.data.map { preferences ->
             preferences[stringPreferencesKey(SHOWS_FOLDER)]
-        }
-
-        return moviesFolder.combine(showsFolder) { movies, shows ->
-            movies != null && shows != null
         }
     }
 

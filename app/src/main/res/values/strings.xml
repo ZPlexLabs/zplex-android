@@ -90,4 +90,13 @@
     <string name="go_to_settings">Go to settings</string>
     <string name="login_to_google_drive">Please login to your Google Drive account</string>
     <string name="logged_in_success">Successfully logged in, please go back and select folders</string>
+    <string name="select_movies_folder">Select movies folder</string>
+    <string name="select_movies">Select the folder where your movies are stored</string>
+    <string name="select_shows_folder">Select shows folder</string>
+    <string name="select_shows">Select the folder where your tv shows are stored</string>
+    <string name="selected">Selected</string>
+    <string name="change_movies_folder_title">Do you want to change the movies folder?</string>
+    <string name="remove_movies_message">This will remove all movies from the library.</string>
+    <string name="change_shows_folder_title">Do you want to change the shows folder?</string>
+    <string name="remove_shows_message">This will remove all shows from the library.</string>
 </resources>
