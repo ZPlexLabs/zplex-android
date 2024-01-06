@@ -170,7 +170,7 @@ class SettingsFragment : Fragment() {
 
     private fun observerBothFolders() {
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.hasMovieFolder.collect { folder ->
                     launch(Dispatchers.Main) {
                         binding.btnSelectMovies.apply {
@@ -187,7 +187,7 @@ class SettingsFragment : Fragment() {
             }
         }
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.hasShowsFolder.collect { folder ->
                     launch(Dispatchers.Main) {
                         binding.btnSelectShows.apply {
@@ -217,7 +217,7 @@ class SettingsFragment : Fragment() {
 
     private fun loadingObserver() {
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.loading.collect { loading ->
                     if (loading) {
                         showLoadingDialog()
