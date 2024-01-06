@@ -10,13 +10,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import zechs.zplex.data.repository.TmdbRepository
+import zechs.zplex.utils.IndexingServiceManager
 import zechs.zplex.utils.SessionManager
 import javax.inject.Inject
+import javax.inject.Named
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val tmdbRepository: TmdbRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    @Named("IndexingServiceManager")
+    private val indexingServiceManager: IndexingServiceManager
 ) : ViewModel() {
 
     companion object {
@@ -60,4 +64,6 @@ class SettingsViewModel @Inject constructor(
     }
 
     val isLoggedIn = sessionManager.isLoggedIn()
+    val indexingServiceStatus = indexingServiceManager.getStatus()
+
 }

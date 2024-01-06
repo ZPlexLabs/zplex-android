@@ -102,4 +102,9 @@
     <string name="revoke_credentials_and_clear_indexing">Revoke the Google Drive login credentials and clear the indexing for all media files</string>
     <string name="logout_title">Are you sure you want to log out?</string>
     <string name="please_wait">Please wait…</string>
+    <string name="scan_for_media">Scan for media</string>
+    <string name="scanning">Scanning…</string>
+    <string name="never">Never</string>
+    <string name="last_scanned">Last scanned: %1$s</string>
+    <string name="scanning_in_progress">Scanning in progress…</string>
 </resources>

@@ -1,6 +1,7 @@
 package zechs.zplex.ui.settings
 
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -10,8 +11,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
+import android.view.animation.OvershootInterpolator
 import androidx.constraintlayout.widget.Constraints
+import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -19,14 +23,17 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.FragmentSettingsBinding
+import zechs.zplex.service.RemoteLibraryIndexingService
 import zechs.zplex.ui.settings.dialog.LoadingDialog
 import zechs.zplex.utils.FolderPickerResultContract
 import zechs.zplex.utils.FolderType
+import zechs.zplex.utils.IndexingServiceState
 import zechs.zplex.utils.SelectedFolder
 import zechs.zplex.utils.StartFolderPicker
 import zechs.zplex.utils.ext.navigateSafe
@@ -118,6 +125,7 @@ class SettingsFragment : Fragment() {
         observerBothFolders()
         loadingObserver()
         loginStatusObserver()
+        indexingServiceObserver()
     }
 
     private fun showFolderPickerDialog(
@@ -260,6 +268,82 @@ class SettingsFragment : Fragment() {
                         binding.settingLogOut.isGone = !loggedIn
                     }
                 }
+            }
+        }
+    }
+
+    private fun indexingServiceObserver() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.indexingServiceStatus.collect { status ->
+                    launch(Dispatchers.Main) {
+                        when (status) {
+                            is IndexingServiceState.Running -> {
+                                handleServiceRunning()
+                            }
+
+                            is IndexingServiceState.Stopped -> {
+                                val lastRun = status.lastRun
+                                Log.d(TAG, "indexingService: Stopped($lastRun)")
+                                handleServiceStopped(lastRun)
+                            }
+
+                            is IndexingServiceState.Unknown -> {
+                                Log.d(TAG, "indexingService: Unknown")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private fun resetAnimation() {
+        binding.progressImageStatus.rotation = 0f
+        binding.progressImageStatus.animate().cancel()
+    }
+
+    private fun handleServiceStopped(lastRun: String?) {
+        binding.apply {
+            progressImageStatus.setImageDrawable(
+                ContextCompat.getDrawable(requireContext(), R.drawable.ic_sync_done_24)
+            )
+            progressImageStatus.isVisible = true
+            progressImageStatus.animate()
+                .rotationBy(360f)
+                .setInterpolator(OvershootInterpolator())
+                .withEndAction { resetAnimation() }
+                .start()
+            lastScannedLabel.text = getString(
+                R.string.last_scanned,
+                lastRun ?: getString(R.string.never)
+            )
+            settingScanMedia.setOnClickListener {
+                requireActivity().startService(
+                    Intent(requireContext(), RemoteLibraryIndexingService::class.java)
+                )
+            }
+        }
+    }
+
+    private fun handleServiceRunning() {
+        binding.apply {
+            progressImageStatus.setImageDrawable(
+                ContextCompat.getDrawable(requireContext(), R.drawable.ic_sync_24)
+            )
+            progressImageStatus.isVisible = true
+            progressImageStatus.animate()
+                .rotationBy(360f)
+                .setInterpolator(OvershootInterpolator())
+                .withEndAction { resetAnimation() }
+                .start()
+            lastScannedLabel.text = getString(R.string.scanning)
+            settingScanMedia.setOnClickListener {
+                Snackbar.make(
+                    binding.root,
+                    getString(R.string.scanning_in_progress),
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
         }
     }

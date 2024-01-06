@@ -10,7 +10,9 @@ import dagger.hilt.components.SingletonComponent
 import zechs.zplex.data.local.WatchedMovieDao
 import zechs.zplex.data.local.WatchedShowDao
 import zechs.zplex.data.repository.WatchedRepository
+import zechs.zplex.utils.IndexingServiceManager
 import zechs.zplex.utils.SessionManager
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -37,4 +39,12 @@ object AppModule {
         watchedMovieDao: WatchedMovieDao
     ) = WatchedRepository(watchedShowDao, watchedMovieDao)
 
+    @Named("IndexingServiceManager")
+    @Singleton
+    @Provides
+    fun provideIndexingServiceManager(
+        @ApplicationContext appContext: Context
+    ): IndexingServiceManager {
+        return IndexingServiceManager(appContext)
+    }
 }
