@@ -15,17 +15,19 @@ import android.view.animation.LinearInterpolator
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialSharedAxis
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import zechs.zplex.R
-import zechs.zplex.data.model.drive.DriveClient
 import zechs.zplex.databinding.FragmentSignInBinding
 import zechs.zplex.ui.code.DialogCode
 import zechs.zplex.utils.Constants.GUIDE_TO_MAKE_DRIVE_CLIENT
 import zechs.zplex.utils.ext.hideKeyboardWhenOffFocus
-import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
 
 
@@ -87,14 +89,16 @@ class SignInFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentSignInBinding.bind(view)
 
+        driveClientObserver()
+
         binding.signInText.setOnClickListener {
             if (!updateClient()) {
                 return@setOnClickListener
             }
-            Log.d(TAG, "Auth url: ${viewModel.client!!.authUrl()}")
+            Log.d(TAG, "Auth url: ${viewModel.getDriveClient()!!.authUrl()}")
 
             Intent().setAction(Intent.ACTION_VIEW)
-                .setData(viewModel.client!!.authUrl())
+                .setData(viewModel.getDriveClient()!!.authUrl())
                 .also { startActivity(it) }
         }
 
@@ -126,7 +130,11 @@ class SignInFragment : Fragment() {
         viewModel.loginStatus.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Resource.Success -> {
-                    findNavController().navigateSafe(R.id.action_signInFragment_to_setupFragment)
+                    Snackbar.make(
+                        binding.root,
+                        getString(R.string.logged_in_success),
+                        Snackbar.LENGTH_LONG
+                    ).show()
                 }
 
                 is Resource.Error -> {
@@ -138,7 +146,9 @@ class SignInFragment : Fragment() {
                     ).show()
                 }
 
-                is Resource.Loading -> isLoading(true)
+                is Resource.Loading -> {
+                    isLoading(true)
+                }
             }
         }
     }
@@ -192,11 +202,32 @@ class SignInFragment : Fragment() {
             return false
         }
 
-        viewModel.client = DriveClient(
-            clientId, clientSecret,
-            redirectUri, listOf(scopes)
-        )
+        viewModel.setClient(clientId, clientSecret, redirectUri, listOf(scopes))
         return true
+    }
+
+    private fun driveClientObserver() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.client.collect { client ->
+                    val hasAlreadyLoggedIn = client != null
+                    launch(Dispatchers.Main) {
+                        binding.apply {
+                            if (hasAlreadyLoggedIn) {
+                                clientId.editText!!.setText(client!!.clientId)
+                                clientSecret.editText!!.setText(client.clientSecret)
+                                redirectUri.editText!!.setText(client.redirectUri)
+                            }
+                            clientId.isEnabled = !hasAlreadyLoggedIn
+                            clientSecret.isEnabled = !hasAlreadyLoggedIn
+                            redirectUri.isEnabled = !hasAlreadyLoggedIn
+                            signInText.isEnabled = !hasAlreadyLoggedIn
+                            enterCode.isEnabled = !hasAlreadyLoggedIn
+                        }
+                    }
+                }
+            }
+        }
     }
 
     override fun onDestroy() {

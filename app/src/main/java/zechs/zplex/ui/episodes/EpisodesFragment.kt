@@ -76,7 +76,15 @@ class EpisodesFragment : Fragment() {
                     )
                 } else {
                     if (!episodesViewModel.hasLoggedIn) {
-                        findNavController().navigateSafe(R.id.action_episodesListFragment_to_signInFragment)
+                        val snackBar = Snackbar.make(
+                            binding.root,
+                            getString(R.string.login_to_google_drive),
+                            Snackbar.LENGTH_SHORT
+                        )
+                        snackBar.setAction(getString(R.string.go_to_settings)) {
+                            findNavController().navigateSafe(R.id.action_episodesListFragment_to_settingsFragment)
+                        }
+                        snackBar.show()
                     } else {
                         episodeViewModel.setShowEpisode(
                             tmdbId,
@@ -151,11 +159,13 @@ class EpisodesFragment : Fragment() {
                     isLoading(false)
                     hasLoaded = true
                 }
+
                 is Resource.Error -> {
                     Log.d(TAG, "Error: ${response.message}")
                     showToast(response.message)
                     binding.rvList.isInvisible = true
                 }
+
                 is Resource.Loading -> if (!hasLoaded) {
                     isLoading(true)
                 }

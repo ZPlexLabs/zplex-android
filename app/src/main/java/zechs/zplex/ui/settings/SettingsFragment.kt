@@ -9,7 +9,9 @@ import android.view.animation.LinearInterpolator
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.transition.MaterialSharedAxis
+import zechs.zplex.R
 import zechs.zplex.databinding.FragmentSettingsBinding
+import zechs.zplex.utils.ext.navigateSafe
 
 
 class SettingsFragment : Fragment() {
@@ -66,6 +68,10 @@ class SettingsFragment : Fragment() {
         _binding = FragmentSettingsBinding.bind(view)
 
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
+
+        binding.settingConfigureClient.setOnClickListener {
+            findNavController().navigateSafe(R.id.action_settingsFragment_to_signInFragment)
+        }
 
     }
 

@@ -84,4 +84,10 @@
     <string name="no">No</string>
     <string name="unknown_error">Unknown error!</string>
     <string name="app_settings">App settings</string>
+    <string name="google_drive">Google Drive</string>
+    <string name="client_configuration">Client configuration</string>
+    <string name="configure_drive_client">Configure your client id, client secret and redirect uri</string>
+    <string name="go_to_settings">Go to settings</string>
+    <string name="login_to_google_drive">Please login to your Google Drive account</string>
+    <string name="logged_in_success">Successfully logged in, please go back and select folders</string>
 </resources>

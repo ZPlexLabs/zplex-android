@@ -93,8 +93,8 @@
             android:id="@+id/action_fragmentMedia_to_fragmentCollection"
             app:destination="@id/fragmentCollection" />
         <action
-            android:id="@+id/action_fragmentMedia_to_signInFragment"
-            app:destination="@id/signInFragment" />
+            android:id="@+id/action_fragmentMedia_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -109,8 +109,8 @@
             android:id="@+id/action_episodesListFragment_to_bigImageFragment"
             app:destination="@id/bigImageFragment" />
         <action
-            android:id="@+id/action_episodesListFragment_to_signInFragment"
-            app:destination="@id/signInFragment" />
+            android:id="@+id/action_episodesListFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -181,13 +181,7 @@
         android:id="@+id/signInFragment"
         android:name="zechs.zplex.ui.signin.SignInFragment"
         android:label="SignInFragment"
-        tools:layout="@layout/fragment_sign_in" >
-        <action
-            android:id="@+id/action_signInFragment_to_setupFragment"
-            app:destination="@id/setupFragment"
-            app:popUpTo="@id/fragmentMedia"
-            app:popUpToInclusive="true" />
-    </fragment>
+        tools:layout="@layout/fragment_sign_in" />
     <fragment
         android:id="@+id/setupFragment"
         android:name="zechs.zplex.ui.setup.SetupFragment"
@@ -198,6 +192,10 @@
         android:id="@+id/settingsFragment"
         android:name="zechs.zplex.ui.settings.SettingsFragment"
         android:label="SettingsFragment"
-        tools:layout="@layout/fragment_settings" />
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_settingsFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
+    </fragment>
 
 </navigation>

@@ -12,19 +12,40 @@ import kotlinx.coroutines.launch
 import zechs.zplex.data.model.drive.AuthorizationResponse
 import zechs.zplex.data.model.drive.DriveClient
 import zechs.zplex.data.repository.DriveRepository
+import zechs.zplex.utils.SessionManager
 import zechs.zplex.utils.state.Resource
 import javax.inject.Inject
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    private val driveRepository: Lazy<DriveRepository>
+    private val driveRepository: Lazy<DriveRepository>,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _loginStatus = MutableLiveData<Resource<AuthorizationResponse>>()
     val loginStatus: LiveData<Resource<AuthorizationResponse>>
         get() = _loginStatus
 
-    var client: DriveClient? = null
+    val client = sessionManager.fetchDriveClientFlow()
+
+
+    private var driveClient: DriveClient? = null
+
+    fun getDriveClient() = driveClient
+
+    fun setClient(
+        clientId: String,
+        clientSecret: String,
+        redirectUri: String,
+        scopes: List<String>
+    ) {
+        driveClient = DriveClient(
+            clientId = clientId,
+            clientSecret = clientSecret,
+            redirectUri = redirectUri,
+            scopes = scopes
+        )
+    }
 
     fun requestRefreshToken(
         authCodeUri: String
@@ -34,11 +55,11 @@ class SignInViewModel @Inject constructor(
         if (authCode == null) {
             _loginStatus.postValue(Resource.Error("Authorization code not found, please check url"))
         } else {
-            if (client == null) {
+            if (driveClient == null) {
                 _loginStatus.postValue(Resource.Error("Client not found, Make sure you have filled all the fields"))
                 return@launch
             }
-            val response = driveRepository.get().fetchRefreshToken(client!!, authCode)
+            val response = driveRepository.get().fetchRefreshToken(driveClient!!, authCode)
             _loginStatus.postValue(response)
         }
     }

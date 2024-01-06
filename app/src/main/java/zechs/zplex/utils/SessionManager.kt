@@ -43,6 +43,17 @@ class SessionManager @Inject constructor(
         return client
     }
 
+    fun fetchDriveClientFlow(): Flow<DriveClient?> {
+        return sessionStore.data.map { preferences ->
+            val value = preferences[stringPreferencesKey(DRIVE_CLIENT)]
+            val client: DriveClient? = value?.let {
+                val type = object : TypeToken<DriveClient?>() {}.type
+                gson.fromJson(value, type)
+            }
+            return@map client
+        }
+    }
+
     suspend fun saveAccessToken(data: TokenResponse) {
         val dataStoreKey = stringPreferencesKey(ACCESS_TOKEN)
         val currentTimeInSeconds = System.currentTimeMillis() / 1000
@@ -126,16 +137,6 @@ class SessionManager @Inject constructor(
 
         return moviesFolder.combine(showsFolder) { movies, shows ->
             movies != null && shows != null
-        }
-    }
-
-    fun needToPickFolder(): Flow<Boolean> {
-        val driveClient: Flow<String?> = sessionStore.data.map { preferences ->
-            preferences[stringPreferencesKey(DRIVE_CLIENT)]
-        }
-
-        return driveClient.combine(hasBothFolders()) { client, hasBothFolders ->
-            client != null && !hasBothFolders
         }
     }
 

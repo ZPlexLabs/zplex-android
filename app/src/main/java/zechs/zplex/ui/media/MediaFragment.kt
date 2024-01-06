@@ -287,7 +287,15 @@ class MediaFragment : Fragment() {
                 if (mediaViewModel.hasLoggedIn) {
                     mediaViewModel.playMovie(tmdbId, year)
                 } else {
-                    findNavController().navigateSafe(R.id.action_fragmentMedia_to_signInFragment)
+                    val snackBar = Snackbar.make(
+                        binding.root,
+                        getString(R.string.login_to_google_drive),
+                        Snackbar.LENGTH_SHORT
+                    )
+                    snackBar.setAction(getString(R.string.go_to_settings)) {
+                        findNavController().navigateSafe(R.id.action_fragmentMedia_to_settingsFragment)
+                    }
+                    snackBar.show()
                 }
             }
 

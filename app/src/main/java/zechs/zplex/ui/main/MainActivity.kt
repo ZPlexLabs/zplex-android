@@ -3,19 +3,15 @@ package zechs.zplex.ui.main
 import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.TranslateAnimation
-import androidx.activity.viewModels
 import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -31,8 +27,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
-
-    private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +59,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        folderSelectionObserver()
         startService(Intent(this, RemoteLibraryIndexingService::class.java))
     }
 
@@ -120,20 +113,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
-    }
-
-
-    private fun folderSelectionObserver() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.needToPickFolder.collect { needToPickFolder ->
-                    if (needToPickFolder && navController.currentDestination?.id != R.id.setupFragment) {
-                        navController.navigate(R.id.setupFragment)
-                    }
-                    Log.d(TAG, "folderSelectionObserver: (needToPickFolder=$needToPickFolder)")
-                }
-            }
-        }
     }
 
     companion object {
