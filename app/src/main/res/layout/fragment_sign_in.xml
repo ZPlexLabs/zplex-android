@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     android:clickable="true"
     android:focusable="true"
-    android:focusableInTouchMode="true">
+    android:focusableInTouchMode="true"
+    android:transitionGroup="true">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -143,7 +144,7 @@
                     android:layout_gravity="center"
                     android:layout_marginEnd="8dp"
                     android:layout_weight="1"
-                            android:text="@string/need_help"
+                    android:text="@string/need_help"
                     app:icon="@drawable/ic_external_24"
                     app:iconGravity="textStart" />
 
@@ -155,7 +156,7 @@
                     android:layout_gravity="center"
                     android:layout_marginStart="8dp"
                     android:layout_weight="1"
-                            android:text="@string/sign_in" />
+                    android:text="@string/sign_in" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

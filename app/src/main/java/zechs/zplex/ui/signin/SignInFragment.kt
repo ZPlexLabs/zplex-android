@@ -11,12 +11,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.animation.LinearInterpolator
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.data.model.drive.DriveClient
 import zechs.zplex.databinding.FragmentSignInBinding
@@ -40,6 +42,35 @@ class SignInFragment : Fragment() {
     private val codeDialog get() = _codeDialog!!
 
     private val viewModel by activityViewModels<SignInViewModel>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        enterTransition = MaterialSharedAxis(
+            /* axis */ MaterialSharedAxis.Y,
+            /* forward */ true
+        ).apply {
+            interpolator = LinearInterpolator()
+            duration = 300
+        }
+
+        returnTransition = MaterialSharedAxis(
+            /* axis */ MaterialSharedAxis.Y,
+            /* forward */ false
+        ).apply {
+            interpolator = LinearInterpolator()
+            duration = 300
+        }
+
+        exitTransition = MaterialSharedAxis(
+            /* axis */ MaterialSharedAxis.Y,
+            /* forward */ true
+        ).apply {
+            interpolator = LinearInterpolator()
+            duration = 250
+        }
+
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
