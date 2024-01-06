@@ -131,7 +131,7 @@ class RemoteLibraryRepository @Inject constructor(
         tmdbRepository.getSavedMovies().value?.forEach { savedMovie ->
             if (driveFiles.none { driveFile -> driveFile.id == savedMovie.fileId }) {
                 Log.d(TAG, "Deleting movie: ${savedMovie.title} from the database.")
-                tmdbRepository.deleteMovie(savedMovie)
+                tmdbRepository.deleteMovie(savedMovie.id)
             }
         }
     }
@@ -237,7 +237,7 @@ class RemoteLibraryRepository @Inject constructor(
     private suspend fun synchronizeLocalShowsWithRemote(shows: List<DriveFile>) {
         tmdbRepository.getSavedShows().value?.forEach { savedShow ->
             if (shows.none { show -> show.id == savedShow.fileId }) {
-                tmdbRepository.deleteShow(savedShow)
+                tmdbRepository.deleteShow(savedShow.id)
             }
         }
     }

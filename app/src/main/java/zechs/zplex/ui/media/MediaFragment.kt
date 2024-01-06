@@ -466,7 +466,7 @@ class MediaFragment : Fragment() {
 
             view.setOnClickListener {
                 if (isSaved) {
-                    mediaViewModel.deleteShow(show)
+                    mediaViewModel.deleteShow(show.id)
                     val snackBar = Snackbar.make(
                         binding.rvList, "${show.name} removed from your library",
                         Snackbar.LENGTH_SHORT
@@ -486,7 +486,7 @@ class MediaFragment : Fragment() {
                     snackBar.setAction(
                         R.string.undo
                     ) {
-                        mediaViewModel.deleteShow(show)
+                        mediaViewModel.deleteShow(show.id)
                     }
                     snackBar.show()
                 }
@@ -515,7 +515,7 @@ class MediaFragment : Fragment() {
 
             view.setOnClickListener {
                 if (isSaved) {
-                    mediaViewModel.deleteMovie(movie)
+                    mediaViewModel.deleteMovie(movie.id)
                     val snackBar = Snackbar.make(
                         binding.rvList, "${movie.title} removed from your library",
                         Snackbar.LENGTH_SHORT
@@ -535,7 +535,7 @@ class MediaFragment : Fragment() {
                     snackBar.setAction(
                         R.string.undo
                     ) {
-                        mediaViewModel.deleteMovie(movie)
+                        mediaViewModel.deleteMovie(movie.id)
                     }
                     snackBar.show()
                 }

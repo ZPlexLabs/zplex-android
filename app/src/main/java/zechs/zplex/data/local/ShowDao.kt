@@ -23,7 +23,6 @@ interface ShowDao {
     @Query("SELECT * FROM shows WHERE id = :id LIMIT 1")
     suspend fun getShowById(id: Int): Show?
 
-    @Delete
-    suspend fun deleteShow(media: Show)
-
+    @Query("DELETE FROM shows WHERE id = :id")
+    suspend fun deleteShowById(id: Int)
 }

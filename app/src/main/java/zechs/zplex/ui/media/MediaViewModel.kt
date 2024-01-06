@@ -47,8 +47,8 @@ class MediaViewModel @Inject constructor(
         tmdbRepository.upsertShow(show)
     }
 
-    fun deleteShow(show: Show) = viewModelScope.launch {
-        tmdbRepository.deleteShow(show)
+    fun deleteShow(tmdbId: Int) = viewModelScope.launch {
+        tmdbRepository.deleteShow(tmdbId)
     }
 
     fun getShow(id: Int) = tmdbRepository.fetchShow(id)
@@ -57,8 +57,8 @@ class MediaViewModel @Inject constructor(
         tmdbRepository.upsertMovie(movie)
     }
 
-    fun deleteMovie(movie: Movie) = viewModelScope.launch {
-        tmdbRepository.deleteMovie(movie)
+    fun deleteMovie(tmdbId: Int) = viewModelScope.launch {
+        tmdbRepository.deleteMovie(tmdbId)
     }
 
     fun getMovie(id: Int) = tmdbRepository.fetchMovie(id)

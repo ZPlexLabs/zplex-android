@@ -123,7 +123,7 @@ class MyShowsFragment : Fragment() {
                             // TODO: Need to change this.
                             fileId = null
                         )
-                        myShowsViewModel.deleteShow(show)
+                        myShowsViewModel.deleteShow(media.id)
                         snackBar.setAction(R.string.undo) {
                             Log.d(TAG, "Undo invoked(), show=$show")
                             myShowsViewModel.saveShow(show)
@@ -139,7 +139,7 @@ class MyShowsFragment : Fragment() {
                             // TODO: Need to change this.
                             fileId = null
                         )
-                        myShowsViewModel.deleteMovie(movie)
+                        myShowsViewModel.deleteMovie(movie.id)
                         snackBar.setAction(R.string.undo) {
                             Log.d(TAG, "Undo invoked(), movie=$movie")
                             myShowsViewModel.saveMovie(movie)

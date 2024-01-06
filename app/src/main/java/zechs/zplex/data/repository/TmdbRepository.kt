@@ -39,8 +39,8 @@ class TmdbRepository @Inject constructor(
     ) = movieDao.getMovie(id)
 
     suspend fun deleteMovie(
-        movie: Movie
-    ) = movieDao.deleteMovie(movie)
+        tmdbId: Int
+    ) = movieDao.deleteMovieById(tmdbId)
 
     fun getSavedMovies() = movieDao.getAllMovies()
 
@@ -57,8 +57,8 @@ class TmdbRepository @Inject constructor(
     ) = showDao.getShow(id)
 
     suspend fun deleteShow(
-        show: Show
-    ) = showDao.deleteShow(show)
+        tmdbId: Int
+    ) = showDao.deleteShowById(tmdbId)
 
     fun getSavedShows() = showDao.getAllShows()
 
