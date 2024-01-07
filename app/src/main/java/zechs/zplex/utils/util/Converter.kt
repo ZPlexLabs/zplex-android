@@ -28,7 +28,7 @@ object Converter {
 
     @Throws(ParseException::class)
     fun toDuration(date: String): String {
-        val format = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        val format = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH)
         format.timeZone = TimeZone.getTimeZone("UTC")
         format.timeZone = TimeZone.getTimeZone(TimeZone.getDefault().toString())
         val past = format.parse(date)
@@ -90,19 +90,18 @@ object Converter {
 
     fun getDate(): String {
         val time = System.currentTimeMillis()
-        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
         return formatter.format(time)!!
     }
 
     fun dateToLocalDate(date: String): LocalDate {
         val pattern = "MMM dd, yyyy"
 
-        val locale = Locale.getDefault(Locale.Category.FORMAT)
         val chronology = IsoChronology.INSTANCE
         val df = DateTimeFormatterBuilder()
             .parseLenient().appendPattern(pattern).toFormatter()
             .withChronology(chronology)
-            .withDecimalStyle(DecimalStyle.of(locale))
+            .withDecimalStyle(DecimalStyle.of(Locale.ENGLISH))
         val temporal: TemporalAccessor = df.parse(date)
         val cDate: ChronoLocalDate = chronology.date(temporal)
         return LocalDate.from(cDate)
