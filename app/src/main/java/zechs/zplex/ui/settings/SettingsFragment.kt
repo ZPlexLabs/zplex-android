@@ -5,7 +5,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.transition.TransitionManager
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -22,10 +21,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.transition.TransitionManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialSharedAxis
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.FragmentSettingsBinding
@@ -180,13 +179,11 @@ class SettingsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.hasMovieFolder.collect { folder ->
-                    launch(Dispatchers.Main) {
-                        binding.btnSelectMovies.apply {
-                            text = if (folder == null) {
-                                getString(R.string.select)
-                            } else {
-                                getString(R.string.selected)
-                            }
+                    binding.btnSelectMovies.apply {
+                        text = if (folder == null) {
+                            getString(R.string.select)
+                        } else {
+                            getString(R.string.selected)
                         }
                     }
 
@@ -197,13 +194,11 @@ class SettingsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.hasShowsFolder.collect { folder ->
-                    launch(Dispatchers.Main) {
-                        binding.btnSelectShows.apply {
-                            text = if (folder == null) {
-                                getString(R.string.select)
-                            } else {
-                                getString(R.string.selected)
-                            }
+                    binding.btnSelectShows.apply {
+                        text = if (folder == null) {
+                            getString(R.string.select)
+                        } else {
+                            getString(R.string.selected)
                         }
                     }
 
@@ -261,12 +256,10 @@ class SettingsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.isLoggedIn.collect { loggedIn ->
-                    launch(Dispatchers.Main) {
-                        TransitionManager.beginDelayedTransition(binding.root, null)
-                        binding.settingSelectMoviesFolder.isGone = !loggedIn
-                        binding.settingsSelectShowsFolder.isGone = !loggedIn
-                        binding.settingLogOut.isGone = !loggedIn
-                    }
+                    TransitionManager.beginDelayedTransition(binding.root, null)
+                    binding.settingSelectMoviesFolder.isGone = !loggedIn
+                    binding.settingsSelectShowsFolder.isGone = !loggedIn
+                    binding.settingLogOut.isGone = !loggedIn
                 }
             }
         }

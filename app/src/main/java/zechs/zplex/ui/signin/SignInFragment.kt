@@ -23,7 +23,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.FragmentSignInBinding
@@ -211,19 +210,17 @@ class SignInFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.RESUMED) {
                 viewModel.client.collect { client ->
                     val hasAlreadyLoggedIn = client != null
-                    launch(Dispatchers.Main) {
-                        binding.apply {
-                            if (hasAlreadyLoggedIn) {
-                                clientId.editText!!.setText(client!!.clientId)
-                                clientSecret.editText!!.setText(client.clientSecret)
-                                redirectUri.editText!!.setText(client.redirectUri)
-                            }
-                            clientId.isEnabled = !hasAlreadyLoggedIn
-                            clientSecret.isEnabled = !hasAlreadyLoggedIn
-                            redirectUri.isEnabled = !hasAlreadyLoggedIn
-                            signInText.isEnabled = !hasAlreadyLoggedIn
-                            enterCode.isEnabled = !hasAlreadyLoggedIn
+                    binding.apply {
+                        if (hasAlreadyLoggedIn) {
+                            clientId.editText!!.setText(client!!.clientId)
+                            clientSecret.editText!!.setText(client.clientSecret)
+                            redirectUri.editText!!.setText(client.redirectUri)
                         }
+                        clientId.isEnabled = !hasAlreadyLoggedIn
+                        clientSecret.isEnabled = !hasAlreadyLoggedIn
+                        redirectUri.isEnabled = !hasAlreadyLoggedIn
+                        signInText.isEnabled = !hasAlreadyLoggedIn
+                        enterCode.isEnabled = !hasAlreadyLoggedIn
                     }
                 }
             }
