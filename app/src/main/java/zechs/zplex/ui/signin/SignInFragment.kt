@@ -207,7 +207,7 @@ class SignInFragment : Fragment() {
 
     private fun driveClientObserver() {
         viewLifecycleOwner.lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.client.collect { client ->
                     val hasAlreadyLoggedIn = client != null
                     binding.apply {
