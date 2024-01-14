@@ -14,10 +14,9 @@ import zechs.zplex.data.remote.RemoteLibrary
 import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.RemoteLibraryRepository
 import zechs.zplex.data.repository.TmdbRepository
+import zechs.zplex.service.IndexingStateFlow
 import zechs.zplex.service.RemoteLibraryIndexingService
-import zechs.zplex.utils.IndexingServiceManager
 import zechs.zplex.utils.SessionManager
-import javax.inject.Named
 
 @Module
 @InstallIn(ServiceComponent::class)
@@ -52,16 +51,7 @@ object ServiceModule {
         tmdbRepository: TmdbRepository,
         sessionManager: SessionManager
     ): RemoteLibrary {
-        return RemoteLibraryRepository(driveRepository, tmdbRepository, sessionManager)
-    }
-
-    @Named("IndexingServiceManagerServiceScoped")
-    @ServiceScoped
-    @Provides
-    fun provideIndexingServiceManager(
-        @ApplicationContext appContext: Context
-    ): IndexingServiceManager {
-        return IndexingServiceManager(appContext)
+        return RemoteLibraryRepository(driveRepository, tmdbRepository, sessionManager,)
     }
 
 }

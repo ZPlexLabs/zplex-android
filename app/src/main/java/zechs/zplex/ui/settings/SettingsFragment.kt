@@ -30,10 +30,10 @@ import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.FragmentSettingsBinding
 import zechs.zplex.service.RemoteLibraryIndexingService
+import zechs.zplex.service.ServiceState
 import zechs.zplex.ui.settings.dialog.LoadingDialog
 import zechs.zplex.utils.FolderPickerResultContract
 import zechs.zplex.utils.FolderType
-import zechs.zplex.utils.IndexingServiceState
 import zechs.zplex.utils.SelectedFolder
 import zechs.zplex.utils.StartFolderPicker
 import zechs.zplex.utils.ext.navigateSafe
@@ -275,22 +275,18 @@ class SettingsFragment : Fragment() {
     private fun indexingServiceObserver() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.indexingServiceStatus.collect { status ->
-                    launch(Dispatchers.Main) {
-                        when (status) {
-                            is IndexingServiceState.Running -> {
-                                handleServiceRunning()
-                            }
+                viewModel.indexingServiceStatus.collect { state ->
+                    when (state) {
+                        ServiceState.Checking -> {
+                            Log.d(TAG, "indexingServiceObserver: Checking")
+                        }
 
-                            is IndexingServiceState.Stopped -> {
-                                val lastRun = status.lastRun
-                                Log.d(TAG, "indexingService: Stopped($lastRun)")
-                                handleServiceStopped(lastRun)
-                            }
+                        is ServiceState.Running -> {
+                            handleServiceRunning()
+                        }
 
-                            is IndexingServiceState.Unknown -> {
-                                Log.d(TAG, "indexingService: Unknown")
-                            }
+                        is ServiceState.Stopped -> {
+                            handleServiceStopped(state.lastRun)
                         }
                     }
                 }
