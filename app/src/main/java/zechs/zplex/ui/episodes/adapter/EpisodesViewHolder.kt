@@ -70,6 +70,13 @@ sealed class EpisodesViewHolder(
                 val ivThumbTAG = "ivThumbTAG"
                 val tvEpisodeCountTAG = "tvEpisodeCountTAG"
 
+                if (episode.progress == 0) {
+                    watchProgress.isGone = true
+                } else {
+                    watchProgress.isGone = false
+                    watchProgress.progress = episode.progress
+                }
+
                 if (episode.still_path.isNullOrEmpty() || ivThumb.tag == ivThumbTAG) {
                     ivThumb.tag = ivThumbTAG
                     ivThumb.isGone = true
