@@ -140,13 +140,13 @@ class EpisodesFragment : Fragment() {
             showPoster = showSeason.showPoster
             tmdbId = showSeason.tmdbId
             if (!hasLoaded) {
-                episodesViewModel.getSeason(
+                episodesViewModel.getSeasonWithWatched(
                     tmdbId = showSeason.tmdbId,
                     seasonNumber = showSeason.seasonNumber
                 )
             }
         }
-        episodesViewModel.episodesResponse.observe(viewLifecycleOwner) { response ->
+        episodesViewModel.episodesWithWatched.observe(viewLifecycleOwner) { response ->
             when (response) {
                 is Resource.Success -> response.data?.let {
                     TransitionManager.beginDelayedTransition(

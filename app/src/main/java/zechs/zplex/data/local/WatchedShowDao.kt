@@ -30,6 +30,13 @@ interface WatchedShowDao {
                 "WHERE tmdbId = :tmdbId " +
                 "AND seasonNumber = :season"
     )
+    fun getWatchedSeasonLive(tmdbId: Int, season: Int): LiveData<List<WatchedShow>>
+
+    @Query(
+        "SELECT * FROM `watched_shows` " +
+                "WHERE tmdbId = :tmdbId " +
+                "AND seasonNumber = :season"
+    )
     suspend fun getWatchedSeason(tmdbId: Int, season: Int): List<WatchedShow>
 
     @Query("DELETE FROM `watched_shows` WHERE tmdbId = :tmdbId")

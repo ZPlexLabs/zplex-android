@@ -3,6 +3,7 @@ package zechs.zplex.ui.episodes
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,33 +52,80 @@ class EpisodesViewModel @Inject constructor(
     }
 
 
-    private val _seasonResponse = MutableLiveData<Resource<List<EpisodesDataModel>>>()
-    val episodesResponse: LiveData<Resource<List<EpisodesDataModel>>>
-        get() = _seasonResponse
+    private val _episodesResponse =
+        MutableLiveData<Resource<List<EpisodesDataModel>>>(Resource.Loading())
+
+    private val _episodesWithWatched = MediatorLiveData<Resource<List<EpisodesDataModel>>>()
+    val episodesWithWatched: LiveData<Resource<List<EpisodesDataModel>>>
+        get() = _episodesWithWatched
+
+    fun getSeasonWithWatched(
+        tmdbId: Int,
+        seasonNumber: Int
+    ) = viewModelScope.launch {
+        getSeason(tmdbId, seasonNumber)
+
+        val watchedSeason = watchedRepository.getWatchedSeason(tmdbId, seasonNumber)
+
+        _episodesWithWatched.addSource(_episodesResponse) { episodes ->
+            _episodesWithWatched.value = combineSeasonWithWatched(episodes, watchedSeason)
+        }
+
+        _episodesWithWatched.addSource(
+            watchedRepository.getWatchedSeasonLive(tmdbId, seasonNumber)
+        ) { watched ->
+            _episodesWithWatched.value =
+                combineSeasonWithWatched(_episodesResponse.value!!, watched)
+        }
+    }
+
+    private fun combineSeasonWithWatched(
+        episodes: Resource<List<EpisodesDataModel>>,
+        watched: List<WatchedShow>
+    ): Resource<List<EpisodesDataModel>> {
+        if (episodes is Resource.Success) {
+            val episodesDataModel = episodes.data!!.toMutableList()
+
+            episodesDataModel.forEachIndexed { index, episode ->
+                if (episode is EpisodesDataModel.Episode) {
+                    watched.firstOrNull { it.episodeNumber == episode.episode_number }
+                        ?.let { watchedShow ->
+                            val newProgress = watchedShow.watchProgress()
+                            Log.d(TAG, "Updating watched progress for ${episode.name} to $newProgress")
+                            episodesDataModel[index] = episode.copy(progress = newProgress)
+                        }
+                }
+            }
+
+            Log.d(TAG, "Combined episodes with watched successfully")
+            return Resource.Success(episodesDataModel.toList())
+        }
+
+        Log.d(TAG, "Episodes resource is not Success")
+        return episodes
+    }
 
     fun getSeason(
         tmdbId: Int,
         seasonNumber: Int
     ) = viewModelScope.launch(Dispatchers.IO) {
-        _seasonResponse.postValue((Resource.Loading()))
+        _episodesResponse.postValue((Resource.Loading()))
         try {
             if (hasInternetConnection()) {
                 val tmdbSeason = tmdbRepository.getSeason(tmdbId, seasonNumber)
-                val watchedSeason = watchedRepository.getWatchedSeason(tmdbId, seasonNumber)
-                _seasonResponse.postValue((handleSeasonResponse(tmdbId, tmdbSeason, watchedSeason)))
+                _episodesResponse.postValue((handleSeasonResponse(tmdbId, tmdbSeason)))
             } else {
-                _seasonResponse.postValue((Resource.Error("No internet connection")))
+                _episodesResponse.postValue((Resource.Error("No internet connection")))
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            _seasonResponse.postValue(postError(e))
+            _episodesResponse.postValue(postError(e))
         }
     }
 
     private suspend fun handleSeasonResponse(
         tmdbId: Int,
-        response: Response<seasonResponseTmdb>,
-        watchedSeason: List<WatchedShow>
+        response: Response<seasonResponseTmdb>
     ): Resource<List<EpisodesDataModel>> {
         if (response.body() != null) {
             val result = response.body()!!
@@ -88,9 +136,9 @@ class EpisodesViewModel @Inject constructor(
             if (!result.episodes.isNullOrEmpty()) {
                 val savedShow = tmdbRepository.fetchShowById(tmdbId)
                 if (savedShow?.fileId != null) {
-                    handleSeasonFolder(result, savedShow.fileId, seasonDataModel, watchedSeason)
+                    handleSeasonFolder(result, savedShow.fileId, seasonDataModel)
                 } else {
-                    handleDefaultMapping(result.episodes, seasonDataModel, watchedSeason)
+                    handleDefaultMapping(result.episodes, seasonDataModel)
                 }
             }
 
@@ -111,22 +159,16 @@ class EpisodesViewModel @Inject constructor(
     private suspend fun handleSeasonFolder(
         result: seasonResponseTmdb,
         showFolderId: String,
-        seasonDataModel: MutableList<EpisodesDataModel>,
-        watchedSeason: List<WatchedShow>
+        seasonDataModel: MutableList<EpisodesDataModel>
     ) {
         val seasonFolderName = "Season ${result.season_number}"
         val seasonFolder = findSeasonFolder(showFolderId, seasonFolderName)
 
         if (seasonFolder != null) {
-            handleEpisodesInFolder(
-                result.episodes!!,
-                seasonFolder.id,
-                seasonDataModel,
-                watchedSeason
-            )
+            handleEpisodesInFolder(result.episodes!!, seasonFolder.id, seasonDataModel)
         } else {
             Log.d(TAG, "No folder found with name \"$seasonFolderName\"")
-            handleDefaultMapping(result.episodes!!, seasonDataModel, watchedSeason)
+            handleDefaultMapping(result.episodes!!, seasonDataModel)
         }
     }
 
@@ -152,8 +194,7 @@ class EpisodesViewModel @Inject constructor(
     private suspend fun handleEpisodesInFolder(
         episodes: List<Episode>,
         seasonFolderId: String,
-        seasonDataModel: MutableList<EpisodesDataModel>,
-        watchedSeason: List<WatchedShow>
+        seasonDataModel: MutableList<EpisodesDataModel>
     ) {
         val episodesInFolder = driveRepository.getAllFilesInFolder(
             queryBuilder = DriveApiQueryBuilder()
@@ -163,18 +204,17 @@ class EpisodesViewModel @Inject constructor(
         )
 
         if (episodesInFolder is Resource.Success && episodesInFolder.data != null) {
-            processMatchingEpisodes(episodes, episodesInFolder.data, seasonDataModel, watchedSeason)
+            processMatchingEpisodes(episodes, episodesInFolder.data, seasonDataModel)
         } else {
             Log.d(TAG, "No files found in season folder")
-            handleDefaultMapping(episodes, seasonDataModel, watchedSeason)
+            handleDefaultMapping(episodes, seasonDataModel)
         }
     }
 
     private fun processMatchingEpisodes(
         episodes: List<Episode>,
         filesInFolder: List<File>,
-        seasonDataModel: MutableList<EpisodesDataModel>,
-        watchedSeason: List<WatchedShow>
+        seasonDataModel: MutableList<EpisodesDataModel>
     ) {
         val episodeMap =
             buildEpisodeMap(filesInFolder.map { it.toDriveFile() }.filter { it.isVideoFile })
@@ -182,27 +222,12 @@ class EpisodesViewModel @Inject constructor(
         var match = 0
         episodes.forEach { episode ->
             val matchingEpisode = findMatchingEpisode(episode, episodeMap)
-            val watchedProgress = watchedSeason
-                .firstOrNull { watched -> watched.episodeNumber == episode.episode_number }
-                ?.watchProgress()
             if (matchingEpisode == null) {
                 Log.d(TAG, "No matching file found for episode ${getEpisodePattern(episode)}")
-                seasonDataModel.add(
-                    createEpisodeModel(
-                        episode,
-                        fileId = null,
-                        watchedProgress ?: 0
-                    )
-                )
+                seasonDataModel.add(createEpisodeModel(episode, fileId = null))
             } else {
                 Log.d(TAG, "Found matching file for episode ${getEpisodePattern(episode)}")
-                seasonDataModel.add(
-                    createEpisodeModel(
-                        episode,
-                        fileId = matchingEpisode.id,
-                        watchedProgress ?: 0
-                    )
-                )
+                seasonDataModel.add(createEpisodeModel(episode, fileId = matchingEpisode.id))
                 match++
             }
         }
@@ -246,8 +271,7 @@ class EpisodesViewModel @Inject constructor(
 
     private fun createEpisodeModel(
         episode: Episode,
-        fileId: String?,
-        progress: Int
+        fileId: String?
     ): EpisodesDataModel.Episode {
         return EpisodesDataModel.Episode(
             id = episode.id,
@@ -256,22 +280,17 @@ class EpisodesViewModel @Inject constructor(
             episode_number = episode.episode_number,
             season_number = episode.season_number,
             still_path = episode.still_path,
-            fileId = fileId,
-            progress = progress
+            fileId = fileId
         )
     }
 
     private fun handleDefaultMapping(
         episodes: List<Episode>,
-        seasonDataModel: MutableList<EpisodesDataModel>,
-        watchedSeason: List<WatchedShow>
+        seasonDataModel: MutableList<EpisodesDataModel>
     ) {
         Log.d(TAG, "Mapping attempt failed, using default")
         episodes.forEach {
-            val watchedProgress = watchedSeason
-                .firstOrNull { watched -> watched.episodeNumber == it.episode_number }
-                ?.watchProgress()
-            seasonDataModel.add(createEpisodeModel(it, fileId = null, watchedProgress ?: 0))
+            seasonDataModel.add(createEpisodeModel(it, fileId = null))
         }
     }
 
