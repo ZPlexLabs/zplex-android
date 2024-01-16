@@ -3,6 +3,7 @@ package zechs.zplex.ui.episodes
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -11,9 +12,11 @@ import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.data.model.drive.DriveFile
 import zechs.zplex.data.model.drive.File
+import zechs.zplex.data.model.entities.WatchedShow
 import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.TmdbRepository
+import zechs.zplex.data.repository.WatchedRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.episodes.EpisodesFragment.Companion.TAG
 import zechs.zplex.ui.episodes.adapter.EpisodesDataModel
@@ -30,6 +33,7 @@ typealias seasonResponseTmdb = zechs.zplex.data.model.tmdb.season.SeasonResponse
 class EpisodesViewModel @Inject constructor(
     app: Application,
     private val tmdbRepository: TmdbRepository,
+    private val watchedRepository: WatchedRepository,
     private val driveRepository: DriveRepository,
     private val sessionManager: SessionManager
 ) : BaseAndroidViewModel(app) {
@@ -48,25 +52,74 @@ class EpisodesViewModel @Inject constructor(
     }
 
 
-    private val _seasonResponse = MutableLiveData<Resource<List<EpisodesDataModel>>>()
-    val episodesResponse: LiveData<Resource<List<EpisodesDataModel>>>
-        get() = _seasonResponse
+    private val _episodesResponse =
+        MutableLiveData<Resource<List<EpisodesDataModel>>>(Resource.Loading())
+
+    private val _episodesWithWatched = MediatorLiveData<Resource<List<EpisodesDataModel>>>()
+    val episodesWithWatched: LiveData<Resource<List<EpisodesDataModel>>>
+        get() = _episodesWithWatched
+
+    fun getSeasonWithWatched(
+        tmdbId: Int,
+        seasonNumber: Int
+    ) = viewModelScope.launch {
+        getSeason(tmdbId, seasonNumber)
+
+        val watchedSeason = watchedRepository.getWatchedSeason(tmdbId, seasonNumber)
+
+        _episodesWithWatched.addSource(_episodesResponse) { episodes ->
+            _episodesWithWatched.value = combineSeasonWithWatched(episodes, watchedSeason)
+        }
+
+        _episodesWithWatched.addSource(
+            watchedRepository.getWatchedSeasonLive(tmdbId, seasonNumber)
+        ) { watched ->
+            _episodesWithWatched.value =
+                combineSeasonWithWatched(_episodesResponse.value!!, watched)
+        }
+    }
+
+    private fun combineSeasonWithWatched(
+        episodes: Resource<List<EpisodesDataModel>>,
+        watched: List<WatchedShow>
+    ): Resource<List<EpisodesDataModel>> {
+        if (episodes is Resource.Success) {
+            val episodesDataModel = episodes.data!!.toMutableList()
+
+            episodesDataModel.forEachIndexed { index, episode ->
+                if (episode is EpisodesDataModel.Episode) {
+                    watched.firstOrNull { it.episodeNumber == episode.episode_number }
+                        ?.let { watchedShow ->
+                            val newProgress = watchedShow.watchProgress()
+                            Log.d(TAG, "Updating watched progress for ${episode.name} to $newProgress")
+                            episodesDataModel[index] = episode.copy(progress = newProgress)
+                        }
+                }
+            }
+
+            Log.d(TAG, "Combined episodes with watched successfully")
+            return Resource.Success(episodesDataModel.toList())
+        }
+
+        Log.d(TAG, "Episodes resource is not Success")
+        return episodes
+    }
 
     fun getSeason(
         tmdbId: Int,
         seasonNumber: Int
     ) = viewModelScope.launch(Dispatchers.IO) {
-        _seasonResponse.postValue((Resource.Loading()))
+        _episodesResponse.postValue((Resource.Loading()))
         try {
             if (hasInternetConnection()) {
                 val tmdbSeason = tmdbRepository.getSeason(tmdbId, seasonNumber)
-                _seasonResponse.postValue((handleSeasonResponse(tmdbId, tmdbSeason)))
+                _episodesResponse.postValue((handleSeasonResponse(tmdbId, tmdbSeason)))
             } else {
-                _seasonResponse.postValue((Resource.Error("No internet connection")))
+                _episodesResponse.postValue((Resource.Error("No internet connection")))
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            _seasonResponse.postValue(postError(e))
+            _episodesResponse.postValue(postError(e))
         }
     }
 
