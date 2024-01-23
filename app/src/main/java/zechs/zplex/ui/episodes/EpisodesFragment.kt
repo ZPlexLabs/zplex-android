@@ -7,11 +7,14 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.isInvisible
+import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -229,6 +232,17 @@ class EpisodesFragment : Fragment() {
         params.rightMargin = resources.dpToPx(16)
 
         binding.coordinatorLayout.addView(extendedFab, params)
+        extendedFab.doOnLayout  { showSlideUp(extendedFab) }
+    }
+
+    private fun showSlideUp(view: View) {
+        val initialTranslationY = view.height + view.marginBottom.toFloat()
+        view.translationY = initialTranslationY
+        view.animate()
+            .translationY(0f)
+            .setInterpolator(DecelerateInterpolator())
+            .setDuration(250L)
+            .start()
     }
 
     private fun isLoading(hide: Boolean) {
