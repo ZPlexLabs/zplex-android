@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.isInvisible
 import androidx.core.view.marginBottom
@@ -186,11 +187,12 @@ class EpisodesFragment : Fragment() {
     }
 
     private fun setupLastWatchedEpisode() {
+        val viewId = ViewCompat.generateViewId()
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 episodesViewModel.lastEpisode.collect { last ->
                     if (last != null) {
-                        showResumeEpisode(last.first, last.second)
+                        showResumeEpisode(viewId, last.first, last.second)
                     }
                 }
 
@@ -198,11 +200,38 @@ class EpisodesFragment : Fragment() {
         }
     }
 
-    private fun showResumeEpisode(episode: EpisodesDataModel.Episode, fileId: String) {
+    private fun showResumeEpisode(
+        viewId: Int,
+        episode: EpisodesDataModel.Episode,
+        fileId: String
+    ) {
         Log.d(TAG, "Found last episode: $episode, $fileId")
-        val extendedFab = ExtendedFloatingActionButton(requireContext())
-        extendedFab.text = getString(R.string.continue_watching)
-        extendedFab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_resume_24)
+
+        val exist = binding.coordinatorLayout.findViewById<ExtendedFloatingActionButton>(viewId)
+        val extendedFab: ExtendedFloatingActionButton
+
+        Log.d(TAG, "Extended fab: $exist")
+
+        if (exist == null) {
+            extendedFab = ExtendedFloatingActionButton(requireContext())
+            extendedFab.id = viewId
+            extendedFab.text = getString(R.string.continue_watching)
+            extendedFab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_resume_24)
+
+            val params = CoordinatorLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            params.gravity = Gravity.BOTTOM or Gravity.END
+            params.bottomMargin = resources.dpToPx(16)
+            params.rightMargin = resources.dpToPx(16)
+
+            binding.coordinatorLayout.addView(extendedFab, params)
+            extendedFab.doOnLayout { showSlideUp(extendedFab) }
+        } else {
+            extendedFab = exist
+        }
+
         extendedFab.setOnClickListener {
             val titleBuilder = StringBuilder()
             if (showName != null) {
@@ -222,18 +251,8 @@ class EpisodesFragment : Fragment() {
                 isLastEpisode = false, fileId,
             )
         }
-
-        val params = CoordinatorLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT
-        )
-        params.gravity = Gravity.BOTTOM or Gravity.END
-        params.bottomMargin = resources.dpToPx(16)
-        params.rightMargin = resources.dpToPx(16)
-
-        binding.coordinatorLayout.addView(extendedFab, params)
-        extendedFab.doOnLayout  { showSlideUp(extendedFab) }
     }
+
 
     private fun showSlideUp(view: View) {
         val initialTranslationY = view.height + view.marginBottom.toFloat()
