@@ -34,7 +34,6 @@ import androidx.transition.TransitionManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import zechs.mpv.MPVLib
 import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART
@@ -167,7 +166,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.startDuration.consumeAsFlow().collect { startPosition ->
+                viewModel.startDuration.collect { startPosition ->
                     resumeVideo(startPosition)
                 }
             }
@@ -539,7 +538,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                 val seasonNumber = intent.getIntExtra("seasonNumber", 0)
                 val episodeNumber = intent.getIntExtra("episodeNumber", 0)
                 val isLastEpisode = intent.getBooleanExtra("isLastEpisode", false)
-                Log.d(TAG, "MPV(seasonNumber=$seasonNumber, episodeNumber=$episodeNumber, isLastEpisode=$isLastEpisode)")
+                Log.d(
+                    TAG,
+                    "MPV(seasonNumber=$seasonNumber, episodeNumber=$episodeNumber, isLastEpisode=$isLastEpisode)"
+                )
                 viewModel.upsertWatchedShow(
                     tmdbId,
                     name,
