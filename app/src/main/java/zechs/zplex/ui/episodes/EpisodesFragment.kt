@@ -190,9 +190,9 @@ class EpisodesFragment : Fragment() {
         val viewId = ViewCompat.generateViewId()
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                episodesViewModel.lastEpisode.collect { last ->
-                    if (last != null) {
-                        showResumeEpisode(viewId, last.first, last.second)
+                episodesViewModel.lastEpisode.collect { episode ->
+                    if (episode != null) {
+                        showResumeEpisode(viewId, episode)
                     }
                 }
 
@@ -202,10 +202,9 @@ class EpisodesFragment : Fragment() {
 
     private fun showResumeEpisode(
         viewId: Int,
-        episode: EpisodesDataModel.Episode,
-        fileId: String
+        episode: EpisodesDataModel.Episode
     ) {
-        Log.d(TAG, "Found last episode: $episode, $fileId")
+        Log.d(TAG, "Found last episode: $episode")
 
         val exist = binding.coordinatorLayout.findViewById<ExtendedFloatingActionButton>(viewId)
         val extendedFab: ExtendedFloatingActionButton
@@ -248,7 +247,8 @@ class EpisodesFragment : Fragment() {
                 titleBuilder.toString(),
                 episode.season_number,
                 episode.episode_number,
-                isLastEpisode = false, fileId,
+                isLastEpisode = false,
+                episode.fileId!!
             )
         }
     }

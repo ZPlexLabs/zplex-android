@@ -352,7 +352,7 @@ class EpisodesViewModel @Inject constructor(
         }
     }
 
-    private val _lastEpisode = MutableStateFlow<Pair<EpisodesDataModel.Episode, String>?>(null)
+    private val _lastEpisode = MutableStateFlow<EpisodesDataModel.Episode?>(null)
     val lastEpisode = _lastEpisode.asStateFlow()
 
     private fun getLastWatchedEpisode(tmdbId: Int, seasonNumber: Int) = viewModelScope.launch {
@@ -360,11 +360,10 @@ class EpisodesViewModel @Inject constructor(
             .stateIn(viewModelScope)
             .collect { last ->
                 last?.let {
-                    _episodesResponse.value?.data?.filterIsInstance<EpisodesDataModel.Episode>()
+                    _lastEpisode.value = _episodesResponse.value?.data
+                        ?.filterIsInstance<EpisodesDataModel.Episode>()
                         ?.firstOrNull { it.episode_number == last.episodeNumber }
-                        ?.let { episode ->
-                            _lastEpisode.value = Pair(episode, episode.name)
-                        }
+                        ?.takeIf { it.fileId != null }
                 }
             }
     }
