@@ -8,6 +8,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import retrofit2.Response
 import zechs.zplex.data.model.drive.DriveFile
@@ -91,7 +94,10 @@ class EpisodesViewModel @Inject constructor(
                     watched.firstOrNull { it.episodeNumber == episode.episode_number }
                         ?.let { watchedShow ->
                             val newProgress = watchedShow.watchProgress()
-                            Log.d(TAG, "Updating watched progress for ${episode.name} to $newProgress")
+                            Log.d(
+                                TAG,
+                                "Updating watched progress for ${episode.name} to $newProgress"
+                            )
                             episodesDataModel[index] = episode.copy(progress = newProgress)
                         }
                 }
@@ -114,6 +120,7 @@ class EpisodesViewModel @Inject constructor(
             if (hasInternetConnection()) {
                 val tmdbSeason = tmdbRepository.getSeason(tmdbId, seasonNumber)
                 _episodesResponse.postValue((handleSeasonResponse(tmdbId, tmdbSeason)))
+                getLastWatchedEpisode(tmdbId, seasonNumber)
             } else {
                 _episodesResponse.postValue((Resource.Error("No internet connection")))
             }
@@ -343,5 +350,21 @@ class EpisodesViewModel @Inject constructor(
 
             else -> {}
         }
+    }
+
+    private val _lastEpisode = MutableStateFlow<EpisodesDataModel.Episode?>(null)
+    val lastEpisode = _lastEpisode.asStateFlow()
+
+    private fun getLastWatchedEpisode(tmdbId: Int, seasonNumber: Int) = viewModelScope.launch {
+        watchedRepository.getLastWatchedEpisode(tmdbId, seasonNumber)
+            .stateIn(viewModelScope)
+            .collect { last ->
+                last?.let {
+                    _lastEpisode.value = _episodesResponse.value?.data
+                        ?.filterIsInstance<EpisodesDataModel.Episode>()
+                        ?.firstOrNull { it.episode_number == last.episodeNumber }
+                        ?.takeIf { it.fileId != null }
+                }
+            }
     }
 }

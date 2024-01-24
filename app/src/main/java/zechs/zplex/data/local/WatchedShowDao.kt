@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import zechs.zplex.data.model.entities.WatchedShow
 
 @Dao
@@ -24,6 +25,9 @@ interface WatchedShowDao {
                 "LIMIT 1"
     )
     suspend fun getWatchedShow(tmdbId: Int, season: Int, episode: Int): WatchedShow?
+
+    @Query("SELECT * FROM `watched_shows` WHERE tmdbId = :tmdbId AND seasonNumber = :season ORDER BY createdAt DESC LIMIT 1")
+    fun getLastWatchedEpisode(tmdbId: Int, season: Int): Flow<WatchedShow?>
 
     @Query(
         "SELECT * FROM `watched_shows` " +

@@ -39,6 +39,11 @@ class WatchedRepository @Inject constructor(
         episode: Int
     ) = watchedShowDao.getWatchedShow(tmdbId, season, episode)
 
+    fun getLastWatchedEpisode(
+        tmdbId: Int,
+        seasonNumber: Int
+    ) = watchedShowDao.getLastWatchedEpisode(tmdbId, seasonNumber)
+
     suspend fun getWatchedSeason(
         tmdbId: Int,
         season: Int

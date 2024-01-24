@@ -3,20 +3,30 @@ package zechs.zplex.ui.episodes
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.doOnLayout
 import androidx.core.view.isInvisible
+import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import dagger.hilt.android.AndroidEntryPoint
@@ -25,10 +35,12 @@ import zechs.zplex.R
 import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.ui.cast.CastsFragmentDirections
 import zechs.zplex.ui.episodes.adapter.EpisodesDataAdapter
+import zechs.zplex.ui.episodes.adapter.EpisodesDataModel
 import zechs.zplex.ui.image.BigImageViewModel
 import zechs.zplex.ui.player.MPVActivity
 import zechs.zplex.ui.shared_viewmodels.EpisodeViewModel
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
+import zechs.zplex.utils.ext.dpToPx
 import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
 
@@ -119,6 +131,7 @@ class EpisodesFragment : Fragment() {
 
         setupEpisodesViewModel()
         mpvObserver()
+        setupLastWatchedEpisode()
     }
 
     private fun openImageFullSize(posterPath: String?, imageView: ImageView) {
@@ -171,6 +184,101 @@ class EpisodesFragment : Fragment() {
                 }
             }
         }
+    }
+
+    private fun setupLastWatchedEpisode() {
+        val viewId = ViewCompat.generateViewId()
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                episodesViewModel.lastEpisode.collect { episode ->
+                    if (episode == null) {
+                        Log.d(TAG, "No last episode found")
+                        removeContinueWatching(viewId)
+                    } else {
+                        showResumeEpisode(viewId, episode)
+                    }
+                }
+
+            }
+        }
+    }
+
+    private fun removeContinueWatching(viewId: Int) {
+        val exist = binding.coordinatorLayout.findViewById<ExtendedFloatingActionButton>(viewId)
+        if (exist != null) {
+            Log.d(TAG, "Removing continue watching FAB")
+            exist.animate()
+                .translationY(exist.height + exist.marginBottom.toFloat())
+                .setInterpolator(DecelerateInterpolator())
+                .setDuration(250L)
+                .withEndAction {
+                    binding.coordinatorLayout.removeView(exist)
+                }.start()
+        }
+    }
+
+    private fun showResumeEpisode(
+        viewId: Int,
+        episode: EpisodesDataModel.Episode
+    ) {
+        Log.d(TAG, "Found last episode: $episode")
+
+        val exist = binding.coordinatorLayout.findViewById<ExtendedFloatingActionButton>(viewId)
+        val extendedFab: ExtendedFloatingActionButton
+
+        Log.d(TAG, "Extended fab: $exist")
+
+        if (exist == null) {
+            extendedFab = ExtendedFloatingActionButton(requireContext())
+            extendedFab.id = viewId
+            extendedFab.text = getString(R.string.continue_watching)
+            extendedFab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_resume_24)
+
+            val params = CoordinatorLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            params.gravity = Gravity.BOTTOM or Gravity.END
+            params.bottomMargin = resources.dpToPx(16)
+            params.rightMargin = resources.dpToPx(16)
+
+            binding.coordinatorLayout.addView(extendedFab, params)
+            extendedFab.doOnLayout { showSlideUp(extendedFab) }
+        } else {
+            extendedFab = exist
+        }
+
+        extendedFab.setOnClickListener {
+            val titleBuilder = StringBuilder()
+            if (showName != null) {
+                titleBuilder.append("$showName - ")
+            }
+            titleBuilder.append(
+                "S%02dE%02d - ".format(
+                    episode.season_number,
+                    episode.episode_number
+                )
+            )
+            titleBuilder.append(episode.name)
+            episodesViewModel.playEpisode(
+                titleBuilder.toString(),
+                episode.season_number,
+                episode.episode_number,
+                isLastEpisode = false,
+                episode.fileId!!
+            )
+        }
+    }
+
+
+    private fun showSlideUp(view: View) {
+        val initialTranslationY = view.height + view.marginBottom.toFloat()
+        view.translationY = initialTranslationY
+        view.animate()
+            .translationY(0f)
+            .setInterpolator(DecelerateInterpolator())
+            .setDuration(250L)
+            .start()
     }
 
     private fun isLoading(hide: Boolean) {
