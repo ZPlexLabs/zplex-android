@@ -191,12 +191,29 @@ class EpisodesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 episodesViewModel.lastEpisode.collect { episode ->
-                    if (episode != null) {
+                    if (episode == null) {
+                        Log.d(TAG, "No last episode found")
+                        removeContinueWatching(viewId)
+                    } else {
                         showResumeEpisode(viewId, episode)
                     }
                 }
 
             }
+        }
+    }
+
+    private fun removeContinueWatching(viewId: Int) {
+        val exist = binding.coordinatorLayout.findViewById<ExtendedFloatingActionButton>(viewId)
+        if (exist != null) {
+            Log.d(TAG, "Removing continue watching FAB")
+            exist.animate()
+                .translationY(exist.height + exist.marginBottom.toFloat())
+                .setInterpolator(DecelerateInterpolator())
+                .setDuration(250L)
+                .withEndAction {
+                    binding.coordinatorLayout.removeView(exist)
+                }.start()
         }
     }
 
