@@ -1,10 +1,13 @@
 package zechs.zplex.ui.episodes.adapter
 
+import android.animation.ValueAnimator
+import android.view.animation.DecelerateInterpolator
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import coil.load
+import com.google.android.material.progressindicator.LinearProgressIndicator
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.data.model.StillSize
@@ -69,12 +72,18 @@ sealed class EpisodesViewHolder(
             itemBinding.apply {
                 val ivThumbTAG = "ivThumbTAG"
                 val tvEpisodeCountTAG = "tvEpisodeCountTAG"
+                val watchProgressTAG = "watchProgressTAG"
 
                 if (episode.progress == 0) {
                     watchProgress.isGone = true
                 } else {
                     watchProgress.isGone = false
-                    watchProgress.progress = episode.progress
+                    if (watchProgress.tag == null) {
+                        animateProgress(watchProgress, episode.progress)
+                        watchProgress.tag = watchProgressTAG
+                    } else {
+                        watchProgress.progress = episode.progress
+                    }
                 }
 
                 if (episode.still_path.isNullOrEmpty() || ivThumb.tag == ivThumbTAG) {
@@ -122,5 +131,17 @@ sealed class EpisodesViewHolder(
             }
         }
 
+        private fun animateProgress(watchProgress: LinearProgressIndicator, targetProgress: Int) {
+            val animator = ValueAnimator.ofInt(0, targetProgress)
+            animator.duration = 500
+            animator.interpolator = DecelerateInterpolator()
+
+            animator.addUpdateListener { animation ->
+                val animatedValue = animation.animatedValue as Int
+                watchProgress.progress = animatedValue
+            }
+
+            animator.start()
+        }
     }
 }
