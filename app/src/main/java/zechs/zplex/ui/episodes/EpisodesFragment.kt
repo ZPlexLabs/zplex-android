@@ -243,24 +243,16 @@ class EpisodesFragment : Fragment() {
         }
 
         extendedFab.setOnClickListener {
-            val titleBuilder = StringBuilder()
-            if (showName != null) {
-                titleBuilder.append("$showName - ")
-            }
-            titleBuilder.append(
-                "S%02dE%02d - ".format(
-                    episode.season_number,
-                    episode.episode_number
-                )
-            )
-            titleBuilder.append(episode.name)
-            episodesViewModel.playEpisode(
-                titleBuilder.toString(),
-                episode.season_number,
-                episode.episode_number,
-                isLastEpisode = false,
-                episode.fileId!!
-            )
+            val startIndex = episodesViewModel.playlist
+                .indexOfFirst { it.fileId == episode.fileId }
+                .takeIf { it != -1 } ?: 0
+            Intent(
+                requireContext(), MPVActivity::class.java
+            ).apply {
+                putExtra("playlist", Gson().toJson(episodesViewModel.playlist))
+                putExtra("startIndex", startIndex)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }.also { startActivity(it) }
         }
     }
 
