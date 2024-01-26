@@ -122,7 +122,6 @@ class EpisodesFragment : Fragment() {
         }
 
         setupEpisodesViewModel()
-        mpvObserver()
         setupLastWatchedEpisode()
     }
 
@@ -289,48 +288,6 @@ class EpisodesFragment : Fragment() {
             message ?: resources.getString(R.string.something_went_wrong),
             Toast.LENGTH_SHORT
         ).show()
-    }
-
-    private fun mpvObserver() {
-        episodesViewModel.mpvFile.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { res ->
-                when (res) {
-                    is Resource.Success -> {
-                        launchMpv(res.data!!)
-                    }
-
-                    is Resource.Error -> {
-                        Snackbar.make(
-                            binding.root,
-                            res.message ?: resources.getString(R.string.something_went_wrong),
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-                    }
-
-                    else -> {}
-                }
-            }
-        }
-    }
-
-    private fun launchMpv(fileToken: EpisodesViewModel.FileToken) {
-        Intent(
-            requireContext(), MPVActivity::class.java
-        ).apply {
-            putExtra("fileId", fileToken.fileId)
-            putExtra("title", fileToken.fileName)
-            putExtra("accessToken", fileToken.accessToken)
-            putExtra("isTV", true)
-            putExtra("tmdbId", tmdbId)
-            putExtra("name", showName ?: "")
-            putExtra("posterPath", showPoster ?: "")
-
-            putExtra("seasonNumber", fileToken.seasonNumber)
-            putExtra("episodeNumber", fileToken.episodeNumber)
-            putExtra("isLastEpisode", fileToken.isLastEpisode)
-
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }.also { startActivity(it) }
     }
 
     override fun onDestroy() {

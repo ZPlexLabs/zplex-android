@@ -322,57 +322,6 @@ class EpisodesViewModel @Inject constructor(
         }
     }
 
-    private val _token = MutableLiveData<Event<Resource<FileToken>>>()
-    val mpvFile: LiveData<Event<Resource<FileToken>>>
-        get() = _token
-
-    data class FileToken(
-        val fileId: String,
-        val fileName: String,
-        val accessToken: String,
-        val seasonNumber: Int,
-        val episodeNumber: Int,
-        val isLastEpisode: Boolean
-    )
-
-    fun playEpisode(
-        title: String,
-        seasonNumber: Int,
-        episodeNumber: Int,
-        isLastEpisode: Boolean,
-        fileId: String
-    ) = viewModelScope.launch {
-        _token.postValue(Event(Resource.Loading()))
-
-        val client = sessionManager.fetchClient() ?: run {
-            _token.postValue(Event(Resource.Error("Client not found")))
-            return@launch
-        }
-        val tokenResponse = driveRepository.fetchAccessToken(client)
-
-        when (tokenResponse) {
-            is Resource.Success -> {
-                val fileToken = FileToken(
-                    fileId = fileId,
-                    fileName = title,
-                    accessToken = tokenResponse.data!!.accessToken,
-                    seasonNumber = seasonNumber,
-                    episodeNumber = episodeNumber,
-                    isLastEpisode = isLastEpisode
-                )
-                _token.postValue(Event(Resource.Success(fileToken)))
-            }
-
-            is Resource.Error -> {
-                _token.postValue(
-                    Event(Resource.Error(tokenResponse.message!!))
-                )
-            }
-
-            else -> {}
-        }
-    }
-
     private val _lastEpisode = MutableStateFlow<EpisodesDataModel.Episode?>(null)
     val lastEpisode = _lastEpisode.asStateFlow()
 
