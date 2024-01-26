@@ -29,6 +29,7 @@ import androidx.transition.TransitionManager
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
@@ -67,25 +68,16 @@ class EpisodesFragment : Fragment() {
         EpisodesDataAdapter(
             episodeOnClick = { episode, isLastEpisode ->
                 if (episode.fileId != null) {
-                    val titleBuilder = StringBuilder()
-                    if (showName != null) {
-                        titleBuilder.append("$showName - ")
-                    }
-                    titleBuilder.append(
-                        "S%02dE%02d - ".format(
-                            episode.season_number,
-                            episode.episode_number
-                        )
-                    )
-                    titleBuilder.append(episode.name)
-
-                    episodesViewModel.playEpisode(
-                        titleBuilder.toString(),
-                        episode.season_number,
-                        episode.episode_number,
-                        isLastEpisode,
-                        episode.fileId,
-                    )
+                    val startIndex = episodesViewModel.playlist
+                        .indexOfFirst { it.fileId == episode.fileId }
+                        .takeIf { it != -1 } ?: 0
+                    Intent(
+                        requireContext(), MPVActivity::class.java
+                    ).apply {
+                        putExtra("playlist", Gson().toJson(episodesViewModel.playlist))
+                        putExtra("startIndex", startIndex)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }.also { startActivity(it) }
                 } else {
                     if (!episodesViewModel.hasLoggedIn) {
                         val snackBar = Snackbar.make(
@@ -155,6 +147,8 @@ class EpisodesFragment : Fragment() {
             if (!hasLoaded) {
                 episodesViewModel.getSeasonWithWatched(
                     tmdbId = showSeason.tmdbId,
+                    showName = showSeason.showName,
+                    showPoster = showSeason.showPoster,
                     seasonNumber = showSeason.seasonNumber
                 )
             }
