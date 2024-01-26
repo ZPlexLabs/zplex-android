@@ -56,3 +56,7 @@
 -keep public class zechs.mpv.MPVLib {
     *;
 }
+-keep public class zechs.zplex.ui.player.PlaybackItem {*;}
+-keep public class zechs.zplex.ui.player.Movie {*;}
+-keep public class zechs.zplex.ui.player.Show {*;}
+-keep public class zechs.zplex.ui.player.GsonPlaybackItem {*;}
