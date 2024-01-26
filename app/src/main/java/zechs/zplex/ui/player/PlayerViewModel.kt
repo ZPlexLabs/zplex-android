@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import zechs.zplex.data.model.entities.WatchedMovie
 import zechs.zplex.data.model.entities.WatchedShow
@@ -30,7 +31,7 @@ class PlayerViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _startDuration = Channel<Long>(Channel.CONFLATED)
-    val startDuration = _startDuration
+    val startDuration = _startDuration.consumeAsFlow()
 
     fun getWatch(tmdbId: Int, isTv: Boolean, seasonNumber: Int?, episodeNumber: Int?) =
         viewModelScope.launch(Dispatchers.IO) {

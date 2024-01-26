@@ -179,7 +179,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.startDuration.consumeAsFlow().collect { startPosition ->
+                viewModel.startDuration.collect { startPosition ->
                     resumeVideo(startPosition)
                 }
             }
