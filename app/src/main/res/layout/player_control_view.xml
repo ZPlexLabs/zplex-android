@@ -49,14 +49,12 @@
         app:layout_constraintVertical_bias="0.0"
         tools:visibility="visible" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/mainControls"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="16dp"
-        android:gravity="center"
-        android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -64,39 +62,93 @@
 
         <!-- Exoplayer ID, do not change -->
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPrevious"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:padding="16dp"
+            android:tooltipText="@string/previous"
+            app:icon="@drawable/ic_previous_24"
+            app:iconSize="24dp"
+            app:iconTint="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
+            app:layout_constraintEnd_toStartOf="@+id/exo_rew"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/btnPlayPause" />
+
+        <!-- Exoplayer ID, do not change -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/exo_rew"
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="24dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="8dp"
             android:padding="16dp"
             android:tooltipText="@string/rewind_10_seconds"
             app:icon="@drawable/ic_rewind_skip_24"
             app:iconSize="24dp"
-            app:iconTint="@android:color/white" />
+            app:iconTint="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
+            app:layout_constraintEnd_toStartOf="@+id/btnPlayPause"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnPrevious"
+            app:layout_constraintTop_toTopOf="@+id/btnPlayPause" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPlayPause"
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             app:icon="@drawable/ic_pause_24"
             app:iconSize="52dp"
-            app:iconTint="@android:color/white" />
+            app:iconTint="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/exo_ffwd"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/exo_rew"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/exo_ffwd"
             style="@style/Widget.Material3.Button.IconButton"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginStart="24dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:padding="16dp"
             android:tooltipText="@string/skip_10_seconds"
             app:icon="@drawable/ic_forward_skip_24"
             app:iconSize="24dp"
-            app:iconTint="@android:color/white" />
+            app:iconTint="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
+            app:layout_constraintEnd_toStartOf="@+id/btnNext"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/btnPlayPause"
+            app:layout_constraintTop_toTopOf="@+id/btnPlayPause" />
 
-    </LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnNext"
+            style="@style/Widget.Material3.Button.IconButton"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:padding="16dp"
+            android:tooltipText="@string/next"
+            app:icon="@drawable/ic_next_24"
+            app:iconSize="24dp"
+            app:iconTint="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/btnPlayPause"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/exo_ffwd"
+            app:layout_constraintTop_toTopOf="@+id/btnPlayPause" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout2"

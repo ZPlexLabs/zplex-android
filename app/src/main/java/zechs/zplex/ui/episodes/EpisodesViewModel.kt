@@ -23,6 +23,8 @@ import zechs.zplex.data.repository.WatchedRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.episodes.EpisodesFragment.Companion.TAG
 import zechs.zplex.ui.episodes.adapter.EpisodesDataModel
+import zechs.zplex.ui.player.PlaybackItem
+import zechs.zplex.ui.player.Show
 import zechs.zplex.utils.SessionManager
 import zechs.zplex.utils.state.Event
 import zechs.zplex.utils.state.Resource
@@ -54,7 +56,6 @@ class EpisodesViewModel @Inject constructor(
         return true
     }
 
-
     private val _episodesResponse =
         MutableLiveData<Resource<List<EpisodesDataModel>>>(Resource.Loading())
 
@@ -62,8 +63,15 @@ class EpisodesViewModel @Inject constructor(
     val episodesWithWatched: LiveData<Resource<List<EpisodesDataModel>>>
         get() = _episodesWithWatched
 
+    private val _playlist = mutableListOf<PlaybackItem>()
+
+    val playlist: List<PlaybackItem>
+        get() = _playlist.toList()
+
     fun getSeasonWithWatched(
         tmdbId: Int,
+        showName: String,
+        showPoster: String?,
         seasonNumber: Int
     ) = viewModelScope.launch {
         getSeason(tmdbId, seasonNumber)
@@ -71,18 +79,22 @@ class EpisodesViewModel @Inject constructor(
         val watchedSeason = watchedRepository.getWatchedSeason(tmdbId, seasonNumber)
 
         _episodesWithWatched.addSource(_episodesResponse) { episodes ->
-            _episodesWithWatched.value = combineSeasonWithWatched(episodes, watchedSeason)
+            _episodesWithWatched.value =
+                combineSeasonWithWatched(tmdbId, showName, showPoster, episodes, watchedSeason)
         }
 
         _episodesWithWatched.addSource(
             watchedRepository.getWatchedSeasonLive(tmdbId, seasonNumber)
         ) { watched ->
             _episodesWithWatched.value =
-                combineSeasonWithWatched(_episodesResponse.value!!, watched)
+                combineSeasonWithWatched(tmdbId, showName, showPoster, _episodesResponse.value!!, watched)
         }
     }
 
     private fun combineSeasonWithWatched(
+        tmdbId: Int,
+        showName: String,
+        showPoster: String?,
         episodes: Resource<List<EpisodesDataModel>>,
         watched: List<WatchedShow>
     ): Resource<List<EpisodesDataModel>> {
@@ -94,12 +106,21 @@ class EpisodesViewModel @Inject constructor(
                     watched.firstOrNull { it.episodeNumber == episode.episode_number }
                         ?.let { watchedShow ->
                             val newProgress = watchedShow.watchProgress()
-                            Log.d(
-                                TAG,
-                                "Updating watched progress for ${episode.name} to $newProgress"
-                            )
+                            Log.d(TAG, "Updating watched progress for ${episode.name} to $newProgress")
                             episodesDataModel[index] = episode.copy(progress = newProgress)
                         }
+                    val _episode = episodesDataModel[index] as EpisodesDataModel.Episode
+                    _playlist.add(
+                        Show(
+                            tmdbId = tmdbId,
+                            title = showName,
+                            posterPath = showPoster,
+                            fileId = _episode.fileId!!,
+                            seasonNumber = _episode.season_number,
+                            episodeNumber = _episode.episode_number,
+                            episodeTitle = _episode.name
+                        )
+                    )
                 }
             }
 
@@ -298,57 +319,6 @@ class EpisodesViewModel @Inject constructor(
         Log.d(TAG, "Mapping attempt failed, using default")
         episodes.forEach {
             seasonDataModel.add(createEpisodeModel(it, fileId = null))
-        }
-    }
-
-    private val _token = MutableLiveData<Event<Resource<FileToken>>>()
-    val mpvFile: LiveData<Event<Resource<FileToken>>>
-        get() = _token
-
-    data class FileToken(
-        val fileId: String,
-        val fileName: String,
-        val accessToken: String,
-        val seasonNumber: Int,
-        val episodeNumber: Int,
-        val isLastEpisode: Boolean
-    )
-
-    fun playEpisode(
-        title: String,
-        seasonNumber: Int,
-        episodeNumber: Int,
-        isLastEpisode: Boolean,
-        fileId: String
-    ) = viewModelScope.launch {
-        _token.postValue(Event(Resource.Loading()))
-
-        val client = sessionManager.fetchClient() ?: run {
-            _token.postValue(Event(Resource.Error("Client not found")))
-            return@launch
-        }
-        val tokenResponse = driveRepository.fetchAccessToken(client)
-
-        when (tokenResponse) {
-            is Resource.Success -> {
-                val fileToken = FileToken(
-                    fileId = fileId,
-                    fileName = title,
-                    accessToken = tokenResponse.data!!.accessToken,
-                    seasonNumber = seasonNumber,
-                    episodeNumber = episodeNumber,
-                    isLastEpisode = isLastEpisode
-                )
-                _token.postValue(Event(Resource.Success(fileToken)))
-            }
-
-            is Resource.Error -> {
-                _token.postValue(
-                    Event(Resource.Error(tokenResponse.message!!))
-                )
-            }
-
-            else -> {}
         }
     }
 

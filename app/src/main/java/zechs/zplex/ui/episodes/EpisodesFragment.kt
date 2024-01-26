@@ -29,6 +29,7 @@ import androidx.transition.TransitionManager
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
@@ -67,25 +68,16 @@ class EpisodesFragment : Fragment() {
         EpisodesDataAdapter(
             episodeOnClick = { episode, isLastEpisode ->
                 if (episode.fileId != null) {
-                    val titleBuilder = StringBuilder()
-                    if (showName != null) {
-                        titleBuilder.append("$showName - ")
-                    }
-                    titleBuilder.append(
-                        "S%02dE%02d - ".format(
-                            episode.season_number,
-                            episode.episode_number
-                        )
-                    )
-                    titleBuilder.append(episode.name)
-
-                    episodesViewModel.playEpisode(
-                        titleBuilder.toString(),
-                        episode.season_number,
-                        episode.episode_number,
-                        isLastEpisode,
-                        episode.fileId,
-                    )
+                    val startIndex = episodesViewModel.playlist
+                        .indexOfFirst { it.fileId == episode.fileId }
+                        .takeIf { it != -1 } ?: 0
+                    Intent(
+                        requireContext(), MPVActivity::class.java
+                    ).apply {
+                        putExtra("playlist", Gson().toJson(episodesViewModel.playlist))
+                        putExtra("startIndex", startIndex)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }.also { startActivity(it) }
                 } else {
                     if (!episodesViewModel.hasLoggedIn) {
                         val snackBar = Snackbar.make(
@@ -130,7 +122,6 @@ class EpisodesFragment : Fragment() {
         }
 
         setupEpisodesViewModel()
-        mpvObserver()
         setupLastWatchedEpisode()
     }
 
@@ -155,6 +146,8 @@ class EpisodesFragment : Fragment() {
             if (!hasLoaded) {
                 episodesViewModel.getSeasonWithWatched(
                     tmdbId = showSeason.tmdbId,
+                    showName = showSeason.showName,
+                    showPoster = showSeason.showPoster,
                     seasonNumber = showSeason.seasonNumber
                 )
             }
@@ -249,24 +242,16 @@ class EpisodesFragment : Fragment() {
         }
 
         extendedFab.setOnClickListener {
-            val titleBuilder = StringBuilder()
-            if (showName != null) {
-                titleBuilder.append("$showName - ")
-            }
-            titleBuilder.append(
-                "S%02dE%02d - ".format(
-                    episode.season_number,
-                    episode.episode_number
-                )
-            )
-            titleBuilder.append(episode.name)
-            episodesViewModel.playEpisode(
-                titleBuilder.toString(),
-                episode.season_number,
-                episode.episode_number,
-                isLastEpisode = false,
-                episode.fileId!!
-            )
+            val startIndex = episodesViewModel.playlist
+                .indexOfFirst { it.fileId == episode.fileId }
+                .takeIf { it != -1 } ?: 0
+            Intent(
+                requireContext(), MPVActivity::class.java
+            ).apply {
+                putExtra("playlist", Gson().toJson(episodesViewModel.playlist))
+                putExtra("startIndex", startIndex)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }.also { startActivity(it) }
         }
     }
 
@@ -303,48 +288,6 @@ class EpisodesFragment : Fragment() {
             message ?: resources.getString(R.string.something_went_wrong),
             Toast.LENGTH_SHORT
         ).show()
-    }
-
-    private fun mpvObserver() {
-        episodesViewModel.mpvFile.observe(viewLifecycleOwner) { event ->
-            event.getContentIfNotHandled()?.let { res ->
-                when (res) {
-                    is Resource.Success -> {
-                        launchMpv(res.data!!)
-                    }
-
-                    is Resource.Error -> {
-                        Snackbar.make(
-                            binding.root,
-                            res.message ?: resources.getString(R.string.something_went_wrong),
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-                    }
-
-                    else -> {}
-                }
-            }
-        }
-    }
-
-    private fun launchMpv(fileToken: EpisodesViewModel.FileToken) {
-        Intent(
-            requireContext(), MPVActivity::class.java
-        ).apply {
-            putExtra("fileId", fileToken.fileId)
-            putExtra("title", fileToken.fileName)
-            putExtra("accessToken", fileToken.accessToken)
-            putExtra("isTV", true)
-            putExtra("tmdbId", tmdbId)
-            putExtra("name", showName ?: "")
-            putExtra("posterPath", showPoster ?: "")
-
-            putExtra("seasonNumber", fileToken.seasonNumber)
-            putExtra("episodeNumber", fileToken.episodeNumber)
-            putExtra("isLastEpisode", fileToken.isLastEpisode)
-
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }.also { startActivity(it) }
     }
 
     override fun onDestroy() {

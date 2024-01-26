@@ -108,4 +108,7 @@
     <string name="last_scanned">Last scanned: %1$s</string>
     <string name="scanning_in_progress">Scanning in progress…</string>
     <string name="continue_watching">Continue watching</string>
+    <string name="ok">OK</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
 </resources>

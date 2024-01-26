@@ -16,6 +16,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+import android.view.animation.AccelerateInterpolator
 import android.widget.SeekBar
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -24,6 +25,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -33,7 +35,9 @@ import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.transition.MaterialFadeThrough
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import zechs.mpv.MPVLib
 import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART
@@ -43,6 +47,7 @@ import zechs.zplex.R
 import zechs.zplex.databinding.ActivityMpvBinding
 import zechs.zplex.databinding.PlayerControlViewBinding
 import zechs.zplex.utils.Constants.DRIVE_API
+import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.util.Orientation
 import zechs.zplex.utils.util.getNextOrientation
 import zechs.zplex.utils.util.setOrientation
@@ -133,6 +138,14 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             btnChapter.setOnClickListener { pickChapter() }
             btnSpeed.setOnClickListener { pickSpeed() }
             btnResize.setOnClickListener { player.cycleScale() }
+            btnNext.setOnClickListener {
+                saveProgress(viewModel.head)
+                viewModel.next()
+            }
+            btnPrevious.setOnClickListener {
+                saveProgress(viewModel.head)
+                viewModel.previous()
+            }
 
             btnRotate.setOnClickListener {
                 orientation = getNextOrientation(orientation)
@@ -171,6 +184,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                 }
             }
         }
+        playlistObserver()
     }
 
     private val seekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
@@ -226,35 +240,94 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
     }
 
     private fun playMedia() {
-        val fileId = intent.getStringExtra("fileId")
-        val title = intent.getStringExtra("title")
-        val accessToken = intent.getStringExtra("accessToken")
-
-        if (fileId == null || accessToken == null) {
-            Log.d(TAG, "FileId & AccessToken both are required. exiting...")
+        val playlist = intent.getStringExtra("playlist")
+        val startIndex = intent.getIntExtra("startIndex", 0)
+        if (playlist == null) {
+            Log.d(TAG, "Playlist is required. exiting...")
             finish()
             return
         }
+        viewModel.setPlaylist(playlist, startIndex)
+    }
 
-        Log.d(TAG, "MPVActivity(fileId=$fileId, title=$title)")
+    private fun playlistObserver() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.current.collect {
+                    handlePlaylistStates(it)
+                }
+            }
+        }
+    }
 
-        controller.playerToolbar.title = title
+    private fun handlePlaylistStates(resource: Resource<PlayerViewModel.Playback?>) {
+        when (resource) {
+            is Resource.Loading -> {
+                // ignore
+            }
 
-        val playUri = getStreamUrl(fileId)
-        MPVLib.command(arrayOf("loadfile", playUri))
-        player.play(playUri)
+            is Resource.Error -> {
+                showErrorDialog(resource.message ?: getString(R.string.unknown_error))
+                MPVLib.command(arrayOf("stop"))
+            }
 
-        MPVLib.setOptionString(
-            "http-header-fields",
-            "Authorization: Bearer $accessToken"
-        )
+            is Resource.Success -> {
+                val accessToken = resource.data!!.token
+                val playbackItem = resource.data.item
+                val titleBuilder = StringBuilder()
+                if (playbackItem != null) {
+                    titleBuilder.append(playbackItem.title)
+                    if (playbackItem is Show) {
+                        titleBuilder.append(
+                            " - S%02dE%02d".format(
+                                playbackItem.seasonNumber,
+                                playbackItem.episodeNumber
+                            )
+                        )
+                        titleBuilder.append(" - ${playbackItem.episodeTitle}")
+                        viewModel.getWatch(
+                            playbackItem.tmdbId,
+                            true,
+                            playbackItem.seasonNumber,
+                            playbackItem.episodeNumber
+                        )
+                    } else {
+                        viewModel.getWatch(playbackItem.tmdbId, false, null, null)
+                    }
+                    val title = titleBuilder.toString()
+                    controller.playerToolbar.title = title
+                    val playUri = getStreamUrl(playbackItem.fileId)
+                    MPVLib.command(arrayOf("loadfile", playUri))
+                    MPVLib.setOptionString(
+                        "http-header-fields",
+                        "Authorization: Bearer $accessToken"
+                    )
+                    player.play(playUri)
+                }
+                TransitionManager.endTransitions(controller.mainControls)
+                TransitionManager.beginDelayedTransition(
+                    controller.mainControls,
+                    MaterialFadeThrough().apply {
+                        interpolator = AccelerateInterpolator()
+                        duration = 150L
+                    }
+                )
+                val isNext = playbackItem?.next != null
+                val isPrev = playbackItem?.prev != null
+                controller.btnNext.isInvisible = !isNext
+                controller.btnPrevious.isInvisible = !isPrev
+            }
+        }
+    }
 
-        val tmdbId = intent.getIntExtra("tmdbId", 0)
-        val isTV = intent.getBooleanExtra("isTV", false)
-
-        val seasonNumber = intent.getIntExtra("seasonNumber", -1)
-        val episodeNumber = intent.getIntExtra("episodeNumber", -1)
-        viewModel.getWatch(tmdbId, isTV, seasonNumber, episodeNumber)
+    private fun showErrorDialog(message: String) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.something_went_wrong))
+            .setMessage(message)
+            .setPositiveButton(getString(R.string.ok)) { dialog, _ ->
+                dialog.dismiss()
+                finish()
+            }.show()
     }
 
     private fun resumeVideo(startPosition: Long) {
@@ -515,7 +588,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         }
     }
 
-    private fun saveProgress() {
+    private fun saveProgress(current: PlaybackItem?) {
         val watchedDuration = player.timePos ?: return
         val totalDuration = player.duration ?: return
         Log.d(TAG, "MPV(current=$watchedDuration, total=$totalDuration)")
@@ -528,38 +601,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         val watchProgress = (watchedDuration.toDouble() / totalDuration.toDouble()).toFloat() * 100
         val minWatchingThresholdPercent = 1
         if (watchProgress > minWatchingThresholdPercent) {
-            val isTV = intent.getBooleanExtra("isTV", false)
-            val tmdbId = intent.getIntExtra("tmdbId", 0)
-            val name = intent.getStringExtra("name")!!
-            val posterPath = intent.getStringExtra("posterPath")
-
-            Log.d(TAG, "MPV(isTV=$isTV, tmdbId=$tmdbId, name=$name, posterPath=$posterPath)")
-            if (isTV) {
-                val seasonNumber = intent.getIntExtra("seasonNumber", 0)
-                val episodeNumber = intent.getIntExtra("episodeNumber", 0)
-                val isLastEpisode = intent.getBooleanExtra("isLastEpisode", false)
-                Log.d(
-                    TAG,
-                    "MPV(seasonNumber=$seasonNumber, episodeNumber=$episodeNumber, isLastEpisode=$isLastEpisode)"
-                )
-                viewModel.upsertWatchedShow(
-                    tmdbId,
-                    name,
-                    posterPath,
-                    seasonNumber,
-                    episodeNumber,
-                    watchedDurationInMills,
-                    totalDurationInMills
-                )
-            } else {
-                viewModel.upsertWatchedMovie(
-                    tmdbId,
-                    name,
-                    posterPath,
-                    watchedDurationInMills,
-                    totalDurationInMills,
-                )
-            }
+            viewModel.saveProgress(current, watchedDurationInMills, totalDurationInMills)
         }
     }
     ////////////////    MPV EVENTS    ////////////////
@@ -606,7 +648,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
 
     override fun onPause() {
-        saveProgress()
+        saveProgress(viewModel.head)
 
         activityIsForeground = false
 
