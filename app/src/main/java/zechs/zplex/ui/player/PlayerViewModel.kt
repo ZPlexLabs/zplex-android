@@ -47,6 +47,7 @@ class PlayerViewModel @Inject constructor(
                 )
                 if (lookUpWatched == null) {
                     Log.d(TAG, "Video not found in database")
+                    _startDuration.send(0)
                 } else {
                     if (!lookUpWatched.hasFinished()) {
                         Log.d(TAG, "Starting at ${lookUpWatched.watchedDuration}")
@@ -57,6 +58,7 @@ class PlayerViewModel @Inject constructor(
                 val lookUpWatched = watchedRepository.getWatchedMovie(tmdbId)
                 if (lookUpWatched == null) {
                     Log.d(TAG, "Video not found in database")
+                    _startDuration.send(0)
                 } else {
                     if (!lookUpWatched.hasFinished()) {
                         Log.d(TAG, "Starting at ${lookUpWatched.watchedDuration}")
