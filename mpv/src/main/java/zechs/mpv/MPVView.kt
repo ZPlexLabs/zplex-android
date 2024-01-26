@@ -93,6 +93,7 @@ class MPVView(
         )
 
         val properties = arrayOf(
+            Property("demuxer-cache-time", MPV_FORMAT_INT64),
             Property("time-pos", MPV_FORMAT_INT64),
             Property("duration", MPV_FORMAT_INT64),
             Property("pause", MPV_FORMAT_FLAG),

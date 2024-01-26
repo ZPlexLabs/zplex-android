@@ -617,8 +617,13 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             when (property) {
                 "time-pos" -> updatePlaybackPos(value.toInt())
                 "duration" -> updatePlaybackDuration(value.toInt())
+                "demuxer-cache-time" -> updateBufferedPos(value.toInt())
             }
         }
+    }
+
+    private fun updateBufferedPos(buffered: Int) {
+        controller.progressBar.secondaryProgress = buffered
     }
 
     override fun eventProperty(property: String) {
