@@ -482,52 +482,19 @@ class MediaViewModel @Inject constructor(
         return true
     }
 
-    private val _token = MutableLiveData<Event<Resource<FileToken>>>()
-    val mpvFile: LiveData<Event<Resource<FileToken>>>
-        get() = _token
-
-    data class FileToken(
-        val fileId: String,
-        val fileName: String,
-        val accessToken: String
-    )
-
-    private fun fetchToken(title: String, fileId: String) = viewModelScope.launch {
-        _token.postValue(Event(Resource.Loading()))
-
-        val client = sessionManager.fetchClient() ?: run {
-            _token.postValue(Event(Resource.Error("Client not found")))
-            return@launch
-        }
-        val tokenResponse = driveRepository.fetchAccessToken(client)
-
-        when (tokenResponse) {
-            is Resource.Success -> {
-                val fileToken = FileToken(
-                    fileId = fileId,
-                    fileName = title,
-                    accessToken = tokenResponse.data!!.accessToken
-                )
-                _token.postValue(Event(Resource.Success(fileToken)))
-            }
-
-            is Resource.Error -> {
-                _token.postValue(
-                    Event(Resource.Error(tokenResponse.message!!))
-                )
-            }
-
-            else -> {}
-        }
-    }
+    private val _movieFile = MutableLiveData<Event<Resource<zechs.zplex.ui.player.Movie>>>()
+    val movieFile: LiveData<Event<Resource<zechs.zplex.ui.player.Movie>>>
+        get() = _movieFile
 
     fun playMovie(tmdbId: Int, year: Int?) = viewModelScope.launch {
         val saved = tmdbRepository.fetchMovieById(tmdbId)
         if (saved?.fileId == null) {
-            _token.postValue(Event(Resource.Error("Movie not found")))
+            _movieFile.postValue(Event(Resource.Error("Movie not found")))
             return@launch
         } else {
-            fetchToken("${saved.title}${if (year != null) " (${year})" else ""}", saved.fileId)
+            val title = "${saved.title}${if (year != null) " (${year})" else ""}"
+            val movie = zechs.zplex.ui.player.Movie(tmdbId, title, showPoster, saved.fileId)
+            _movieFile.postValue(Event(Resource.Success(movie)))
         }
     }
 }

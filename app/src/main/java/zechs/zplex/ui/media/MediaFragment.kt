@@ -32,6 +32,7 @@ import androidx.transition.TransitionManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
@@ -556,7 +557,7 @@ class MediaFragment : Fragment() {
     }
 
     private fun mpvObserver() {
-        mediaViewModel.mpvFile.observe(viewLifecycleOwner) { event ->
+        mediaViewModel.movieFile.observe(viewLifecycleOwner) { event ->
             event.getContentIfNotHandled()?.let { res ->
                 when (res) {
                     is Resource.Success -> {
@@ -573,17 +574,12 @@ class MediaFragment : Fragment() {
         }
     }
 
-    private fun launchMpv(fileToken: MediaViewModel.FileToken) {
+    private fun launchMpv(movie: zechs.zplex.ui.player.Movie) {
         Intent(
             requireContext(), MPVActivity::class.java
         ).apply {
-            putExtra("fileId", fileToken.fileId)
-            putExtra("title", fileToken.fileName)
-            putExtra("accessToken", fileToken.accessToken)
-            putExtra("isTV", false)
-            putExtra("tmdbId", mediaViewModel.tmdbId)
-            putExtra("name", mediaViewModel.showName ?: "")
-            putExtra("posterPath", mediaViewModel.showPoster ?: "")
+            putExtra("playlist", Gson().toJson(listOf(movie)))
+            putExtra("startIndex", 0)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }.also { startActivity(it) }
     }
