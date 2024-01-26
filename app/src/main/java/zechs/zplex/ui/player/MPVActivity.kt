@@ -138,8 +138,14 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             btnChapter.setOnClickListener { pickChapter() }
             btnSpeed.setOnClickListener { pickSpeed() }
             btnResize.setOnClickListener { player.cycleScale() }
-            btnNext.setOnClickListener { viewModel.next() }
-            btnPrevious.setOnClickListener { viewModel.previous() }
+            btnNext.setOnClickListener {
+                saveProgress(viewModel.head)
+                viewModel.next()
+            }
+            btnPrevious.setOnClickListener {
+                saveProgress(viewModel.head)
+                viewModel.previous()
+            }
 
             btnRotate.setOnClickListener {
                 orientation = getNextOrientation(orientation)
@@ -582,7 +588,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         }
     }
 
-    private fun saveProgress() {
+    private fun saveProgress(current: PlaybackItem?) {
         val watchedDuration = player.timePos ?: return
         val totalDuration = player.duration ?: return
         Log.d(TAG, "MPV(current=$watchedDuration, total=$totalDuration)")
@@ -595,35 +601,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         val watchProgress = (watchedDuration.toDouble() / totalDuration.toDouble()).toFloat() * 100
         val minWatchingThresholdPercent = 1
         if (watchProgress > minWatchingThresholdPercent) {
-            val isTV = intent.getBooleanExtra("isTV", false)
-            val tmdbId = intent.getIntExtra("tmdbId", 0)
-            val name = intent.getStringExtra("name")!!
-            val posterPath = intent.getStringExtra("posterPath")
-
-            Log.d(TAG, "MPV(isTV=$isTV, tmdbId=$tmdbId, name=$name, posterPath=$posterPath)")
-            if (isTV) {
-                val seasonNumber = intent.getIntExtra("seasonNumber", 0)
-                val episodeNumber = intent.getIntExtra("episodeNumber", 0)
-                val isLastEpisode = intent.getBooleanExtra("isLastEpisode", false)
-                Log.d(TAG, "MPV(seasonNumber=$seasonNumber, episodeNumber=$episodeNumber, isLastEpisode=$isLastEpisode)")
-                viewModel.upsertWatchedShow(
-                    tmdbId,
-                    name,
-                    posterPath,
-                    seasonNumber,
-                    episodeNumber,
-                    watchedDurationInMills,
-                    totalDurationInMills
-                )
-            } else {
-                viewModel.upsertWatchedMovie(
-                    tmdbId,
-                    name,
-                    posterPath,
-                    watchedDurationInMills,
-                    totalDurationInMills,
-                )
-            }
+            viewModel.saveProgress(current, watchedDurationInMills, totalDurationInMills)
         }
     }
     ////////////////    MPV EVENTS    ////////////////
@@ -670,7 +648,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
 
     override fun onPause() {
-        saveProgress()
+        saveProgress(viewModel.head)
 
         activityIsForeground = false
 

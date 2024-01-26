@@ -4,6 +4,7 @@ package zechs.zplex.ui.player
 interface PlaybackItem {
     val tmdbId: Int
     val title: String
+    val posterPath: String?
     val fileId: String
     var next: PlaybackItem?
     var prev: PlaybackItem?
@@ -12,6 +13,7 @@ interface PlaybackItem {
 data class Movie(
     override val tmdbId: Int,
     override val title: String,
+    override val posterPath: String?,
     override val fileId: String,
     override var next: PlaybackItem? = null,
     override var prev: PlaybackItem? = null,
@@ -21,6 +23,7 @@ data class Movie(
 data class Show(
     override val tmdbId: Int,
     override val title: String,
+    override val posterPath: String?,
     override val fileId: String,
     override var next: PlaybackItem? = null,
     override var prev: PlaybackItem? = null,
@@ -33,6 +36,7 @@ data class GsonPlaybackItem(
     val tmdbId: Int,
     val title: String,
     val fileId: String,
+    val posterPath: String?,
     val next: Int?,
     val prev: Int?,
     val seasonNumber: Int?,
@@ -41,9 +45,9 @@ data class GsonPlaybackItem(
 ) {
     fun toPlaybackItem(): PlaybackItem {
         return if (seasonNumber != null && episodeNumber != null && episodeTitle != null) {
-            Show(tmdbId, title, fileId, null, null, seasonNumber, episodeNumber, episodeTitle)
+            Show(tmdbId, title, posterPath, fileId, null, null, seasonNumber, episodeNumber, episodeTitle)
         } else {
-            Movie(tmdbId, title, fileId, null, null)
+            Movie(tmdbId, title, posterPath, fileId, null, null)
         }
     }
 }

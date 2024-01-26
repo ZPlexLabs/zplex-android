@@ -93,6 +93,8 @@ class PlayerViewModel @Inject constructor(
         )
 
         watchedRepository.upsertWatchedShow(watch)
+        val title = "$name - S${seasonNumber}E${episodeNumber}"
+        Log.d(TAG, "Saving progress: $title at $watchedDuration/$totalDuration")
     }
 
     fun upsertWatchedMovie(
@@ -115,6 +117,7 @@ class PlayerViewModel @Inject constructor(
             watchedDuration, totalDuration, Calendar.getInstance().timeInMillis
         )
         watchedRepository.upsertWatchedMovie(watch)
+        Log.d(TAG, "Saving progress: $name at $watchedDuration/$totalDuration")
     }
 
 
@@ -123,7 +126,8 @@ class PlayerViewModel @Inject constructor(
         val token: String
     )
 
-    private var head: PlaybackItem? = null
+    var head: PlaybackItem? = null
+        private set
     private val _current: MutableStateFlow<Resource<Playback?>> = MutableStateFlow(Resource.Loading())
     val current = _current.asStateFlow()
 
@@ -171,6 +175,25 @@ class PlayerViewModel @Inject constructor(
                 _current.value = Resource.Success(Playback(head, tokenResponse.message!!))
             }
             else -> {}
+        }
+    }
+
+    fun saveProgress(current: PlaybackItem?, watchedDuration: Long, totalDuration: Long) {
+        val playbackItem = current ?: run {
+            Log.d(TAG, "No playback item found, not saving progress")
+            return
+        }
+        if (playbackItem is Movie) {
+            upsertWatchedMovie(
+                playbackItem.tmdbId, playbackItem.title, playbackItem.posterPath,
+                watchedDuration, totalDuration
+            )
+        } else if (playbackItem is Show) {
+            upsertWatchedShow(
+                playbackItem.tmdbId, playbackItem.title, playbackItem.posterPath,
+                playbackItem.seasonNumber, playbackItem.episodeNumber,
+                watchedDuration, totalDuration
+            )
         }
     }
 
