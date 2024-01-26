@@ -37,7 +37,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import zechs.mpv.MPVLib
 import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART
