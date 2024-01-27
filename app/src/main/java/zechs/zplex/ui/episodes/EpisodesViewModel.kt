@@ -26,7 +26,6 @@ import zechs.zplex.ui.episodes.adapter.EpisodesDataModel
 import zechs.zplex.ui.player.PlaybackItem
 import zechs.zplex.ui.player.Show
 import zechs.zplex.utils.SessionManager
-import zechs.zplex.utils.state.Event
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import zechs.zplex.utils.util.DriveApiQueryBuilder
@@ -109,18 +108,21 @@ class EpisodesViewModel @Inject constructor(
                             Log.d(TAG, "Updating watched progress for ${episode.name} to $newProgress")
                             episodesDataModel[index] = episode.copy(progress = newProgress)
                         }
-                    val _episode = episodesDataModel[index] as EpisodesDataModel.Episode
-                    _playlist.add(
-                        Show(
-                            tmdbId = tmdbId,
-                            title = showName,
-                            posterPath = showPoster,
-                            fileId = _episode.fileId!!,
-                            seasonNumber = _episode.season_number,
-                            episodeNumber = _episode.episode_number,
-                            episodeTitle = _episode.name
-                        )
-                    )
+                    (episodesDataModel[index] as EpisodesDataModel.Episode)
+                        .takeIf { it.fileId != null }
+                        ?.let {
+                            _playlist.add(
+                                Show(
+                                    tmdbId = tmdbId,
+                                    title = showName,
+                                    posterPath = showPoster,
+                                    fileId = it.fileId!!,
+                                    seasonNumber = it.season_number,
+                                    episodeNumber = it.episode_number,
+                                    episodeTitle = it.name
+                                )
+                            )
+                        }
                 }
             }
 
