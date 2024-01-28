@@ -252,22 +252,27 @@ class EpisodesFragment : Fragment() {
     }
 
     private val extendedFabScrollListener = object : RecyclerView.OnScrollListener() {
-        val floatingActionButton = binding.coordinatorLayout
-            .findViewById<ExtendedFloatingActionButton>(continueWatchingFab)
-
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-            if (newState == RecyclerView.SCROLL_STATE_IDLE
-                && !floatingActionButton.isExtended
-                && recyclerView.computeVerticalScrollOffset() == 0
-            ) {
-                floatingActionButton.extend()
+            val floatingActionButton: ExtendedFloatingActionButton? = binding.coordinatorLayout
+                .findViewById(continueWatchingFab)
+            if (floatingActionButton != null) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE
+                    && !floatingActionButton.isExtended
+                    && recyclerView.computeVerticalScrollOffset() == 0
+                ) {
+                    floatingActionButton.extend()
+                }
             }
             super.onScrollStateChanged(recyclerView, newState)
         }
 
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-            if (dy != 0 && floatingActionButton.isExtended) {
-                floatingActionButton.shrink()
+            val floatingActionButton: ExtendedFloatingActionButton? = binding.coordinatorLayout
+                .findViewById(continueWatchingFab)
+            if (floatingActionButton != null) {
+                if (dy != 0 && floatingActionButton.isExtended) {
+                    floatingActionButton.shrink()
+                }
             }
             super.onScrolled(recyclerView, dx, dy)
         }
