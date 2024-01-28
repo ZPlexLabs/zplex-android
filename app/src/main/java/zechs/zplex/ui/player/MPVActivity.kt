@@ -283,7 +283,9 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                                 playbackItem.episodeNumber
                             )
                         )
-                        titleBuilder.append(" - ${playbackItem.episodeTitle}")
+                        if (playbackItem.episodeTitle != null) {
+                            titleBuilder.append(" - ${playbackItem.episodeTitle}")
+                        }
                         viewModel.getWatch(
                             playbackItem.tmdbId,
                             true,

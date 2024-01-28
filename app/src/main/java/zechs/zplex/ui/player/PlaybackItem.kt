@@ -29,7 +29,7 @@ data class Show(
     override var prev: PlaybackItem? = null,
     val seasonNumber: Int,
     val episodeNumber: Int,
-    val episodeTitle: String,
+    val episodeTitle: String?,
 ) : PlaybackItem
 
 data class GsonPlaybackItem(
