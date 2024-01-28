@@ -217,16 +217,17 @@ class EpisodesFragment : Fragment() {
         }
     }
 
+    private val continueWatchingFab = ViewCompat.generateViewId()
+
     private fun setupLastWatchedEpisode() {
-        val viewId = ViewCompat.generateViewId()
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 episodesViewModel.lastEpisode.collect { episode ->
                     if (episode == null) {
                         Log.d(TAG, "No last episode found")
-                        removeContinueWatching(viewId)
+                        removeContinueWatching()
                     } else {
-                        showResumeEpisode(viewId, episode)
+                        showResumeEpisode(episode)
                     }
                 }
 
@@ -234,8 +235,9 @@ class EpisodesFragment : Fragment() {
         }
     }
 
-    private fun removeContinueWatching(viewId: Int) {
-        val exist = binding.coordinatorLayout.findViewById<ExtendedFloatingActionButton>(viewId)
+    private fun removeContinueWatching() {
+        val exist = binding.coordinatorLayout
+            .findViewById<ExtendedFloatingActionButton>(continueWatchingFab)
         if (exist != null) {
             Log.d(TAG, "Removing continue watching FAB")
             exist.animate()
@@ -246,22 +248,45 @@ class EpisodesFragment : Fragment() {
                     binding.coordinatorLayout.removeView(exist)
                 }.start()
         }
+        binding.rvList.clearOnScrollListeners()
+    }
+
+    private val extendedFabScrollListener = object : RecyclerView.OnScrollListener() {
+        val floatingActionButton = binding.coordinatorLayout
+            .findViewById<ExtendedFloatingActionButton>(continueWatchingFab)
+
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            if (newState == RecyclerView.SCROLL_STATE_IDLE
+                && !floatingActionButton.isExtended
+                && recyclerView.computeVerticalScrollOffset() == 0
+            ) {
+                floatingActionButton.extend()
+            }
+            super.onScrollStateChanged(recyclerView, newState)
+        }
+
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            if (dy != 0 && floatingActionButton.isExtended) {
+                floatingActionButton.shrink()
+            }
+            super.onScrolled(recyclerView, dx, dy)
+        }
     }
 
     private fun showResumeEpisode(
-        viewId: Int,
         episode: Episode
     ) {
         Log.d(TAG, "Found last episode: $episode")
 
-        val exist = binding.coordinatorLayout.findViewById<ExtendedFloatingActionButton>(viewId)
+        val exist = binding.coordinatorLayout
+            .findViewById<ExtendedFloatingActionButton>(continueWatchingFab)
         val extendedFab: ExtendedFloatingActionButton
 
         Log.d(TAG, "Extended fab: $exist")
 
         if (exist == null) {
             extendedFab = ExtendedFloatingActionButton(requireContext())
-            extendedFab.id = viewId
+            extendedFab.id = continueWatchingFab
             extendedFab.text = getString(R.string.continue_watching)
             extendedFab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_resume_24)
 
@@ -291,6 +316,8 @@ class EpisodesFragment : Fragment() {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }.also { startActivity(it) }
         }
+        binding.rvList.clearOnScrollListeners()
+        binding.rvList.addOnScrollListener(extendedFabScrollListener)
     }
 
 
