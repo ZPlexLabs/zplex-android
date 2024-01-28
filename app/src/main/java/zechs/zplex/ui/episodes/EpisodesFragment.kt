@@ -34,10 +34,10 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
+import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.ui.cast.CastsFragmentDirections
-import zechs.zplex.ui.episodes.adapter.EpisodesDataAdapter
-import zechs.zplex.ui.episodes.adapter.EpisodesDataModel
+import zechs.zplex.ui.episodes.adapter.EpisodesAdapter
 import zechs.zplex.ui.image.BigImageViewModel
 import zechs.zplex.ui.player.MPVActivity
 import zechs.zplex.ui.shared_viewmodels.EpisodeViewModel
@@ -65,9 +65,9 @@ class EpisodesFragment : Fragment() {
     private var showName: String? = null
     private var showPoster: String? = null
 
-    private val episodeDataAdapter by lazy {
-        EpisodesDataAdapter(
-            episodeOnClick = { episode, isLastEpisode ->
+    private val episodeAdapter by lazy {
+        EpisodesAdapter(
+            episodeOnClick = { episode ->
                 if (episode.fileId != null) {
                     val startIndex = episodesViewModel.playlist
                         .indexOfFirst { it.fileId == episode.fileId }
@@ -161,7 +161,7 @@ class EpisodesFragment : Fragment() {
                         MaterialFadeThrough()
                     )
                     viewLifecycleOwner.lifecycleScope.launch {
-                        episodeDataAdapter.submitList(it)
+                        episodeAdapter.submitList(it)
                     }
                     isLoading(false)
                     hasLoaded = true
@@ -213,7 +213,7 @@ class EpisodesFragment : Fragment() {
 
     private fun showResumeEpisode(
         viewId: Int,
-        episode: EpisodesDataModel.Episode
+        episode: Episode
     ) {
         Log.d(TAG, "Found last episode: $episode")
 
@@ -276,7 +276,7 @@ class EpisodesFragment : Fragment() {
 
     private fun setupRecyclerView() {
         binding.rvList.apply {
-            adapter = episodeDataAdapter
+            adapter = episodeAdapter
             setPadding(16, 0, 16, 16)
             layoutManager = GridLayoutManager(activity, 2, RecyclerView.VERTICAL, false)
         }
