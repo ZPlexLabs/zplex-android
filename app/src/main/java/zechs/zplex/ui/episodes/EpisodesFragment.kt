@@ -24,7 +24,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -276,9 +277,8 @@ class EpisodesFragment : Fragment() {
     private fun setupRecyclerView() {
         binding.rvList.apply {
             adapter = episodeDataAdapter
-            layoutManager = LinearLayoutManager(
-                activity, LinearLayoutManager.VERTICAL, false
-            )
+            setPadding(16, 0, 16, 16)
+            layoutManager = GridLayoutManager(activity, 2, RecyclerView.VERTICAL, false)
         }
     }
 

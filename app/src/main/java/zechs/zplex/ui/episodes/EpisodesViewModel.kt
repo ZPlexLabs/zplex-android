@@ -161,7 +161,8 @@ class EpisodesViewModel @Inject constructor(
             val result = response.body()!!
             val seasonDataModel = mutableListOf<EpisodesDataModel>()
 
-            seasonDataModel.add(createSeasonHeader(result))
+            // TODO: migrate to collapsing toolbar
+            // seasonDataModel.add(createSeasonHeader(result))
 
             if (!result.episodes.isNullOrEmpty()) {
                 val savedShow = tmdbRepository.fetchShowById(tmdbId)

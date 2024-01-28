@@ -3,7 +3,6 @@ package zechs.zplex.ui.episodes.adapter
 import android.animation.ValueAnimator
 import android.view.animation.DecelerateInterpolator
 import androidx.core.view.isGone
-import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import coil.load
@@ -15,7 +14,6 @@ import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.databinding.ItemEpisodeBinding
 import zechs.zplex.databinding.ItemEpisodeHeaderBinding
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.util.SpannableTextView
 
 
 sealed class EpisodesViewHolder(
@@ -70,9 +68,12 @@ sealed class EpisodesViewHolder(
             val title = episode.name.ifEmpty { "No title" }
 
             itemBinding.apply {
-                val ivThumbTAG = "ivThumbTAG"
-                val tvEpisodeCountTAG = "tvEpisodeCountTAG"
                 val watchProgressTAG = "watchProgressTAG"
+
+                ivThumb.load(episodeStillUrl) {
+                    placeholder(R.drawable.no_thumb)
+                }
+                tvEpisodeCount.text = count
 
                 if (episode.progress == 0) {
                     watchProgress.isGone = true
@@ -86,31 +87,6 @@ sealed class EpisodesViewHolder(
                     }
                 }
 
-                if (episode.still_path.isNullOrEmpty() || ivThumb.tag == ivThumbTAG) {
-                    ivThumb.tag = ivThumbTAG
-                    ivThumb.isGone = true
-                } else {
-                    ivThumb.tag = null
-                    ivThumb.load(episodeStillUrl) {
-                        placeholder(R.drawable.no_thumb)
-                    }
-                }
-
-                if (count == title || tvEpisodeCount.tag == tvEpisodeCountTAG) {
-                    tvEpisodeCount.tag = tvEpisodeCountTAG
-                    tvEpisodeCount.isInvisible = true
-                } else {
-                    tvEpisodeCount.tag = null
-                    tvEpisodeCount.text = count
-                }
-
-                val overviewText = if (episode.overview.isNullOrEmpty()) {
-                    "No description"
-                } else episode.overview
-
-                SpannableTextView.spannablePlotText(
-                    tvOverview, overviewText, 180, "...more", root
-                )
                 tvTitle.text = title
                 val isLastEpisode = episode.episode_number == episodesDataAdapter.itemCount
                 root.setOnClickListener {
