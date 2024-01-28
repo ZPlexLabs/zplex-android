@@ -14,6 +14,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
+import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
@@ -27,6 +28,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
+import coil.load
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
@@ -34,14 +36,16 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
+import zechs.zplex.data.model.PosterSize
 import zechs.zplex.data.model.tmdb.entities.Episode
-import zechs.zplex.databinding.FragmentListBinding
+import zechs.zplex.databinding.FragmentEpisodesBinding
 import zechs.zplex.ui.cast.CastsFragmentDirections
 import zechs.zplex.ui.episodes.adapter.EpisodesAdapter
 import zechs.zplex.ui.image.BigImageViewModel
 import zechs.zplex.ui.player.MPVActivity
 import zechs.zplex.ui.shared_viewmodels.EpisodeViewModel
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
+import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.ext.dpToPx
 import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
@@ -49,7 +53,7 @@ import zechs.zplex.utils.state.Resource
 @AndroidEntryPoint
 class EpisodesFragment : Fragment() {
 
-    private var _binding: FragmentListBinding? = null
+    private var _binding: FragmentEpisodesBinding? = null
     private val binding get() = _binding!!
 
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
@@ -108,13 +112,13 @@ class EpisodesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentListBinding.inflate(inflater, container, false)
+        _binding = FragmentEpisodesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentListBinding.bind(view)
+        _binding = FragmentEpisodesBinding.bind(view)
 
         setupRecyclerView()
 
@@ -176,6 +180,29 @@ class EpisodesFragment : Fragment() {
                 is Resource.Loading -> if (!hasLoaded) {
                     isLoading(true)
                 }
+            }
+        }
+
+        episodesViewModel.seasonHeader.observe(viewLifecycleOwner) { header ->
+            val itemBinding = binding.seasonHeader
+            if (!header.seasonPosterPath.isNullOrBlank()) {
+                val posterUrl = "${TMDB_IMAGE_PREFIX}/${PosterSize.w780}${header.seasonPosterPath}"
+                itemBinding.ivPoster.load(posterUrl) { placeholder(R.drawable.no_poster) }
+            }
+
+            val overviewText = header.seasonOverview.ifEmpty { "No description" }
+
+            itemBinding.apply {
+                tvSeasonNumber.text = header.seasonNumber
+                tvPlot.text = overviewText
+
+                if (header.seasonName.isNullOrEmpty() || header.seasonName == header.seasonNumber) {
+                    tvSeasonName.isGone = true
+                } else {
+                    tvSeasonName.isGone = false
+                    tvSeasonName.text = header.seasonName
+                }
+
             }
         }
     }
@@ -271,13 +298,13 @@ class EpisodesFragment : Fragment() {
         binding.apply {
             loading.isInvisible = !hide
             rvList.isInvisible = hide
+            binding.seasonHeader.root.isInvisible = hide
         }
     }
 
     private fun setupRecyclerView() {
         binding.rvList.apply {
             adapter = episodeAdapter
-            setPadding(16, 0, 16, 16)
             layoutManager = GridLayoutManager(activity, 2, RecyclerView.VERTICAL, false)
         }
     }

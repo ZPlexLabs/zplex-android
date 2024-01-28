@@ -147,6 +147,16 @@ class EpisodesViewModel @Inject constructor(
         }
     }
 
+    data class SeasonHeader(
+        val seasonNumber: String,
+        val seasonName: String?,
+        val seasonPosterPath: String?,
+        val seasonOverview: String
+    )
+    private val _seasonHeader = MutableLiveData<SeasonHeader>()
+    val seasonHeader: LiveData<SeasonHeader>
+        get() = _seasonHeader
+
     private suspend fun handleSeasonResponse(
         tmdbId: Int,
         response: Response<seasonResponseTmdb>
@@ -155,8 +165,7 @@ class EpisodesViewModel @Inject constructor(
             val result = response.body()!!
             val seasonDataModel = mutableListOf<Episode>()
 
-            // TODO: migrate to collapsing toolbar
-            // seasonDataModel.add(createSeasonHeader(result))
+            _seasonHeader.postValue(createSeasonHeader(result))
 
             if (!result.episodes.isNullOrEmpty()) {
                 val savedShow = tmdbRepository.fetchShowById(tmdbId)
@@ -172,14 +181,14 @@ class EpisodesViewModel @Inject constructor(
         return Resource.Error(response.message())
     }
 
-//    private fun createSeasonHeader(result: seasonResponseTmdb): EpisodesDataModel.Header {
-//        return EpisodesDataModel.Header(
-//            seasonNumber = "Season ${result.season_number}",
-//            seasonName = result.name,
-//            seasonPosterPath = result.poster_path,
-//            seasonOverview = result.overview ?: "No description"
-//        )
-//    }
+    private fun createSeasonHeader(result: seasonResponseTmdb): SeasonHeader {
+        return SeasonHeader(
+            seasonNumber = "Season ${result.season_number}",
+            seasonName = result.name,
+            seasonPosterPath = result.poster_path,
+            seasonOverview = result.overview ?: "No description"
+        )
+    }
 
     private suspend fun handleSeasonFolder(
         result: seasonResponseTmdb,
