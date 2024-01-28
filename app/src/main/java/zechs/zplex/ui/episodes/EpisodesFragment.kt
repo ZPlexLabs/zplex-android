@@ -2,11 +2,13 @@ package zechs.zplex.ui.episodes
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
@@ -194,7 +196,6 @@ class EpisodesFragment : Fragment() {
 
             itemBinding.apply {
                 tvSeasonNumber.text = header.seasonNumber
-                tvPlot.text = overviewText
 
                 if (header.seasonName.isNullOrEmpty() || header.seasonName == header.seasonNumber) {
                     tvSeasonName.isGone = true
@@ -202,7 +203,16 @@ class EpisodesFragment : Fragment() {
                     tvSeasonName.isGone = false
                     tvSeasonName.text = header.seasonName
                 }
-
+                tvPlot.text = overviewText
+                tvPlot.viewTreeObserver.addOnGlobalLayoutListener(object :
+                    ViewTreeObserver.OnGlobalLayoutListener {
+                    override fun onGlobalLayout() {
+                        tvPlot.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        val noOfLinesVisible = tvPlot.height / tvPlot.lineHeight
+                        tvPlot.maxLines = noOfLinesVisible
+                        tvPlot.ellipsize = TextUtils.TruncateAt.END
+                    }
+                })
             }
         }
     }
