@@ -25,9 +25,12 @@ import zechs.zplex.ui.episodes.EpisodesFragment.Companion.TAG
 import zechs.zplex.ui.player.PlaybackItem
 import zechs.zplex.ui.player.Show
 import zechs.zplex.utils.SessionManager
+import zechs.zplex.utils.ext.ifNullOrEmpty
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import zechs.zplex.utils.util.DriveApiQueryBuilder
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 typealias seasonResponseTmdb = zechs.zplex.data.model.tmdb.season.SeasonResponse
@@ -71,7 +74,7 @@ class EpisodesViewModel @Inject constructor(
         showPoster: String?,
         seasonNumber: Int
     ) = viewModelScope.launch {
-        getSeason(tmdbId, seasonNumber)
+        getSeason(tmdbId, showName, seasonNumber)
 
         val watchedSeason = watchedRepository.getWatchedSeason(tmdbId, seasonNumber)
 
@@ -130,13 +133,14 @@ class EpisodesViewModel @Inject constructor(
 
     fun getSeason(
         tmdbId: Int,
+        showName: String,
         seasonNumber: Int
     ) = viewModelScope.launch(Dispatchers.IO) {
         _episodesResponse.postValue((Resource.Loading()))
         try {
             if (hasInternetConnection()) {
                 val tmdbSeason = tmdbRepository.getSeason(tmdbId, seasonNumber)
-                _episodesResponse.postValue((handleSeasonResponse(tmdbId, tmdbSeason)))
+                _episodesResponse.postValue((handleSeasonResponse(tmdbId, showName, tmdbSeason)))
                 getLastWatchedEpisode(tmdbId, seasonNumber)
             } else {
                 _episodesResponse.postValue((Resource.Error("No internet connection")))
@@ -153,19 +157,21 @@ class EpisodesViewModel @Inject constructor(
         val seasonPosterPath: String?,
         val seasonOverview: String
     )
+
     private val _seasonHeader = MutableLiveData<SeasonHeader>()
     val seasonHeader: LiveData<SeasonHeader>
         get() = _seasonHeader
 
     private suspend fun handleSeasonResponse(
         tmdbId: Int,
+        showName: String,
         response: Response<seasonResponseTmdb>
     ): Resource<List<Episode>> {
         if (response.body() != null) {
             val result = response.body()!!
             val seasonDataModel = mutableListOf<Episode>()
 
-            _seasonHeader.postValue(createSeasonHeader(result))
+            _seasonHeader.postValue(createSeasonHeader(showName, result))
 
             if (!result.episodes.isNullOrEmpty()) {
                 val savedShow = tmdbRepository.fetchShowById(tmdbId)
@@ -181,12 +187,31 @@ class EpisodesViewModel @Inject constructor(
         return Resource.Error(response.message())
     }
 
-    private fun createSeasonHeader(result: seasonResponseTmdb): SeasonHeader {
+    private fun createSeasonHeader(
+        showName: String,
+        result: seasonResponseTmdb
+    ): SeasonHeader {
+        val overviewBuilder = StringBuilder("Season ${result.season_number} of $showName")
+
+        result.episodes?.size?.let { numberOfEpisodes ->
+            overviewBuilder.append(if (numberOfEpisodes == 1) " with 1 episode" else " with $numberOfEpisodes episodes")
+        }
+
+        result.air_date?.let { date ->
+            val parsedDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE)
+            if (parsedDate.isAfter(LocalDate.now())) {
+                overviewBuilder.append(" is scheduled to premiere on $parsedDate")
+            } else {
+                overviewBuilder.append(" premiered on $parsedDate")
+            }
+        } ?: run { overviewBuilder.append(" is scheduled to premiere soon") }
+
+        Log.d(TAG, "Overview: $overviewBuilder")
         return SeasonHeader(
             seasonNumber = "Season ${result.season_number}",
             seasonName = result.name,
             seasonPosterPath = result.poster_path,
-            seasonOverview = result.overview ?: "No description"
+            seasonOverview = result.overview.ifNullOrEmpty { overviewBuilder.toString() }
         )
     }
 

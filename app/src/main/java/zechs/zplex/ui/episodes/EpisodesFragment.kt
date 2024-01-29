@@ -192,8 +192,7 @@ class EpisodesFragment : Fragment() {
                 itemBinding.ivPoster.load(posterUrl) { placeholder(R.drawable.no_poster) }
             }
 
-            val overviewText = header.seasonOverview.ifEmpty { "No description" }
-
+            val overviewText = header.seasonOverview
             itemBinding.apply {
                 tvSeasonNumber.text = header.seasonNumber
 
