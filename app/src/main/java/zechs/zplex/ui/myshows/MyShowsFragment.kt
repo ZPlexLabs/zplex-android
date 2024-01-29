@@ -244,8 +244,8 @@ class MyShowsFragment : Fragment() {
         findNavController().navigateSafe(action)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         binding.rvMyShows.adapter = null
         _binding = null
     }

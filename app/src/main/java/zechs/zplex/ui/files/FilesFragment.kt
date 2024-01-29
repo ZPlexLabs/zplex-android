@@ -322,8 +322,8 @@ class FilesFragment : Fragment() {
         snackBar.show()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         binding.rvList.adapter = null
         _binding = null
     }

@@ -589,8 +589,8 @@ class MediaFragment : Fragment() {
         mediaViewModel.updateStatus()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         binding.rvList.adapter = null
         _binding = null
     }
