@@ -28,6 +28,7 @@ import zechs.zplex.utils.SessionManager
 import zechs.zplex.utils.ext.ifNullOrEmpty
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
+import zechs.zplex.utils.util.Converter
 import zechs.zplex.utils.util.DriveApiQueryBuilder
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -207,8 +208,9 @@ class EpisodesViewModel @Inject constructor(
         }
 
         result.air_date?.let { date ->
-            val parsedDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE)
-            if (parsedDate.isAfter(LocalDate.now())) {
+            val localDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE)
+            val parsedDate = Converter.parseDate(date)
+            if (localDate.isAfter(LocalDate.now())) {
                 overviewBuilder.append(" is scheduled to premiere on $parsedDate")
             } else {
                 overviewBuilder.append(" premiered on $parsedDate")
