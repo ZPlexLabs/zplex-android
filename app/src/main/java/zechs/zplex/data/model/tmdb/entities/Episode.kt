@@ -11,5 +11,6 @@ data class Episode(
     val season_number: Int,
     val still_path: String?,
     val guest_stars: List<Cast>?,
-    val fileId: String?
+    val fileId: String?,
+    val progress: Int = 0
 )

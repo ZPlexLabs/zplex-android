@@ -2,11 +2,13 @@ package zechs.zplex.ui.episodes
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.TextUtils
 import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import android.widget.Toast
@@ -14,6 +16,7 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
+import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
@@ -24,8 +27,10 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
+import coil.load
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
@@ -33,14 +38,16 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
-import zechs.zplex.databinding.FragmentListBinding
+import zechs.zplex.data.model.PosterSize
+import zechs.zplex.data.model.tmdb.entities.Episode
+import zechs.zplex.databinding.FragmentEpisodesBinding
 import zechs.zplex.ui.cast.CastsFragmentDirections
-import zechs.zplex.ui.episodes.adapter.EpisodesDataAdapter
-import zechs.zplex.ui.episodes.adapter.EpisodesDataModel
+import zechs.zplex.ui.episodes.adapter.EpisodesAdapter
 import zechs.zplex.ui.image.BigImageViewModel
 import zechs.zplex.ui.player.MPVActivity
 import zechs.zplex.ui.shared_viewmodels.EpisodeViewModel
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
+import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.ext.dpToPx
 import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
@@ -48,7 +55,7 @@ import zechs.zplex.utils.state.Resource
 @AndroidEntryPoint
 class EpisodesFragment : Fragment() {
 
-    private var _binding: FragmentListBinding? = null
+    private var _binding: FragmentEpisodesBinding? = null
     private val binding get() = _binding!!
 
     private val seasonViewModel by activityViewModels<SeasonViewModel>()
@@ -59,14 +66,9 @@ class EpisodesFragment : Fragment() {
         ViewModelProvider(this)[EpisodesViewModel::class.java]
     }
 
-    private var hasLoaded: Boolean = false
-    private var tmdbId = 0
-    private var showName: String? = null
-    private var showPoster: String? = null
-
-    private val episodeDataAdapter by lazy {
-        EpisodesDataAdapter(
-            episodeOnClick = { episode, isLastEpisode ->
+    private val episodeAdapter by lazy {
+        EpisodesAdapter(
+            episodeOnClick = { episode ->
                 if (episode.fileId != null) {
                     val startIndex = episodesViewModel.playlist
                         .indexOfFirst { it.fileId == episode.fileId }
@@ -91,7 +93,7 @@ class EpisodesFragment : Fragment() {
                         snackBar.show()
                     } else {
                         episodeViewModel.setShowEpisode(
-                            tmdbId,
+                            episodesViewModel.tmdbId,
                             episode.season_number,
                             episode.episode_number
                         )
@@ -107,13 +109,13 @@ class EpisodesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentListBinding.inflate(inflater, container, false)
+        _binding = FragmentEpisodesBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        _binding = FragmentListBinding.bind(view)
+        _binding = FragmentEpisodesBinding.bind(view)
 
         setupRecyclerView()
 
@@ -140,10 +142,7 @@ class EpisodesFragment : Fragment() {
 
     private fun setupEpisodesViewModel() {
         seasonViewModel.showId.observe(viewLifecycleOwner) { showSeason ->
-            showName = showSeason.showName
-            showPoster = showSeason.showPoster
-            tmdbId = showSeason.tmdbId
-            if (!hasLoaded) {
+            if (!episodesViewModel.hasLoaded) {
                 episodesViewModel.getSeasonWithWatched(
                     tmdbId = showSeason.tmdbId,
                     showName = showSeason.showName,
@@ -160,10 +159,10 @@ class EpisodesFragment : Fragment() {
                         MaterialFadeThrough()
                     )
                     viewLifecycleOwner.lifecycleScope.launch {
-                        episodeDataAdapter.submitList(it)
+                        episodeAdapter.submitList(it)
                     }
                     isLoading(false)
-                    hasLoaded = true
+                    episodesViewModel.hasLoaded = true
                 }
 
                 is Resource.Error -> {
@@ -172,23 +171,54 @@ class EpisodesFragment : Fragment() {
                     binding.rvList.isInvisible = true
                 }
 
-                is Resource.Loading -> if (!hasLoaded) {
+                is Resource.Loading -> if (!episodesViewModel.hasLoaded) {
                     isLoading(true)
                 }
             }
         }
+
+        episodesViewModel.seasonHeader.observe(viewLifecycleOwner) { header ->
+            val itemBinding = binding.seasonHeader
+            if (!header.seasonPosterPath.isNullOrBlank()) {
+                val posterUrl = "${TMDB_IMAGE_PREFIX}/${PosterSize.w780}${header.seasonPosterPath}"
+                itemBinding.ivPoster.load(posterUrl) { placeholder(R.drawable.no_poster) }
+            }
+
+            val overviewText = header.seasonOverview
+            itemBinding.apply {
+                tvSeasonNumber.text = header.seasonNumber
+
+                if (header.seasonName.isNullOrEmpty() || header.seasonName == header.seasonNumber) {
+                    tvSeasonName.isGone = true
+                } else {
+                    tvSeasonName.isGone = false
+                    tvSeasonName.text = header.seasonName
+                }
+                tvPlot.text = overviewText
+                tvPlot.viewTreeObserver.addOnGlobalLayoutListener(object :
+                    ViewTreeObserver.OnGlobalLayoutListener {
+                    override fun onGlobalLayout() {
+                        tvPlot.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                        val noOfLinesVisible = tvPlot.height / tvPlot.lineHeight
+                        tvPlot.maxLines = noOfLinesVisible
+                        tvPlot.ellipsize = TextUtils.TruncateAt.END
+                    }
+                })
+            }
+        }
     }
 
+    private val continueWatchingFab = ViewCompat.generateViewId()
+
     private fun setupLastWatchedEpisode() {
-        val viewId = ViewCompat.generateViewId()
         viewLifecycleOwner.lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 episodesViewModel.lastEpisode.collect { episode ->
                     if (episode == null) {
                         Log.d(TAG, "No last episode found")
-                        removeContinueWatching(viewId)
+                        removeContinueWatching()
                     } else {
-                        showResumeEpisode(viewId, episode)
+                        showResumeEpisode(episode)
                     }
                 }
 
@@ -196,8 +226,9 @@ class EpisodesFragment : Fragment() {
         }
     }
 
-    private fun removeContinueWatching(viewId: Int) {
-        val exist = binding.coordinatorLayout.findViewById<ExtendedFloatingActionButton>(viewId)
+    private fun removeContinueWatching() {
+        val exist = binding.coordinatorLayout
+            .findViewById<ExtendedFloatingActionButton>(continueWatchingFab)
         if (exist != null) {
             Log.d(TAG, "Removing continue watching FAB")
             exist.animate()
@@ -208,22 +239,50 @@ class EpisodesFragment : Fragment() {
                     binding.coordinatorLayout.removeView(exist)
                 }.start()
         }
+        binding.rvList.clearOnScrollListeners()
+    }
+
+    private val extendedFabScrollListener = object : RecyclerView.OnScrollListener() {
+        override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+            val floatingActionButton: ExtendedFloatingActionButton? = binding.coordinatorLayout
+                .findViewById(continueWatchingFab)
+            if (floatingActionButton != null) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE
+                    && !floatingActionButton.isExtended
+                    && recyclerView.computeVerticalScrollOffset() == 0
+                ) {
+                    floatingActionButton.extend()
+                }
+            }
+            super.onScrollStateChanged(recyclerView, newState)
+        }
+
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            val floatingActionButton: ExtendedFloatingActionButton? = binding.coordinatorLayout
+                .findViewById(continueWatchingFab)
+            if (floatingActionButton != null) {
+                if (dy != 0 && floatingActionButton.isExtended) {
+                    floatingActionButton.shrink()
+                }
+            }
+            super.onScrolled(recyclerView, dx, dy)
+        }
     }
 
     private fun showResumeEpisode(
-        viewId: Int,
-        episode: EpisodesDataModel.Episode
+        episode: Episode
     ) {
         Log.d(TAG, "Found last episode: $episode")
 
-        val exist = binding.coordinatorLayout.findViewById<ExtendedFloatingActionButton>(viewId)
+        val exist = binding.coordinatorLayout
+            .findViewById<ExtendedFloatingActionButton>(continueWatchingFab)
         val extendedFab: ExtendedFloatingActionButton
 
         Log.d(TAG, "Extended fab: $exist")
 
         if (exist == null) {
             extendedFab = ExtendedFloatingActionButton(requireContext())
-            extendedFab.id = viewId
+            extendedFab.id = continueWatchingFab
             extendedFab.text = getString(R.string.continue_watching)
             extendedFab.icon = ContextCompat.getDrawable(requireContext(), R.drawable.ic_resume_24)
 
@@ -253,6 +312,8 @@ class EpisodesFragment : Fragment() {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }.also { startActivity(it) }
         }
+        binding.rvList.clearOnScrollListeners()
+        binding.rvList.addOnScrollListener(extendedFabScrollListener)
     }
 
 
@@ -270,15 +331,14 @@ class EpisodesFragment : Fragment() {
         binding.apply {
             loading.isInvisible = !hide
             rvList.isInvisible = hide
+            binding.seasonHeader.root.isInvisible = hide
         }
     }
 
     private fun setupRecyclerView() {
         binding.rvList.apply {
-            adapter = episodeDataAdapter
-            layoutManager = LinearLayoutManager(
-                activity, LinearLayoutManager.VERTICAL, false
-            )
+            adapter = episodeAdapter
+            layoutManager = GridLayoutManager(activity, 2, RecyclerView.VERTICAL, false)
         }
     }
 

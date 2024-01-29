@@ -22,13 +22,15 @@ import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.data.repository.WatchedRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.episodes.EpisodesFragment.Companion.TAG
-import zechs.zplex.ui.episodes.adapter.EpisodesDataModel
 import zechs.zplex.ui.player.PlaybackItem
 import zechs.zplex.ui.player.Show
 import zechs.zplex.utils.SessionManager
+import zechs.zplex.utils.ext.ifNullOrEmpty
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import zechs.zplex.utils.util.DriveApiQueryBuilder
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 typealias seasonResponseTmdb = zechs.zplex.data.model.tmdb.season.SeasonResponse
@@ -41,6 +43,17 @@ class EpisodesViewModel @Inject constructor(
     private val driveRepository: DriveRepository,
     private val sessionManager: SessionManager
 ) : BaseAndroidViewModel(app) {
+
+    var hasLoaded: Boolean = false
+
+    var tmdbId = 0
+        private set
+
+    var showName: String? = null
+        private set
+
+    var showPoster: String? = null
+        private set
 
     var hasLoggedIn = false
         private set
@@ -55,11 +68,10 @@ class EpisodesViewModel @Inject constructor(
         return true
     }
 
-    private val _episodesResponse =
-        MutableLiveData<Resource<List<EpisodesDataModel>>>(Resource.Loading())
+    private val _episodesResponse = MutableLiveData<Resource<List<Episode>>>(Resource.Loading())
 
-    private val _episodesWithWatched = MediatorLiveData<Resource<List<EpisodesDataModel>>>()
-    val episodesWithWatched: LiveData<Resource<List<EpisodesDataModel>>>
+    private val _episodesWithWatched = MediatorLiveData<Resource<List<Episode>>>()
+    val episodesWithWatched: LiveData<Resource<List<Episode>>>
         get() = _episodesWithWatched
 
     private val _playlist = mutableListOf<PlaybackItem>()
@@ -73,57 +85,56 @@ class EpisodesViewModel @Inject constructor(
         showPoster: String?,
         seasonNumber: Int
     ) = viewModelScope.launch {
+        this@EpisodesViewModel.showName = showName
+        this@EpisodesViewModel.showPoster = showPoster
+        this@EpisodesViewModel.tmdbId = tmdbId
+
         getSeason(tmdbId, seasonNumber)
 
         val watchedSeason = watchedRepository.getWatchedSeason(tmdbId, seasonNumber)
 
         _episodesWithWatched.addSource(_episodesResponse) { episodes ->
             _episodesWithWatched.value =
-                combineSeasonWithWatched(tmdbId, showName, showPoster, episodes, watchedSeason)
+                combineSeasonWithWatched(episodes, watchedSeason)
         }
 
         _episodesWithWatched.addSource(
             watchedRepository.getWatchedSeasonLive(tmdbId, seasonNumber)
         ) { watched ->
             _episodesWithWatched.value =
-                combineSeasonWithWatched(tmdbId, showName, showPoster, _episodesResponse.value!!, watched)
+                combineSeasonWithWatched(_episodesResponse.value!!, watched)
         }
     }
 
     private fun combineSeasonWithWatched(
-        tmdbId: Int,
-        showName: String,
-        showPoster: String?,
-        episodes: Resource<List<EpisodesDataModel>>,
+        episodes: Resource<List<Episode>>,
         watched: List<WatchedShow>
-    ): Resource<List<EpisodesDataModel>> {
+    ): Resource<List<Episode>> {
         if (episodes is Resource.Success) {
             val episodesDataModel = episodes.data!!.toMutableList()
 
             episodesDataModel.forEachIndexed { index, episode ->
-                if (episode is EpisodesDataModel.Episode) {
-                    watched.firstOrNull { it.episodeNumber == episode.episode_number }
-                        ?.let { watchedShow ->
-                            val newProgress = watchedShow.watchProgress()
-                            Log.d(TAG, "Updating watched progress for ${episode.name} to $newProgress")
-                            episodesDataModel[index] = episode.copy(progress = newProgress)
-                        }
-                    (episodesDataModel[index] as EpisodesDataModel.Episode)
-                        .takeIf { it.fileId != null }
-                        ?.let {
-                            _playlist.add(
-                                Show(
-                                    tmdbId = tmdbId,
-                                    title = showName,
-                                    posterPath = showPoster,
-                                    fileId = it.fileId!!,
-                                    seasonNumber = it.season_number,
-                                    episodeNumber = it.episode_number,
-                                    episodeTitle = it.name
-                                )
+                watched.firstOrNull { it.episodeNumber == episode.episode_number }
+                    ?.let { watchedShow ->
+                        val newProgress = watchedShow.watchProgress()
+                        Log.d(TAG, "Updating watched progress for ${episode.name} to $newProgress")
+                        episodesDataModel[index] = episode.copy(progress = newProgress)
+                    }
+                (episodesDataModel[index])
+                    .takeIf { it.fileId != null }
+                    ?.let {
+                        _playlist.add(
+                            Show(
+                                tmdbId = tmdbId,
+                                title = showName!!,
+                                posterPath = showPoster,
+                                fileId = it.fileId!!,
+                                seasonNumber = it.season_number,
+                                episodeNumber = it.episode_number,
+                                episodeTitle = it.name
                             )
-                        }
-                }
+                        )
+                    }
             }
 
             Log.d(TAG, "Combined episodes with watched successfully")
@@ -153,15 +164,26 @@ class EpisodesViewModel @Inject constructor(
         }
     }
 
+    data class SeasonHeader(
+        val seasonNumber: String,
+        val seasonName: String?,
+        val seasonPosterPath: String?,
+        val seasonOverview: String
+    )
+
+    private val _seasonHeader = MutableLiveData<SeasonHeader>()
+    val seasonHeader: LiveData<SeasonHeader>
+        get() = _seasonHeader
+
     private suspend fun handleSeasonResponse(
         tmdbId: Int,
         response: Response<seasonResponseTmdb>
-    ): Resource<List<EpisodesDataModel>> {
+    ): Resource<List<Episode>> {
         if (response.body() != null) {
             val result = response.body()!!
-            val seasonDataModel = mutableListOf<EpisodesDataModel>()
+            val seasonDataModel = mutableListOf<Episode>()
 
-            seasonDataModel.add(createSeasonHeader(result))
+            _seasonHeader.postValue(createSeasonHeader(result))
 
             if (!result.episodes.isNullOrEmpty()) {
                 val savedShow = tmdbRepository.fetchShowById(tmdbId)
@@ -177,19 +199,35 @@ class EpisodesViewModel @Inject constructor(
         return Resource.Error(response.message())
     }
 
-    private fun createSeasonHeader(result: seasonResponseTmdb): EpisodesDataModel.Header {
-        return EpisodesDataModel.Header(
+    private fun createSeasonHeader(result: seasonResponseTmdb): SeasonHeader {
+        val overviewBuilder = StringBuilder("Season ${result.season_number} of $showName")
+
+        result.episodes?.size?.let { numberOfEpisodes ->
+            overviewBuilder.append(if (numberOfEpisodes == 1) " with 1 episode" else " with $numberOfEpisodes episodes")
+        }
+
+        result.air_date?.let { date ->
+            val parsedDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE)
+            if (parsedDate.isAfter(LocalDate.now())) {
+                overviewBuilder.append(" is scheduled to premiere on $parsedDate")
+            } else {
+                overviewBuilder.append(" premiered on $parsedDate")
+            }
+        } ?: run { overviewBuilder.append(" is scheduled to premiere soon") }
+
+        Log.d(TAG, "Overview: $overviewBuilder")
+        return SeasonHeader(
             seasonNumber = "Season ${result.season_number}",
             seasonName = result.name,
             seasonPosterPath = result.poster_path,
-            seasonOverview = result.overview ?: "No description"
+            seasonOverview = result.overview.ifNullOrEmpty { overviewBuilder.toString() }
         )
     }
 
     private suspend fun handleSeasonFolder(
         result: seasonResponseTmdb,
         showFolderId: String,
-        seasonDataModel: MutableList<EpisodesDataModel>
+        seasonDataModel: MutableList<Episode>
     ) {
         val seasonFolderName = "Season ${result.season_number}"
         val seasonFolder = findSeasonFolder(showFolderId, seasonFolderName)
@@ -224,7 +262,7 @@ class EpisodesViewModel @Inject constructor(
     private suspend fun handleEpisodesInFolder(
         episodes: List<Episode>,
         seasonFolderId: String,
-        seasonDataModel: MutableList<EpisodesDataModel>
+        seasonDataModel: MutableList<Episode>
     ) {
         val episodesInFolder = driveRepository.getAllFilesInFolder(
             queryBuilder = DriveApiQueryBuilder()
@@ -244,20 +282,21 @@ class EpisodesViewModel @Inject constructor(
     private fun processMatchingEpisodes(
         episodes: List<Episode>,
         filesInFolder: List<File>,
-        seasonDataModel: MutableList<EpisodesDataModel>
+        seasonDataModel: MutableList<Episode>
     ) {
-        val episodeMap =
-            buildEpisodeMap(filesInFolder.map { it.toDriveFile() }.filter { it.isVideoFile })
+        val episodeMap = buildEpisodeMap(
+            filesInFolder.map { it.toDriveFile() }.filter { it.isVideoFile }
+        )
 
         var match = 0
         episodes.forEach { episode ->
             val matchingEpisode = findMatchingEpisode(episode, episodeMap)
             if (matchingEpisode == null) {
                 Log.d(TAG, "No matching file found for episode ${getEpisodePattern(episode)}")
-                seasonDataModel.add(createEpisodeModel(episode, fileId = null))
+                seasonDataModel.add(episode.copy(fileId = null))
             } else {
                 Log.d(TAG, "Found matching file for episode ${getEpisodePattern(episode)}")
-                seasonDataModel.add(createEpisodeModel(episode, fileId = matchingEpisode.id))
+                seasonDataModel.add(episode.copy(fileId = matchingEpisode.id))
                 match++
             }
         }
@@ -299,32 +338,17 @@ class EpisodesViewModel @Inject constructor(
         return null
     }
 
-    private fun createEpisodeModel(
-        episode: Episode,
-        fileId: String?
-    ): EpisodesDataModel.Episode {
-        return EpisodesDataModel.Episode(
-            id = episode.id,
-            name = episode.name ?: "TBA",
-            overview = episode.name,
-            episode_number = episode.episode_number,
-            season_number = episode.season_number,
-            still_path = episode.still_path,
-            fileId = fileId
-        )
-    }
-
     private fun handleDefaultMapping(
         episodes: List<Episode>,
-        seasonDataModel: MutableList<EpisodesDataModel>
+        seasonDataModel: MutableList<Episode>
     ) {
         Log.d(TAG, "Mapping attempt failed, using default")
         episodes.forEach {
-            seasonDataModel.add(createEpisodeModel(it, fileId = null))
+            seasonDataModel.add(it.copy(fileId = null))
         }
     }
 
-    private val _lastEpisode = MutableStateFlow<EpisodesDataModel.Episode?>(null)
+    private val _lastEpisode = MutableStateFlow<Episode?>(null)
     val lastEpisode = _lastEpisode.asStateFlow()
 
     private fun getLastWatchedEpisode(tmdbId: Int, seasonNumber: Int) = viewModelScope.launch {
@@ -333,7 +357,6 @@ class EpisodesViewModel @Inject constructor(
             .collect { last ->
                 last?.let {
                     _lastEpisode.value = _episodesResponse.value?.data
-                        ?.filterIsInstance<EpisodesDataModel.Episode>()
                         ?.firstOrNull { it.episode_number == last.episodeNumber }
                         ?.takeIf { it.fileId != null }
                 }
