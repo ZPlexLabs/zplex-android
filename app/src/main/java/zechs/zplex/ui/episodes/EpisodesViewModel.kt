@@ -44,6 +44,17 @@ class EpisodesViewModel @Inject constructor(
     private val sessionManager: SessionManager
 ) : BaseAndroidViewModel(app) {
 
+    var hasLoaded: Boolean = false
+
+    var tmdbId = 0
+        private set
+
+    var showName: String? = null
+        private set
+
+    var showPoster: String? = null
+        private set
+
     var hasLoggedIn = false
         private set
 
@@ -74,27 +85,28 @@ class EpisodesViewModel @Inject constructor(
         showPoster: String?,
         seasonNumber: Int
     ) = viewModelScope.launch {
-        getSeason(tmdbId, showName, seasonNumber)
+        this@EpisodesViewModel.showName = showName
+        this@EpisodesViewModel.showPoster = showPoster
+        this@EpisodesViewModel.tmdbId = tmdbId
+
+        getSeason(tmdbId, seasonNumber)
 
         val watchedSeason = watchedRepository.getWatchedSeason(tmdbId, seasonNumber)
 
         _episodesWithWatched.addSource(_episodesResponse) { episodes ->
             _episodesWithWatched.value =
-                combineSeasonWithWatched(tmdbId, showName, showPoster, episodes, watchedSeason)
+                combineSeasonWithWatched(episodes, watchedSeason)
         }
 
         _episodesWithWatched.addSource(
             watchedRepository.getWatchedSeasonLive(tmdbId, seasonNumber)
         ) { watched ->
             _episodesWithWatched.value =
-                combineSeasonWithWatched(tmdbId, showName, showPoster, _episodesResponse.value!!, watched)
+                combineSeasonWithWatched(_episodesResponse.value!!, watched)
         }
     }
 
     private fun combineSeasonWithWatched(
-        tmdbId: Int,
-        showName: String,
-        showPoster: String?,
         episodes: Resource<List<Episode>>,
         watched: List<WatchedShow>
     ): Resource<List<Episode>> {
@@ -113,14 +125,16 @@ class EpisodesViewModel @Inject constructor(
                     ?.let {
                         _playlist.add(
                             Show(
-                                tmdbId = tmdbId, title = showName,
-                                posterPath = showPoster, fileId = it.fileId!!,
-                                seasonNumber = it.season_number, episodeNumber = it.episode_number,
+                                tmdbId = tmdbId,
+                                title = showName!!,
+                                posterPath = showPoster,
+                                fileId = it.fileId!!,
+                                seasonNumber = it.season_number,
+                                episodeNumber = it.episode_number,
                                 episodeTitle = it.name
                             )
                         )
                     }
-
             }
 
             Log.d(TAG, "Combined episodes with watched successfully")
@@ -133,14 +147,13 @@ class EpisodesViewModel @Inject constructor(
 
     fun getSeason(
         tmdbId: Int,
-        showName: String,
         seasonNumber: Int
     ) = viewModelScope.launch(Dispatchers.IO) {
         _episodesResponse.postValue((Resource.Loading()))
         try {
             if (hasInternetConnection()) {
                 val tmdbSeason = tmdbRepository.getSeason(tmdbId, seasonNumber)
-                _episodesResponse.postValue((handleSeasonResponse(tmdbId, showName, tmdbSeason)))
+                _episodesResponse.postValue((handleSeasonResponse(tmdbId, tmdbSeason)))
                 getLastWatchedEpisode(tmdbId, seasonNumber)
             } else {
                 _episodesResponse.postValue((Resource.Error("No internet connection")))
@@ -164,14 +177,13 @@ class EpisodesViewModel @Inject constructor(
 
     private suspend fun handleSeasonResponse(
         tmdbId: Int,
-        showName: String,
         response: Response<seasonResponseTmdb>
     ): Resource<List<Episode>> {
         if (response.body() != null) {
             val result = response.body()!!
             val seasonDataModel = mutableListOf<Episode>()
 
-            _seasonHeader.postValue(createSeasonHeader(showName, result))
+            _seasonHeader.postValue(createSeasonHeader(result))
 
             if (!result.episodes.isNullOrEmpty()) {
                 val savedShow = tmdbRepository.fetchShowById(tmdbId)
@@ -187,10 +199,7 @@ class EpisodesViewModel @Inject constructor(
         return Resource.Error(response.message())
     }
 
-    private fun createSeasonHeader(
-        showName: String,
-        result: seasonResponseTmdb
-    ): SeasonHeader {
+    private fun createSeasonHeader(result: seasonResponseTmdb): SeasonHeader {
         val overviewBuilder = StringBuilder("Season ${result.season_number} of $showName")
 
         result.episodes?.size?.let { numberOfEpisodes ->

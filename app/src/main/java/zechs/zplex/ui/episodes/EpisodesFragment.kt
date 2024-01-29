@@ -66,11 +66,6 @@ class EpisodesFragment : Fragment() {
         ViewModelProvider(this)[EpisodesViewModel::class.java]
     }
 
-    private var hasLoaded: Boolean = false
-    private var tmdbId = 0
-    private var showName: String? = null
-    private var showPoster: String? = null
-
     private val episodeAdapter by lazy {
         EpisodesAdapter(
             episodeOnClick = { episode ->
@@ -98,7 +93,7 @@ class EpisodesFragment : Fragment() {
                         snackBar.show()
                     } else {
                         episodeViewModel.setShowEpisode(
-                            tmdbId,
+                            episodesViewModel.tmdbId,
                             episode.season_number,
                             episode.episode_number
                         )
@@ -147,10 +142,7 @@ class EpisodesFragment : Fragment() {
 
     private fun setupEpisodesViewModel() {
         seasonViewModel.showId.observe(viewLifecycleOwner) { showSeason ->
-            showName = showSeason.showName
-            showPoster = showSeason.showPoster
-            tmdbId = showSeason.tmdbId
-            if (!hasLoaded) {
+            if (!episodesViewModel.hasLoaded) {
                 episodesViewModel.getSeasonWithWatched(
                     tmdbId = showSeason.tmdbId,
                     showName = showSeason.showName,
@@ -170,7 +162,7 @@ class EpisodesFragment : Fragment() {
                         episodeAdapter.submitList(it)
                     }
                     isLoading(false)
-                    hasLoaded = true
+                    episodesViewModel.hasLoaded = true
                 }
 
                 is Resource.Error -> {
@@ -179,7 +171,7 @@ class EpisodesFragment : Fragment() {
                     binding.rvList.isInvisible = true
                 }
 
-                is Resource.Loading -> if (!hasLoaded) {
+                is Resource.Loading -> if (!episodesViewModel.hasLoaded) {
                     isLoading(true)
                 }
             }
