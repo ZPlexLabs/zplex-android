@@ -27,7 +27,7 @@ class EpisodeViewHolder(
             tvEpisodeCount.text = count
 
             if (!episode.still_path.isNullOrEmpty()) {
-                val episodeThumb = "${TMDB_IMAGE_PREFIX}/${StillSize.original}${episode.still_path}"
+                val episodeThumb = "${TMDB_IMAGE_PREFIX}/${StillSize.w300}${episode.still_path}"
                 ivThumb.load(episodeThumb) { placeholder(R.drawable.no_thumb) }
             }
 
