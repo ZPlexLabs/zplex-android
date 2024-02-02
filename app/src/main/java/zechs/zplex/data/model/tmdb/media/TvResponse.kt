@@ -20,7 +20,7 @@ data class TvResponse(
     val poster_path: String?,
     val backdrop_path: String?,
     val seasons: MutableList<Season>?,
-    val credits: Credits,
+    val credits: Credits?,
     val recommendations: Recommendations?,
     val videos: Videos?,
     val vote_average: Double?,

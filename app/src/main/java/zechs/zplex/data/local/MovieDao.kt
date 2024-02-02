@@ -1,7 +1,10 @@
 package zechs.zplex.data.local
 
 import androidx.lifecycle.LiveData
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import zechs.zplex.data.model.entities.Movie
 
 @Dao
@@ -16,7 +19,10 @@ interface MovieDao {
     @Query("SELECT EXISTS(SELECT * FROM movies WHERE id = :id)")
     fun getMovie(id: Int): LiveData<Boolean>
 
-    @Delete
-    suspend fun deleteMovie(media: Movie)
+    @Query("SELECT * FROM movies WHERE id = :id LIMIT 1")
+    suspend fun getMovieById(id: Int): Movie?
+
+    @Query("DELETE FROM movies WHERE id = :id")
+    suspend fun deleteMovieById(id: Int)
 
 }

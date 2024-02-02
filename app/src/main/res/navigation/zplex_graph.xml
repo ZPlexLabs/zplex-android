@@ -18,6 +18,9 @@
         <action
             android:id="@+id/action_homeFragment_to_episodesListFragment"
             app:destination="@id/episodesListFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -89,6 +92,9 @@
         <action
             android:id="@+id/action_fragmentMedia_to_fragmentCollection"
             app:destination="@id/fragmentCollection" />
+        <action
+            android:id="@+id/action_fragmentMedia_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -102,6 +108,9 @@
         <action
             android:id="@+id/action_episodesListFragment_to_bigImageFragment"
             app:destination="@id/bigImageFragment" />
+        <action
+            android:id="@+id/action_episodesListFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
     </fragment>
 
     <fragment
@@ -167,6 +176,21 @@
         <action
             android:id="@+id/action_upcomingFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />
+    </fragment>
+    <fragment
+        android:id="@+id/signInFragment"
+        android:name="zechs.zplex.ui.signin.SignInFragment"
+        android:label="SignInFragment"
+        tools:layout="@layout/fragment_sign_in" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="zechs.zplex.ui.settings.SettingsFragment"
+        android:label="SettingsFragment"
+        tools:layout="@layout/fragment_settings" >
+        <action
+            android:id="@+id/action_settingsFragment_to_signInFragment"
+            app:destination="@id/signInFragment" />
     </fragment>
 
 </navigation>

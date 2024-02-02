@@ -52,7 +52,8 @@ sealed class MediaDataModel {
 
     @Keep
     data class MovieButton(
-        val movie: Movie
+        val movie: Movie,
+        val year: Int?
     ) : MediaDataModel()
 
     @Keep

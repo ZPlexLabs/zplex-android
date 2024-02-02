@@ -16,7 +16,8 @@ data class Media(
     val backdrop_path: String?,
     val overview: String?,
     val release_date: String?,
-    val first_air_date: String?
+    val first_air_date: String?,
+    val fileId: String? = null
 ) : Serializable {
 
     fun releasedDate(): String? {

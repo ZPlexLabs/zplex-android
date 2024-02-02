@@ -32,6 +32,7 @@ import androidx.transition.TransitionManager
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
@@ -49,6 +50,7 @@ import zechs.zplex.ui.list.adapter.ListDataModel
 import zechs.zplex.ui.media.adapter.MediaClickListener
 import zechs.zplex.ui.media.adapter.MediaDataAdapter
 import zechs.zplex.ui.media.adapter.MediaDataModel
+import zechs.zplex.ui.player.MPVActivity
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
 import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
@@ -90,6 +92,7 @@ class MediaFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentListBinding.bind(view)
 
         val media = args.media
         mediaViewModel.mediaType = when {
@@ -104,6 +107,7 @@ class MediaFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener {
             findNavController().navigateUp()
         }
+        mpvObserver()
     }
 
     private fun setupMediaViewModel(tmdbId: Int, mediaType: MediaType) {
@@ -280,8 +284,20 @@ class MediaFragment : Fragment() {
                 navigateToCollection(collectionId)
             }
 
-            override fun movieWatchNow(tmdbId: Int) {
-                showSnackBar(message = "To be implemented")
+            override fun movieWatchNow(tmdbId: Int, year: Int?) {
+                if (mediaViewModel.hasLoggedIn) {
+                    mediaViewModel.playMovie(tmdbId, year)
+                } else {
+                    val snackBar = Snackbar.make(
+                        binding.root,
+                        getString(R.string.login_to_google_drive),
+                        Snackbar.LENGTH_SHORT
+                    )
+                    snackBar.setAction(getString(R.string.go_to_settings)) {
+                        findNavController().navigateSafe(R.id.action_fragmentMedia_to_settingsFragment)
+                    }
+                    snackBar.show()
+                }
             }
 
             override fun movieShare(movie: Movie) {
@@ -459,7 +475,7 @@ class MediaFragment : Fragment() {
 
             view.setOnClickListener {
                 if (isSaved) {
-                    mediaViewModel.deleteShow(show)
+                    mediaViewModel.deleteShow(show.id)
                     val snackBar = Snackbar.make(
                         binding.rvList, "${show.name} removed from your library",
                         Snackbar.LENGTH_SHORT
@@ -479,7 +495,7 @@ class MediaFragment : Fragment() {
                     snackBar.setAction(
                         R.string.undo
                     ) {
-                        mediaViewModel.deleteShow(show)
+                        mediaViewModel.deleteShow(show.id)
                     }
                     snackBar.show()
                 }
@@ -508,7 +524,7 @@ class MediaFragment : Fragment() {
 
             view.setOnClickListener {
                 if (isSaved) {
-                    mediaViewModel.deleteMovie(movie)
+                    mediaViewModel.deleteMovie(movie.id)
                     val snackBar = Snackbar.make(
                         binding.rvList, "${movie.title} removed from your library",
                         Snackbar.LENGTH_SHORT
@@ -528,7 +544,7 @@ class MediaFragment : Fragment() {
                     snackBar.setAction(
                         R.string.undo
                     ) {
-                        mediaViewModel.deleteMovie(movie)
+                        mediaViewModel.deleteMovie(movie.id)
                     }
                     snackBar.show()
                 }
@@ -540,8 +556,41 @@ class MediaFragment : Fragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    private fun mpvObserver() {
+        mediaViewModel.movieFile.observe(viewLifecycleOwner) { event ->
+            event.getContentIfNotHandled()?.let { res ->
+                when (res) {
+                    is Resource.Success -> {
+                        launchMpv(res.data!!)
+                    }
+
+                    is Resource.Error -> {
+                        showSnackBar(res.message!!)
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    }
+
+    private fun launchMpv(movie: zechs.zplex.ui.player.Movie) {
+        Intent(
+            requireContext(), MPVActivity::class.java
+        ).apply {
+            putExtra("playlist", Gson().toJson(listOf(movie)))
+            putExtra("startIndex", 0)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }.also { startActivity(it) }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        mediaViewModel.updateStatus()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
         binding.rvList.adapter = null
         _binding = null
     }

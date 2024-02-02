@@ -1,6 +1,7 @@
 package zechs.zplex.ui.main
 
 import android.animation.ValueAnimator
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateInterpolator
@@ -18,6 +19,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.ActivityMainBinding
+import zechs.zplex.service.RemoteLibraryIndexingService
 
 
 @AndroidEntryPoint
@@ -44,10 +46,12 @@ class MainActivity : AppCompatActivity() {
                 R.id.fragmentMedia, R.id.castsFragment,
                 R.id.episodesListFragment, R.id.fragmentList,
                 R.id.fragmentCollection, R.id.watchFragment,
-                R.id.bigImageFragment -> {
+                R.id.bigImageFragment, R.id.signInFragment,
+                R.id.settingsFragment -> {
                     animationNavColorChange(R.color.statusBarColor)
                     hideSlideDown(binding.bottomNavigationView)
                 }
+
                 else -> {
                     animationNavColorChange(R.color.fadedColor)
                     showSlideUp(binding.bottomNavigationView)
@@ -55,6 +59,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        startService(Intent(this, RemoteLibraryIndexingService::class.java))
     }
 
     private fun animationNavColorChange(
@@ -109,22 +114,6 @@ class MainActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
-
-//    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-//        if (event.action == MotionEvent.ACTION_DOWN) {
-//            val v: View? = currentFocus
-//            if (v is EditText) {
-//                val outRect = Rect()
-//                v.getGlobalVisibleRect(outRect)
-//                if (!outRect.contains(event.rawX.toInt(), event.rawY.toInt())) {
-//                    v.clearFocus()
-//                    val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-//                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0)
-//                }
-//            }
-//        }
-//        return super.dispatchTouchEvent(event)
-//    }
 
     companion object {
         const val TAG = "MainActivity"

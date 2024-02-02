@@ -1,12 +1,12 @@
 package zechs.zplex.ui.shared_adapters.detailed_media
 
 import androidx.recyclerview.widget.RecyclerView
+import coil.load
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.ItemDetailedMediaBinding
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.GlideApp
 
 class DetailedViewHolder(
     private val itemBinding: ItemDetailedMediaBinding,
@@ -26,11 +26,8 @@ class DetailedViewHolder(
                 detailedMediaAdapter.mediaOnClick.invoke(media)
             }
 
-            ivPoster.apply {
-                GlideApp.with(this)
-                    .load(posterUrl)
-                    .placeholder(R.drawable.no_poster)
-                    .into(this)
+            ivPoster.load(posterUrl) {
+                placeholder(R.drawable.no_poster)
             }
 
             var releasing = "Release date not available"

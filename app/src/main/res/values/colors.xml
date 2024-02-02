@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#1E1E22</color>
     <color name="cardColor">#171717</color>
     <color name="colorAccent">#6750a4</color>
+    <color name="colorAccentLight">#8F82C1</color>
     <color name="textColor">#FFFFFF</color>
     <color name="textColor_54">#8AFFFFFF</color>
     <color name="textColor_74">#BDFFFFFF</color>

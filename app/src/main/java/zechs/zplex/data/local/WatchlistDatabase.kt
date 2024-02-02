@@ -15,7 +15,7 @@ import zechs.zplex.data.model.entities.WatchedShow
         WatchedMovie::class,
         WatchedShow::class
     ],
-    version = 4,
+    version = 1,
     exportSchema = false
 )
 

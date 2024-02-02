@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.EditText
 import zechs.zplex.R
+import zechs.zplex.utils.util.Keyboard
 
 /**
  * Adds a clear all button when edit text as any text
@@ -34,4 +35,10 @@ fun EditText.setupClearButtonWithAction() {
         }
         return@OnTouchListener false
     })
+}
+
+fun EditText.hideKeyboardWhenOffFocus() {
+    this.setOnFocusChangeListener { v, hasFocus ->
+        if (!hasFocus) Keyboard.hide(v)
+    }
 }

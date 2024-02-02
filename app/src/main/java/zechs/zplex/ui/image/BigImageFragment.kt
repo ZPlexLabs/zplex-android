@@ -1,6 +1,5 @@
 package zechs.zplex.ui.image
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,16 +8,15 @@ import android.view.animation.LinearInterpolator
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
+import coil.load
+import coil.request.ErrorResult
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.google.android.material.transition.MaterialFadeThrough
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.databinding.FragmentBigImageBinding
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.GlideApp
 
 class BigImageFragment : Fragment() {
 
@@ -57,40 +55,28 @@ class BigImageFragment : Fragment() {
                 "${TMDB_IMAGE_PREFIX}/${PosterSize.original}${imageUri}"
             } else R.drawable.no_poster
 
-            GlideApp.with(binding.bigImageView)
-                .load(imageUrl)
-                .placeholder(R.drawable.no_poster)
-                .addListener(glideRequestListener)
-                .into(binding.bigImageView)
+            binding.bigImageView.load(imageUrl) {
+                placeholder(R.drawable.no_poster)
+                listener(imageRequestListener)
+            }
         }
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
     }
 
-    private val glideRequestListener = object : RequestListener<Drawable> {
-        override fun onLoadFailed(
-            e: GlideException?,
-            model: Any?,
-            target: Target<Drawable>?,
-            isFirstResource: Boolean
-        ): Boolean {
+    private val imageRequestListener = object : ImageRequest.Listener {
+        override fun onError(request: ImageRequest, result: ErrorResult) {
+            super.onError(request, result)
             parentFragment?.startPostponedEnterTransition()
-            return false
         }
 
-        override fun onResourceReady(
-            resource: Drawable?,
-            model: Any?,
-            target: Target<Drawable>?,
-            dataSource: DataSource?,
-            isFirstResource: Boolean
-        ): Boolean {
+        override fun onSuccess(request: ImageRequest, result: SuccessResult) {
+            super.onSuccess(request, result)
             parentFragment?.startPostponedEnterTransition()
-            return false
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
     }
 

@@ -8,10 +8,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
+import coil.load
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import zechs.zplex.R
 import zechs.zplex.data.model.BackdropSize
 import zechs.zplex.data.model.PosterSize
@@ -21,7 +20,6 @@ import zechs.zplex.ui.shared_adapters.casts.CastAdapter
 import zechs.zplex.ui.shared_adapters.media.MediaAdapter
 import zechs.zplex.ui.shared_adapters.video.VideoAdapter
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.util.SpannableTextView.spannablePlotText
 
 sealed class MediaViewHolder(
@@ -37,28 +35,14 @@ sealed class MediaViewHolder(
         private var hasLoadedResource = false
         private var isPoster = false
 
-        private val glideRequestListener = object : RequestListener<Drawable> {
-            override fun onLoadFailed(
-                e: GlideException?,
-                model: Any?,
-                target: Target<Drawable>?,
-                isFirstResource: Boolean
-            ): Boolean {
-                return false
-            }
-
-            override fun onResourceReady(
-                resource: Drawable?,
-                model: Any?,
-                target: Target<Drawable>?,
-                dataSource: DataSource?,
-                isFirstResource: Boolean
-            ): Boolean {
-                if (!hasLoadedResource && resource != null && isPoster) {
+        private val imageRequestListener = object : ImageRequest.Listener {
+            override fun onSuccess(request: ImageRequest, result: SuccessResult) {
+                super.onSuccess(request, result)
+                val resource = result.drawable
+                if (!hasLoadedResource && isPoster) {
                     listener.setImageResource(resource)
                     hasLoadedResource = true
                 }
-                return false
             }
         }
 
@@ -74,18 +58,14 @@ sealed class MediaViewHolder(
                 "$TMDB_IMAGE_PREFIX/${BackdropSize.w780}${item.backdropPath}"
             }
             itemBinding.apply {
-                GlideApp
-                    .with(ivPoster)
-                    .load(posterUrl)
-                    .addListener(glideRequestListener)
-                    .placeholder(R.drawable.no_poster)
-                    .into(ivPoster)
+                ivPoster.load(posterUrl) {
+                    placeholder(R.drawable.no_poster)
+                    listener(imageRequestListener)
+                }
 
-                GlideApp
-                    .with(ivBackdrop)
-                    .load(backdropUrl)
-                    .placeholder(R.drawable.no_thumb)
-                    .into(ivBackdrop)
+                ivBackdrop.load(backdropUrl) {
+                    placeholder(R.drawable.no_thumb)
+                }
 
                 rbRating.rating = item.rating.toFloat()
                 tvRatingText.text = item.rating.toString()
@@ -136,10 +116,9 @@ sealed class MediaViewHolder(
                 "$TMDB_IMAGE_PREFIX/${PosterSize.w342}${item.seasonPosterPath}"
             }
             itemBinding.apply {
-                GlideApp.with(ivSeasonPoster)
-                    .load(seasonPosterUrl)
-                    .placeholder(R.drawable.no_poster)
-                    .into(ivSeasonPoster)
+                ivSeasonPoster.load(seasonPosterUrl) {
+                    placeholder(R.drawable.no_poster)
+                }
                 tvSeasonNumber.text = item.seasonName
                 tvYearEpisode.text = item.seasonYearAndEpisodeCount
                 tvSeasonPlot.text = item.seasonPlot
@@ -159,11 +138,9 @@ sealed class MediaViewHolder(
                 val bannerUrl = if (item.bannerPoster == null) R.drawable.no_thumb else {
                     "$TMDB_IMAGE_PREFIX/${BackdropSize.w780}${item.bannerPoster}"
                 }
-                GlideApp.with(ivBanner)
-                    .load(bannerUrl)
-                    .placeholder(R.drawable.no_thumb)
-                    .into(ivBanner)
-
+                ivBanner.load(bannerUrl) {
+                    placeholder(R.drawable.no_thumb)
+                }
                 tvCollection.text = item.collectionName
                 root.setOnClickListener {
                     mediaDataAdapter.mediaClickListener.collectionClick(item.collectionId)
@@ -216,9 +193,9 @@ sealed class MediaViewHolder(
                 btnWatchNow.apply {
                     text = context.getString(R.string.watch_now)
                     icon = getDrawable(R.drawable.ic_play_circle_24)
-//                    setOnClickListener {
-//                        listener.movieWatchNow(item.movie.id)
-//                    }
+                    setOnClickListener {
+                        listener.movieWatchNow(item.movie.id, item.year)
+                    }
 
                     val btnWatchNowTag = "btnWatchNowTAG"
                     if (tag != btnWatchNowTag) {

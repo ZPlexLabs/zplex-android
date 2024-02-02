@@ -28,7 +28,7 @@ object Converter {
 
     @Throws(ParseException::class)
     fun toDuration(date: String): String {
-        val format = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+        val format = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH)
         format.timeZone = TimeZone.getTimeZone("UTC")
         format.timeZone = TimeZone.getTimeZone(TimeZone.getDefault().toString())
         val past = format.parse(date)
@@ -90,22 +90,35 @@ object Converter {
 
     fun getDate(): String {
         val time = System.currentTimeMillis()
-        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
         return formatter.format(time)!!
     }
 
     fun dateToLocalDate(date: String): LocalDate {
         val pattern = "MMM dd, yyyy"
 
-        val locale = Locale.getDefault(Locale.Category.FORMAT)
         val chronology = IsoChronology.INSTANCE
         val df = DateTimeFormatterBuilder()
             .parseLenient().appendPattern(pattern).toFormatter()
             .withChronology(chronology)
-            .withDecimalStyle(DecimalStyle.of(locale))
+            .withDecimalStyle(DecimalStyle.of(Locale.ENGLISH))
         val temporal: TemporalAccessor = df.parse(date)
         val cDate: ChronoLocalDate = chronology.date(temporal)
         return LocalDate.from(cDate)
+    }
+
+    fun toHumanSize(size: Long): String {
+        val kb = size.toString().toDouble() / 1024
+        val mb = kb / 1024
+        val gb = mb / 1024
+        val tb = gb / 1024
+        return when {
+            size < 1024L -> "$size Bytes"
+            size < 1024L * 1024 -> String.format("%.2f", kb) + " KB"
+            size < 1024L * 1024 * 1024 -> String.format("%.2f", mb) + " MB"
+            size < 1024L * 1024 * 1024 * 1024 -> String.format("%.2f", gb) + " GB"
+            else -> String.format("%.2f", tb) + " TB"
+        }
     }
 
 }

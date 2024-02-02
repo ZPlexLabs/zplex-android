@@ -28,7 +28,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     app: Application,
     private val tmdbRepository: TmdbRepository,
-    watchedRepository: WatchedRepository
+    private val watchedRepository: WatchedRepository
 ) : BaseAndroidViewModel(app) {
 
     @Suppress("unused")
@@ -62,13 +62,21 @@ class HomeViewModel @Inject constructor(
 
         val watchedDataModel = mutableListOf<WatchedDataModel>()
 
-        movie.forEach {
-            watchedDataModel.add(WatchedDataModel.Movie(it))
-        }
+        movie.sortedBy { it.createdAt }
+            .distinctBy { it.tmdbId }
+            .forEach {
+                watchedDataModel.add(WatchedDataModel.Movie(it))
+            }
 
-        show.forEach {
-            watchedDataModel.add(WatchedDataModel.Show(it))
-        }
+        show.groupBy { it.tmdbId }
+            .values
+            .flatMap { group ->
+                group.maxByOrNull { it.createdAt }?.let { listOf(it) } ?: emptyList()
+            }
+            .sortedByDescending { it.createdAt }
+            .forEach {
+                watchedDataModel.add(WatchedDataModel.Show(it))
+            }
 
         watchedDataModel.sortBy {
             when (it) {
@@ -99,7 +107,7 @@ class HomeViewModel @Inject constructor(
 
             val trending = async {
                 tmdbRepository.getTrending(
-                    time_window = TrendingWindow.DAY.toString().lowercase()
+                    timeWindow = TrendingWindow.DAY.toString().lowercase()
                 )
             }
 
@@ -156,5 +164,12 @@ class HomeViewModel @Inject constructor(
         }
 
         return Resource.Error(theatres.message())
+    }
+
+    fun removeWatchedMedia(watched: WatchedDataModel) = viewModelScope.launch {
+        when (watched) {
+            is WatchedDataModel.Movie -> watchedRepository.deleteWatchedMovie(watched.movie.tmdbId)
+            is WatchedDataModel.Show -> watchedRepository.deleteWatchedShow(watched.show.tmdbId)
+        }
     }
 }

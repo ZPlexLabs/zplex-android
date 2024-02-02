@@ -11,6 +11,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 import zechs.zplex.R
@@ -51,12 +52,24 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentListBinding.bind(view)
 
         binding.toolbar.apply {
             navigationIcon = null
             isTitleCentered = false
             setTitleTextAppearance(context, R.style.homeTitleTextAppearance)
             title = resources.getString(R.string.app_name)
+            inflateMenu(R.menu.main_menu)
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_settings -> {
+                        findNavController().navigateSafe(R.id.action_homeFragment_to_settingsFragment)
+                        true
+                    }
+
+                    else -> false
+                }
+            }
         }
 
         setupRecyclerView()
@@ -107,13 +120,31 @@ class HomeFragment : Fragment() {
                 is WatchedDataModel.Show -> navigateToSeason(watched.show)
             }
         }
+
+        override fun onLongClickWatched(watched: WatchedDataModel) {
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.remove_from_watched))
+                .setPositiveButton(getString(R.string.yes)) { _, _ ->
+                    homeViewModel.removeWatchedMedia(watched)
+                }
+                .setNegativeButton(getString(R.string.no)) { _, _ -> }
+                .show()
+        }
     }
 
     private fun homeMediaSuccess(listResponse: List<HomeDataModel>) {
         homeDataAdapter.submitList(listResponse)
 
         homeViewModel.watchedMedia.observe(viewLifecycleOwner) { watchedList ->
-            watchedList?.let { setupWatchedList(it) }
+            watchedList?.let {
+                val sortedList = it.sortedByDescending { watchedData ->
+                    when (watchedData) {
+                        is WatchedDataModel.Show -> watchedData.show.createdAt
+                        is WatchedDataModel.Movie -> watchedData.movie.createdAt
+                    }
+                }
+                setupWatchedList(sortedList)
+            }
         }
     }
 
@@ -180,8 +211,8 @@ class HomeFragment : Fragment() {
         binding.loading.isVisible = hide
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         _binding = null
     }
 

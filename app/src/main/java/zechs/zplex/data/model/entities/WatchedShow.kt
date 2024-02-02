@@ -3,6 +3,7 @@ package zechs.zplex.data.model.entities
 import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.util.Calendar
 
 @Entity(tableName = "watched_shows")
 @Keep
@@ -15,6 +16,7 @@ data class WatchedShow(
     val episodeNumber: Int,
     val watchedDuration: Long,
     val totalDuration: Long,
+    val createdAt: Long,
     @PrimaryKey(autoGenerate = true) val id: Int? = null
 ) {
 

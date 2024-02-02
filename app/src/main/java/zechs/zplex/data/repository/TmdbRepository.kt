@@ -30,37 +30,47 @@ class TmdbRepository @Inject constructor(
         movie: Movie
     ) = movieDao.upsertMovie(movie)
 
+    suspend fun fetchMovieById(
+        id: Int
+    ) = movieDao.getMovieById(id)
+
     fun fetchMovie(
         id: Int
     ) = movieDao.getMovie(id)
 
     suspend fun deleteMovie(
-        movie: Movie
-    ) = movieDao.deleteMovie(movie)
+        tmdbId: Int
+    ) = movieDao.deleteMovieById(tmdbId)
 
     fun getSavedMovies() = movieDao.getAllMovies()
 
     suspend fun upsertShow(
-        Show: Show
-    ) = showDao.upsertShow(Show)
+        show: Show
+    ) = showDao.upsertShow(show)
+
+    suspend fun fetchShowById(
+        id: Int
+    ) = showDao.getShowById(id)
 
     fun fetchShow(
         id: Int
     ) = showDao.getShow(id)
 
     suspend fun deleteShow(
-        Show: Show
-    ) = showDao.deleteShow(Show)
+        tmdbId: Int
+    ) = showDao.deleteShowById(tmdbId)
 
     fun getSavedShows() = showDao.getAllShows()
 
     suspend fun getShow(
-        tvId: Int
-    ) = tmdbApi.getShow(tvId)
+        tvId: Int,
+        appendToQuery: String? = "credits,recommendations,videos"
+    ) = tmdbApi.getShow(tvId, append_to_response = appendToQuery)
 
     suspend fun getMovie(
-        movieId: Int
-    ) = tmdbApi.getMovie(movieId)
+        movieId: Int,
+        appendToQuery: String? = "credits,recommendations,videos"
+    ) = tmdbApi.getMovie(movieId, append_to_response = appendToQuery)
 
     suspend fun getSeason(
         tvId: Int,
@@ -83,8 +93,8 @@ class TmdbRepository @Inject constructor(
     ) = tmdbApi.getCollection(collection_id = collectionId)
 
     suspend fun getTrending(
-        time_window: String
-    ) = tmdbApi.getTrending(time_window)
+        timeWindow: String
+    ) = tmdbApi.getTrending(timeWindow)
 
     suspend fun getUpcoming(page: Int) = tmdbApi.getUpcoming(page = page)
 
@@ -114,38 +124,36 @@ class TmdbRepository @Inject constructor(
     }
 
     suspend fun getInTheatres(
-        dateStart: String, dateEnd: String
+        dateStart: String,
+        dateEnd: String
     ) = tmdbApi.getInTheatres(
         release_date_start = dateStart,
         release_date_end = dateEnd
     )
 
-    suspend fun getPopularOnStreaming(
-    ) = tmdbApi.getPopularOnStreaming()
+    suspend fun getPopularOnStreaming() = tmdbApi.getPopularOnStreaming()
 
     suspend fun getShowsFromCompany(
-        company_id: Int,
+        companyId: Int,
         page: Int
     ) = tmdbApi.getFromCompany(
         media_type = MediaType.tv,
-        with_companies = company_id,
+        with_companies = companyId,
         page = page
     )
 
     suspend fun getMoviesFromCompany(
-        company_id: Int,
+        companyId: Int,
         page: Int
     ) = tmdbApi.getFromCompany(
         media_type = MediaType.movie,
-        with_companies = company_id,
+        with_companies = companyId,
         page = page
     )
 
     suspend fun getPerson(
-        person_id: Int
-    ) = tmdbApi.getPerson(
-        person_id = person_id
-    )
+        personId: Int
+    ) = tmdbApi.getPerson(personId)
 
     suspend fun searchKeyword(
         query: String

@@ -137,8 +137,8 @@ class UpcomingFragment : Fragment() {
         findNavController().navigateSafe(action)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         binding.rvBrowse.adapter = null
         _binding = null
     }

@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
+import coil.load
 import dagger.hilt.android.AndroidEntryPoint
 import zechs.zplex.R
 import zechs.zplex.data.model.StillSize
@@ -20,7 +21,6 @@ import zechs.zplex.databinding.FragmentWatchBinding
 import zechs.zplex.ui.shared_adapters.casts.CastAdapter
 import zechs.zplex.ui.shared_viewmodels.EpisodeViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.GlideApp
 import zechs.zplex.utils.ext.navigateSafe
 import zechs.zplex.utils.state.Resource
 
@@ -58,6 +58,11 @@ class WatchFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        _binding = FragmentWatchBinding.bind(view)
+
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
 
         setupRecyclerView()
 
@@ -102,11 +107,9 @@ class WatchFragment : Fragment() {
             }
         }
 
-        GlideApp.with(binding.ivBackdrop)
-            .asBitmap()
-            .load(episodeStillUrl)
-            .placeholder(R.drawable.no_thumb)
-            .into(binding.ivBackdrop)
+        binding.ivBackdrop.load(episodeStillUrl) {
+            placeholder(R.drawable.no_thumb)
+        }
 
         val castList = episode.guest_stars?.map {
             Cast(
@@ -136,8 +139,8 @@ class WatchFragment : Fragment() {
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onDestroyView() {
+        super.onDestroyView()
         binding.rvCasts.adapter = null
         _binding = null
     }

@@ -13,6 +13,7 @@ import zechs.zplex.data.local.ShowDao
 import zechs.zplex.data.remote.TmdbApi
 import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.utils.Constants.TMDB_API_URL
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -22,6 +23,7 @@ object TmdbModule {
     @Provides
     @Singleton
     fun provideTmdbApi(
+        @Named("OkHttpClient")
         client: OkHttpClient,
         moshi: Moshi
     ): TmdbApi {

@@ -26,7 +26,7 @@ interface TmdbApi {
         @Query("language")
         language: String = "en-US",
         @Query("append_to_response")
-        append_to_response: String = "credits,recommendations,videos"
+        append_to_response: String?
     ): Response<TvResponse>
 
     @GET("3/tv/{tv_id}/season/{season_number}")
@@ -78,7 +78,7 @@ interface TmdbApi {
         @Query("language")
         language: String = "en-US",
         @Query("append_to_response")
-        append_to_response: String = "credits,recommendations,videos"
+        append_to_response: String?
     ): Response<MovieResponse>
 
     @GET("3/collection/{collection_id}")

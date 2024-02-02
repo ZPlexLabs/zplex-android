@@ -15,7 +15,8 @@ data class Movie(
     val title: String,
     val media_type: String?,
     val poster_path: String?,
-    val vote_average: Double?
+    val vote_average: Double?,
+    val fileId: String?
 ) {
 
     fun toMedia() = Media(
@@ -28,7 +29,8 @@ data class Movie(
         backdrop_path = null,
         overview = null,
         release_date = null,
-        first_air_date = null
+        first_air_date = null,
+        fileId = fileId
     )
 
 }

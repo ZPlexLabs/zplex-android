@@ -18,7 +18,7 @@ data class MovieResponse(
     val overview: String?,
     val poster_path: String?,
     val backdrop_path: String?,
-    val credits: Credits,
+    val credits: Credits?,
     val recommendations: Recommendations?,
     val videos: Videos?,
     val vote_average: Double?

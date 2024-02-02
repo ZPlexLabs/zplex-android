@@ -39,9 +39,14 @@ sealed class HomeViewHolder(
         }
 
         private val watchedAdapter by lazy {
-            WatchedDataAdapter {
-                homeDataAdapter.homeClickListener.onClickWatched(it)
-            }
+            WatchedDataAdapter(
+                watchedOnClick = {
+                    homeDataAdapter.homeClickListener.onClickWatched(it)
+                },
+                watchedOnLongClick = {
+                    homeDataAdapter.homeClickListener.onLongClickWatched(it)
+                }
+            )
         }
 
         fun bindMedia(item: HomeDataModel.Media) {
@@ -70,7 +75,7 @@ sealed class HomeViewHolder(
                 ) {
                     override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
                         return lp?.let {
-                            it.width = (0.33 * width).toInt()
+                            it.width = (0.40 * width).toInt()
                             true
                         } ?: super.checkLayoutParams(lp)
                     }
