@@ -27,27 +27,26 @@ object Converter {
     private val timesString = listOf("year", "month", "day", "hr", "min", "sec")
 
     @Throws(ParseException::class)
-    fun toDuration(date: String): String {
+    fun toDuration(date: String, now: Date = Date()): String {
         val format = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.ENGLISH)
         format.timeZone = TimeZone.getTimeZone("UTC")
-        format.timeZone = TimeZone.getTimeZone(TimeZone.getDefault().toString())
+
         val past = format.parse(date)
-        val now = Date()
-        val duration = TimeUnit.MILLISECONDS.toMillis(
-            now.time - Objects.requireNonNull(past).time
-        )
+        val duration = TimeUnit.MILLISECONDS.toMillis(now.time - past!!.time)
+
         val response = StringBuilder()
         for (i in times.indices) {
             val current = times[i]
             val temp = duration / current
-            if (temp > 0) {
-                response.append(temp).append(" ").append(timesString[i])
-                    .append(if (temp != 1L) "s" else "").append(" ago")
+            if (temp >= 1) {
+                response.append(temp.toInt()).append(" ").append(timesString[i])
+                    .append(if (temp.toInt() != 1) "s" else "").append(" ago")
                 break
             }
         }
         return if ("" == response.toString()) "0 secs ago" else response.toString()
     }
+
 
     fun getSize(size: Long): String {
         val s: String

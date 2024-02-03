@@ -2,19 +2,26 @@ package zechs.zplex.utils
 
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import zechs.zplex.utils.util.Converter
 import zechs.zplex.utils.util.Converter.convertMinutes
 import zechs.zplex.utils.util.Converter.getSize
 import zechs.zplex.utils.util.Converter.parseDate
 import zechs.zplex.utils.util.Converter.toDuration
 import zechs.zplex.utils.util.Converter.yearsBetween
+import java.time.LocalDate
+import java.time.ZoneId
+import java.util.Date
+
 
 class ConverterUtilsTest {
 
     @Test
     fun `dates to time ago`() {
-        val expected = "2 years ago"
-        val response = toDuration("2020-04-20 20:00")
+        val fixedDate = LocalDate.of(2023, 1, 1).atStartOfDay(ZoneId.systemDefault())
+        val date = Date.from(fixedDate.toInstant())
+
+        val expected = "3 years ago"
+
+        val response = toDuration("2020-01-01 00:00", date)
         assertEquals(expected, response)
     }
 
@@ -41,8 +48,8 @@ class ConverterUtilsTest {
 
     @Test
     fun `age from birthday`() {
-        val expected = 20
-        val response = yearsBetween("2002-02-21", Converter.getDate())
+        val expected = 22
+        val response = yearsBetween("2002-02-21", "2024-02-21")
         assertEquals(expected, response)
     }
 
