@@ -65,7 +65,7 @@ class CastsFragment : Fragment() {
             findNavController().navigateUp()
         }
 
-        setupCastViewModel(args.cast.id)
+        setupCastViewModel(args.castId)
     }
 
     private fun openImageFullSize(posterPath: String?, imageView: ImageView) {

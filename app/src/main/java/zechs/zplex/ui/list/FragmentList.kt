@@ -144,8 +144,10 @@ class FragmentList : Fragment(), ListClickListener {
     }
 
     override fun onClickCast(cast: Cast) {
-        val action = FragmentListDirections.actionFragmentListToCastsFragment(cast)
-        findNavController().navigateSafe(action)
+        cast.id?.let { castId ->
+            val action = FragmentListDirections.actionFragmentListToCastsFragment(castId)
+            findNavController().navigateSafe(action)
+        }
     }
 
     override fun onClickVideo(video: Video) {

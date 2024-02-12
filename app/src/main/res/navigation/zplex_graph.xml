@@ -129,8 +129,8 @@
         android:label="CastsFragment"
         tools:layout="@layout/fragment_list">
         <argument
-            android:name="cast"
-            app:argType="zechs.zplex.data.model.tmdb.entities.Cast" />
+            android:name="cast_id"
+            app:argType="integer" />
         <action
             android:id="@+id/action_castsFragment_to_bigImageFragment"
             app:destination="@id/bigImageFragment" />

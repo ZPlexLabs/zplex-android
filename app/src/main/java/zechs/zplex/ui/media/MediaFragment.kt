@@ -196,9 +196,11 @@ class MediaFragment : Fragment() {
             }
 
             override fun onClickCast(cast: Cast) {
-                val action = MediaFragmentDirections
-                    .actionFragmentMediaToCastsFragment(cast)
-                findNavController().navigateSafe(action)
+                cast.id?.let { castId ->
+                    val action = MediaFragmentDirections
+                        .actionFragmentMediaToCastsFragment(castId)
+                    findNavController().navigateSafe(action)
+                }
             }
 
             override fun setImageResource(image: Drawable) {

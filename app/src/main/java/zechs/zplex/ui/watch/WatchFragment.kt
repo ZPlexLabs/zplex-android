@@ -35,12 +35,14 @@ class WatchFragment : Fragment() {
         ViewModelProvider(this)[WatchViewModel::class.java]
     }
     private val castAdapter by lazy {
-        CastAdapter(castOnClick = {
-            WatchFragmentDirections
-                .actionWatchFragmentToCastsFragment(cast = it)
-                .also {
-                    findNavController().navigateSafe(it)
-                }
+        CastAdapter(castOnClick = { cast ->
+            cast.id?.let { castId ->
+                WatchFragmentDirections
+                    .actionWatchFragmentToCastsFragment(castId)
+                    .also {
+                        findNavController().navigateSafe(it)
+                    }
+            }
         })
     }
 
