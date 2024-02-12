@@ -2,7 +2,7 @@ package zechs.zplex.ui.shared_adapters.media
 
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
+import com.bumptech.glide.Glide
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.data.model.tmdb.entities.Media
@@ -30,9 +30,10 @@ class MediaViewHolder(
             if (mediaAdapter.rating) {
                 ratingView.isVisible = true
             }
-            itemPoster.load(mediaPosterUrl) {
-                placeholder(R.drawable.no_poster)
-            }
+            Glide.with(itemPoster.context)
+                .load(mediaPosterUrl)
+                .placeholder(R.drawable.no_poster)
+                .into(itemPoster)
             root.setOnClickListener {
                 mediaAdapter.mediaOnClick.invoke(media)
             }
