@@ -8,8 +8,6 @@ import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import zechs.zplex.data.model.entities.WatchedMovie
@@ -131,8 +129,8 @@ class PlayerViewModel @Inject constructor(
 
     var head: PlaybackItem? = null
         private set
-    private val _current: MutableStateFlow<Resource<Playback?>> = MutableStateFlow(Resource.Loading())
-    val current = _current.asStateFlow()
+    private val _current = Channel<Resource<Playback?>>(Channel.CONFLATED)
+    val current = _current.receiveAsFlow()
 
     fun setPlaylist(playlist: String, startIndex: Int) {
         val playbackItemType = object : TypeToken<List<GsonPlaybackItem>?>() {}.type
@@ -167,15 +165,15 @@ class PlayerViewModel @Inject constructor(
 
     private fun updateWithToken() = viewModelScope.launch(Dispatchers.IO) {
         val client = sessionManager.fetchClient() ?: run {
-            _current.value = Resource.Error("Client not found")
+            _current.send(Resource.Error("Client not found"))
             return@launch
         }
         when (val tokenResponse = driveRepository.fetchAccessToken(client)) {
             is Resource.Success -> {
-                _current.value = Resource.Success(Playback(head, tokenResponse.data!!.accessToken))
+                _current.send(Resource.Success(Playback(head, tokenResponse.data!!.accessToken)))
             }
             is Resource.Error -> {
-                _current.value = Resource.Success(Playback(head, tokenResponse.message!!))
+                _current.send(Resource.Success(Playback(head, tokenResponse.message!!)))
             }
             else -> {}
         }
