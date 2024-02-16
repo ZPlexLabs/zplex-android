@@ -7,8 +7,9 @@ import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.WindowManager
-import zechs.mpv.MPVLib.mpvFormat.*
-import java.util.*
+import zechs.mpv.MPVLib.mpvFormat.MPV_FORMAT_FLAG
+import zechs.mpv.MPVLib.mpvFormat.MPV_FORMAT_INT64
+import zechs.mpv.MPVLib.mpvFormat.MPV_FORMAT_NONE
 import kotlin.reflect.KProperty
 
 class MPVView(
@@ -20,10 +21,17 @@ class MPVView(
         internal const val TAG = "mpv"
     }
 
-    fun initialize(configDir: String) {
+    fun initialize(configDir: String, cacheDir: String) {
         MPVLib.create(this.context)
         MPVLib.setOptionString("config", "yes")
+        MPVLib.setOptionString("cache", "yes")
+        MPVLib.setOptionString("cache-on-disk", "yes")
+        MPVLib.setOptionString("cache-dir", cacheDir)
         MPVLib.setOptionString("config-dir", configDir)
+
+        for (opt in arrayOf("demuxer-cache-dir", "gpu-shader-cache-dir", "icc-cache-dir")) {
+            MPVLib.setOptionString(opt, cacheDir)
+        }
 
         initOptions(configDir)
         MPVLib.init()

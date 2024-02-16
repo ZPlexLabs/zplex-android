@@ -100,7 +100,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             .playerToolbar
             .setNavigationOnClickListener { finish() }
 
-        player.initialize(filesDir.path)
+        player.initialize(filesDir.path, cacheDir.path)
         player.addObserver(this)
         playMedia()
 
