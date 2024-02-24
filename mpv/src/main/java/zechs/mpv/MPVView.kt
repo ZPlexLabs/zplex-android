@@ -10,6 +10,7 @@ import android.view.WindowManager
 import zechs.mpv.MPVLib.mpvFormat.MPV_FORMAT_FLAG
 import zechs.mpv.MPVLib.mpvFormat.MPV_FORMAT_INT64
 import zechs.mpv.MPVLib.mpvFormat.MPV_FORMAT_NONE
+import java.util.Locale
 import kotlin.reflect.KProperty
 
 class MPVView(
