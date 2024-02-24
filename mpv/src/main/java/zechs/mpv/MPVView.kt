@@ -194,6 +194,10 @@ class MPVView(
         get() = MPVLib.getPropertyBoolean("pause")
         set(paused) = MPVLib.setPropertyBoolean("pause", paused!!)
 
+    var isBuffering: Boolean?
+        get() = MPVLib.getPropertyBoolean("core-idle")
+        set(buffering) {}
+
     var timePos: Int?
         get() = MPVLib.getPropertyInt("time-pos")
         set(progress) = MPVLib.setPropertyInt("time-pos", progress!!)

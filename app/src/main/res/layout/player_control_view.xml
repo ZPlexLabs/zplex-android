@@ -98,6 +98,22 @@
             app:layout_constraintStart_toEndOf="@+id/btnPrevious"
             app:layout_constraintTop_toTopOf="@+id/btnPlayPause" />
 
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/buffering"
+            style="@style/Widget.Material3.CircularProgressIndicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:indeterminate="true"
+            app:indicatorColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/exo_ffwd"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/exo_rew"
+            app:layout_constraintTop_toTopOf="parent"
+            app:trackCornerRadius="24dp" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnPlayPause"
             style="@style/Widget.Material3.Button.IconButton"
@@ -105,6 +121,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
+            android:visibility="invisible"
             app:icon="@drawable/ic_pause_24"
             app:iconSize="52dp"
             app:iconTint="@android:color/white"

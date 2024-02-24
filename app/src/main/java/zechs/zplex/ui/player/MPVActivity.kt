@@ -367,19 +367,33 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         }
     }
 
-    private fun updatePlaybackStatus(paused: Boolean) {
+    private enum class PlaybackState {
+        PLAYING,
+        PAUSED,
+        BUFFERING
+    }
+
+    private fun updatePlaybackStatus(state: PlaybackState) {
+        Log.d(TAG, "updatePlaybackStatus($state)")
+        TransitionManager.endTransitions(controller.mainControls)
         TransitionManager.beginDelayedTransition(
             controller.mainControls,
             AutoTransition().apply { duration = 250L }
         )
 
-        controller.btnPlayPause.icon = ContextCompat.getDrawable(
-            /* context */ applicationContext,
-            /* drawableId */ if (paused) R.drawable.ic_play_24
-            else R.drawable.ic_pause_24
-        )
-
-        if (paused) {
+        if (state == PlaybackState.BUFFERING) {
+            controller.buffering.isInvisible = false
+            controller.btnPlayPause.isInvisible = true
+        } else {
+            controller.buffering.isInvisible = true
+            controller.btnPlayPause.isInvisible = false
+            controller.btnPlayPause.icon = ContextCompat.getDrawable(
+                /* context */ applicationContext,
+                /* drawableId */ if (state == PlaybackState.PAUSED) R.drawable.ic_play_24
+                else R.drawable.ic_pause_24
+            )
+        }
+        if (state == PlaybackState.BUFFERING) {
             window.clearFlags(FLAG_KEEP_SCREEN_ON)
         } else {
             window.addFlags(FLAG_KEEP_SCREEN_ON)
@@ -609,7 +623,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
     override fun eventProperty(property: String, value: Boolean) {
         if (activityIsForeground && property == "pause") {
-            runOnUiThread { updatePlaybackStatus(value) }
+            runOnUiThread { updatePlaybackStatus(if (value) PlaybackState.PAUSED else PlaybackState.PLAYING) }
         }
     }
 
@@ -642,11 +656,27 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         if (activityIsForeground && property == "track-list") {
             player.loadTracks()
         }
+
+        if (activityIsForeground && property == "core-idle") {
+            runOnUiThread { updatePlaybackStatus(if (player.paused!!) PlaybackState.PAUSED else PlaybackState.PLAYING) }
+        }
     }
 
     override fun event(eventId: Int) {
-        if (activityIsForeground && eventId == MPV_EVENT_PLAYBACK_RESTART) {
-            runOnUiThread { updatePlaybackStatus(player.paused!!) }
+        if (activityIsForeground) {
+            runOnUiThread {
+                if (eventId == MPV_EVENT_PLAYBACK_RESTART) {
+                    updatePlaybackStatus(if (player.paused!!) PlaybackState.PAUSED else PlaybackState.PLAYING)
+                } else {
+                    if (player.isBuffering != null) {
+                        if (player.isBuffering!! && !player.paused!!) {
+                            updatePlaybackStatus(PlaybackState.BUFFERING)
+                        } else {
+                            updatePlaybackStatus(if (player.paused!!) PlaybackState.PAUSED else PlaybackState.PLAYING)
+                        }
+                    }
+                }
+            }
         }
     }
 
