@@ -37,7 +37,7 @@ class MPVView(
         val wm = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
 
         val display = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            context.display!!
+            context.display
         } else {
             @Suppress("DEPRECATION")
             wm.defaultDisplay
