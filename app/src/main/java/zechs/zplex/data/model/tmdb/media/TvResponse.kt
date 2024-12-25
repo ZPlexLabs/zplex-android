@@ -14,7 +14,7 @@ data class TvResponse(
     val id: Int,
     val imdb_id: String?,
     val name: String?,
-    val networks: List<Network>?,
+    // val networks: List<Network>?,
     val production_companies: List<Network>?,
     val overview: String?,
     val poster_path: String?,

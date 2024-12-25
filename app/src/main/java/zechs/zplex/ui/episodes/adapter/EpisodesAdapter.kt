@@ -8,7 +8,8 @@ import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.databinding.ItemEpisodeBinding
 
 class EpisodesAdapter(
-    val episodeOnClick: (Episode) -> Unit
+    val episodeOnClick: (Episode) -> Unit,
+    val episodeOnLongPress: (Episode) -> Unit
 ) : ListAdapter<Episode, EpisodeViewHolder>(EpisodeDiffCallback()) {
 
     override fun onCreateViewHolder(

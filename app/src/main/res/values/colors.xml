@@ -13,4 +13,7 @@
     <color name="fadedColor">#2a2831</color>
     <color name="statusBarColor">#1c1b1f</color>
 
+    <color name="colorOnSuccessContainer">#004d00</color>
+    <color name="colorSuccessContainer">#b9f6ca</color>
+
 </resources>

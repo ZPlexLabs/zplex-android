@@ -1,7 +1,13 @@
 package zechs.zplex.data.remote
 
-import retrofit2.http.*
+import okhttp3.ResponseBody
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Path
+import retrofit2.http.Query
+import retrofit2.http.Streaming
 import zechs.zplex.data.model.drive.DriveResponse
+import zechs.zplex.data.model.drive.FileResponse
 import zechs.zplex.data.model.drive.FilesResponse
 
 interface DriveApi {
@@ -38,4 +44,20 @@ interface DriveApi {
         fields: String = "nextPageToken, drives(id, name, kind)"
     ): DriveResponse
 
+    @Streaming
+    @GET("drive/v3/files/{fileId}?alt=media")
+    suspend fun downloadFile(
+        @Path("fileId") fileId: String,
+        @Header("Authorization")
+        accessToken: String
+    ): ResponseBody
+
+    @GET("drive/v3/files/{fileId}")
+    suspend fun getFile(
+        @Path("fileId") fileId: String,
+        @Header("Authorization")
+        accessToken: String,
+        @Query("fields")
+        fields: String = "id, name, size, modifiedTime, md5Checksum, mimeType"
+    ): FileResponse
 }

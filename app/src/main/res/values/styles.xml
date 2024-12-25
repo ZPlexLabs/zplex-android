@@ -7,13 +7,11 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
-    <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar">
+    <style name="AppTheme" parent="Theme.Material3.DynamicColors.Dark.NoActionBar">
         <item name="chipStyle">@style/Widget.App.Chip</item>
         <item name="popupMenuBackground">@drawable/popup_menu_bg</item>
         <item name="android:listPopupWindowStyle">@style/MyListPopupWindow</item>
         <item name="materialCardViewStyle">@style/Widget.App.Card</item>
-        <item name="android:statusBarColor">@color/statusBarColor</item>
-        <item name="android:navigationBarColor">@color/fadedColor</item>
     </style>
 
     <style name="MenuTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">

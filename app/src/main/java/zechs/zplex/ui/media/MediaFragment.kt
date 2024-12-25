@@ -8,6 +8,8 @@ import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -124,18 +126,22 @@ class MediaFragment : Fragment() {
     ) {
         when (response) {
             is Resource.Success -> response.data?.let {
-                TransitionManager.beginDelayedTransition(
-                    binding.root,
-                    MaterialFadeThrough()
-                )
 
                 viewLifecycleOwner
                     .lifecycleScope
-                    .launch { mediaDataAdapter.submitList(it) }
+                    .launch {
+                        TransitionManager.beginDelayedTransition(
+                            binding.root,
+                            MaterialFadeThrough()
+                        )
+
+                        mediaDataAdapter.submitList(it)
+                    }
 
                 isLoading(false)
                 mediaViewModel.hasLoaded = true
             }
+
             is Resource.Error -> {
                 showSnackBar(
                     message = response.message,
@@ -150,6 +156,7 @@ class MediaFragment : Fragment() {
                 isLoading(false)
                 mediaViewModel.hasLoaded = true
             }
+
             is Resource.Loading -> {
                 if (!mediaViewModel.hasLoaded) {
                     mediaViewModel.setDominantColor(
@@ -180,6 +187,7 @@ class MediaFragment : Fragment() {
                         listDataModel.heading,
                         listDataModel.media
                     )
+
                     is ListDataModel.Videos -> setVideoList(listDataModel.videos)
                     else -> {}
                 }

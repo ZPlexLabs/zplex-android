@@ -80,6 +80,12 @@ dependencies {
     val lifecycleVersion = "2.8.7"
     val glideVersion = "4.16.0"
     val okhttpVersion = "4.12.0"
+    val workVersion = "2.10.0"
+
+
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:$workVersion")
+    implementation("androidx.hilt:hilt-work:1.2.0")
 
     // Core dependencies
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")

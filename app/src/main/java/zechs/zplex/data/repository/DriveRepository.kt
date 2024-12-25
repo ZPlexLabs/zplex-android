@@ -16,7 +16,6 @@ import zechs.zplex.utils.SessionManager
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.util.DriveApiQueryBuilder
 import javax.inject.Inject
-import javax.inject.Singleton
 
 class DriveRepository @Inject constructor(
     private val driveApi: DriveApi,
@@ -186,5 +185,15 @@ class DriveRepository @Inject constructor(
         Log.d(TAG, error)
         return Resource.Error(error)
     }
+
+    suspend fun downloadFile(
+        fileId: String,
+        accessToken: String
+    ) = driveApi.downloadFile(fileId, "Bearer $accessToken")
+
+    suspend fun getFile(
+        fileId: String,
+        accessToken: String
+    ) = driveApi.getFile(fileId, "Bearer $accessToken")
 
 }

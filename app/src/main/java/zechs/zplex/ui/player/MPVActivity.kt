@@ -30,26 +30,32 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.AutoTransition
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.sidesheet.SideSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.mpv.MPVLib
+import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED
 import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART
 import zechs.mpv.MPVView
 import zechs.mpv.utils.Utils
 import zechs.zplex.R
 import zechs.zplex.databinding.ActivityMpvBinding
 import zechs.zplex.databinding.PlayerControlViewBinding
+import zechs.zplex.databinding.SideSheetEpisodesBinding
+import zechs.zplex.ui.player.sidesheet.episodes.adapter.SideSheetEpisodesAdapter
 import zechs.zplex.utils.Constants.DRIVE_API
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.util.Orientation
 import zechs.zplex.utils.util.getNextOrientation
 import zechs.zplex.utils.util.setOrientation
+import java.io.File
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
@@ -82,6 +88,18 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
     private var onLoadCommands = mutableListOf<Array<String>>()
     private val speeds = arrayOf(0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0)
     private var orientation = Orientation.LANDSCAPE
+    private lateinit var sideSheetDialog: SideSheetDialog
+    private val episodesSheet by lazy {
+        SideSheetEpisodesBinding.inflate(layoutInflater)
+    }
+    private val sideSheetEpisodeAdapter by lazy {
+        SideSheetEpisodesAdapter(
+            episodeOnClick = { episode ->
+                viewModel.play(episode.fileId!!)
+                sideSheetDialog.hide()
+            }
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,14 +113,33 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
         player = binding.player
         controller = binding.controller
+        sideSheetDialog = SideSheetDialog(this)
 
         controller
             .playerToolbar
             .setNavigationOnClickListener { finish() }
 
-        player.initialize(filesDir.path)
+        controller
+            .playerToolbar
+            .setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.action_playlist -> {
+                        showPlaylistDialog()
+                        return@setOnMenuItemClickListener true
+                    }
+                }
+                return@setOnMenuItemClickListener false
+            }
+
+        sideSheetDialog.setContentView(episodesSheet.root)
+        episodesSheet.rvList.apply {
+            adapter = sideSheetEpisodeAdapter
+            layoutManager = LinearLayoutManager(
+                applicationContext, LinearLayoutManager.VERTICAL, false
+            )
+        }
+        player.initialize(filesDir.path, cacheDir.path)
         player.addObserver(this)
-        playMedia()
 
         audioManager = getSystemService(
             Context.AUDIO_SERVICE
@@ -139,10 +176,12 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             btnResize.setOnClickListener { player.cycleScale() }
             btnNext.setOnClickListener {
                 saveProgress(viewModel.head)
+                player.stop()
                 viewModel.next()
             }
             btnPrevious.setOnClickListener {
                 saveProgress(viewModel.head)
+                player.stop()
                 viewModel.previous()
             }
 
@@ -184,6 +223,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             }
         }
         playlistObserver()
+        playMedia()
     }
 
     private val seekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
@@ -235,7 +275,6 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
     override fun onNewIntent(i: Intent?) {
         super.onNewIntent(i)
-        playMedia()
     }
 
     private fun playMedia() {
@@ -247,6 +286,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             return
         }
         viewModel.setPlaylist(playlist, startIndex)
+        sideSheetEpisodeAdapter.submitList(viewModel.getPlaylist())
     }
 
     private fun playlistObserver() {
@@ -275,6 +315,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                 val playbackItem = resource.data.item
                 val titleBuilder = StringBuilder()
                 if (playbackItem != null) {
+                    val playlistButton = binding.controller.playerToolbar.menu
+                        .findItem(R.id.action_playlist)
                     titleBuilder.append(playbackItem.title)
                     if (playbackItem is Show) {
                         titleBuilder.append(
@@ -292,17 +334,34 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                             playbackItem.seasonNumber,
                             playbackItem.episodeNumber
                         )
+                        playlistButton.apply {
+                            isVisible = true
+                            playlistButton.setOnMenuItemClickListener {
+                                showPlaylistDialog()
+                                return@setOnMenuItemClickListener true
+                            }
+                        }
                     } else {
+                        playlistButton.isVisible = false
                         viewModel.getWatch(playbackItem.tmdbId, false, null, null)
                     }
                     val title = titleBuilder.toString()
                     controller.playerToolbar.title = title
-                    val playUri = getStreamUrl(playbackItem.fileId)
-                    MPVLib.command(arrayOf("loadfile", playUri))
-                    MPVLib.setOptionString(
-                        "http-header-fields",
-                        "Authorization: Bearer $accessToken"
-                    )
+                    val playUri = if (playbackItem.offline) {
+                        Uri.fromFile(File(playbackItem.fileId)).toString()
+                    } else getStreamUrl(playbackItem.fileId)
+
+                    Log.d(TAG, "playUri: $playUri")
+
+                    if (!playbackItem.offline) {
+                        MPVLib.setOptionString(
+                            "http-header-fields",
+                            "Authorization: Bearer $accessToken"
+                        )
+                    }
+                    if (player.vo !== null && player.vo!!) {
+                        MPVLib.command(arrayOf("loadfile", playUri))
+                    }
                     player.play(playUri)
                 }
                 TransitionManager.endTransitions(controller.mainControls)
@@ -319,6 +378,12 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                 controller.btnPrevious.isInvisible = !isPrev
             }
         }
+    }
+
+    private fun showPlaylistDialog() {
+        val currentIndex = viewModel.findIndexFromFileId(viewModel.head!!.fileId)
+        episodesSheet.rvList.smoothScrollToPosition(currentIndex)
+        sideSheetDialog.show()
     }
 
     private fun showErrorDialog(message: String) {
@@ -367,19 +432,33 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         }
     }
 
-    private fun updatePlaybackStatus(paused: Boolean) {
+    private enum class PlaybackState {
+        PLAYING,
+        PAUSED,
+        BUFFERING
+    }
+
+    private fun updatePlaybackStatus(state: PlaybackState) {
+        Log.d(TAG, "updatePlaybackStatus($state)")
+        TransitionManager.endTransitions(controller.mainControls)
         TransitionManager.beginDelayedTransition(
             controller.mainControls,
             AutoTransition().apply { duration = 250L }
         )
 
-        controller.btnPlayPause.icon = ContextCompat.getDrawable(
-            /* context */ applicationContext,
-            /* drawableId */ if (paused) R.drawable.ic_play_24
-            else R.drawable.ic_pause_24
-        )
-
-        if (paused) {
+        if (state == PlaybackState.BUFFERING) {
+            binding.buffering.isInvisible = false
+            controller.btnPlayPause.isInvisible = true
+        } else {
+            binding.buffering.isInvisible = true
+            controller.btnPlayPause.isInvisible = false
+            controller.btnPlayPause.icon = ContextCompat.getDrawable(
+                /* context */ applicationContext,
+                /* drawableId */ if (state == PlaybackState.PAUSED) R.drawable.ic_play_24
+                else R.drawable.ic_pause_24
+            )
+        }
+        if (state == PlaybackState.BUFFERING) {
             window.clearFlags(FLAG_KEEP_SCREEN_ON)
         } else {
             window.addFlags(FLAG_KEEP_SCREEN_ON)
@@ -609,7 +688,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
     override fun eventProperty(property: String, value: Boolean) {
         if (activityIsForeground && property == "pause") {
-            runOnUiThread { updatePlaybackStatus(value) }
+            runOnUiThread { updatePlaybackStatus(if (value) PlaybackState.PAUSED else PlaybackState.PLAYING) }
         }
     }
 
@@ -638,15 +717,46 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         runOnUiThread { eventPropertyUi(property) }
     }
 
+    override fun eventProperty(property: String, value: Double) {
+        runOnUiThread { eventPropertyUi(property) }
+    }
+
     private fun eventPropertyUi(property: String) {
         if (activityIsForeground && property == "track-list") {
             player.loadTracks()
         }
+
+        if (activityIsForeground && property == "core-idle") {
+            runOnUiThread { updatePlaybackStatus(if (player.paused!!) PlaybackState.PAUSED else PlaybackState.PLAYING) }
+        }
     }
 
     override fun event(eventId: Int) {
-        if (activityIsForeground && eventId == MPV_EVENT_PLAYBACK_RESTART) {
-            runOnUiThread { updatePlaybackStatus(player.paused!!) }
+        if (activityIsForeground) {
+            runOnUiThread {
+                if (eventId == MPV_EVENT_PLAYBACK_RESTART) {
+                    updatePlaybackStatus(if (player.paused!!) PlaybackState.PAUSED else PlaybackState.PLAYING)
+                } else {
+                    if (player.isBuffering != null) {
+                        if (player.isBuffering!! && !player.paused!!) {
+                            updatePlaybackStatus(PlaybackState.BUFFERING)
+                        } else {
+                            val pausedIcon = ContextCompat.getDrawable(
+                                /* context */ applicationContext,
+                                /* drawableId */ R.drawable.ic_pause_24
+                            )
+                            if (player.paused!! && controller.btnPlayPause.icon != pausedIcon) {
+                                updatePlaybackStatus(PlaybackState.PAUSED)
+                            } else if (!player.paused!! && controller.btnPlayPause.icon == pausedIcon) {
+                                updatePlaybackStatus(PlaybackState.PLAYING)
+                            }
+                        }
+                    }
+                }
+                if (eventId == MPV_EVENT_FILE_LOADED) {
+                    Log.d(TAG, "File has starting playing...")
+                }
+            }
         }
     }
 
@@ -659,6 +769,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         activityIsForeground = false
 
         if (isFinishing) {
+            Log.v(TAG, "isFinishing: mpv stop")
             MPVLib.command(arrayOf("stop"))
         }
         super.onPause()

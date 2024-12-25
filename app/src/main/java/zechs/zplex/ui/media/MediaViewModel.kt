@@ -14,13 +14,13 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
+import zechs.zplex.data.local.offline.OfflineShowDao
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.entities.Show
 import zechs.zplex.data.model.tmdb.media.MovieResponse
 import zechs.zplex.data.model.tmdb.media.TvResponse
 import zechs.zplex.data.model.tmdb.search.SearchResponse
-import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.media.adapter.MediaDataModel
@@ -36,7 +36,7 @@ class MediaViewModel @Inject constructor(
     app: Application,
     private val tmdbRepository: TmdbRepository,
     private val sessionManager: SessionManager,
-    private val driveRepository: DriveRepository
+    private val offlineShowDao: OfflineShowDao
 ) : BaseAndroidViewModel(app) {
 
     private val _dominantColor = MutableLiveData<Int>()
@@ -89,7 +89,7 @@ class MediaViewModel @Inject constructor(
     fun getMedia(
         tmdbId: Int,
         mediaType: MediaType
-    ) = viewModelScope.launch {
+    ) = viewModelScope.launch(Dispatchers.IO) {
         _mediaResponse.postValue(Resource.Loading())
         try {
             if (hasInternetConnection()) {
@@ -99,7 +99,13 @@ class MediaViewModel @Inject constructor(
                     else -> {}
                 }
             } else {
-                _mediaResponse.postValue(Resource.Error("No internet connection"))
+                when (mediaType) {
+                    MediaType.tv -> fetchShowLocal(tmdbId)
+                    else -> {
+                        _mediaResponse.postValue(Resource.Error("No internet connection"))
+                    }
+                }
+
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -129,6 +135,14 @@ class MediaViewModel @Inject constructor(
         }
 
         _mediaResponse.postValue(handleMovieResponse(movie, company = null))
+    }
+
+    private suspend fun fetchShowLocal(
+        tmdbId: Int
+    ) = withContext(Dispatchers.IO) {
+        offlineShowDao.getShowById(tmdbId)?.let { show ->
+            handleTvResponse(Response.success(show.toTvResponse()), company = null)
+        }
     }
 
     private suspend fun fetchShow(

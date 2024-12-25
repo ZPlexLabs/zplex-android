@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import zechs.zplex.data.model.entities.WatchedMovie
 import zechs.zplex.data.model.entities.WatchedShow
+import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.WatchedRepository
 import zechs.zplex.ui.player.MPVActivity.Companion.TAG
@@ -132,7 +133,35 @@ class PlayerViewModel @Inject constructor(
     private val _current = Channel<Resource<Playback?>>(Channel.CONFLATED)
     val current = _current.receiveAsFlow()
 
+    private var playlistJson: String? = null
+
+    // for side sheet
+    fun play(newFileId: String) {
+        if (head?.fileId == newFileId) return
+        setPlaylist(playlistJson!!, findIndexFromFileId(newFileId))
+    }
+
+      fun findIndexFromFileId(newFileId: String): Int {
+        return getPlaylist().indexOfFirst { pair -> pair.first.fileId == newFileId }
+    }
+
+    // here boolean is for currentlyPlaying
+    fun getPlaylist(): List<Pair<Episode, Boolean>> {
+        if (playlistJson.isNullOrEmpty()) return emptyList()
+        val playbackItemType = object : TypeToken<List<GsonPlaybackItem>>() {}.type
+        return gson.fromJson<List<GsonPlaybackItem>>(playlistJson, playbackItemType)
+            .mapNotNull { playbackItem ->
+                val temp = playbackItem.toPlaybackItem()
+                if (temp is Show) {
+                    val currentlyPlaying = head?.fileId == temp.fileId
+                    Pair(temp.episode, currentlyPlaying)
+                } else null
+            }
+    }
+
+
     fun setPlaylist(playlist: String, startIndex: Int) {
+        playlistJson = playlist
         val playbackItemType = object : TypeToken<List<GsonPlaybackItem>?>() {}.type
         gson.fromJson<List<GsonPlaybackItem>>(playlist, playbackItemType)
             ?.map { it.toPlaybackItem() }
@@ -164,6 +193,14 @@ class PlayerViewModel @Inject constructor(
     }
 
     private fun updateWithToken() = viewModelScope.launch(Dispatchers.IO) {
+        if (head != null) {
+            if (head!!.offline) {
+                Log.d(TAG, "Offline : ${head!!.title} (${head!!.fileId})")
+                _current.send(Resource.Success(Playback(head, "")))
+                return@launch
+            }
+        }
+
         val client = sessionManager.fetchClient() ?: run {
             _current.send(Resource.Error("Client not found"))
             return@launch
@@ -172,17 +209,23 @@ class PlayerViewModel @Inject constructor(
             is Resource.Success -> {
                 _current.send(Resource.Success(Playback(head, tokenResponse.data!!.accessToken)))
             }
+
             is Resource.Error -> {
                 _current.send(Resource.Success(Playback(head, tokenResponse.message!!)))
             }
+
             else -> {}
         }
     }
 
-    fun saveProgress(current: PlaybackItem?, watchedDuration: Long, totalDuration: Long) {
+    fun saveProgress(
+        current: PlaybackItem?,
+        watchedDuration: Long,
+        totalDuration: Long
+    ) = viewModelScope.launch(Dispatchers.IO) {
         val playbackItem = current ?: run {
             Log.d(TAG, "No playback item found, not saving progress")
-            return
+            return@launch
         }
         if (playbackItem is Movie) {
             upsertWatchedMovie(

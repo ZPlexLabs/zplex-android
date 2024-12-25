@@ -7,8 +7,10 @@ import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.WindowManager
-import zechs.mpv.MPVLib.mpvFormat.*
-import java.util.*
+import zechs.mpv.MPVLib.mpvFormat.MPV_FORMAT_FLAG
+import zechs.mpv.MPVLib.mpvFormat.MPV_FORMAT_INT64
+import zechs.mpv.MPVLib.mpvFormat.MPV_FORMAT_NONE
+import java.util.Locale
 import kotlin.reflect.KProperty
 
 class MPVView(
@@ -20,10 +22,16 @@ class MPVView(
         internal const val TAG = "mpv"
     }
 
-    fun initialize(configDir: String) {
+    fun initialize(configDir: String, cacheDir: String) {
         MPVLib.create(this.context)
         MPVLib.setOptionString("config", "yes")
+        MPVLib.setOptionString("cache-dir", cacheDir)
         MPVLib.setOptionString("config-dir", configDir)
+        MPVLib.setOptionString("idle", "yes")
+
+        for (opt in arrayOf("demuxer-cache-dir", "gpu-shader-cache-dir", "icc-cache-dir")) {
+            MPVLib.setOptionString(opt, cacheDir)
+        }
 
         initOptions(configDir)
         MPVLib.init()
@@ -76,6 +84,10 @@ class MPVView(
 
     fun play(path: String) {
         this.playUri = path
+    }
+
+    fun stop() {
+//        MPVLib.command(arrayOf("cycle", "stop"))
     }
 
     // Called when back button is pressed, or app is shutting down
@@ -186,6 +198,10 @@ class MPVView(
         get() = MPVLib.getPropertyBoolean("pause")
         set(paused) = MPVLib.setPropertyBoolean("pause", paused!!)
 
+    var isBuffering: Boolean?
+        get() = MPVLib.getPropertyBoolean("core-idle")
+        set(buffering) {}
+
     var timePos: Int?
         get() = MPVLib.getPropertyInt("time-pos")
         set(progress) = MPVLib.setPropertyInt("time-pos", progress!!)
@@ -194,6 +210,14 @@ class MPVView(
     var duration: Int?
         get() = MPVLib.getPropertyInt("duration")
         private set(duration) {
+            // do nothing
+        }
+
+    // this is to check if surface is attached or not
+    // potential app-crasher.
+    var vo: Boolean?
+        get() = MPVLib.getPropertyString("force-window") == "yes"
+        private set(vo) {
             // do nothing
         }
 

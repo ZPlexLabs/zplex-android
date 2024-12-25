@@ -12,7 +12,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DatabaseModule {
+object ZPlexDatabaseModule {
 
     private const val DATABASE_NAME = "zplex_db.db"
 

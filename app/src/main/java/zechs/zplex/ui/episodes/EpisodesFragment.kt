@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import coil.load
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
@@ -100,8 +101,60 @@ class EpisodesFragment : Fragment() {
                         findNavController().navigateSafe(R.id.action_episodesListFragment_to_watchFragment)
                     }
                 }
+            },
+            episodeOnLongPress = { episode ->
+                if (episode.fileId != null) {
+                    if (episode.fileId.startsWith(requireContext().filesDir.absolutePath)) {
+                        showDeleteEpisodeDialog(episode)
+                    } else {
+                        showEpisodeOptionsDialog(episode)
+                    }
+                }
             }
         )
+    }
+
+    private fun showEpisodeOptionsDialog(episode: Episode) {
+        val message = """
+        • Title: ${episode.name ?: "Unknown"}
+        • Season: ${episode.season_number}
+        • Episode: ${episode.episode_number}
+        • File Size: ${episode.fileSize ?: "Unknown"}
+        """.trimIndent()
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.download_episode))
+            .setMessage(message)
+            .setPositiveButton(getString(R.string.yes)) { dialog, _ ->
+                val title = StringBuilder()
+                episodesViewModel.showName?.let {
+                    title.append(it)
+                    title.append(" - ")
+                }
+                title.append(episodesViewModel.getEpisodePattern(episode))
+                title.append(" - ")
+                title.append(episode.name)
+                showToast(getString(R.string.starting_download))
+                episodesViewModel.startDownload(episode, title.toString())
+                dialog.dismiss()
+            }
+            .setNegativeButton(getString(R.string.no)) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+
+    private fun showDeleteEpisodeDialog(episode: Episode) {
+        val options = arrayOf(getString(R.string.remove_from_offline))
+        MaterialAlertDialogBuilder(requireContext())
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> {
+                        episodesViewModel.removeOffline(episode)
+                    }
+                }
+            }.show()
     }
 
     override fun onCreateView(
@@ -208,7 +261,7 @@ class EpisodesFragment : Fragment() {
         }
     }
 
-    private val continueWatchingFab = ViewCompat.generateViewId()
+    private val continueWatchingFab = View.generateViewId()
 
     private fun setupLastWatchedEpisode() {
         viewLifecycleOwner.lifecycleScope.launch {

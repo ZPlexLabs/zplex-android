@@ -18,6 +18,7 @@ import zechs.zplex.data.repository.WatchedRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.home.adapter.HomeDataModel
 import zechs.zplex.ui.home.adapter.watched.WatchedDataModel
+import zechs.zplex.utils.SessionManager
 import zechs.zplex.utils.ext.combineWith
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
@@ -28,7 +29,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     app: Application,
     private val tmdbRepository: TmdbRepository,
-    private val watchedRepository: WatchedRepository
+    private val watchedRepository: WatchedRepository,
+    private val sessionManager: SessionManager
 ) : BaseAndroidViewModel(app) {
 
     @Suppress("unused")

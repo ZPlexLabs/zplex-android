@@ -3,6 +3,7 @@ package zechs.zplex.ui.episodes.adapter
 import android.animation.ValueAnimator
 import android.view.animation.DecelerateInterpolator
 import androidx.core.view.isGone
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.google.android.material.progressindicator.LinearProgressIndicator
@@ -27,7 +28,7 @@ class EpisodeViewHolder(
             tvEpisodeCount.text = count
 
             if (!episode.still_path.isNullOrEmpty()) {
-                val episodeThumb = "${TMDB_IMAGE_PREFIX}/${StillSize.w300}${episode.still_path}"
+                val episodeThumb = "${TMDB_IMAGE_PREFIX}/${StillSize.original}${episode.still_path}"
                 ivThumb.load(episodeThumb) { placeholder(R.drawable.no_thumb) }
             }
 
@@ -42,9 +43,14 @@ class EpisodeViewHolder(
                     watchProgress.progress = episode.progress
                 }
             }
+            offlineBadge.isInvisible = !episode.offline
 
             root.setOnClickListener {
                 episodesAdapter.episodeOnClick.invoke(episode)
+            }
+            root.setOnLongClickListener() {
+                episodesAdapter.episodeOnLongPress.invoke(episode)
+                return@setOnLongClickListener true
             }
         }
     }

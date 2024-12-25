@@ -80,6 +80,7 @@ class RemoteLibraryIndexingService : LifecycleService() {
         job?.cancel()
         job = null
         isServiceRunning = false
+        indexingStateFlow.serviceStopped()
         super.onDestroy()
     }
 

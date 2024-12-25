@@ -6,6 +6,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,18 +18,25 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import zechs.zplex.data.local.offline.OfflineEpisodeDao
+import zechs.zplex.data.local.offline.OfflineSeasonDao
+import zechs.zplex.data.local.offline.OfflineShowDao
 import zechs.zplex.data.model.drive.DriveFile
 import zechs.zplex.data.model.drive.File
 import zechs.zplex.data.model.entities.WatchedShow
 import zechs.zplex.data.model.tmdb.entities.Episode
+import zechs.zplex.data.model.tmdb.season.SeasonResponse
 import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.data.repository.WatchedRepository
+import zechs.zplex.service.DownloadWorker
+import zechs.zplex.service.OfflineDatabaseWorker
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.episodes.EpisodesFragment.Companion.TAG
 import zechs.zplex.ui.player.PlaybackItem
 import zechs.zplex.ui.player.Show
 import zechs.zplex.utils.SessionManager
+import zechs.zplex.utils.ext.deleteIfExistsSafely
 import zechs.zplex.utils.ext.ifNullOrEmpty
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
@@ -42,7 +54,11 @@ class EpisodesViewModel @Inject constructor(
     private val tmdbRepository: TmdbRepository,
     private val watchedRepository: WatchedRepository,
     private val driveRepository: DriveRepository,
-    private val sessionManager: SessionManager
+    private val sessionManager: SessionManager,
+    private val offlineShowDao: OfflineShowDao,
+    private val offlineSeasonDao: OfflineSeasonDao,
+    private val offlineEpisodeDao: OfflineEpisodeDao,
+    private val workManager: WorkManager
 ) : BaseAndroidViewModel(app) {
 
     var hasLoaded: Boolean = false
@@ -130,6 +146,9 @@ class EpisodesViewModel @Inject constructor(
                                 title = showName!!,
                                 posterPath = showPoster,
                                 fileId = it.fileId!!,
+                                // ideally this should be check to filesDir
+                                offline = it.fileId.startsWith(context.filesDir.path),
+                                episode = episode,
                                 seasonNumber = it.season_number,
                                 episodeNumber = it.episode_number,
                                 episodeTitle = it.name
@@ -146,7 +165,7 @@ class EpisodesViewModel @Inject constructor(
         return episodes
     }
 
-    fun getSeason(
+    private fun getSeason(
         tmdbId: Int,
         seasonNumber: Int
     ) = viewModelScope.launch(Dispatchers.IO) {
@@ -157,7 +176,19 @@ class EpisodesViewModel @Inject constructor(
                 _episodesResponse.postValue((handleSeasonResponse(tmdbId, tmdbSeason)))
                 getLastWatchedEpisode(tmdbId, seasonNumber)
             } else {
-                _episodesResponse.postValue((Resource.Error("No internet connection")))
+                val offlineSeason = offlineSeasonDao.getSeasonById(tmdbId, seasonNumber)
+                if (offlineSeason != null) {
+                    val gson = GsonBuilder()
+                        .serializeNulls()
+                        .create()
+                    val type = object : TypeToken<SeasonResponse?>() {}.type
+                    val season: SeasonResponse = gson.fromJson(offlineSeason.json, type)
+                    val responseSeason = Response.success(season)
+                    _episodesResponse.postValue((handleSeasonResponse(tmdbId, responseSeason)))
+                    getLastWatchedEpisode(tmdbId, seasonNumber)
+                } else {
+                    _episodesResponse.postValue((Resource.Error("No internet connection")))
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -191,7 +222,7 @@ class EpisodesViewModel @Inject constructor(
                 if (savedShow?.fileId != null) {
                     handleSeasonFolder(result, savedShow.fileId, seasonDataModel)
                 } else {
-                    handleDefaultMapping(result.episodes, seasonDataModel)
+                    handleDefaultMapping(result.episodes, result.season_number!!, seasonDataModel)
                 }
             }
 
@@ -235,10 +266,15 @@ class EpisodesViewModel @Inject constructor(
         val seasonFolder = findSeasonFolder(showFolderId, seasonFolderName)
 
         if (seasonFolder != null) {
-            handleEpisodesInFolder(result.episodes!!, seasonFolder.id, seasonDataModel)
+            handleEpisodesInFolder(
+                result.episodes!!,
+                result.season_number!!,
+                seasonFolder.id,
+                seasonDataModel
+            )
         } else {
             Log.d(TAG, "No folder found with name \"$seasonFolderName\"")
-            handleDefaultMapping(result.episodes!!, seasonDataModel)
+            handleDefaultMapping(result.episodes!!, result.season_number!!, seasonDataModel)
         }
     }
 
@@ -263,6 +299,7 @@ class EpisodesViewModel @Inject constructor(
 
     private suspend fun handleEpisodesInFolder(
         episodes: List<Episode>,
+        seasonNumber: Int,
         seasonFolderId: String,
         seasonDataModel: MutableList<Episode>
     ) {
@@ -274,15 +311,16 @@ class EpisodesViewModel @Inject constructor(
         )
 
         if (episodesInFolder is Resource.Success && episodesInFolder.data != null) {
-            processMatchingEpisodes(episodes, episodesInFolder.data, seasonDataModel)
+            processMatchingEpisodes(episodes, seasonNumber, episodesInFolder.data, seasonDataModel)
         } else {
             Log.d(TAG, "No files found in season folder")
-            handleDefaultMapping(episodes, seasonDataModel)
+            handleDefaultMapping(episodes, seasonNumber, seasonDataModel)
         }
     }
 
     private fun processMatchingEpisodes(
         episodes: List<Episode>,
+        seasonNumber: Int,
         filesInFolder: List<File>,
         seasonDataModel: MutableList<Episode>
     ) {
@@ -290,19 +328,39 @@ class EpisodesViewModel @Inject constructor(
             filesInFolder.map { it.toDriveFile() }.filter { it.isVideoFile }
         )
 
+        val offlineEpisodes = offlineEpisodeDao
+            .getAllEpisodes(tmdbId, seasonNumber)
+            .associate { episode ->
+                "S%02dE%02d".format(episode.seasonNumber, episode.episodeNumber) to episode.filePath
+            }
+
         var match = 0
+        var offline = 0
         episodes.forEach { episode ->
-            val matchingEpisode = findMatchingEpisode(episode, episodeMap)
-            if (matchingEpisode == null) {
-                Log.d(TAG, "No matching file found for episode ${getEpisodePattern(episode)}")
-                seasonDataModel.add(episode.copy(fileId = null))
-            } else {
+            val offlineFile = offlineEpisodes[getEpisodePattern(episode)]
+            if (offlineFile != null) {
                 Log.d(TAG, "Found matching file for episode ${getEpisodePattern(episode)}")
-                seasonDataModel.add(episode.copy(fileId = matchingEpisode.id))
-                match++
+                // java.io.File(offlineFile).length()
+                seasonDataModel.add(episode.copy(fileId = offlineFile, offline = true))
+                offline++
+            } else {
+                val matchingEpisode = findMatchingEpisode(episode, episodeMap)
+                if (matchingEpisode == null) {
+                    Log.d(TAG, "No matching file found for episode ${getEpisodePattern(episode)}")
+                    seasonDataModel.add(episode.copy(fileId = null))
+                } else {
+                    Log.d(TAG, "Found matching file for episode ${getEpisodePattern(episode)}")
+                    seasonDataModel.add(
+                        episode.copy(
+                            fileId = matchingEpisode.id,
+                            fileSize = matchingEpisode.humanSize
+                        )
+                    )
+                    match++
+                }
             }
         }
-        Log.d(TAG, "Matched $match out of ${episodes.size} episodes")
+        Log.d(TAG, "Matched $match out of ${episodes.size} episodes and $offline were offline.")
     }
 
 
@@ -324,7 +382,7 @@ class EpisodesViewModel @Inject constructor(
         return episodeMap[episodePattern]
     }
 
-    private fun getEpisodePattern(episode: Episode): String {
+    fun getEpisodePattern(episode: Episode): String {
         return "S%02dE%02d".format(episode.season_number, episode.episode_number)
     }
 
@@ -342,11 +400,22 @@ class EpisodesViewModel @Inject constructor(
 
     private fun handleDefaultMapping(
         episodes: List<Episode>,
+        seasonNumber: Int,
         seasonDataModel: MutableList<Episode>
     ) {
         Log.d(TAG, "Mapping attempt failed, using default")
-        episodes.forEach {
-            seasonDataModel.add(it.copy(fileId = null))
+        val offlineEpisodes = offlineEpisodeDao
+            .getAllEpisodes(tmdbId, seasonNumber)
+            .associate { episode ->
+                "S%02dE%02d".format(episode.seasonNumber, episode.episodeNumber) to episode.filePath
+            }
+        episodes.forEach { episode ->
+            val offlineFile = offlineEpisodes[getEpisodePattern(episode)]
+            if (offlineFile == null) {
+                seasonDataModel.add(episode.copy(fileId = null))
+            } else {
+                seasonDataModel.add(episode.copy(fileId = offlineFile, offline = true))
+            }
         }
     }
 
@@ -363,5 +432,43 @@ class EpisodesViewModel @Inject constructor(
                         ?.takeIf { it.fileId != null }
                 }
             }
+    }
+
+    fun startDownload(episode: Episode, title: String) {
+        episode.fileId ?: kotlin.run {
+            Log.d(TAG, "EpisodesViewModel.startDownload requires fileId")
+        }
+        val data = Data.Builder()
+            .putInt(DownloadWorker.TMDB_ID, tmdbId)
+            .putInt(DownloadWorker.EPISODE_NUMBER, episode.episode_number)
+            .putInt(DownloadWorker.SEASON_NUMBER, episode.season_number)
+            .putString(DownloadWorker.FILE_ID, episode.fileId!!)
+            .putString(DownloadWorker.FILE_TITLE, title)
+            .build()
+
+
+        val downloadRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
+            .setInputData(data)
+            .addTag(episode.fileId)
+            .build()
+
+        val offlineRequest = OneTimeWorkRequestBuilder<OfflineDatabaseWorker>().build()
+
+        workManager.beginWith(downloadRequest)
+            .then(offlineRequest)
+            .enqueue()
+    }
+
+    fun removeOffline(episode: Episode) = viewModelScope.launch(Dispatchers.IO) {
+        offlineEpisodeDao.deleteEpisode(tmdbId, episode.season_number, episode.episode_number)
+        java.io.File(episode.fileId!!).deleteIfExistsSafely()
+        val offlineEpisodes = offlineEpisodeDao.getAllEpisodes(tmdbId, episode.season_number)
+        if (offlineEpisodes.isEmpty()) {
+            offlineSeasonDao.deleteSeason(tmdbId, episode.season_number)
+            val offlineSeasons = offlineSeasonDao.getAllSeasons(tmdbId)
+            if (offlineSeasons.isEmpty()) {
+                offlineShowDao.deleteShowById(tmdbId)
+            }
+        }
     }
 }

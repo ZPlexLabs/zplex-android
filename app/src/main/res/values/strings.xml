@@ -111,4 +111,11 @@
     <string name="ok">OK</string>
     <string name="previous">Previous</string>
     <string name="next">Next</string>
+    <string name="download_episode">Do you want to download this episode?</string>
+    <string name="starting_download">Starting download…</string>
+    <string name="cancel">Cancel</string>
+    <string name="remove_from_offline">Remove from offline</string>
+    <string name="downloaded">Downloaded</string>
+    <string name="playlist">Playlist</string>
+    <string name="now_playing">Now Playing...</string>
 </resources>

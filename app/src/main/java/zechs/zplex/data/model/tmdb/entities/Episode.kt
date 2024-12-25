@@ -12,5 +12,7 @@ data class Episode(
     val still_path: String?,
     val guest_stars: List<Cast>?,
     val fileId: String?,
+    val fileSize: String?,
+    val offline: Boolean = false,
     val progress: Int = 0
 )
