@@ -389,9 +389,10 @@ class EpisodesFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
+        val spanCount = resources.getInteger(R.integer.episodes_span_count)
         binding.rvList.apply {
             adapter = episodeAdapter
-            layoutManager = GridLayoutManager(activity, 2, RecyclerView.VERTICAL, false)
+            layoutManager = GridLayoutManager(activity, spanCount, RecyclerView.VERTICAL, false)
         }
     }
 

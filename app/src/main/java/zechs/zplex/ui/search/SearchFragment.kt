@@ -19,6 +19,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import zechs.zplex.R
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.FragmentSearchBinding
 import zechs.zplex.ui.shared_adapters.media.MediaAdapter
@@ -153,9 +154,30 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
+        val smallestWidthDp = resources.configuration.smallestScreenWidthDp
+
+        Log.d("ScreenInfo", "Smallest screen width dp: $smallestWidthDp")
+
+        val spanCount = resources.getInteger(R.integer.grid_span_count)
+        val widthRatio = when (spanCount) {
+            3 -> 0.30
+            4 -> 0.22
+            5 -> 0.18
+            6 -> 0.15
+            7 -> 0.13
+            else -> 1.0 / spanCount
+        }
+        val gridLayoutManager = object : GridLayoutManager(activity, spanCount, RecyclerView.VERTICAL, false) {
+            override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
+                return lp?.let {
+                    it.width = (widthRatio * width).toInt()
+                    true
+                } ?: super.checkLayoutParams(null)
+            }
+        }
         binding.rvSearch.apply {
             adapter = searchAdapter
-            layoutManager = GridLayoutManager(activity, 3)
+            layoutManager = gridLayoutManager
             addOnScrollListener(this@SearchFragment.scrollListener)
         }
     }
