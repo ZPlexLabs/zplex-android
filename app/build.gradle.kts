@@ -30,6 +30,8 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
+            manifestPlaceholders["icon"] = "@mipmap/ic_launcher_debug"
+            manifestPlaceholders["roundIcon"] = "@mipmap/ic_launcher_debug_round"
         }
 
         release {
@@ -39,6 +41,8 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            manifestPlaceholders["icon"] = "@mipmap/ic_launcher"
+            manifestPlaceholders["roundIcon"] = "@mipmap/ic_launcher_round"
         }
     }
 
