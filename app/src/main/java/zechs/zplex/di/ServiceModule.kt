@@ -9,13 +9,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
-import zechs.zplex.R
 import zechs.zplex.data.remote.RemoteLibrary
 import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.RemoteLibraryRepository
 import zechs.zplex.data.repository.TmdbRepository
-import zechs.zplex.service.IndexingStateFlow
 import zechs.zplex.service.RemoteLibraryIndexingService
+import zechs.zplex.utils.BuildNotificationUtils
 import zechs.zplex.utils.SessionManager
 
 @Module
@@ -27,13 +26,10 @@ object ServiceModule {
     fun provideNotificationBuilder(
         @ApplicationContext context: Context
     ): NotificationCompat.Builder {
-        return NotificationCompat.Builder(
+        return BuildNotificationUtils.buildIndexingServiceNotification(
             context,
-            RemoteLibraryIndexingService.NOTIFICATION_CHANNEL_ID
+            RemoteLibraryIndexingService.INDEXING_SERVICE_NOTIFICATION_CHANNEL_ID
         )
-            .setAutoCancel(false)
-            .setOngoing(true)
-            .setSmallIcon(R.drawable.ic_library_24dp)
     }
 
     @ServiceScoped
@@ -47,11 +43,13 @@ object ServiceModule {
     @ServiceScoped
     @Provides
     fun provideRemoteLibrary(
+        notificationManager: NotificationManager,
         driveRepository: DriveRepository,
         tmdbRepository: TmdbRepository,
-        sessionManager: SessionManager
+        sessionManager: SessionManager,
+        @ApplicationContext context: Context
     ): RemoteLibrary {
-        return RemoteLibraryRepository(driveRepository, tmdbRepository, sessionManager,)
+        return RemoteLibraryRepository(notificationManager, driveRepository, tmdbRepository, sessionManager, context)
     }
 
 }

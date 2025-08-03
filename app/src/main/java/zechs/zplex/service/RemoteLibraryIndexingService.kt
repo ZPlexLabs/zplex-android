@@ -12,15 +12,14 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import zechs.zplex.data.remote.RemoteLibrary
 import javax.inject.Inject
-import javax.inject.Named
 
 @AndroidEntryPoint
 class RemoteLibraryIndexingService : LifecycleService() {
 
     companion object {
-        const val NOTIFICATION_ID = 100001
+        const val INDEXING_SERVICE_NOTIFICATION_ID = 100001
 
-        const val NOTIFICATION_CHANNEL_ID = "indexing_library"
+        const val INDEXING_SERVICE_NOTIFICATION_CHANNEL_ID = "indexing_library"
         const val NOTIFICATION_CHANNEL_NAME = "Indexing Library"
 
         var isServiceRunning = false
@@ -29,7 +28,7 @@ class RemoteLibraryIndexingService : LifecycleService() {
 
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
-            NOTIFICATION_CHANNEL_ID,
+            INDEXING_SERVICE_NOTIFICATION_CHANNEL_ID,
             NOTIFICATION_CHANNEL_NAME,
             NotificationManager.IMPORTANCE_LOW
         )
@@ -38,7 +37,7 @@ class RemoteLibraryIndexingService : LifecycleService() {
 
     private fun startForegroundService() {
         createNotificationChannel()
-        startForeground(NOTIFICATION_ID, notification.build())
+        startForeground(INDEXING_SERVICE_NOTIFICATION_ID, notification.build())
     }
 
     @Inject
@@ -62,7 +61,7 @@ class RemoteLibraryIndexingService : LifecycleService() {
             doWork()
             isServiceRunning = true
         }
-        return START_STICKY;
+        return START_STICKY
     }
 
     private fun doWork() {
