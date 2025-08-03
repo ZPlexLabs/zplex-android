@@ -71,7 +71,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.episodesListFragment, R.id.fragmentList,
                 R.id.fragmentCollection, R.id.watchFragment,
                 R.id.bigImageFragment, R.id.signInFragment,
-                R.id.settingsFragment -> {
+                R.id.settingsFragment, R.id.seasonsBottomSheetFragment -> {
                     hideSlideDown(binding.bottomNavigationView)
                     ViewCompat.setOnApplyWindowInsetsListener(binding.zplexFrame) { view, insets ->
                         val bars = insets.getInsets(

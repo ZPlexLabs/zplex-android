@@ -13,6 +13,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -96,16 +97,35 @@ class EpisodesViewModel @Inject constructor(
     val playlist: List<PlaybackItem>
         get() = _playlist.toList()
 
-    fun getSeasonWithWatched(
+    fun setShowData(
         tmdbId: Int,
         showName: String,
         showPoster: String?,
-        seasonNumber: Int
-    ) = viewModelScope.launch {
+    ) {
         this@EpisodesViewModel.showName = showName
         this@EpisodesViewModel.showPoster = showPoster
         this@EpisodesViewModel.tmdbId = tmdbId
+    }
 
+    private var job: Job? = null
+
+    fun getSeasonWithWatched(
+        tmdbId: Int,
+        seasonNumber: Int
+    ) {
+        if (seasonHeader.value != null && seasonHeader.value!!.number == seasonNumber) {
+            return;
+        }
+        job?.cancel()
+        _episodesWithWatched.removeSource(_episodesResponse)
+        _playlist.clear()
+        job = internalGetSeasonWithWatched(tmdbId, seasonNumber)
+    }
+
+    private fun internalGetSeasonWithWatched(
+        tmdbId: Int,
+        seasonNumber: Int
+    ) = viewModelScope.launch {
         getSeason(tmdbId, seasonNumber)
 
         val watchedSeason = watchedRepository.getWatchedSeason(tmdbId, seasonNumber)
@@ -198,6 +218,7 @@ class EpisodesViewModel @Inject constructor(
 
     data class SeasonHeader(
         val seasonNumber: String,
+        val number: Int,
         val seasonName: String?,
         val seasonPosterPath: String?,
         val seasonOverview: String
@@ -251,6 +272,7 @@ class EpisodesViewModel @Inject constructor(
         Log.d(TAG, "Overview: $overviewBuilder")
         return SeasonHeader(
             seasonNumber = "Season ${result.season_number}",
+            number = result.season_number ?: 0,
             seasonName = result.name,
             seasonPosterPath = result.poster_path,
             seasonOverview = result.overview.ifNullOrEmpty { overviewBuilder.toString() }
@@ -422,11 +444,13 @@ class EpisodesViewModel @Inject constructor(
     private val _lastEpisode = MutableStateFlow<Episode?>(null)
     val lastEpisode = _lastEpisode.asStateFlow()
 
-    private fun getLastWatchedEpisode(tmdbId: Int, seasonNumber: Int) = viewModelScope.launch {
+    private suspend fun getLastWatchedEpisode(tmdbId: Int, seasonNumber: Int) {
         watchedRepository.getLastWatchedEpisode(tmdbId, seasonNumber)
             .stateIn(viewModelScope)
             .collect { last ->
-                last?.let {
+                if (last == null) {
+                    _lastEpisode.value = null
+                } else {
                     _lastEpisode.value = _episodesResponse.value?.data
                         ?.firstOrNull { it.episode_number == last.episodeNumber }
                         ?.takeIf { it.fileId != null }

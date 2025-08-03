@@ -192,5 +192,9 @@
             android:id="@+id/action_settingsFragment_to_signInFragment"
             app:destination="@id/signInFragment" />
     </fragment>
+    <dialog
+        android:id="@+id/seasonsBottomSheetFragment"
+        android:name="zechs.zplex.ui.episodes.SeasonsBottomSheetFragment"
+        tools:layout="@layout/bottom_seasons_sheet_fragment" />
 
 </navigation>

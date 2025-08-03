@@ -125,4 +125,5 @@
     <string name="btn_play">Play</string>
     <string name="btn_pause">Pause</string>
     <string name="playlist">Playlist</string>
+    <string name="all_seasons">All seasons</string>
 </resources>

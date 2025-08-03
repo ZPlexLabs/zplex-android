@@ -63,6 +63,7 @@ class EpisodesFragment : Fragment() {
     private val bigImageViewModel by activityViewModels<BigImageViewModel>()
     private val episodeViewModel by activityViewModels<EpisodeViewModel>()
 
+    private val sharedViewModel: EpisodesSharedViewModel by activityViewModels()
     private val episodesViewModel by lazy {
         ViewModelProvider(this)[EpisodesViewModel::class.java]
     }
@@ -172,12 +173,30 @@ class EpisodesFragment : Fragment() {
 
         setupRecyclerView()
 
-        binding.toolbar.setNavigationOnClickListener {
-            findNavController().navigateUp()
+        binding.toolbar.apply {
+            inflateMenu(R.menu.episodes_menu)
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_all_seasons -> {
+                        showSeasonsBottomSheet()
+                        true
+                    }
+
+                    else -> false
+                }
+            }
+
+            setNavigationOnClickListener {
+                findNavController().navigateUp()
+            }
         }
 
         setupEpisodesViewModel()
         setupLastWatchedEpisode()
+    }
+
+    private fun showSeasonsBottomSheet() {
+        findNavController().navigate(R.id.seasonsBottomSheetFragment)
     }
 
     private fun openImageFullSize(posterPath: String?, imageView: ImageView) {
@@ -196,13 +215,21 @@ class EpisodesFragment : Fragment() {
     private fun setupEpisodesViewModel() {
         seasonViewModel.showId.observe(viewLifecycleOwner) { showSeason ->
             if (!episodesViewModel.hasLoaded) {
-                episodesViewModel.getSeasonWithWatched(
+                episodesViewModel.setShowData(
                     tmdbId = showSeason.tmdbId,
                     showName = showSeason.showName,
-                    showPoster = showSeason.showPoster,
-                    seasonNumber = showSeason.seasonNumber
+                    showPoster = showSeason.showPoster
                 )
+                sharedViewModel.loadSeasons(
+                    showId = showSeason.tmdbId,
+                    showName = showSeason.showName
+                )
+                sharedViewModel.selectSeason(showSeason.seasonNumber)
             }
+        }
+        sharedViewModel.selectedSeasonNumber.observe(viewLifecycleOwner) { seasonNumber ->
+            Log.d(TAG, "getSeasonWithWatched(tmdbId=${episodesViewModel.tmdbId}, seasonNumber=$seasonNumber)")
+            episodesViewModel.getSeasonWithWatched(episodesViewModel.tmdbId, seasonNumber)
         }
         episodesViewModel.episodesWithWatched.observe(viewLifecycleOwner) { response ->
             when (response) {
@@ -211,9 +238,7 @@ class EpisodesFragment : Fragment() {
                         binding.root,
                         MaterialFadeThrough()
                     )
-                    viewLifecycleOwner.lifecycleScope.launch {
-                        episodeAdapter.submitList(it)
-                    }
+                    episodeAdapter.submitList(it)
                     isLoading(false)
                     episodesViewModel.hasLoaded = true
                 }
@@ -224,8 +249,10 @@ class EpisodesFragment : Fragment() {
                     binding.rvList.isInvisible = true
                 }
 
-                is Resource.Loading -> if (!episodesViewModel.hasLoaded) {
+                is Resource.Loading -> {
                     isLoading(true)
+                    episodeAdapter.submitList(null)
+                    removeContinueWatching()
                 }
             }
         }
