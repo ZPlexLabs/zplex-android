@@ -25,6 +25,19 @@
         android:windowSoftInputMode="adjustPan|adjustResize"
         tools:ignore="AllowBackup">
         <activity
+            android:name=".ui.newui.serverchooser.ServerChooserActivity"
+            android:configChanges="orientation|screenSize|keyboard|keyboardHidden|navigation"
+            android:exported="true"
+            android:theme="@style/NewAppTheme"
+            android:windowSoftInputMode="adjustPan">
+            <!--            <intent-filter>-->
+            <!--                <action android:name="android.intent.action.MAIN" />-->
+
+            <!--                <category android:name="android.intent.category.LAUNCHER" />-->
+
+            <!--            </intent-filter>-->
+        </activity>
+        <activity
             android:name="zechs.zplex.ui.main.MainActivity"
             android:configChanges="orientation"
             android:exported="true"
