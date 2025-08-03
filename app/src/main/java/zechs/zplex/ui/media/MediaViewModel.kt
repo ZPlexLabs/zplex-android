@@ -18,10 +18,12 @@ import zechs.zplex.data.local.offline.OfflineShowDao
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.entities.Show
+import zechs.zplex.data.model.entities.WatchedMovie
 import zechs.zplex.data.model.tmdb.media.MovieResponse
 import zechs.zplex.data.model.tmdb.media.TvResponse
 import zechs.zplex.data.model.tmdb.search.SearchResponse
 import zechs.zplex.data.repository.TmdbRepository
+import zechs.zplex.data.repository.WatchedRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.media.adapter.MediaDataModel
 import zechs.zplex.utils.SessionManager
@@ -29,6 +31,7 @@ import zechs.zplex.utils.state.Event
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import zechs.zplex.utils.util.Converter
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,6 +39,7 @@ class MediaViewModel @Inject constructor(
     app: Application,
     private val tmdbRepository: TmdbRepository,
     private val sessionManager: SessionManager,
+    private val watchedRepository: WatchedRepository,
     private val offlineShowDao: OfflineShowDao
 ) : BaseAndroidViewModel(app) {
 
@@ -408,6 +412,7 @@ class MediaViewModel @Inject constructor(
             }
 
             val saved = tmdbRepository.fetchMovieById(result.id)
+            val watched = watchedRepository.getWatchedMovie(result.id)
 
             mediaDataModel.add(
                 MediaDataModel.MovieButton(
@@ -420,6 +425,7 @@ class MediaViewModel @Inject constructor(
                         fileId = saved?.fileId,
                         modifiedTime = saved?.modifiedTime
                     ),
+                    watchedMovie = watched,
                     year = year
                 )
             )
@@ -508,15 +514,19 @@ class MediaViewModel @Inject constructor(
     val movieFile: LiveData<Event<Resource<zechs.zplex.ui.player.Movie>>>
         get() = _movieFile
 
-    fun playMovie(tmdbId: Int, year: Int?) = viewModelScope.launch {
-        val saved = tmdbRepository.fetchMovieById(tmdbId)
-        if (saved?.fileId == null) {
+    fun playMovie(movie: Movie, year: Int?) = viewModelScope.launch {
+        if (movie.fileId == null) {
             _movieFile.postValue(Event(Resource.Error("Movie not found")))
             return@launch
         } else {
-            val title = "${saved.title}${if (year != null) " (${year})" else ""}"
-            val movie = zechs.zplex.ui.player.Movie(tmdbId, title, showPoster, saved.fileId)
-            _movieFile.postValue(Event(Resource.Success(movie)))
+            val title = "${movie.title}${if (year != null) " (${year})" else ""}"
+            val playerMovie = zechs.zplex.ui.player.Movie(tmdbId, title, showPoster, movie.fileId)
+            _movieFile.postValue(Event(Resource.Success(playerMovie)))
         }
     }
+
+    fun movieWatchedState(tmdbId: Int): LiveData<WatchedMovie?> {
+        return watchedRepository.observeWatchedMovie(tmdbId)
+    }
+
 }

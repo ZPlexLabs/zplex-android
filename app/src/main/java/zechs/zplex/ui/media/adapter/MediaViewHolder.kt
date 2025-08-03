@@ -3,6 +3,7 @@ package zechs.zplex.ui.media.adapter
 import android.graphics.drawable.Drawable
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
@@ -191,15 +192,15 @@ sealed class MediaViewHolder(
         fun bindMovie(item: MediaDataModel.MovieButton) {
             itemBinding.apply {
                 btnWatchNow.apply {
-                    text = context.getString(R.string.watch_now)
                     icon = getDrawable(R.drawable.ic_play_circle_24)
                     setOnClickListener {
-                        listener.movieWatchNow(item.movie.id, item.year)
+                        listener.movieWatchNow(item.movie, item.year)
                     }
 
                     val btnWatchNowTag = "btnWatchNowTAG"
                     if (tag != btnWatchNowTag) {
                         listener.setButtonView(this)
+                        listener.setMovieWatchNowButton(this)
                     }
                     tag = btnWatchNowTag
                 }

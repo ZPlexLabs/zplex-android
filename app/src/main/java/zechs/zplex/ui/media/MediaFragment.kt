@@ -294,9 +294,27 @@ class MediaFragment : Fragment() {
                 navigateToCollection(collectionId)
             }
 
-            override fun movieWatchNow(tmdbId: Int, year: Int?) {
+            override fun setMovieWatchNowButton(view: MaterialButton) {
+                mediaViewModel.movieWatchedState(args.media.id)
+                    .observe(viewLifecycleOwner) { watchedMovie ->
+                        val continueWatching = watchedMovie != null && !watchedMovie.hasFinished()
+                        if (continueWatching) {
+                            view.text = getString(R.string.continue_watching)
+                            view.icon =
+                                ContextCompat.getDrawable(requireContext(), R.drawable.ic_resume_24)
+                        } else {
+                            view.text = getString(R.string.watch_now)
+                            view.icon = ContextCompat.getDrawable(
+                                requireContext(),
+                                R.drawable.ic_play_circle_24
+                            )
+                        }
+                    }
+            }
+
+            override fun movieWatchNow(movie: Movie, year: Int?) {
                 if (mediaViewModel.hasLoggedIn) {
-                    mediaViewModel.playMovie(tmdbId, year)
+                    mediaViewModel.playMovie(movie, year)
                 } else {
                     val snackBar = Snackbar.make(
                         binding.root,

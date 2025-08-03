@@ -23,6 +23,10 @@ class WatchedRepository @Inject constructor(
         tmdbId: Int
     ) = watchedMovieDao.getWatchedMovie(tmdbId)
 
+    fun observeWatchedMovie(
+        tmdbId: Int
+    ) = watchedMovieDao.observeWatchedMovie(tmdbId)
+
     fun getAllWatchedMovies() = watchedMovieDao.getAllWatchedMovies()
 
     suspend fun upsertWatchedShow(
