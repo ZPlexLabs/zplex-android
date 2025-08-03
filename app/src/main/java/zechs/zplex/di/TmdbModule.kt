@@ -1,5 +1,6 @@
 package zechs.zplex.di
 
+import com.google.gson.Gson
 import com.squareup.moshi.Moshi
 import dagger.Module
 import dagger.Provides
@@ -10,6 +11,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import zechs.zplex.data.local.MovieDao
 import zechs.zplex.data.local.ShowDao
+import zechs.zplex.data.local.api_cache.ApiCacheDao
 import zechs.zplex.data.remote.OmdbApi
 import zechs.zplex.data.remote.TmdbApi
 import zechs.zplex.data.repository.TmdbRepository
@@ -42,9 +44,11 @@ object TmdbModule {
         tmdbApi: TmdbApi,
         omdbApi: OmdbApi,
         movieDao: MovieDao,
-        showDao: ShowDao
+        showDao: ShowDao,
+        apiCacheDao: ApiCacheDao,
+        gson: Gson
     ): TmdbRepository {
-        return TmdbRepository(tmdbApi, omdbApi, movieDao, showDao)
+        return TmdbRepository(tmdbApi, omdbApi, movieDao, showDao, apiCacheDao, gson)
     }
 
 }

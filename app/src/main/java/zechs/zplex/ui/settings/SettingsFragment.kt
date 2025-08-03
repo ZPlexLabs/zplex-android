@@ -125,6 +125,29 @@ class SettingsFragment : Fragment() {
         loadingObserver()
         loginStatusObserver()
         indexingServiceObserver()
+        cacheCountObserver()
+    }
+
+    private fun cacheCountObserver() {
+        binding.settingCacheCount.setOnLongClickListener {
+            resetCacheDialog()
+            return@setOnLongClickListener true
+        }
+        viewModel.cacheCount.observe(viewLifecycleOwner) { count ->
+            binding.cacheCountText.text = getString(R.string.cache_items_stored, count)
+        }
+    }
+
+    private fun resetCacheDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.reset_cache_dialog_title))
+            .setMessage(getString(R.string.reset_cache_dialog_message))
+            .setPositiveButton(getString(R.string.reset)) { _, _ ->
+                viewModel.resetCache()
+            }
+            .setNegativeButton(getString(R.string.no)) { _, _ -> }
+            .setCancelable(true)
+            .show()
     }
 
     private fun showFolderPickerDialog(

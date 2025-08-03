@@ -118,6 +118,10 @@
     <string name="downloaded">Downloaded</string>
     <string name="imdb_logo">Imdb Logo</string>
     <string name="indexing">Indexing…</string>
+    <string name="current_cached_data">Current cached data</string>
+    <string name="cache_items_stored">%1$d items stored in cache</string>
+    <string name="reset_cache_dialog_title">Are you sure you want to reset the cache?</string>
+    <string name="reset_cache_dialog_message">This will permanently delete all cached data used by the app. You won’t be able to undo this action.</string>
     <string name="playlist">Playlist</string>
     <string name="now_playing">Now Playing...</string>
 </resources>

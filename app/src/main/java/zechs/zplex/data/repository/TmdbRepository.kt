@@ -1,9 +1,14 @@
 package zechs.zplex.data.repository
 
 import android.util.Log
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import okhttp3.ResponseBody.Companion.toResponseBody
 import retrofit2.Response
 import zechs.zplex.data.local.MovieDao
 import zechs.zplex.data.local.ShowDao
+import zechs.zplex.data.local.api_cache.ApiCacheDao
+import zechs.zplex.data.model.ApiCache
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.Order
 import zechs.zplex.data.model.SortBy
@@ -13,19 +18,21 @@ import zechs.zplex.data.model.tmdb.keyword.TmdbKeyword
 import zechs.zplex.data.model.tmdb.media.MovieResponse
 import zechs.zplex.data.model.tmdb.media.TvResponse
 import zechs.zplex.data.model.tmdb.search.SearchResponse
+import zechs.zplex.data.model.tmdb.season.SeasonResponse
+import zechs.zplex.data.remote.OmdbApi
 import zechs.zplex.data.remote.TmdbApi
 import zechs.zplex.utils.ext.nullIfNAOrElse
 import javax.inject.Inject
 import javax.inject.Singleton
-import zechs.zplex.data.remote.OmdbApi
-import okhttp3.ResponseBody.Companion.toResponseBody
 
 @Singleton
 class TmdbRepository @Inject constructor(
     private val tmdbApi: TmdbApi,
     private val omdbApi: OmdbApi,
     private val movieDao: MovieDao,
-    private val showDao: ShowDao
+    private val showDao: ShowDao,
+    private val apiCacheDao: ApiCacheDao,
+    private val gson: Gson
 ) {
 
     companion object {
@@ -70,8 +77,24 @@ class TmdbRepository @Inject constructor(
 
     suspend fun getShow(
         tvId: Int,
-        appendToQuery: String? = "credits,recommendations,videos"
+        appendToQuery: String? = "credits,recommendations,videos,external_ids"
     ): Response<TvResponse> {
+        val cacheKey = "show_${tvId}${if (appendToQuery != null) "_${appendToQuery}" else ""}"
+        val existingCache = apiCacheDao.getCacheById(cacheKey)
+        if (existingCache != null) {
+            if (existingCache.expiration < System.currentTimeMillis()) {
+                apiCacheDao.deleteCacheById(cacheKey)
+                Log.d(TAG, "Deleting cache with key: $cacheKey")
+            } else {
+                try {
+                    val parsed = parseCache<TvResponse>(existingCache.classType, existingCache.body)
+                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                    return Response.success(parsed)
+                } catch (e: Exception) {
+                    Log.d(TAG, "Cache deserialization failed: " + e.message.toString())
+                }
+            }
+        }
         return try {
             val tmdbResponse = tmdbApi.getShow(tvId, append_to_response = appendToQuery)
             val show = tmdbResponse.body()
@@ -91,6 +114,16 @@ class TmdbRepository @Inject constructor(
                                 vote_average = imdbRating,
                                 isImdbRating = true
                             )
+                            val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
+                            Log.d(TAG, "Creating cache with key: $cacheKey")
+                            apiCacheDao.addCache(
+                                ApiCache(
+                                    id = cacheKey,
+                                    body = gson.toJson(updatedMovie),
+                                    classType = TvResponse::class.java.name,
+                                    expiration = expiration
+                                )
+                            )
                             return Response.success(updatedMovie)
                         }
                     }
@@ -107,6 +140,23 @@ class TmdbRepository @Inject constructor(
         movieId: Int,
         appendToQuery: String? = "credits,recommendations,videos"
     ): Response<MovieResponse> {
+        val cacheKey = "movie_${movieId}${if (appendToQuery != null) "_${appendToQuery}" else ""}"
+        val existingCache = apiCacheDao.getCacheById(cacheKey)
+        if (existingCache != null) {
+            if (existingCache.expiration < System.currentTimeMillis()) {
+                apiCacheDao.deleteCacheById(cacheKey)
+                Log.d(TAG, "Deleting cache with key: $cacheKey")
+            } else {
+                try {
+                    val parsed =
+                        parseCache<MovieResponse>(existingCache.classType, existingCache.body)
+                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                    return Response.success(parsed)
+                } catch (e: Exception) {
+                    Log.d(TAG, "Cache deserialization failed: " + e.message.toString())
+                }
+            }
+        }
         return try {
             val tmdbResponse = tmdbApi.getMovie(movieId, append_to_response = appendToQuery)
             val movie = tmdbResponse.body()
@@ -126,6 +176,16 @@ class TmdbRepository @Inject constructor(
                                 vote_average = imdbRating,
                                 isImdbRating = true
                             )
+                            val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
+                            Log.d(TAG, "Creating cache with key: $cacheKey")
+                            apiCacheDao.addCache(
+                                ApiCache(
+                                    id = cacheKey,
+                                    body = gson.toJson(updatedMovie),
+                                    classType = MovieResponse::class.java.name,
+                                    expiration = expiration
+                                )
+                            )
                             return Response.success(updatedMovie)
                         }
                     }
@@ -141,7 +201,43 @@ class TmdbRepository @Inject constructor(
     suspend fun getSeason(
         tvId: Int,
         seasonNumber: Int
-    ) = tmdbApi.getSeason(tvId, seasonNumber)
+    ): Response<SeasonResponse> {
+        val cacheKey = "${tvId}_season_${seasonNumber}"
+        val existingCache = apiCacheDao.getCacheById(cacheKey)
+        if (existingCache != null) {
+            if (existingCache.expiration < System.currentTimeMillis()) {
+                apiCacheDao.deleteCacheById(cacheKey)
+                Log.d(TAG, "Deleting cache with key: $cacheKey")
+            } else {
+                try {
+                    val parsed =
+                        parseCache<SeasonResponse>(existingCache.classType, existingCache.body)
+                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                    return Response.success(parsed)
+                } catch (e: Exception) {
+                    Log.d(
+                        TAG,
+                        "Cache deserialization failed (cache will be deleted): " + e.message.toString()
+                    )
+                    apiCacheDao.deleteCacheById(cacheKey)
+                }
+            }
+        }
+        val season = tmdbApi.getSeason(tvId, seasonNumber)
+        if (season.isSuccessful && season.body() != null) {
+            val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
+            Log.d(TAG, "Creating cache with key: $cacheKey")
+            apiCacheDao.addCache(
+                ApiCache(
+                    id = cacheKey,
+                    body = gson.toJson(season.body()),
+                    classType = SeasonResponse::class.java.name,
+                    expiration = expiration
+                )
+            )
+        }
+        return season
+    }
 
     suspend fun getEpisode(
         tvId: Int,
@@ -227,4 +323,12 @@ class TmdbRepository @Inject constructor(
         query = query
     )
 
+    @Suppress("UNCHECKED_CAST")
+    private fun <T> parseCache(classType: String, body: String): T {
+        val clazz = Class.forName(classType)
+        val type = TypeToken.get(clazz).type
+        val parsed = gson.fromJson<Any>(body, type)
+
+        return parsed as T
+    }
 }

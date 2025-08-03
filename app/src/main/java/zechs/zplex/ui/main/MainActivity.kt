@@ -28,19 +28,28 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.ThisApp
 import zechs.zplex.databinding.ActivityMainBinding
+import zechs.zplex.service.CacheCleanupWorker
 import zechs.zplex.service.RemoteLibraryIndexingService
 import zechs.zplex.utils.MaterialMotionInterpolator
+import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
+
+    @Inject
+    lateinit var workManager: WorkManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -106,6 +115,20 @@ class MainActivity : AppCompatActivity() {
         if (!hasNotificationPermission()) {
             requestNotificationPermission()
         }
+
+        scheduleCacheCleanup()
+    }
+
+    private fun scheduleCacheCleanup() {
+        val weeklyWorkRequest = PeriodicWorkRequestBuilder<CacheCleanupWorker>(
+            7, TimeUnit.DAYS
+        ).build()
+
+        workManager.enqueueUniquePeriodicWork(
+            "CacheCleanupJob",
+            ExistingPeriodicWorkPolicy.KEEP,
+            weeklyWorkRequest
+        )
     }
 
     private fun requestNotificationPermission() {
