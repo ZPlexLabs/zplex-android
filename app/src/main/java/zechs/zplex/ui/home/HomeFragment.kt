@@ -161,7 +161,7 @@ class HomeFragment : Fragment() {
         when (homeDataAdapter.itemCount) {
             5 -> {
                 if (watchedList.isNotEmpty()) {
-                    currentList.add(1, HomeDataModel.Header("Continue Watching"))
+                    currentList.add(1, HomeDataModel.Header(getString(R.string.continue_watching)))
                     currentList.add(2, HomeDataModel.Watched(watchedList))
                 }
             }
@@ -169,7 +169,7 @@ class HomeFragment : Fragment() {
                 currentList.removeAt(1)
                 currentList.removeAt(1)
                 if (watchedList.isNotEmpty()) {
-                    currentList.add(1, HomeDataModel.Header("Continue Watching"))
+                    currentList.add(1, HomeDataModel.Header(getString(R.string.continue_watching)))
                     currentList.add(2, HomeDataModel.Watched(watchedList))
                 }
             }
