@@ -4,7 +4,6 @@ import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.content.Intent
 import android.content.res.ColorStateList
-import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
@@ -20,11 +19,12 @@ import android.widget.RatingBar
 import androidx.annotation.Keep
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
+import androidx.core.view.doOnAttach
 import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -36,7 +36,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.entities.Movie
@@ -126,23 +125,22 @@ class MediaFragment : Fragment() {
     ) {
         when (response) {
             is Resource.Success -> response.data?.let {
+                requireView().doOnAttach {
+                    TransitionManager.beginDelayedTransition(
+                        binding.root,
+                        MaterialFadeThrough()
+                    )
 
-                viewLifecycleOwner
-                    .lifecycleScope
-                    .launch {
-                        TransitionManager.beginDelayedTransition(
-                            binding.root,
-                            MaterialFadeThrough()
-                        )
-
-                        mediaDataAdapter.submitList(it)
-                    }
+                    mediaDataAdapter.submitList(response.data)
+                    startPostponedEnterTransition()
+                }
 
                 isLoading(false)
                 mediaViewModel.hasLoaded = true
             }
 
             is Resource.Error -> {
+                requireView().doOnAttach { startPostponedEnterTransition() }
                 showSnackBar(
                     message = response.message,
                     action = SnackBarAction(R.string.retry) {
@@ -159,10 +157,9 @@ class MediaFragment : Fragment() {
 
             is Resource.Loading -> {
                 if (!mediaViewModel.hasLoaded) {
-                    mediaViewModel.setDominantColor(
-                        Color.parseColor("#EADDFF")
-                    )
+                    mediaViewModel.setDominantColor("#EADDFF".toColorInt())
                     isLoading(true)
+                    postponeEnterTransition()
                 }
             }
         }
