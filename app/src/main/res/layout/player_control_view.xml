@@ -5,7 +5,7 @@
     android:id="@+id/controls"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#B3000000">
+    android:background="#99000000">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/playerToolbar"

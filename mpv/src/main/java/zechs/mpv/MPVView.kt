@@ -202,6 +202,10 @@ class MPVView(
         get() = MPVLib.getPropertyBoolean("core-idle")
         set(buffering) {}
 
+    var isEndOfFile: Boolean?
+        get() = MPVLib.getPropertyBoolean("end-file")
+        set(buffering) {}
+
     var timePos: Int?
         get() = MPVLib.getPropertyInt("time-pos")
         set(progress) = MPVLib.setPropertyInt("time-pos", progress!!)
@@ -275,5 +279,20 @@ class MPVView(
         MPVLib.setPropertyString("vo", "null")
         MPVLib.setOptionString("force-window", "no")
         MPVLib.detachSurface()
+    }
+
+    /**
+     * Returns the video aspect ratio. Rotation is taken into account.
+     */
+    fun getVideoAspect(): Double? {
+        return MPVLib.getPropertyDouble("video-params/aspect")?.let {
+            if (it < 0.001)
+                return 0.0
+            val rot = MPVLib.getPropertyInt("video-params/rotate") ?: 0
+            if (rot % 180 == 90)
+                1.0 / it
+            else
+                it
+        }
     }
 }

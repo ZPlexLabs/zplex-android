@@ -1,8 +1,10 @@
 package zechs.zplex.ui.player
 
+import android.app.PictureInPictureParams
+import android.app.RemoteAction
 import android.content.Context
-import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.drawable.Icon
 import android.media.AudioManager
 import android.media.AudioManager.AUDIOFOCUS_GAIN
 import android.media.AudioManager.AUDIOFOCUS_LOSS
@@ -12,15 +14,21 @@ import android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED
 import android.media.AudioManager.OnAudioFocusChangeListener
 import android.media.AudioManager.STREAM_MUSIC
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.util.Rational
 import android.view.View
 import android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
 import android.view.animation.AccelerateInterpolator
 import android.widget.SeekBar
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -38,9 +46,13 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
+import com.samsung.android.sdk.penremote.ButtonEvent
+import com.samsung.android.sdk.penremote.SpenEventListener
+import com.samsung.android.sdk.penremote.SpenUnit
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.mpv.MPVLib
+import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_END_FILE
 import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED
 import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART
 import zechs.mpv.MPVView
@@ -51,6 +63,7 @@ import zechs.zplex.databinding.PlayerControlViewBinding
 import zechs.zplex.databinding.SideSheetEpisodesBinding
 import zechs.zplex.ui.player.sidesheet.episodes.adapter.SideSheetEpisodesAdapter
 import zechs.zplex.utils.Constants.DRIVE_API
+import zechs.zplex.utils.SpenRemoteHelper
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.util.Orientation
 import zechs.zplex.utils.util.getNextOrientation
@@ -71,6 +84,11 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
     private lateinit var audioManager: AudioManager
     private var audioFocusRestore: () -> Unit = {}
+
+    /**
+     * DO NOT USE THIS
+     */
+    private var activityIsStopped = false
 
     // View-binding
     private lateinit var binding: ActivityMpvBinding
@@ -99,6 +117,15 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                 sideSheetDialog.hide()
             }
         )
+    }
+
+    private val spenListener = SpenEventListener { spenEvent ->
+        val buttonEvent = ButtonEvent(spenEvent)
+        when (buttonEvent.action) {
+            ButtonEvent.ACTION_UP -> {
+                player.cyclePause()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -168,6 +195,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
             // init onClick listeners
             btnPlayPause.setOnClickListener { player.cyclePause() }
+            btnPip.setOnClickListener { goIntoPiP() }
             exoFfwd.setOnClickListener { skipForward() }
             exoRew.setOnClickListener { rewindBackward() }
             btnAudio.setOnClickListener { pickAudio() }
@@ -225,6 +253,22 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         }
         playlistObserver()
         playMedia()
+
+        if (isSamsungWithSPen()) {
+            SpenRemoteHelper.initialize(
+                context = this,
+                onConnected = {
+                    SpenRemoteHelper.registerListener(SpenUnit.TYPE_BUTTON, spenListener)
+                },
+                onDisconnected = { errorCode ->
+                    SpenRemoteHelper.unregisterListener(SpenUnit.TYPE_BUTTON)
+                    Log.e("SpenRemote", "Disconnected with code: $errorCode")
+                }
+            )
+        }
+        addOnPictureInPictureModeChangedListener { info ->
+            onPiPModeChangedImpl(info.isInPictureInPictureMode)
+        }
     }
 
     private val seekBarChangeListener = object : SeekBar.OnSeekBarChangeListener {
@@ -274,10 +318,6 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
     }
 
 
-    override fun onNewIntent(i: Intent?) {
-        super.onNewIntent(i)
-    }
-
     private fun playMedia() {
         val playlist = intent.getStringExtra("playlist")
         val startIndex = intent.getIntExtra("startIndex", 0)
@@ -314,21 +354,22 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             is Resource.Success -> {
                 val accessToken = resource.data!!.token
                 val playbackItem = resource.data.item
-                val titleBuilder = StringBuilder()
                 if (playbackItem != null) {
                     val playlistButton = binding.controller.playerToolbar.menu
                         .findItem(R.id.action_playlist)
-                    titleBuilder.append(playbackItem.title)
+                    controller.playerToolbar.title = playbackItem.title
                     if (playbackItem is Show) {
-                        titleBuilder.append(
-                            " - S%02dE%02d".format(
+                        val subtextBuilder = StringBuilder()
+                        subtextBuilder.append(
+                            "S%02dE%02d".format(
                                 playbackItem.seasonNumber,
                                 playbackItem.episodeNumber
                             )
                         )
                         if (playbackItem.episodeTitle != null) {
-                            titleBuilder.append(" - ${playbackItem.episodeTitle}")
+                            subtextBuilder.append(" - ${playbackItem.episodeTitle}")
                         }
+                        controller.playerToolbar.subtitle = subtextBuilder.toString()
                         viewModel.getWatch(
                             playbackItem.tmdbId,
                             true,
@@ -346,8 +387,6 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                         playlistButton.isVisible = false
                         viewModel.getWatch(playbackItem.tmdbId, false, null, null)
                     }
-                    val title = titleBuilder.toString()
-                    controller.playerToolbar.title = title
                     val playUri = if (playbackItem.offline) {
                         Uri.fromFile(File(playbackItem.fileId)).toString()
                     } else getStreamUrl(playbackItem.fileId)
@@ -360,7 +399,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                             "Authorization: Bearer $accessToken"
                         )
                     }
-                    if (player.vo !== null && player.vo!!) {
+                    if (player.vo != null && player.vo!!) {
                         MPVLib.command(arrayOf("loadfile", playUri))
                     }
                     player.play(playUri)
@@ -404,9 +443,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
     }
 
     private fun getStreamUrl(fileId: String): String {
-        val uri = Uri.parse(
-            "${DRIVE_API}/files/${fileId}?supportsAllDrives=True&alt=media"
-        )
+        val uri = "${DRIVE_API}/files/${fileId}?supportsAllDrives=True&alt=media".toUri()
         Log.d(TAG, "STREAM_URL=$uri")
         return uri.toString()
     }
@@ -685,6 +722,86 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             viewModel.saveProgress(current, watchedDurationInMills, totalDurationInMills)
         }
     }
+
+    private fun isSamsungWithSPen(): Boolean {
+        val hasSPenFeature = this.packageManager.hasSystemFeature("com.sec.feature.spen_usp")
+        return Build.MANUFACTURER.equals("samsung", ignoreCase = true) && hasSPenFeature
+    }
+
+    private fun onPiPModeChangedImpl(state: Boolean) {
+        Log.v(TAG, "onPiPModeChanged($state)")
+        if (state) {
+            binding.controller.root.isInvisible = true
+            return
+        }
+
+        binding.controller.root.isInvisible = false
+        if (player.paused != null) {
+            updatePlaybackStatus(if (player.paused!!) PlaybackState.PAUSED else PlaybackState.PLAYING)
+        }
+        // For whatever stupid reason Android provides no good detection for when PiP is exited
+        // so we have to do this shit <https://stackoverflow.com/questions/43174507/#answer-56127742>
+        // If we don't exit the activity here it will stick around and not be retrievable from the
+        // recents screen, or react to onNewIntent().
+        if (activityIsStopped) {
+            // Note: On Android 12 or older there's another bug with this: the result will not
+            // be delivered to the calling activity and is instead instantly returned the next
+            // time, which makes it looks like the file picker is broken.
+            saveProgress(viewModel.head)
+            player.stop()
+            Log.d(TAG, "Killing MPV Player as exited from PiP Mode")
+            finish()
+        }
+    }
+
+    private fun goIntoPiP() {
+        updatePiPParams(true)
+        enterPictureInPictureMode()
+    }
+
+    /**
+     * Update Picture-in-picture parameters. Will only run if in PiP mode unless
+     * `force` is set.
+     */
+    private fun updatePiPParams(force: Boolean = false) {
+        if (!isInPictureInPictureMode && !force)
+            return
+
+        val playPauseAction = if (player.paused != null && player.paused!!) {
+            makeRemoteAction(R.drawable.ic_play_24, R.string.btn_play, "PLAY_PAUSE")
+        } else {
+            makeRemoteAction(R.drawable.ic_pause_24, R.string.btn_pause, "PLAY_PAUSE")
+        }
+        val actions = mutableListOf<RemoteAction>()
+        actions.add(playPauseAction)
+
+        val params = with(PictureInPictureParams.Builder()) {
+            val aspect = player.getVideoAspect() ?: 0.0
+            setAspectRatio(Rational(aspect.times(10000).toInt(), 10000))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                setAutoEnterEnabled(true)
+                setSeamlessResizeEnabled(true)
+            }
+            setActions(actions)
+        }
+        try {
+            setPictureInPictureParams(params.build())
+        } catch (e: IllegalArgumentException) {
+            // Android has some limits of what the aspect ratio can be
+            params.setAspectRatio(Rational(1, 1))
+            setPictureInPictureParams(params.build())
+        }
+    }
+
+    private fun makeRemoteAction(
+        @DrawableRes icon: Int,
+        @StringRes title: Int,
+        intentAction: String
+    ): RemoteAction {
+        val intent = NotificationButtonReceiver.createIntent(this, intentAction)
+        return RemoteAction(Icon.createWithResource(this, icon), getString(title), "", intent)
+    }
+
     ////////////////    MPV EVENTS    ////////////////
 
     override fun eventProperty(property: String, value: Boolean) {
@@ -757,6 +874,20 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                 if (eventId == MPV_EVENT_FILE_LOADED) {
                     Log.d(TAG, "File has starting playing...")
                 }
+                if (eventId == MPV_EVENT_END_FILE) {
+                    binding.controller.apply {
+                        val progress = progressBar.progress
+                        val max = binding.controller.progressBar.max
+                        val completed = (max - progress) <= 2
+                        Log.d(TAG, "End of file, completed=$completed, progress=$progress, max=$max")
+                        if (completed && btnNext.isVisible) {
+                            viewModel.next()
+                            Log.d(TAG, "End of file, auto-playing next in playlist")
+                        } else {
+                            Log.d(TAG, "End of file, but last item or not completed")
+                        }
+                    }
+                }
             }
         }
     }
@@ -765,6 +896,12 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
 
     override fun onPause() {
+        if (isInMultiWindowMode || isInPictureInPictureMode) {
+            Log.v(TAG, "Going into multi-window mode")
+            super.onPause()
+            return
+        }
+        player.cyclePause()
         saveProgress(viewModel.head)
 
         activityIsForeground = false
@@ -793,9 +930,22 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         updateOrientation(newConfig)
     }
 
+    override fun onStart() {
+        super.onStart()
+        activityIsStopped = false
+    }
+
+    override fun onStop() {
+        super.onStop()
+        activityIsStopped = true
+    }
+
     override fun onDestroy() {
         Log.v(TAG, "Exiting.")
 
+        if (isSamsungWithSPen()) {
+            SpenRemoteHelper.disconnect(this)
+        }
         @Suppress("DEPRECATION")
         audioManager.abandonAudioFocus(audioFocusChangeListener)
 

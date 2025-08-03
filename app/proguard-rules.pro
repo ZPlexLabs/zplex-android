@@ -60,3 +60,6 @@
 -keep public class zechs.zplex.ui.player.Movie {*;}
 -keep public class zechs.zplex.ui.player.Show {*;}
 -keep public class zechs.zplex.ui.player.GsonPlaybackItem {*;}
+
+-keep class com.samsung.android.sdk.** { *; }
+-dontwarn com.samsung.android.sdk.**

@@ -141,7 +141,7 @@ class PlayerViewModel @Inject constructor(
         setPlaylist(playlistJson!!, findIndexFromFileId(newFileId))
     }
 
-      fun findIndexFromFileId(newFileId: String): Int {
+    fun findIndexFromFileId(newFileId: String): Int {
         return getPlaylist().indexOfFirst { pair -> pair.first.fileId == newFileId }
     }
 
@@ -156,7 +156,7 @@ class PlayerViewModel @Inject constructor(
                     val currentlyPlaying = head?.fileId == temp.fileId
                     Pair(temp.episode, currentlyPlaying)
                 } else null
-            }
+            }.distinctBy { it.first.fileId }
     }
 
 
@@ -165,7 +165,9 @@ class PlayerViewModel @Inject constructor(
         val playbackItemType = object : TypeToken<List<GsonPlaybackItem>?>() {}.type
         gson.fromJson<List<GsonPlaybackItem>>(playlist, playbackItemType)
             ?.map { it.toPlaybackItem() }
-            ?.let { setPlaylist(it.toList(), startIndex) }
+            ?.let { playlistList ->
+                setPlaylist(playlistList.toList().distinctBy { it.fileId }, startIndex)
+            }
     }
 
     private fun setPlaylist(playlist: List<PlaybackItem>, startIndex: Int = 0) {
