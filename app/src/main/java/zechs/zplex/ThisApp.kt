@@ -10,6 +10,7 @@ import zechs.zplex.utils.CrashHandler
 
 @HiltAndroidApp
 class ThisApp : Application(), ImageLoaderFactory {
+    var indexServiceExecuted = false
 
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)

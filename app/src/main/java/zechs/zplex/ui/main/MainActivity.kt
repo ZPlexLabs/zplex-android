@@ -31,6 +31,7 @@ import androidx.navigation.ui.setupWithNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
+import zechs.zplex.ThisApp
 import zechs.zplex.databinding.ActivityMainBinding
 import zechs.zplex.service.RemoteLibraryIndexingService
 import zechs.zplex.utils.MaterialMotionInterpolator
@@ -96,8 +97,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-        startService(Intent(this, RemoteLibraryIndexingService::class.java))
+        val app = application as ThisApp
+        if (!app.indexServiceExecuted) {
+            startService(Intent(this, RemoteLibraryIndexingService::class.java))
+            app.indexServiceExecuted = true
+        }
 
         if (!hasNotificationPermission()) {
             requestNotificationPermission()
