@@ -16,7 +16,8 @@ data class Show(
     val media_type: String?,
     val poster_path: String?,
     val vote_average: Double?,
-    val fileId: String?
+    val fileId: String?,
+    val modifiedTime: Long? = null
 ) {
 
     fun toMedia() = Media(

@@ -10,6 +10,7 @@ data class DriveFile(
     val size: Long?,
     val mimeType: String,
     val iconLink: String?,
+    val modifiedTime: Long?,
     val shortcutDetails: ShortcutDetails
 ) {
     val humanSize = size?.let { Converter.toHumanSize(it) }

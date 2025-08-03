@@ -8,6 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import zechs.zplex.data.local.*
+import zechs.zplex.utils.MIGRATION_1_2
 import javax.inject.Singleton
 
 @Module
@@ -24,7 +25,9 @@ object ZPlexDatabaseModule {
         appContext,
         WatchlistDatabase::class.java,
         DATABASE_NAME
-    ).build()
+    )
+        .addMigrations(MIGRATION_1_2)
+        .build()
 
     @Singleton
     @Provides

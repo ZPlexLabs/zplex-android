@@ -13,7 +13,7 @@ interface ShowDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertShow(media: Show): Long
 
-    @Query("SELECT * FROM shows ORDER BY id DESC")
+    @Query("SELECT * FROM shows ORDER BY CASE WHEN modifiedTime IS NULL THEN 1 ELSE 0 END, modifiedTime DESC")
     fun getAllShows(): LiveData<List<Show>>
 
     @Query("SELECT EXISTS(SELECT * FROM shows WHERE id = :id)")

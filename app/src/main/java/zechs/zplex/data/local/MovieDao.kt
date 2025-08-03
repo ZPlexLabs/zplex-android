@@ -13,7 +13,7 @@ interface MovieDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertMovie(media: Movie): Long
 
-    @Query("SELECT * FROM movies ORDER BY id DESC")
+    @Query("SELECT * FROM movies ORDER BY CASE WHEN modifiedTime IS NULL THEN 1 ELSE 0 END, modifiedTime DESC")
     fun getAllMovies(): LiveData<List<Movie>>
 
     @Query("SELECT EXISTS(SELECT * FROM movies WHERE id = :id)")

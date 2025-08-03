@@ -283,7 +283,8 @@ class MediaViewModel @Inject constructor(
                         name = result.name,
                         poster_path = result.poster_path,
                         vote_average = result.vote_average,
-                        fileId = saved?.fileId
+                        fileId = saved?.fileId,
+                        modifiedTime = saved?.modifiedTime
                     ),
                     seasons = seasonList
                 )
@@ -416,7 +417,8 @@ class MediaViewModel @Inject constructor(
                         title = result.title,
                         poster_path = result.poster_path,
                         vote_average = result.vote_average,
-                        fileId = saved?.fileId
+                        fileId = saved?.fileId,
+                        modifiedTime = saved?.modifiedTime
                     ),
                     year = year
                 )

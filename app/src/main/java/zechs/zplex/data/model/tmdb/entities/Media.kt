@@ -17,7 +17,8 @@ data class Media(
     val overview: String?,
     val release_date: String?,
     val first_air_date: String?,
-    val fileId: String? = null
+    val fileId: String? = null,
+    val modifiedTime: Long? = null
 ) : Serializable {
 
     fun releasedDate(): String? {

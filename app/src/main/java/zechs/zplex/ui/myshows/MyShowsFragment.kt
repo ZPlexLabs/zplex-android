@@ -120,7 +120,8 @@ class MyShowsFragment : Fragment() {
                             media_type = media.media_type.name,
                             poster_path = media.poster_path,
                             vote_average = media.vote_average,
-                            fileId = media.fileId
+                            fileId = media.fileId,
+                            modifiedTime = media.modifiedTime
                         )
                         myShowsViewModel.deleteShow(media.id)
                         snackBar.setAction(R.string.undo) {
@@ -135,7 +136,8 @@ class MyShowsFragment : Fragment() {
                             media_type = media.media_type.name,
                             poster_path = media.poster_path,
                             vote_average = media.vote_average,
-                            fileId = media.fileId
+                            fileId = media.fileId,
+                            modifiedTime = media.modifiedTime
                         )
                         myShowsViewModel.deleteMovie(movie.id)
                         snackBar.setAction(R.string.undo) {

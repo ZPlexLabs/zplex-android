@@ -1,6 +1,8 @@
 package zechs.zplex.data.model.drive
 
 import androidx.annotation.Keep
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 
 @Keep
 data class FilesResponse(
@@ -15,9 +17,17 @@ data class File(
     val size: Long?,
     val iconLink: String,
     val mimeType: String,
+    val modifiedTime: String?,
     val shortcutDetails: ShortcutDetails = ShortcutDetails(),
 ) {
-    fun toDriveFile() = DriveFile(id, name, size, mimeType, iconLink, shortcutDetails)
+
+    private fun convertToEpoch(): Long? {
+        if (modifiedTime.isNullOrEmpty()) return null
+        return Instant.from(DateTimeFormatter.ISO_INSTANT.parse(modifiedTime)).toEpochMilli()
+    }
+
+    fun toDriveFile() =
+        DriveFile(id, name, size, mimeType, iconLink, convertToEpoch(), shortcutDetails)
 }
 
 @Keep
