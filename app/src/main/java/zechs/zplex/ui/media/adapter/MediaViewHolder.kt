@@ -184,7 +184,7 @@ sealed class MediaViewHolder(
                 }
 
                 btnShare.setOnClickListener {
-                    listener.showShare(item.show)
+                    listener.showShare(item.show.id, item.show.name, item.imdbId)
                 }
             }
         }
@@ -213,7 +213,7 @@ sealed class MediaViewHolder(
                 }
 
                 btnShare.setOnClickListener {
-                    listener.movieShare(item.movie)
+                    listener.movieShare(item.movie.id, item.movie.title, item.imdbId)
                 }
             }
         }

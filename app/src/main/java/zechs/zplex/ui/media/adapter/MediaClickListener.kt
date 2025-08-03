@@ -30,11 +30,11 @@ interface MediaClickListener {
     fun movieWatchNow(movie: Movie, year: Int?)
     fun setMovieWatchNowButton(view: MaterialButton)
     fun movieWatchlist(view: MaterialButton, movie: Movie)
-    fun movieShare(movie: Movie)
+    fun movieShare(tmdbId: Int, title: String, imdbId: String?)
 
     fun showWatchNow(seasons: List<Season>)
     fun showWatchlist(view: MaterialButton, show: Show)
-    fun showShare(show: Show)
+    fun showShare(tmdbId: Int, title: String, imdbId: String?)
 
     fun openImageInBig(imagePath: String?, imageView: ImageView)
 

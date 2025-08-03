@@ -278,6 +278,7 @@ class MediaViewModel @Inject constructor(
             }
 
             val saved = tmdbRepository.fetchShowById(result.id)
+            val imdbId = result.external_ids?.getOrDefault("imdb_id", null)
 
             mediaDataModel.add(
                 MediaDataModel.ShowButton(
@@ -290,6 +291,7 @@ class MediaViewModel @Inject constructor(
                         fileId = saved?.fileId,
                         modifiedTime = saved?.modifiedTime
                     ),
+                    imdbId = imdbId,
                     seasons = seasonList
                 )
             )
@@ -426,6 +428,7 @@ class MediaViewModel @Inject constructor(
                         modifiedTime = saved?.modifiedTime
                     ),
                     watchedMovie = watched,
+                    imdbId = result.imdb_id,
                     year = year
                 )
             )

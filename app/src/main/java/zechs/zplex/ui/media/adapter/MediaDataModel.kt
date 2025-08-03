@@ -49,14 +49,16 @@ sealed class MediaDataModel {
     @Keep
     data class ShowButton(
         val seasons: List<Season>,
-        val show: Show
+        val show: Show,
+        val imdbId: String?
     ) : MediaDataModel()
 
     @Keep
     data class MovieButton(
         val movie: Movie,
         val watchedMovie: WatchedMovie?,
-        val year: Int?
+        val year: Int?,
+        val imdbId: String?
     ) : MediaDataModel()
 
     @Keep

@@ -325,16 +325,16 @@ class MediaFragment : Fragment() {
                 }
             }
 
-            override fun movieShare(movie: Movie) {
-                shareIntent(movie.id, movie.title, MediaType.movie)
+            override fun movieShare(tmdbId: Int, title: String, imdbId: String?) {
+                shareIntent(tmdbId, imdbId, title, MediaType.movie)
             }
 
             override fun showWatchNow(seasons: List<Season>) {
                 setSeasonsList(seasons)
             }
 
-            override fun showShare(show: Show) {
-                shareIntent(show.id, show.name, MediaType.tv)
+            override fun showShare(tmdbId: Int, title: String, imdbId: String?) {
+                shareIntent(tmdbId, imdbId, title, MediaType.tv)
             }
 
             override fun showWatchlist(
@@ -390,17 +390,18 @@ class MediaFragment : Fragment() {
 
     private fun shareIntent(
         tmdbId: Int,
-        showName: String,
+        imdbId: String?,
+        title: String,
         mediaType: MediaType
     ) {
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
-        sendIntent.putExtra(
-            Intent.EXTRA_TEXT,
-            "https://www.themoviedb.org/${mediaType.name}/${tmdbId}"
-        )
+        val shareUrl =  if (imdbId != null) {
+            "https://www.imdb.com/title/${imdbId}"
+        } else "https://www.themoviedb.org/${mediaType.name}/${tmdbId}"
+        sendIntent.putExtra(Intent.EXTRA_TEXT, shareUrl)
         sendIntent.type = "text/plain"
-        val shareIntent = Intent.createChooser(sendIntent, showName)
+        val shareIntent = Intent.createChooser(sendIntent, title)
         startActivity(shareIntent)
     }
 
