@@ -51,5 +51,5 @@ enum class Order {
 
 @Keep
 enum class MediaType {
-    tv, movie, person
+    tv, movie, person, collection
 }
