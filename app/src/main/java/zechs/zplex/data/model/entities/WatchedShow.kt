@@ -3,7 +3,6 @@ package zechs.zplex.data.model.entities
 import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.Calendar
 
 @Entity(tableName = "watched_shows")
 @Keep

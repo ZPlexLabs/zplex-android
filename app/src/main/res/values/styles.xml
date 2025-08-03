@@ -14,6 +14,12 @@
         <item name="materialCardViewStyle">@style/Widget.App.Card</item>
     </style>
 
+    <style name="NewAppTheme" parent="Theme.Material3.DynamicColors.Dark.NoActionBar">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowFullscreen">false</item>
+        <item name="android:fitsSystemWindows">true</item>
+    </style>
+
     <style name="MenuTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorSecondary">@color/textColor</item>
         <item name="android:actionMenuTextColor">@color/textColor</item>

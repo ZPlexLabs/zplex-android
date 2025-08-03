@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import zechs.zplex.R
 import zechs.zplex.data.model.tmdb.entities.Episode
-import zechs.zplex.databinding.ItemEpisodeBinding
 import zechs.zplex.databinding.ItemSidesheetEpisodeBinding
 
 class SideSheetEpisodesAdapter(

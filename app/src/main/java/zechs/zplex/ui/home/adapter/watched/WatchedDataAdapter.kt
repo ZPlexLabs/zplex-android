@@ -20,10 +20,12 @@ class WatchedDataAdapter(
         ): Boolean = when {
             oldItem is WatchedDataModel.Movie && newItem
                     is WatchedDataModel.Movie && oldItem.movie.tmdbId == newItem.movie.tmdbId
-            -> true
+                -> true
+
             oldItem is WatchedDataModel.Show && newItem
                     is WatchedDataModel.Show && oldItem.show.tmdbId == newItem.show.tmdbId
-            -> true
+                -> true
+
             else -> false
         }
 

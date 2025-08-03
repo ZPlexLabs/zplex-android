@@ -11,7 +11,7 @@ import androidx.work.WorkManager
 class DownloadActionReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d(TAG, "onReceive: ${intent.action}" )
+        Log.d(TAG, "onReceive: ${intent.action}")
         if (intent.action == CANCEL_ACTION) {
             val downloadName = intent.getStringExtra(DOWNLOAD_NAME) ?: return
             Log.d(TAG, "downloadName: $downloadName")

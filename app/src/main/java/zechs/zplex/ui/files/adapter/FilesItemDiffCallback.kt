@@ -12,11 +12,11 @@ class FilesItemDiffCallback : DiffUtil.ItemCallback<FilesDataModel>() {
 
         oldItem is FilesDataModel.Loading && newItem is FilesDataModel.Loading
                 && oldItem == newItem
-        -> true
+            -> true
 
         oldItem is FilesDataModel.File && newItem is FilesDataModel.File &&
                 oldItem.driveFile.id == newItem.driveFile.id
-        -> true
+            -> true
 
         else -> false
     }

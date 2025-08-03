@@ -80,6 +80,7 @@ class WatchFragment : Fragment() {
                 is Resource.Success -> {
                     responseEpisode.data?.let { doOnSuccess(it) }
                 }
+
                 is Resource.Error -> {}
                 is Resource.Loading -> {}
             }

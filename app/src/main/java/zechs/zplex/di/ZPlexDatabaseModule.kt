@@ -7,7 +7,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import zechs.zplex.data.local.*
+import zechs.zplex.data.local.MovieDao
+import zechs.zplex.data.local.ShowDao
+import zechs.zplex.data.local.WatchedMovieDao
+import zechs.zplex.data.local.WatchedShowDao
+import zechs.zplex.data.local.WatchlistDatabase
 import zechs.zplex.utils.MIGRATION_1_2
 import javax.inject.Singleton
 

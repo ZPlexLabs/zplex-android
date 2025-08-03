@@ -14,7 +14,6 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
 import androidx.core.view.doOnLayout
 import androidx.core.view.isGone
 import androidx.core.view.isInvisible
@@ -228,7 +227,10 @@ class EpisodesFragment : Fragment() {
             }
         }
         sharedViewModel.selectedSeasonNumber.observe(viewLifecycleOwner) { seasonNumber ->
-            Log.d(TAG, "getSeasonWithWatched(tmdbId=${episodesViewModel.tmdbId}, seasonNumber=$seasonNumber)")
+            Log.d(
+                TAG,
+                "getSeasonWithWatched(tmdbId=${episodesViewModel.tmdbId}, seasonNumber=$seasonNumber)"
+            )
             episodesViewModel.getSeasonWithWatched(episodesViewModel.tmdbId, seasonNumber)
         }
         episodesViewModel.episodesWithWatched.observe(viewLifecycleOwner) { response ->

@@ -15,7 +15,12 @@ import coil.request.SuccessResult
 import zechs.zplex.R
 import zechs.zplex.data.model.BackdropSize
 import zechs.zplex.data.model.PosterSize
-import zechs.zplex.databinding.*
+import zechs.zplex.databinding.ItemListWithHeadingBinding
+import zechs.zplex.databinding.ItemMediaButtonsBinding
+import zechs.zplex.databinding.ItemMediaCollectionBinding
+import zechs.zplex.databinding.ItemMediaHeaderBinding
+import zechs.zplex.databinding.ItemMediaSeasonBinding
+import zechs.zplex.databinding.ItemMediaTitleBinding
 import zechs.zplex.ui.list.adapter.ListDataModel
 import zechs.zplex.ui.shared_adapters.casts.CastAdapter
 import zechs.zplex.ui.shared_adapters.media.MediaAdapter

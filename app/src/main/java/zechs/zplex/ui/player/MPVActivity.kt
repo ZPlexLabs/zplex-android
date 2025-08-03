@@ -879,7 +879,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                         val progress = progressBar.progress
                         val max = binding.controller.progressBar.max
                         val completed = (max - progress) <= 2
-                        Log.d(TAG, "End of file, completed=$completed, progress=$progress, max=$max")
+                        Log.d(
+                            TAG,
+                            "End of file, completed=$completed, progress=$progress, max=$max"
+                        )
                         if (completed && btnNext.isVisible) {
                             viewModel.next()
                             Log.d(TAG, "End of file, auto-playing next in playlist")

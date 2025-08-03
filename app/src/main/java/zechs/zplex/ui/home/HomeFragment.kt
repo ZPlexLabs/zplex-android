@@ -84,11 +84,13 @@ class HomeFragment : Fragment() {
                     isLoading(false)
                     homeMediaSuccess(response.data!!)
                 }
+
                 is Resource.Error -> {
                     isLoading(false)
                     Log.d(TAG, "Error: ${response.message}")
                     homeMediaError(response.message!!)
                 }
+
                 is Resource.Loading -> {
                     isLoading(true)
                     Log.d(TAG, "isLoading")
@@ -165,6 +167,7 @@ class HomeFragment : Fragment() {
                     currentList.add(2, HomeDataModel.Watched(watchedList))
                 }
             }
+
             7 -> {
                 currentList.removeAt(1)
                 currentList.removeAt(1)
@@ -173,6 +176,7 @@ class HomeFragment : Fragment() {
                     currentList.add(2, HomeDataModel.Watched(watchedList))
                 }
             }
+
             else -> {}
         }
         homeDataAdapter.submitList(currentList)

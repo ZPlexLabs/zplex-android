@@ -114,6 +114,7 @@ class SearchFragment : Fragment() {
                         isLoading = false
                     }
                 }
+
                 is Resource.Error -> {
                     isLoading = false
                     response.message?.let { message ->
@@ -124,6 +125,7 @@ class SearchFragment : Fragment() {
                     }
                     binding.pbSearch.isInvisible = true
                 }
+
                 is Resource.Loading -> {
                     isLoading = true
                     binding.pbSearch.isVisible = true
@@ -167,14 +169,15 @@ class SearchFragment : Fragment() {
             7 -> 0.13
             else -> 1.0 / spanCount
         }
-        val gridLayoutManager = object : GridLayoutManager(activity, spanCount, RecyclerView.VERTICAL, false) {
-            override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
-                return lp?.let {
-                    it.width = (widthRatio * width).toInt()
-                    true
-                } ?: super.checkLayoutParams(null)
+        val gridLayoutManager =
+            object : GridLayoutManager(activity, spanCount, RecyclerView.VERTICAL, false) {
+                override fun checkLayoutParams(lp: RecyclerView.LayoutParams?): Boolean {
+                    return lp?.let {
+                        it.width = (widthRatio * width).toInt()
+                        true
+                    } ?: super.checkLayoutParams(null)
+                }
             }
-        }
         binding.rvSearch.apply {
             adapter = searchAdapter
             layoutManager = gridLayoutManager

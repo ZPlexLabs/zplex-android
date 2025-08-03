@@ -1,7 +1,12 @@
 package zechs.zplex.data.model.tmdb.media
 
 import androidx.annotation.Keep
-import zechs.zplex.data.model.tmdb.entities.*
+import zechs.zplex.data.model.tmdb.entities.Cast
+import zechs.zplex.data.model.tmdb.entities.Episode
+import zechs.zplex.data.model.tmdb.entities.Genre
+import zechs.zplex.data.model.tmdb.entities.Media
+import zechs.zplex.data.model.tmdb.entities.Season
+import zechs.zplex.data.model.tmdb.entities.Video
 
 @Keep
 data class MediaResponse(

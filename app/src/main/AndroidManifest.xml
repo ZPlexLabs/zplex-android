@@ -68,6 +68,7 @@
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             tools:node="remove" />
+
         <receiver android:name=".service.DownloadActionReceiver" />
         <receiver android:name=".ui.player.NotificationButtonReceiver" />
     </application>

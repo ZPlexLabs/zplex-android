@@ -180,6 +180,7 @@ class MyShowsFragment : Fragment() {
                             myShowsViewModel.saveShow(show)
                         }
                     }
+
                     MediaType.movie -> {
                         val movie = Movie(
                             id = media.id,
@@ -196,6 +197,7 @@ class MyShowsFragment : Fragment() {
                             myShowsViewModel.saveMovie(movie)
                         }
                     }
+
                     else -> {}
                 }
 

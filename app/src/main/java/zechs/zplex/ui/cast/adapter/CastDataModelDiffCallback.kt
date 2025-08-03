@@ -10,19 +10,19 @@ class CastDataModelDiffCallback : DiffUtil.ItemCallback<CastDataModel>() {
     ): Boolean = when {
         oldItem is CastDataModel.Heading && newItem
                 is CastDataModel.Heading && oldItem.heading == newItem.heading
-        -> true
+            -> true
 
         oldItem is CastDataModel.Header && newItem
                 is CastDataModel.Header && oldItem.profilePath == newItem.profilePath
-        -> true
+            -> true
 
         oldItem is CastDataModel.Meta && newItem
                 is CastDataModel.Meta && oldItem.id == newItem.id
-        -> true
+            -> true
 
         oldItem is CastDataModel.AppearsIn && newItem
                 is CastDataModel.AppearsIn && oldItem.appearsIn == newItem.appearsIn
-        -> true
+            -> true
 
         else -> false
     }

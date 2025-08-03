@@ -14,6 +14,9 @@ import java.util.List;
 // Wrapper for native library
 public class MPVLib {
 
+    private static final List<EventObserver> observers = new ArrayList<>();
+    private static final List<LogObserver> log_observers = new ArrayList<>();
+
     static {
         String[] libs = {"mpv", "player"};
         for (String lib : libs) {
@@ -55,8 +58,6 @@ public class MPVLib {
     public static native void setPropertyString(@NonNull String property, @NonNull String value);
 
     public static native void observeProperty(@NonNull String property, int format);
-
-    private static final List<EventObserver> observers = new ArrayList<>();
 
     public static void addObserver(EventObserver o) {
         synchronized (observers) {
@@ -111,8 +112,6 @@ public class MPVLib {
                 o.event(eventId);
         }
     }
-
-    private static final List<LogObserver> log_observers = new ArrayList<>();
 
     public static void addLogObserver(LogObserver o) {
         synchronized (log_observers) {

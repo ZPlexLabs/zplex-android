@@ -147,9 +147,11 @@ class BrowseFragment : Fragment() {
             MediaType.movie -> {
                 binding.tvMediaType.text = getString(R.string.browsing_movies)
             }
+
             MediaType.tv -> {
                 binding.tvMediaType.text = getString(R.string.browsing_tv)
             }
+
             else -> {}
         }
 
@@ -363,6 +365,7 @@ class BrowseFragment : Fragment() {
                             genreMenu.text = getGenre(currentFilters.withGenres, getMovieGenre())
                         }
                     }
+
                     MediaType.tv -> {
                         val movieChip = filtersDialog.findViewById<Chip>(R.id.chip_movie)
                         val tvChip = filtersDialog.findViewById<Chip>(R.id.chip_tv)
@@ -375,6 +378,7 @@ class BrowseFragment : Fragment() {
                             genreMenu.text = getGenre(currentFilters.withGenres, getTvGenre())
                         }
                     }
+
                     else -> {}
                 }
                 sortMenu.text = getSort(currentFilters.sortBy.name)

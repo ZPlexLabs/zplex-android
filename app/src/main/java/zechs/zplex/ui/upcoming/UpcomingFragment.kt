@@ -69,6 +69,7 @@ class UpcomingFragment : Fragment() {
                     }
                     isLoading = false
                 }
+
                 is Resource.Error -> {
                     response.message?.let { message ->
                         val errorMsg = message.ifEmpty {
@@ -86,6 +87,7 @@ class UpcomingFragment : Fragment() {
                         isLoading = false
                     }
                 }
+
                 is Resource.Loading -> {
                     binding.apply {
                         // pbBrowse.isVisible = true

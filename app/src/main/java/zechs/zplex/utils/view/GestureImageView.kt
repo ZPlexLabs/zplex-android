@@ -175,6 +175,7 @@ class GestureImageView : AppCompatImageView, View.OnTouchListener,
                 mStart.set(mLast)
                 mode = DRAG
             }
+
             MotionEvent.ACTION_MOVE -> if (mode == DRAG) {
                 val dx = currentPoint.x - mLast.x
                 val dy = currentPoint.y - mLast.y
@@ -184,6 +185,7 @@ class GestureImageView : AppCompatImageView, View.OnTouchListener,
                 fixTranslation()
                 mLast[currentPoint.x] = currentPoint.y
             }
+
             MotionEvent.ACTION_POINTER_UP -> mode = NONE
         }
         imageMatrix = mMatrix

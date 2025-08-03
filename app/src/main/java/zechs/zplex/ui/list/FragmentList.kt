@@ -133,6 +133,7 @@ class FragmentList : Fragment(), ListClickListener {
                         showPoster = it.showPoster
                     )
                 }
+
                 else -> {}
             }
         }

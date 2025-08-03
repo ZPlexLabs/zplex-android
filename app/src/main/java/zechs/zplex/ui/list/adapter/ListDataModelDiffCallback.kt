@@ -11,18 +11,19 @@ class ListDataModelDiffCallback : DiffUtil.ItemCallback<ListDataModel>() {
 
         oldItem is ListDataModel.Seasons && newItem
                 is ListDataModel.Seasons && oldItem.tmdbId == newItem.tmdbId
-        -> true
+            -> true
+
         oldItem is ListDataModel.Casts && newItem
                 is ListDataModel.Casts && oldItem.casts == newItem.casts
-        -> true
+            -> true
 
         oldItem is ListDataModel.Media && newItem
                 is ListDataModel.Media && oldItem.media == newItem.media
-        -> true
+            -> true
 
         oldItem is ListDataModel.Videos && newItem
                 is ListDataModel.Videos && oldItem.videos == newItem.videos
-        -> true
+            -> true
 
         else -> false
     }

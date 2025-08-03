@@ -49,7 +49,13 @@ object ServiceModule {
         sessionManager: SessionManager,
         @ApplicationContext context: Context
     ): RemoteLibrary {
-        return RemoteLibraryRepository(notificationManager, driveRepository, tmdbRepository, sessionManager, context)
+        return RemoteLibraryRepository(
+            notificationManager,
+            driveRepository,
+            tmdbRepository,
+            sessionManager,
+            context
+        )
     }
 
 }

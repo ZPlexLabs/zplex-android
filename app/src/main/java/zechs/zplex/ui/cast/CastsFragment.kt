@@ -104,10 +104,12 @@ class CastsFragment : Fragment() {
                         isLoading(false)
                         hasLoaded = true
                     }
+
                     is Resource.Error -> {
                         showSnackBar(response.message)
                         binding.rvList.isInvisible = true
                     }
+
                     is Resource.Loading -> if (!hasLoaded) {
                         isLoading(true)
                     }

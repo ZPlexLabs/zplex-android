@@ -2,9 +2,9 @@ package zechs.zplex.data.model.drive
 
 import android.net.Uri
 import androidx.annotation.Keep
+import androidx.core.net.toUri
 import zechs.zplex.utils.Constants.GOOGLE_ACCOUNTS_URL
 import java.io.Serializable
-import androidx.core.net.toUri
 
 @Keep
 data class DriveClient(

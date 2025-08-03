@@ -7,8 +7,6 @@ import android.content.res.ColorStateList
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -396,7 +394,7 @@ class MediaFragment : Fragment() {
     ) {
         val sendIntent = Intent()
         sendIntent.action = Intent.ACTION_SEND
-        val shareUrl =  if (imdbId != null) {
+        val shareUrl = if (imdbId != null) {
             "https://www.imdb.com/title/${imdbId}"
         } else "https://www.themoviedb.org/${mediaType.name}/${tmdbId}"
         sendIntent.putExtra(Intent.EXTRA_TEXT, shareUrl)

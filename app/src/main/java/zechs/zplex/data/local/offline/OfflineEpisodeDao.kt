@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import zechs.zplex.data.model.offline.OfflineEpisode
-import zechs.zplex.data.model.offline.OfflineSeason
 
 @Dao
 interface OfflineEpisodeDao {

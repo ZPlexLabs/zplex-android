@@ -1,9 +1,6 @@
 package zechs.zplex.di
 
 import android.content.Context
-import android.util.Log
-import androidx.work.Configuration
-import androidx.work.WorkManager
 import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
@@ -12,12 +9,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import zechs.zplex.data.local.WatchedMovieDao
 import zechs.zplex.data.local.WatchedShowDao
-import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.WatchedRepository
-import zechs.zplex.service.DownloadWorkerFactory
 import zechs.zplex.service.IndexingStateFlow
 import zechs.zplex.utils.SessionManager
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module

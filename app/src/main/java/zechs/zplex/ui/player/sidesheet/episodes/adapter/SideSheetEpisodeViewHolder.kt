@@ -8,7 +8,6 @@ import com.google.android.material.progressindicator.LinearProgressIndicator
 import zechs.zplex.R
 import zechs.zplex.data.model.StillSize
 import zechs.zplex.data.model.tmdb.entities.Episode
-import zechs.zplex.databinding.ItemEpisodeBinding
 import zechs.zplex.databinding.ItemSidesheetEpisodeBinding
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.MaterialMotionInterpolator

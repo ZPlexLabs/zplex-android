@@ -54,7 +54,19 @@ data class GsonPlaybackItem(
 ) {
     fun toPlaybackItem(): PlaybackItem {
         return if (seasonNumber != null && episodeNumber != null && episodeTitle != null) {
-            Show(tmdbId, title, posterPath, fileId, offline, null, null, episode!!, seasonNumber, episodeNumber, episodeTitle)
+            Show(
+                tmdbId,
+                title,
+                posterPath,
+                fileId,
+                offline,
+                null,
+                null,
+                episode!!,
+                seasonNumber,
+                episodeNumber,
+                episodeTitle
+            )
         } else {
             Movie(tmdbId, title, posterPath, fileId, offline, null, null)
         }

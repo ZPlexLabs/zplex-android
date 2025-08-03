@@ -11,43 +11,44 @@ class MediaDataModelDiffCallback : DiffUtil.ItemCallback<MediaDataModel>() {
 
         oldItem is MediaDataModel.Header && newItem
                 is MediaDataModel.Header && oldItem.backdropPath == newItem.backdropPath
-        -> true
+            -> true
 
         oldItem is MediaDataModel.Title && newItem
                 is MediaDataModel.Title && oldItem.title == newItem.title
-        -> true
+            -> true
 
         oldItem is MediaDataModel.LatestSeason && newItem
                 is MediaDataModel.LatestSeason && oldItem.showTmdbId == newItem.showTmdbId
-        -> true
+            -> true
 
         oldItem is MediaDataModel.PartOfCollection && newItem
                 is MediaDataModel.PartOfCollection && oldItem.collectionId == newItem.collectionId
-        -> true
+            -> true
 
         oldItem is MediaDataModel.MovieButton && newItem
                 is MediaDataModel.MovieButton && oldItem.movie.id == newItem.movie.id
-        -> true
+            -> true
 
         oldItem is MediaDataModel.ShowButton && newItem
                 is MediaDataModel.ShowButton && oldItem.show.id == newItem.show.id
-        -> true
+            -> true
 
         oldItem is MediaDataModel.Casts && newItem
                 is MediaDataModel.Casts && oldItem.casts == newItem.casts
-        -> true
+            -> true
 
         oldItem is MediaDataModel.Recommendations && newItem
                 is MediaDataModel.Recommendations && oldItem.recommendations == newItem.recommendations
-        -> true
+            -> true
 
         oldItem is MediaDataModel.MoreFromCompany && newItem
                 is MediaDataModel.MoreFromCompany && oldItem.more == newItem.more
-        -> true
+            -> true
 
         oldItem is MediaDataModel.Videos && newItem
                 is MediaDataModel.Videos && oldItem.videos == newItem.videos
-        -> true
+            -> true
+
         else -> false
     }
 

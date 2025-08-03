@@ -1,7 +1,6 @@
 package zechs.zplex.ui.main
 
 import android.Manifest
-import android.animation.ValueAnimator
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -14,7 +13,6 @@ import android.view.animation.Interpolator
 import android.view.animation.TranslateAnimation
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.ColorRes
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -163,21 +161,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun animationNavColorChange(
-        @ColorRes color: Int
-    ) = lifecycleScope.launch {
-        val from = window.navigationBarColor
-        val to = ContextCompat.getColor(applicationContext, color)
-        ValueAnimator
-            .ofArgb(from, to)
-            .also {
-                it.addUpdateListener { animator ->
-                    window.navigationBarColor = (animator.animatedValue as Int)
-                }
-                it.start()
-            }
-    }
-
     private fun slideAnimation(
         view: View,
         fromXDelta: Float, toXDelta: Float,
@@ -242,15 +225,6 @@ class MainActivity : AppCompatActivity() {
     private fun hideSlideDown(view: View) {
         slideAnimation(view, 0f, 0f, 0f, view.height.toFloat(), false)
     }
-
-    private fun showSlideInFromLeft(view: View) {
-        slideAnimation(view, -view.width.toFloat(), 0f, 0f, 0f, true)
-    }
-
-    private fun hideSlideOutFromLeft(view: View) {
-        slideAnimation(view, 0f, -view.width.toFloat(), 0f, 0f, false)
-    }
-
 
     private fun hasNotificationPermission(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

@@ -19,7 +19,9 @@ class CrashHandler(
         exception.printStackTrace(PrintWriter(stackTrace))
 
         Intent(context.applicationContext, ErrorActivity::class.java).apply {
-            putExtra(ErrorActivity.EXTRA_ERROR_MESSAGE, exception.message?.ifNullOrEmpty { "Unknown error!" })
+            putExtra(
+                ErrorActivity.EXTRA_ERROR_MESSAGE,
+                exception.message?.ifNullOrEmpty { "Unknown error!" })
             putExtra(ErrorActivity.EXTRA_STACK_TRACE, stackTrace.toString())
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }.also { context.applicationContext.startActivity(it) }

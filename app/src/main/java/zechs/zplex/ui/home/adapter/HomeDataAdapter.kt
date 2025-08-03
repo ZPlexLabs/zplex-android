@@ -48,6 +48,7 @@ class HomeDataAdapter(
         when (holder) {
             is HomeViewHolder.HeadingViewHolder ->
                 holder.bind(item as HomeDataModel.Header)
+
             is HomeViewHolder.ListViewHolder -> {
                 when (item) {
                     is HomeDataModel.Media -> holder.bindMedia(item)

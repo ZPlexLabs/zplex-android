@@ -10,16 +10,20 @@ class HomeDataModelDiffCallback : DiffUtil.ItemCallback<HomeDataModel>() {
     ): Boolean = when {
         oldItem is HomeDataModel.Header && newItem
                 is HomeDataModel.Header && oldItem.heading == newItem.heading
-        -> true
+            -> true
+
         oldItem is HomeDataModel.Media && newItem
                 is HomeDataModel.Media && oldItem.media == newItem.media
-        -> true
+            -> true
+
         oldItem is HomeDataModel.Banner && newItem
                 is HomeDataModel.Banner && oldItem.media == newItem.media
-        -> true
+            -> true
+
         oldItem is HomeDataModel.Watched && newItem
                 is HomeDataModel.Watched && oldItem.watched == newItem.watched
-        -> true
+            -> true
+
         else -> false
     }
 

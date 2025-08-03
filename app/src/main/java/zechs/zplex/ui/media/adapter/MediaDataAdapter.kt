@@ -4,7 +4,12 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import zechs.zplex.R
-import zechs.zplex.databinding.*
+import zechs.zplex.databinding.ItemListWithHeadingBinding
+import zechs.zplex.databinding.ItemMediaButtonsBinding
+import zechs.zplex.databinding.ItemMediaCollectionBinding
+import zechs.zplex.databinding.ItemMediaHeaderBinding
+import zechs.zplex.databinding.ItemMediaSeasonBinding
+import zechs.zplex.databinding.ItemMediaTitleBinding
 
 class MediaDataAdapter(
     val mediaClickListener: MediaClickListener
@@ -87,6 +92,7 @@ class MediaDataAdapter(
                     else -> {}
                 }
             }
+
             is MediaViewHolder.ListViewHolder -> {
                 when (item) {
                     is MediaDataModel.Casts -> holder.bindCasts(item)
@@ -108,13 +114,13 @@ class MediaDataAdapter(
 
             is MediaDataModel.ShowButton,
             is MediaDataModel.MovieButton
-            -> R.layout.item_media_buttons
+                -> R.layout.item_media_buttons
 
             is MediaDataModel.Casts,
             is MediaDataModel.Recommendations,
             is MediaDataModel.MoreFromCompany,
             is MediaDataModel.Videos
-            -> R.layout.item_list_with_heading
+                -> R.layout.item_list_with_heading
         }
     }
 }
