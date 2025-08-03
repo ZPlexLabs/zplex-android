@@ -116,6 +116,7 @@
     <string name="cancel">Cancel</string>
     <string name="remove_from_offline">Remove from offline</string>
     <string name="downloaded">Downloaded</string>
+    <string name="imdb_logo">Imdb Logo</string>
     <string name="playlist">Playlist</string>
     <string name="now_playing">Now Playing...</string>
 </resources>

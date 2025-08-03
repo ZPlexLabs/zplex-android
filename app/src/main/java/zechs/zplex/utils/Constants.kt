@@ -3,7 +3,8 @@ package zechs.zplex.utils
 import zechs.zplex.BuildConfig
 
 object Constants {
-
+    const val OMDB_API_URL = "https://www.omdbapi.com"
+    const val OMDB_API_KEY = BuildConfig.OMDB_API_KEY
     const val TMDB_API_URL = "https://api.themoviedb.org"
     const val TMDB_IMAGE_PREFIX = "https://www.themoviedb.org/t/p"
     const val TMDB_API_KEY = BuildConfig.TMDB_API_KEY

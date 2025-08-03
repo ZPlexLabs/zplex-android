@@ -84,7 +84,7 @@ sealed class MediaViewHolder(
                         imageView = ivPoster
                     )
                 }
-
+                ivImdbLogo.isGone = !item.isImdbRating
                 ivBackdrop.setOnClickListener {
                     listener.openImageInBig(
                         imagePath = item.backdropPath,

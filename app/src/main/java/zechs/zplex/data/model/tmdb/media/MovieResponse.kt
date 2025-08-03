@@ -21,5 +21,6 @@ data class MovieResponse(
     val credits: Credits?,
     val recommendations: Recommendations?,
     val videos: Videos?,
-    val vote_average: Double?
+    val vote_average: Double?,
+    val isImdbRating: Boolean = false
 )

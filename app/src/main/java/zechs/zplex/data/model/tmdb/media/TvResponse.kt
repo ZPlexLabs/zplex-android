@@ -12,7 +12,7 @@ data class TvResponse(
     val first_air_date: String?,
     val genres: List<Genre>?,
     val id: Int,
-    val imdb_id: String?,
+    val external_ids: Map<String, String?>?,
     val name: String?,
     // val networks: List<Network>?,
     val production_companies: List<Network>?,
@@ -24,5 +24,6 @@ data class TvResponse(
     val recommendations: Recommendations?,
     val videos: Videos?,
     val vote_average: Double?,
+    val isImdbRating: Boolean = false,
     val last_episode_to_air: Episode?
 )

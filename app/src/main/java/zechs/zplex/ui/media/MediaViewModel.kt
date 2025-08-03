@@ -207,7 +207,10 @@ class MediaViewModel @Inject constructor(
                 MediaDataModel.Header(
                     backdropPath = result.backdrop_path,
                     posterPath = result.poster_path,
-                    rating = result.vote_average?.div(2) ?: 0.toDouble(),
+                    rating = result.vote_average?.let {
+                        String.format(Locale.ENGLISH, "%.2f", (it / 2.0)).toDouble()
+                    } ?: 0.toDouble(),
+                    isImdbRating = result.isImdbRating,
                     genre = result.genres
                         ?.take(3)
                         ?.joinToString(
@@ -370,7 +373,10 @@ class MediaViewModel @Inject constructor(
                 MediaDataModel.Header(
                     backdropPath = result.backdrop_path,
                     posterPath = result.poster_path,
-                    rating = result.vote_average?.div(2) ?: 0.toDouble(),
+                    rating = result.vote_average?.let {
+                        String.format(Locale.ENGLISH, "%.2f", (it / 2.0)).toDouble()
+                    } ?: 0.toDouble(),
+                    isImdbRating = result.isImdbRating,
                     genre = result.genres?.take(3)?.joinToString(
                         truncated = "",
                         separator = ", ",

@@ -15,6 +15,7 @@ sealed class MediaDataModel {
         val backdropPath: String?,
         val posterPath: String?,
         val rating: Double,
+        val isImdbRating: Boolean,
         val genre: String,
         val runtime: String
     ) : MediaDataModel()

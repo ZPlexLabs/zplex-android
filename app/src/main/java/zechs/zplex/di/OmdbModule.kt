@@ -8,43 +8,28 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import zechs.zplex.data.local.MovieDao
-import zechs.zplex.data.local.ShowDao
 import zechs.zplex.data.remote.OmdbApi
-import zechs.zplex.data.remote.TmdbApi
-import zechs.zplex.data.repository.TmdbRepository
-import zechs.zplex.utils.Constants.TMDB_API_URL
+import zechs.zplex.utils.Constants.OMDB_API_URL
 import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object TmdbModule {
+object OmdbModule {
 
     @Provides
     @Singleton
-    fun provideTmdbApi(
-        @Named("OkHttpClient")
+    fun provideOmdbApi(
+        @Named("OmdbHttpClient")
         client: OkHttpClient,
         moshi: Moshi
-    ): TmdbApi {
+    ): OmdbApi {
         return Retrofit.Builder()
-            .baseUrl(TMDB_API_URL)
+            .baseUrl(OMDB_API_URL)
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
-            .create(TmdbApi::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideTmdbRepository(
-        tmdbApi: TmdbApi,
-        omdbApi: OmdbApi,
-        movieDao: MovieDao,
-        showDao: ShowDao
-    ): TmdbRepository {
-        return TmdbRepository(tmdbApi, omdbApi, movieDao, showDao)
+            .create(OmdbApi::class.java)
     }
 
 }

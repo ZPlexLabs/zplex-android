@@ -7,3 +7,6 @@ fun String?.ifNullOrEmpty(block: () -> String): String {
         this
     }
 }
+
+inline fun <T> String.nullIfNAOrElse(block: (String) -> T): T? =
+    if (this == "N/A") null else block(this)

@@ -56,6 +56,18 @@
 
     </com.google.android.material.card.MaterialCardView>
 
+    <ImageView
+        android:id="@+id/iv_imdbLogo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:contentDescription="@string/imdb_logo"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_rating_text"
+        app:layout_constraintStart_toEndOf="@+id/tv_rating_text"
+        app:layout_constraintTop_toTopOf="@+id/tv_rating_text"
+        android:src="@drawable/ic_imdb_24"
+        tools:visibility="visible" />
+
     <RatingBar
         android:id="@+id/rb_rating"
         style="@style/RatingBar"

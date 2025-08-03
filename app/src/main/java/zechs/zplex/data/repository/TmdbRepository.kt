@@ -10,14 +10,20 @@ import zechs.zplex.data.model.SortBy
 import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.entities.Show
 import zechs.zplex.data.model.tmdb.keyword.TmdbKeyword
+import zechs.zplex.data.model.tmdb.media.MovieResponse
+import zechs.zplex.data.model.tmdb.media.TvResponse
 import zechs.zplex.data.model.tmdb.search.SearchResponse
 import zechs.zplex.data.remote.TmdbApi
+import zechs.zplex.utils.ext.nullIfNAOrElse
 import javax.inject.Inject
 import javax.inject.Singleton
+import zechs.zplex.data.remote.OmdbApi
+import okhttp3.ResponseBody.Companion.toResponseBody
 
 @Singleton
 class TmdbRepository @Inject constructor(
     private val tmdbApi: TmdbApi,
+    private val omdbApi: OmdbApi,
     private val movieDao: MovieDao,
     private val showDao: ShowDao
 ) {
@@ -65,12 +71,72 @@ class TmdbRepository @Inject constructor(
     suspend fun getShow(
         tvId: Int,
         appendToQuery: String? = "credits,recommendations,videos"
-    ) = tmdbApi.getShow(tvId, append_to_response = appendToQuery)
+    ): Response<TvResponse> {
+        return try {
+            val tmdbResponse = tmdbApi.getShow(tvId, append_to_response = appendToQuery)
+            val show = tmdbResponse.body()
+
+            if (tmdbResponse.isSuccessful && show != null) {
+                val imdbId = show.external_ids?.get("imdb_id")
+                if (!imdbId.isNullOrBlank()) {
+                    val omdbResponse = omdbApi.fetchTvById(imdbId)
+
+                    if (omdbResponse.isSuccessful) {
+                        val imdbRating = omdbResponse.body()
+                            ?.imdbRating
+                            ?.nullIfNAOrElse { it.toDoubleOrNull() }
+
+                        if (imdbRating != null) {
+                            val updatedMovie = show.copy(
+                                vote_average = imdbRating,
+                                isImdbRating = true
+                            )
+                            return Response.success(updatedMovie)
+                        }
+                    }
+                }
+            }
+
+            tmdbResponse
+        } catch (e: Exception) {
+            Response.error(500, "Exception: ${e.message}".toResponseBody(null))
+        }
+    }
 
     suspend fun getMovie(
         movieId: Int,
         appendToQuery: String? = "credits,recommendations,videos"
-    ) = tmdbApi.getMovie(movieId, append_to_response = appendToQuery)
+    ): Response<MovieResponse> {
+        return try {
+            val tmdbResponse = tmdbApi.getMovie(movieId, append_to_response = appendToQuery)
+            val movie = tmdbResponse.body()
+
+            if (tmdbResponse.isSuccessful && movie != null) {
+                val imdbId = movie.imdb_id
+                if (!imdbId.isNullOrBlank()) {
+                    val omdbResponse = omdbApi.fetchMovieById(imdbId)
+
+                    if (omdbResponse.isSuccessful) {
+                        val imdbRating = omdbResponse.body()
+                            ?.imdbRating
+                            ?.nullIfNAOrElse { it.toDoubleOrNull() }
+
+                        if (imdbRating != null) {
+                            val updatedMovie = movie.copy(
+                                vote_average = imdbRating,
+                                isImdbRating = true
+                            )
+                            return Response.success(updatedMovie)
+                        }
+                    }
+                }
+            }
+
+            tmdbResponse
+        } catch (e: Exception) {
+            Response.error(500, "Exception: ${e.message}".toResponseBody(null))
+        }
+    }
 
     suspend fun getSeason(
         tvId: Int,

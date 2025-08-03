@@ -9,6 +9,7 @@ plugins {
 }
 
 val tmdbApiKey: String = gradleLocalProperties(rootDir, providers).getProperty("TMDB_API_KEY")
+val omdbApiKey: String = gradleLocalProperties(rootDir, providers).getProperty("OMDB_API_KEY")
 
 android {
     namespace = "zechs.zplex"
@@ -22,6 +23,7 @@ android {
         versionName = "4.0.0"
 
         buildConfigField("String", "TMDB_API_KEY", "\"${tmdbApiKey}\"")
+        buildConfigField("String", "OMDB_API_KEY", "\"${omdbApiKey}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
