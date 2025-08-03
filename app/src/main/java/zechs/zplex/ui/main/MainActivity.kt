@@ -6,34 +6,34 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.Interpolator
 import android.view.animation.TranslateAnimation
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.ColorRes
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.navigationrail.NavigationRailView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import zechs.zplex.utils.MaterialMotionInterpolator
 import zechs.zplex.R
 import zechs.zplex.databinding.ActivityMainBinding
 import zechs.zplex.service.RemoteLibraryIndexingService
+import zechs.zplex.utils.MaterialMotionInterpolator
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -42,16 +42,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
 
-        window.statusBarColor = ContextCompat.getColor(
-            this,
-            com.google.android.material.R.color.m3_sys_color_dark_surface_container
-        )
         val navHostFragment = supportFragmentManager.findFragmentById(
             R.id.mainNavHostFragment
         ) as NavHostFragment
@@ -65,13 +62,37 @@ class MainActivity : AppCompatActivity() {
                 R.id.fragmentCollection, R.id.watchFragment,
                 R.id.bigImageFragment, R.id.signInFragment,
                 R.id.settingsFragment -> {
-                    animationNavColorChange(com.google.android.material.R.color.m3_sys_color_dark_surface)
                     hideSlideDown(binding.bottomNavigationView)
+                    ViewCompat.setOnApplyWindowInsetsListener(binding.zplexFrame) { view, insets ->
+                        val bars = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                                    or WindowInsetsCompat.Type.displayCutout()
+                        )
+                        view.updatePadding(
+                            left = bars.left,
+                            top = bars.top,
+                            right = bars.right,
+                            bottom = bars.bottom,
+                        )
+                        WindowInsetsCompat.CONSUMED
+                    }
                 }
 
                 else -> {
-                    animationNavColorChange(com.google.android.material.R.color.m3_sys_color_dark_surface_container)
                     showSlideUp(binding.bottomNavigationView)
+                    ViewCompat.setOnApplyWindowInsetsListener(binding.zplexFrame) { view, insets ->
+                        val bars = insets.getInsets(
+                            WindowInsetsCompat.Type.systemBars()
+                                    or WindowInsetsCompat.Type.displayCutout()
+                        )
+                        view.updatePadding(
+                            left = bars.left,
+                            top = bars.top,
+                            right = bars.right,
+                            bottom = 0,
+                        )
+                        WindowInsetsCompat.CONSUMED
+                    }
                 }
             }
         }

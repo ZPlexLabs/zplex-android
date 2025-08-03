@@ -102,6 +102,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         Utils.copyAssets(this)
