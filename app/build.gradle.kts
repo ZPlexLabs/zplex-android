@@ -12,12 +12,12 @@ val tmdbApiKey: String = gradleLocalProperties(rootDir, providers).getProperty("
 
 android {
     namespace = "zechs.zplex"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "zechs.zplex"
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 22
         versionName = "4.0.0"
 
@@ -72,89 +72,101 @@ android {
 }
 
 dependencies {
-
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("extension-*.aar"))))
+    // --- Local Modules and AAR/JARs ---
     implementation(project(":mpv"))
+    implementation(
+        fileTree(
+            mapOf(
+                "dir" to "libs",
+                "include" to listOf("extension-*.aar", "*.jar")
+            )
+        )
+    )
 
-    // Dependency versions
-    val hiltVersion = "2.50"
-    val moshiVersion = "1.15.0"
-    val retrofitVersion = "2.9.0"
-    val roomVersion = "2.6.1"
-    val lifecycleVersion = "2.8.7"
+    // --- Version Variables ---
+    val appCompatVersion = "1.7.1"
+    val coilVersion = "2.7.0"
+    val constraintLayoutVersion = "2.2.1"
+    val coroutinesVersion = "1.10.2"
+    val datastoreVersion = "1.1.7"
+    val espressoVersion = "3.7.0"
     val glideVersion = "4.16.0"
-    val okhttpVersion = "4.12.0"
-    val workVersion = "2.10.0"
+    val gsonVersion = "2.13.1"
+    val hiltVersion = "2.57"
+    val hiltExtVersion = "1.2.0"
+    val junitVersion = "4.13.2"
+    val kotlinCoreVersion = "1.16.0"
+    val androidXActivity = "1.10.1"
+    val lifecycleVersion = "2.9.2"
+    val materialVersion = "1.12.0"
+    val moshiVersion = "1.15.2"
+    val navigationVersion = "2.9.3"
+    val okhttpVersion = "5.1.0"
+    val paletteVersion = "1.0.0"
+    val renderscriptToolkitVersion = "b6363490c3"
+    val retrofitVersion = "3.0.0"
+    val roomVersion = "2.7.2"
+    val testExtJunitVersion = "1.3.0"
+    val workVersion = "2.10.3"
 
+    // --- AndroidX Core ---
+    implementation("androidx.core:core-ktx:$kotlinCoreVersion")
+    implementation("androidx.appcompat:appcompat:$appCompatVersion")
+    implementation("androidx.constraintlayout:constraintlayout:$constraintLayoutVersion")
+    implementation("com.google.android.material:material:$materialVersion")
+    implementation("androidx.palette:palette-ktx:$paletteVersion")
+    implementation("androidx.activity:activity-ktx:$androidXActivity")
 
-    // WorkManager
-    implementation("androidx.work:work-runtime-ktx:$workVersion")
-    implementation("androidx.hilt:hilt-work:1.2.0")
+    // --- Kotlin Coroutines ---
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
-    // Core dependencies
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
-    implementation("androidx.core:core-ktx:1.15.0")
-
-    // UI-related dependencies
-    implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
-    implementation("androidx.palette:palette-ktx:1.0.0")
-
-    // Dagger Hilt for dependency injection
+    // --- Dependency Injection (Hilt) ---
     implementation("com.google.dagger:hilt-android:$hiltVersion")
-    implementation("androidx.hilt:hilt-common:1.2.0")
     ksp("com.google.dagger:hilt-compiler:$hiltVersion")
+    implementation("androidx.hilt:hilt-common:$hiltExtVersion")
+    implementation("androidx.hilt:hilt-navigation-fragment:$hiltExtVersion")
+    implementation("androidx.hilt:hilt-work:$hiltExtVersion")
 
-    // Dagger Hilt for navigation
-    implementation("androidx.hilt:hilt-navigation-fragment:1.2.0")
-
-    // Networking dependencies
+    // --- Networking ---
+    implementation(platform("com.squareup.okhttp3:okhttp-bom:$okhttpVersion"))
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:logging-interceptor")
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-moshi:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-scalars:$retrofitVersion")
 
-    // JSON parsing with Moshi
+    // --- JSON Parsing ---
     implementation("com.squareup.moshi:moshi:$moshiVersion")
     implementation("com.squareup.moshi:moshi-kotlin:$moshiVersion")
     ksp("com.squareup.moshi:moshi-kotlin-codegen:$moshiVersion")
+    implementation("com.google.code.gson:gson:$gsonVersion")
 
-    // Gson for JSON parsing
-    implementation("com.google.code.gson:gson:2.11.0")
-
-    // Coil for image loading
-    implementation("io.coil-kt:coil:2.5.0")
-
-    // Glide for image loading
-    // DO NOT UPGRADE Glide to versions beyond 4.13.2
+    // --- Image Loading ---
     implementation("com.github.bumptech.glide:glide:$glideVersion")
+    implementation("io.coil-kt:coil:$coilVersion")
 
-    // Renderscript intrinsics replacement toolkit
-    implementation("com.github.necatisozer:renderscript-intrinsics-replacement-toolkit:0.8-beta")
-
-    // Room database
+    // --- Persistence ---
+    implementation("androidx.datastore:datastore-preferences:$datastoreVersion")
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
     ksp("androidx.room:room-compiler:$roomVersion")
 
-    // Datastore
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-
-    // Networking with OkHttp
-    implementation(platform("com.squareup.okhttp3:okhttp-bom:$okhttpVersion"))
-    implementation("com.squareup.okhttp3:okhttp")
-    implementation("com.squareup.okhttp3:logging-interceptor")
-
-    // Lifecycle and Navigational Components
-    implementation("androidx.lifecycle:lifecycle-service:2.8.7")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+    // --- Lifecycle & Navigation ---
+    implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
-    implementation("androidx.navigation:navigation-fragment-ktx:2.8.5")
-    implementation("androidx.navigation:navigation-ui-ktx:2.8.5")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
+    implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
+    implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion")
 
-    // Testing dependencies
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    // --- WorkManager ---
+    implementation("androidx.work:work-runtime-ktx:$workVersion")
 
+    // --- Renderscript Replacement ---
+    //noinspection Aligned16KB
+    implementation("com.github.android:renderscript-intrinsics-replacement-toolkit:$renderscriptToolkitVersion")
+
+    // --- Testing ---
+    testImplementation("junit:junit:$junitVersion")
+    androidTestImplementation("androidx.test.ext:junit:$testExtJunitVersion")
+    androidTestImplementation("androidx.test.espresso:espresso-core:$espressoVersion")
 }
