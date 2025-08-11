@@ -16,4 +16,7 @@
     <color name="colorOnSuccessContainer">#004d00</color>
     <color name="colorSuccessContainer">#b9f6ca</color>
 
+    <color name="colorOnFinaleContainer">#5a1a00</color>
+    <color name="colorFinaleContainer">#ffccbc</color>
+
 </resources>

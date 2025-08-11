@@ -43,7 +43,8 @@ class EpisodeViewHolder(
                     watchProgress.progress = episode.progress
                 }
             }
-            offlineBadge.isInvisible = !episode.offline
+            offlineBadge.isGone = !episode.offline
+            finaleBadge.isInvisible = !episode.isSeasonFinale
 
             root.setOnClickListener {
                 episodesAdapter.episodeOnClick.invoke(episode)
