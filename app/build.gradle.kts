@@ -17,7 +17,7 @@ android {
 
     defaultConfig {
         applicationId = "zechs.zplex"
-        minSdk = 28
+        minSdk = 31
         targetSdk = 36
         versionCode = 22
         versionName = "4.0.0"
@@ -48,13 +48,16 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
     }
 
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        compilerOptions {
+            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
     }
 
     buildFeatures {
@@ -94,12 +97,12 @@ dependencies {
     val espressoVersion = "3.7.0"
     val glideVersion = "4.16.0"
     val gsonVersion = "2.13.1"
-    val hiltVersion = "2.57"
+    val hiltVersion = "2.57.1"
     val hiltExtVersion = "1.2.0"
     val junitVersion = "4.13.2"
-    val kotlinCoreVersion = "1.16.0"
+    val kotlinCoreVersion = "1.17.0"
     val androidXActivity = "1.10.1"
-    val lifecycleVersion = "2.9.2"
+    val lifecycleVersion = "2.9.3"
     val materialVersion = "1.12.0"
     val moshiVersion = "1.15.2"
     val navigationVersion = "2.9.3"
