@@ -74,67 +74,63 @@ class TmdbRepository @Inject constructor(
     ) = showDao.deleteShowById(tmdbId)
 
     fun getSavedShows() = showDao.getAllShows()
-
     suspend fun getShow(
         tvId: Int,
         appendToQuery: String? = "credits,recommendations,videos,external_ids"
     ): Response<TvResponse> {
         val cacheKey = "show_${tvId}${if (appendToQuery != null) "_${appendToQuery}" else ""}"
         val existingCache = apiCacheDao.getCacheById(cacheKey)
-        if (existingCache != null) {
-            if (existingCache.expiration < System.currentTimeMillis()) {
-                apiCacheDao.deleteCacheById(cacheKey)
-                Log.d(TAG, "Deleting cache with key: $cacheKey")
-            } else {
-                try {
-                    val parsed = parseCache<TvResponse>(existingCache.classType, existingCache.body)
-                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
-                    return Response.success(parsed)
-                } catch (e: Exception) {
-                    Log.d(TAG, "Cache deserialization failed: " + e.message.toString())
-                }
+        if (existingCache != null && existingCache.expiration >= System.currentTimeMillis()) {
+            try {
+                val parsed = parseCache<TvResponse>(existingCache.classType, existingCache.body)
+                Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                return Response.success(parsed)
+            } catch (e: Exception) {
+                Log.d(TAG, "Cache deserialization failed: ${e.message}")
             }
         }
-        return try {
+        try {
             val tmdbResponse = tmdbApi.getShow(tvId, append_to_response = appendToQuery)
-            val show = tmdbResponse.body()
+            var show = tmdbResponse.body()
 
             if (tmdbResponse.isSuccessful && show != null) {
+                val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
                 val imdbId = show.external_ids?.get("imdb_id")
                 if (!imdbId.isNullOrBlank()) {
                     val omdbResponse = omdbApi.fetchTvById(imdbId)
-
                     if (omdbResponse.isSuccessful) {
                         val imdbRating = omdbResponse.body()
                             ?.imdbRating
                             ?.nullIfNAOrElse { it.toDoubleOrNull() }
 
                         if (imdbRating != null) {
-                            val updatedMovie = show.copy(
+                            show = show.copy(
                                 vote_average = imdbRating,
                                 isImdbRating = true
                             )
-                            val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
-                            Log.d(TAG, "Creating cache with key: $cacheKey")
-                            apiCacheDao.addCache(
-                                ApiCache(
-                                    id = cacheKey,
-                                    body = gson.toJson(updatedMovie),
-                                    classType = TvResponse::class.java.name,
-                                    expiration = expiration
-                                )
-                            )
-                            return Response.success(updatedMovie)
                         }
                     }
                 }
-            }
 
-            tmdbResponse
+                apiCacheDao.addCache(
+                    ApiCache(
+                        id = cacheKey,
+                        body = gson.toJson(show),
+                        classType = TvResponse::class.java.name,
+                        expiration = expiration
+                    )
+                )
+                Log.d(TAG, "Saved cache with key: $cacheKey")
+
+                return Response.success(show)
+            }
+            return tmdbResponse
+
         } catch (e: Exception) {
-            Response.error(500, "Exception: ${e.message}".toResponseBody(null))
+            return Response.error(500, "Exception: ${e.message}".toResponseBody(null))
         }
     }
+
 
     suspend fun getMovie(
         movieId: Int,
@@ -142,59 +138,53 @@ class TmdbRepository @Inject constructor(
     ): Response<MovieResponse> {
         val cacheKey = "movie_${movieId}${if (appendToQuery != null) "_${appendToQuery}" else ""}"
         val existingCache = apiCacheDao.getCacheById(cacheKey)
-        if (existingCache != null) {
-            if (existingCache.expiration < System.currentTimeMillis()) {
-                apiCacheDao.deleteCacheById(cacheKey)
-                Log.d(TAG, "Deleting cache with key: $cacheKey")
-            } else {
-                try {
-                    val parsed =
-                        parseCache<MovieResponse>(existingCache.classType, existingCache.body)
-                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
-                    return Response.success(parsed)
-                } catch (e: Exception) {
-                    Log.d(TAG, "Cache deserialization failed: " + e.message.toString())
-                }
+        if (existingCache != null && existingCache.expiration >= System.currentTimeMillis()) {
+            try {
+                val parsed = parseCache<MovieResponse>(existingCache.classType, existingCache.body)
+                Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                return Response.success(parsed)
+            } catch (e: Exception) {
+                Log.d(TAG, "Cache deserialization failed: ${e.message}")
             }
         }
-        return try {
+        try {
             val tmdbResponse = tmdbApi.getMovie(movieId, append_to_response = appendToQuery)
-            val movie = tmdbResponse.body()
+            var movie = tmdbResponse.body()
 
             if (tmdbResponse.isSuccessful && movie != null) {
+                val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
+
                 val imdbId = movie.imdb_id
                 if (!imdbId.isNullOrBlank()) {
                     val omdbResponse = omdbApi.fetchMovieById(imdbId)
-
                     if (omdbResponse.isSuccessful) {
                         val imdbRating = omdbResponse.body()
                             ?.imdbRating
                             ?.nullIfNAOrElse { it.toDoubleOrNull() }
 
                         if (imdbRating != null) {
-                            val updatedMovie = movie.copy(
+                            movie = movie.copy(
                                 vote_average = imdbRating,
                                 isImdbRating = true
                             )
-                            val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
-                            Log.d(TAG, "Creating cache with key: $cacheKey")
-                            apiCacheDao.addCache(
-                                ApiCache(
-                                    id = cacheKey,
-                                    body = gson.toJson(updatedMovie),
-                                    classType = MovieResponse::class.java.name,
-                                    expiration = expiration
-                                )
-                            )
-                            return Response.success(updatedMovie)
                         }
                     }
                 }
-            }
 
-            tmdbResponse
+                apiCacheDao.addCache(
+                    ApiCache(
+                        id = cacheKey,
+                        body = gson.toJson(movie),
+                        classType = MovieResponse::class.java.name,
+                        expiration = expiration
+                    )
+                )
+                Log.d(TAG, "Saved cache with key: $cacheKey")
+                return Response.success(movie)
+            }
+            return tmdbResponse
         } catch (e: Exception) {
-            Response.error(500, "Exception: ${e.message}".toResponseBody(null))
+            return Response.error(500, "Exception: ${e.message}".toResponseBody(null))
         }
     }
 
@@ -298,20 +288,92 @@ class TmdbRepository @Inject constructor(
     suspend fun getShowsFromCompany(
         companyId: Int,
         page: Int
-    ) = tmdbApi.getFromCompany(
-        media_type = MediaType.tv,
-        with_companies = companyId,
-        page = page
-    )
+    ): Response<SearchResponse> {
+        val cacheKey = "show_company_${companyId}_${page}"
+        val existingCache = apiCacheDao.getCacheById(cacheKey)
+        if (existingCache != null) {
+            if (existingCache.expiration < System.currentTimeMillis()) {
+                apiCacheDao.deleteCacheById(cacheKey)
+                Log.d(TAG, "Deleting cache with key: $cacheKey")
+            } else {
+                try {
+                    val parsed =
+                        parseCache<SearchResponse>(existingCache.classType, existingCache.body)
+                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                    return Response.success(parsed)
+                } catch (e: Exception) {
+                    Log.d(
+                        TAG,
+                        "Cache deserialization failed (cache will be deleted): " + e.message.toString()
+                    )
+                    apiCacheDao.deleteCacheById(cacheKey)
+                }
+            }
+        }
+        val company = tmdbApi.getFromCompany(
+            media_type = MediaType.tv,
+            with_companies = companyId,
+            page = page
+        )
+        if (company.isSuccessful && company.body() != null) {
+            val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
+            Log.d(TAG, "Creating cache with key: $cacheKey")
+            apiCacheDao.addCache(
+                ApiCache(
+                    id = cacheKey,
+                    body = gson.toJson(company.body()),
+                    classType = SearchResponse::class.java.name,
+                    expiration = expiration
+                )
+            )
+        }
+        return company
+    }
 
     suspend fun getMoviesFromCompany(
         companyId: Int,
         page: Int
-    ) = tmdbApi.getFromCompany(
-        media_type = MediaType.movie,
-        with_companies = companyId,
-        page = page
-    )
+    ): Response<SearchResponse> {
+        val cacheKey = "movie_company_${companyId}_${page}"
+        val existingCache = apiCacheDao.getCacheById(cacheKey)
+        if (existingCache != null) {
+            if (existingCache.expiration < System.currentTimeMillis()) {
+                apiCacheDao.deleteCacheById(cacheKey)
+                Log.d(TAG, "Deleting cache with key: $cacheKey")
+            } else {
+                try {
+                    val parsed =
+                        parseCache<SearchResponse>(existingCache.classType, existingCache.body)
+                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                    return Response.success(parsed)
+                } catch (e: Exception) {
+                    Log.d(
+                        TAG,
+                        "Cache deserialization failed (cache will be deleted): " + e.message.toString()
+                    )
+                    apiCacheDao.deleteCacheById(cacheKey)
+                }
+            }
+        }
+        val company = tmdbApi.getFromCompany(
+            media_type = MediaType.movie,
+            with_companies = companyId,
+            page = page
+        )
+        if (company.isSuccessful && company.body() != null) {
+            val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
+            Log.d(TAG, "Creating cache with key: $cacheKey")
+            apiCacheDao.addCache(
+                ApiCache(
+                    id = cacheKey,
+                    body = gson.toJson(company.body()),
+                    classType = SearchResponse::class.java.name,
+                    expiration = expiration
+                )
+            )
+        }
+        return company
+    }
 
     suspend fun getPerson(
         personId: Int
