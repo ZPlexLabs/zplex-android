@@ -39,6 +39,11 @@ class TmdbRepository @Inject constructor(
     companion object {
         private const val TAG = "TmdbRepository"
         private const val THIRTY_DAYS_MILLIS = CACHE_TTL_IN_DAYS * 24 * 60 * 60 * 1000L
+        private const val CACHE_ENABLED = true
+    }
+
+    init {
+        Log.d(TAG, "Caching is ${if (CACHE_ENABLED) "enabled" else "disabled"}")
     }
 
     suspend fun upsertMovie(
@@ -76,19 +81,22 @@ class TmdbRepository @Inject constructor(
     ) = showDao.deleteShowById(tmdbId)
 
     fun getSavedShows() = showDao.getAllShows()
+
     suspend fun getShow(
         tvId: Int,
         appendToQuery: String? = "credits,recommendations,videos,external_ids"
     ): Response<TvResponse> {
         val cacheKey = "show_${tvId}${if (appendToQuery != null) "_${appendToQuery}" else ""}"
-        val existingCache = apiCacheDao.getCacheById(cacheKey)
-        if (existingCache != null && existingCache.expiration >= System.currentTimeMillis()) {
-            try {
-                val parsed = parseCache<TvResponse>(existingCache.classType, existingCache.body)
-                Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
-                return Response.success(parsed)
-            } catch (e: Exception) {
-                Log.d(TAG, "Cache deserialization failed: ${e.message}")
+        if (CACHE_ENABLED) {
+            val existingCache = apiCacheDao.getCacheById(cacheKey)
+            if (existingCache != null && existingCache.expiration >= System.currentTimeMillis()) {
+                try {
+                    val parsed = parseCache<TvResponse>(existingCache.classType, existingCache.body)
+                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                    return Response.success(parsed)
+                } catch (e: Exception) {
+                    Log.d(TAG, "Cache deserialization failed: ${e.message}")
+                }
             }
         }
         try {
@@ -139,14 +147,19 @@ class TmdbRepository @Inject constructor(
         appendToQuery: String? = "credits,recommendations,videos"
     ): Response<MovieResponse> {
         val cacheKey = "movie_${movieId}${if (appendToQuery != null) "_${appendToQuery}" else ""}"
-        val existingCache = apiCacheDao.getCacheById(cacheKey)
-        if (existingCache != null && existingCache.expiration >= System.currentTimeMillis()) {
-            try {
-                val parsed = parseCache<MovieResponse>(existingCache.classType, existingCache.body)
-                Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
-                return Response.success(parsed)
-            } catch (e: Exception) {
-                Log.d(TAG, "Cache deserialization failed: ${e.message}")
+        if (CACHE_ENABLED) {
+            val existingCache = apiCacheDao.getCacheById(cacheKey)
+            if (existingCache != null && existingCache.expiration >= System.currentTimeMillis()) {
+                try {
+                    val parsed = parseCache<MovieResponse>(
+                        existingCache.classType,
+                        existingCache.body
+                    )
+                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                    return Response.success(parsed)
+                } catch (e: Exception) {
+                    Log.d(TAG, "Cache deserialization failed: ${e.message}")
+                }
             }
         }
         try {
@@ -195,23 +208,25 @@ class TmdbRepository @Inject constructor(
         seasonNumber: Int
     ): Response<SeasonResponse> {
         val cacheKey = "${tvId}_season_${seasonNumber}"
-        val existingCache = apiCacheDao.getCacheById(cacheKey)
-        if (existingCache != null) {
-            if (existingCache.expiration < System.currentTimeMillis()) {
-                apiCacheDao.deleteCacheById(cacheKey)
-                Log.d(TAG, "Deleting cache with key: $cacheKey")
-            } else {
-                try {
-                    val parsed =
-                        parseCache<SeasonResponse>(existingCache.classType, existingCache.body)
-                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
-                    return Response.success(parsed)
-                } catch (e: Exception) {
-                    Log.d(
-                        TAG,
-                        "Cache deserialization failed (cache will be deleted): " + e.message.toString()
-                    )
+        if (CACHE_ENABLED) {
+            val existingCache = apiCacheDao.getCacheById(cacheKey)
+            if (existingCache != null) {
+                if (existingCache.expiration < System.currentTimeMillis()) {
                     apiCacheDao.deleteCacheById(cacheKey)
+                    Log.d(TAG, "Deleting cache with key: $cacheKey")
+                } else {
+                    try {
+                        val parsed =
+                            parseCache<SeasonResponse>(existingCache.classType, existingCache.body)
+                        Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                        return Response.success(parsed)
+                    } catch (e: Exception) {
+                        Log.d(
+                            TAG,
+                            "Cache deserialization failed (cache will be deleted): " + e.message.toString()
+                        )
+                        apiCacheDao.deleteCacheById(cacheKey)
+                    }
                 }
             }
         }
@@ -292,23 +307,26 @@ class TmdbRepository @Inject constructor(
         page: Int
     ): Response<SearchResponse> {
         val cacheKey = "show_company_${companyId}_${page}"
-        val existingCache = apiCacheDao.getCacheById(cacheKey)
-        if (existingCache != null) {
-            if (existingCache.expiration < System.currentTimeMillis()) {
-                apiCacheDao.deleteCacheById(cacheKey)
-                Log.d(TAG, "Deleting cache with key: $cacheKey")
-            } else {
-                try {
-                    val parsed =
-                        parseCache<SearchResponse>(existingCache.classType, existingCache.body)
-                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
-                    return Response.success(parsed)
-                } catch (e: Exception) {
-                    Log.d(
-                        TAG,
-                        "Cache deserialization failed (cache will be deleted): " + e.message.toString()
-                    )
+        if (CACHE_ENABLED) {
+            val existingCache = apiCacheDao.getCacheById(cacheKey)
+            if (existingCache != null) {
+                if (existingCache.expiration < System.currentTimeMillis()) {
                     apiCacheDao.deleteCacheById(cacheKey)
+                    Log.d(TAG, "Deleting cache with key: $cacheKey")
+                } else {
+                    try {
+                        val parsed = parseCache<SearchResponse>(
+                            existingCache.classType, existingCache.body
+                        )
+                        Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                        return Response.success(parsed)
+                    } catch (e: Exception) {
+                        Log.d(
+                            TAG,
+                            "Cache deserialization failed (cache will be deleted): " + e.message.toString()
+                        )
+                        apiCacheDao.deleteCacheById(cacheKey)
+                    }
                 }
             }
         }
@@ -337,23 +355,27 @@ class TmdbRepository @Inject constructor(
         page: Int
     ): Response<SearchResponse> {
         val cacheKey = "movie_company_${companyId}_${page}"
-        val existingCache = apiCacheDao.getCacheById(cacheKey)
-        if (existingCache != null) {
-            if (existingCache.expiration < System.currentTimeMillis()) {
-                apiCacheDao.deleteCacheById(cacheKey)
-                Log.d(TAG, "Deleting cache with key: $cacheKey")
-            } else {
-                try {
-                    val parsed =
-                        parseCache<SearchResponse>(existingCache.classType, existingCache.body)
-                    Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
-                    return Response.success(parsed)
-                } catch (e: Exception) {
-                    Log.d(
-                        TAG,
-                        "Cache deserialization failed (cache will be deleted): " + e.message.toString()
-                    )
+        if (CACHE_ENABLED) {
+            val existingCache = apiCacheDao.getCacheById(cacheKey)
+            if (existingCache != null) {
+                if (existingCache.expiration < System.currentTimeMillis()) {
                     apiCacheDao.deleteCacheById(cacheKey)
+                    Log.d(TAG, "Deleting cache with key: $cacheKey")
+                } else {
+                    try {
+                        val parsed = parseCache<SearchResponse>(
+                            existingCache.classType,
+                            existingCache.body
+                        )
+                        Log.d(TAG, "Retrieved cache successfully with key: $cacheKey")
+                        return Response.success(parsed)
+                    } catch (e: Exception) {
+                        Log.d(
+                            TAG,
+                            "Cache deserialization failed (cache will be deleted): " + e.message.toString()
+                        )
+                        apiCacheDao.deleteCacheById(cacheKey)
+                    }
                 }
             }
         }
