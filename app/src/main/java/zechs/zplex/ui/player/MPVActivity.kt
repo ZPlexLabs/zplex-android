@@ -442,7 +442,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         Log.d(TAG, "MPV(resumeVideo=${Utils.prettyTime(startPositionInSeconds.toInt())}) startPositionInSeconds=$startPositionInSeconds")
         MPVLib.setOptionString("start", Utils.prettyTime(startPositionInSeconds.toInt()))
         val timePos = MPVLib.getPropertyInt("time-pos")
-        if (abs(timePos - startPositionInSeconds) > 2) {
+        if ((timePos != null) && (abs(timePos - startPositionInSeconds) > 2)) {
             Log.d(TAG, "MPV(resumeVideo=${startPositionInSeconds.toInt()}) timePos=$timePos")
             MPVLib.command(arrayOf("seek", startPositionInSeconds.toString(), "absolute"))
         }
