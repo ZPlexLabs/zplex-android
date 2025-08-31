@@ -31,32 +31,6 @@ import zechs.zplex.utils.ext.deleteIfExistsSafely
 import java.io.File
 import javax.inject.Inject
 
-class CombinedWorkerFactory @Inject constructor(
-    private val downloadWorkerFactory: DownloadWorkerFactory,
-    private val offlineDatabaseWorkerFactory: OfflineDatabaseWorkerFactory
-) : WorkerFactory() {
-
-    override fun createWorker(
-        appContext: Context,
-        workerClassName: String,
-        workerParameters: WorkerParameters
-    ): ListenableWorker? {
-        return when (workerClassName) {
-            DownloadWorker::class.java.name ->
-                downloadWorkerFactory.createWorker(appContext, workerClassName, workerParameters)
-
-            OfflineDatabaseWorker::class.java.name ->
-                offlineDatabaseWorkerFactory.createWorker(
-                    appContext,
-                    workerClassName,
-                    workerParameters
-                )
-
-            else -> null
-        }
-    }
-}
-
 class OfflineDatabaseWorkerFactory @Inject constructor(
     private val offlineShowDao: OfflineShowDao,
     private val offlineSeasonDao: OfflineSeasonDao,
