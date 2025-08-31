@@ -54,4 +54,13 @@ object OfflineDatabaseModule {
     ): OfflineEpisodeDao {
         return db.getOfflineEpisodeDao()
     }
+
+    @Singleton
+    @Provides
+    fun provideOfflineMovieDao(
+        db: OfflineDatabase
+    ): OfflineMovieDao {
+        return db.getOfflineMovieDao()
+    }
+
 }

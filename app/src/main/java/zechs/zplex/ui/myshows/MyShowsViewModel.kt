@@ -1,10 +1,12 @@
 package zechs.zplex.ui.myshows
 
 import android.app.Application
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import zechs.zplex.data.local.offline.OfflineMovieDao
 import zechs.zplex.data.local.offline.OfflineShowDao
 import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.entities.Show
@@ -16,7 +18,8 @@ import javax.inject.Inject
 class MyShowsViewModel @Inject constructor(
     app: Application,
     private val tmdbRepository: TmdbRepository,
-    offlineShowDao: OfflineShowDao
+    offlineShowDao: OfflineShowDao,
+    offlineMovieDao: OfflineMovieDao
 ) : BaseAndroidViewModel(app) {
 
     fun saveShow(show: Show) = viewModelScope.launch {
@@ -35,12 +38,16 @@ class MyShowsViewModel @Inject constructor(
         tmdbRepository.deleteMovie(tmdbId)
     }
 
-    val movies = tmdbRepository.getSavedMovies()
-    val shows =
-        if (hasInternetConnection()) {
-            tmdbRepository.getSavedShows()
-        } else {
-            offlineShowDao.getAllShows().map { it.map { tv -> tv.toShow() } }
-        }
+    val movies: LiveData<List<Movie>> = if (hasInternetConnection()) {
+        tmdbRepository.getSavedMovies()
+    } else {
+        offlineMovieDao.getAllMovies().map { it.map { tv -> tv.toMovie() } }
+    }
+
+    val shows: LiveData<List<Show>> = if (hasInternetConnection()) {
+        tmdbRepository.getSavedShows()
+    } else {
+        offlineShowDao.getAllShows().map { it.map { tv -> tv.toShow() } }
+    }
 
 }
