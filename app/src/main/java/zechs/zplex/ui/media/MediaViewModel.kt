@@ -145,7 +145,12 @@ class MediaViewModel @Inject constructor(
         tmdbId: Int
     ) = withContext(Dispatchers.IO) {
         offlineShowDao.getShowById(tmdbId)?.let { show ->
-            handleTvResponse(Response.success(show.toTvResponse()), company = null)
+            val handleTvResponse = handleTvResponse(
+                Response.success(
+                    show.toTvResponse()
+                ), company = null
+            )
+            _mediaResponse.postValue(handleTvResponse)
         }
     }
 
