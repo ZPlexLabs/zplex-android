@@ -69,6 +69,7 @@ import zechs.zplex.utils.util.Orientation
 import zechs.zplex.utils.util.getNextOrientation
 import zechs.zplex.utils.util.setOrientation
 import java.io.File
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 @AndroidEntryPoint
@@ -438,8 +439,13 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
     private fun resumeVideo(startPosition: Long) {
         val startPositionInSeconds = startPosition / 1000
-        Log.d(TAG, "MPV(resumeVideo=${Utils.prettyTime(startPositionInSeconds.toInt())})")
+        Log.d(TAG, "MPV(resumeVideo=${Utils.prettyTime(startPositionInSeconds.toInt())}) startPositionInSeconds=$startPositionInSeconds")
         MPVLib.setOptionString("start", Utils.prettyTime(startPositionInSeconds.toInt()))
+        val timePos = MPVLib.getPropertyInt("time-pos")
+        if (abs(timePos - startPositionInSeconds) > 2) {
+            Log.d(TAG, "MPV(resumeVideo=${startPositionInSeconds.toInt()}) timePos=$timePos")
+            MPVLib.command(arrayOf("seek", startPositionInSeconds.toString(), "absolute"))
+        }
     }
 
     private fun getStreamUrl(fileId: String): String {
