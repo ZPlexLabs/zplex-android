@@ -27,6 +27,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import okio.use
 import zechs.zplex.R
+import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.drive.DriveClient
 import zechs.zplex.data.model.drive.FileResponse
 import zechs.zplex.data.repository.DriveRepository
@@ -76,6 +77,7 @@ class DownloadWorker @AssistedInject constructor(
         const val FILE_TITLE = "fileTitle"
         const val TMDB_ID = "tmdbId"
         const val OFFLINE_DOWNLOADS_GROUP = "OFFLINE_DOWNLOADS_GROUP"
+        const val MEDIA_TYPE = "mediaType"
         const val SEASON_NUMBER = "seasonNumber"
         const val EPISODE_NUMBER = "episodeNumber"
         const val CHANNEL_ID = "download_channel"
@@ -87,57 +89,80 @@ class DownloadWorker @AssistedInject constructor(
     }
 
     override suspend fun doWork(): Result {
-        val client = sessionManager.fetchClient() ?: run {
-            Log.d(TAG, "Drive Client is required.")
-            return Result.failure()
-        }
-        val fileId = inputData.getString(FILE_ID) ?: run {
-            Log.d(TAG, "Download fileId is required.")
-            return Result.failure()
-        }
-        val title = inputData.getString(FILE_TITLE) ?: run {
-            Log.d(TAG, "Download title is required.")
-            return Result.failure()
-        }
-        val seasonNumber = inputData.getInt(SEASON_NUMBER, 0)
-        if (seasonNumber == 0) {
-            Log.d(TAG, "Season number is required.")
-            return Result.failure()
-        }
+        val client = sessionManager.fetchClient()
+            ?: return fail("Drive Client is required.")
+
+        val fileId = inputData.getString(FILE_ID)
+            ?: return fail("Download fileId is required.")
+
+        val title = inputData.getString(FILE_TITLE)
+            ?: return fail("Download title is required.")
+
         val tmdbId = inputData.getInt(TMDB_ID, 0)
-        if (tmdbId == 0) {
-            Log.d(TAG, "tmdbId is required.")
-            return Result.failure()
-        }
-        val episodeNumber = inputData.getInt(EPISODE_NUMBER, 0)
-        if (episodeNumber == 0) {
-            Log.d(TAG, "episodeNumber is required.")
-            return Result.failure()
+            .takeIf { it != 0 }
+            ?: return fail("TMDB ID is required.")
+
+        val mediaType = inputData.getString(MEDIA_TYPE)
+            ?: return fail("Media type is required.")
+
+        val seasonNumber: Int?
+        val episodeNumber: Int?
+        when (mediaType) {
+            MediaType.tv.name -> {
+                seasonNumber = inputData.getInt(SEASON_NUMBER, 0)
+                    .takeIf { it != 0 }
+                    ?: return fail("Season number is required.")
+
+                episodeNumber = inputData.getInt(EPISODE_NUMBER, 0)
+                    .takeIf { it != 0 }
+                    ?: return fail("Episode number is required.")
+            }
+
+            MediaType.movie.name -> {
+                seasonNumber = null
+                episodeNumber = null
+            }
+
+            else -> {
+                return fail("Unsupported media type: $mediaType")
+            }
         }
 
         ensureDownloadsFolder()
         createNotificationChannel()
-        val notificationId = Random.nextInt(1, Integer.MAX_VALUE)
+        val notificationId = Random.nextInt(1, Int.MAX_VALUE)
 
-        val file = downloadFile(
-            client = client,
-            title = title,
-            fileId = fileId,
-            notificationId = notificationId
-        )
+        val file = try {
+            downloadFile(client = client, title = title, fileId = fileId, notificationId = notificationId)
+        } catch (e: Exception) {
+            return fail("Download failed: ${e.message ?: "Unknown error"}")
+        }
 
         return if (file != null) {
-            val outputData = workDataOf(
-                FILE_TITLE to title,
-                TMDB_ID to tmdbId,
-                SEASON_NUMBER to seasonNumber,
-                EPISODE_NUMBER to episodeNumber,
-                NOTIFICATION_ID to notificationId,
-                FILE_PATH to file.path
-            )
-            Result.success(outputData)
+            val outputData = when (mediaType) {
+                MediaType.tv.name -> workDataOf(
+                    FILE_TITLE to title,
+                    MEDIA_TYPE to mediaType,
+                    TMDB_ID to tmdbId,
+                    SEASON_NUMBER to seasonNumber,
+                    EPISODE_NUMBER to episodeNumber,
+                    NOTIFICATION_ID to notificationId,
+                    FILE_PATH to file.path
+                )
+
+                MediaType.movie.name -> workDataOf(
+                    FILE_TITLE to title,
+                    MEDIA_TYPE to mediaType,
+                    TMDB_ID to tmdbId,
+                    NOTIFICATION_ID to notificationId,
+                    FILE_PATH to file.path
+                )
+
+                else -> null
+            }
+            outputData?.let { Result.success(it) } ?: fail("Unexpected error: outputData is null")
         } else {
-            Result.failure()
+            fail("Download returned null file for fileId=$fileId, title=$title")
         }
     }
 
@@ -437,7 +462,10 @@ class DownloadWorker @AssistedInject constructor(
         return String.format(Locale.ENGLISH, "%.1f %s", size, units[exp - 1])
     }
 
-
+    private fun fail(message: String): Result {
+        Log.e(TAG, message)
+        return Result.failure()
+    }
 }
 
 class DownloadCancelled : Exception()

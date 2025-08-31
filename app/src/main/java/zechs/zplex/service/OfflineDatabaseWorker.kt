@@ -23,6 +23,7 @@ import zechs.zplex.R
 import zechs.zplex.data.local.offline.OfflineEpisodeDao
 import zechs.zplex.data.local.offline.OfflineSeasonDao
 import zechs.zplex.data.local.offline.OfflineShowDao
+import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.offline.OfflineEpisode
 import zechs.zplex.data.model.offline.OfflineSeason
 import zechs.zplex.data.model.offline.OfflineShow
@@ -68,53 +69,64 @@ class OfflineDatabaseWorker @AssistedInject constructor(
     }
 
     override suspend fun doWork(): Result {
-        val filePath = inputData.getString(DownloadWorker.FILE_PATH) ?: run {
-            Log.d(TAG, "episodeNumber is required.")
-            return Result.failure()
-        }
-        val file = File(filePath)
-        val title = inputData.getString(DownloadWorker.FILE_TITLE) ?: run {
-            Log.d(TAG, "Download title is required.")
-            return Result.failure()
-        }
+        val filePath = inputData.getString(DownloadWorker.FILE_PATH)
+            ?: return fail("File path is required.")
 
-        val seasonNumber = inputData.getInt(DownloadWorker.SEASON_NUMBER, 0)
-        if (seasonNumber == 0) {
-            Log.d(TAG, "Season number is required.")
-            file.deleteIfExistsSafely()
-            return Result.failure()
-        }
+        val file = File(filePath)
+
+        // Common required fields
+        val title = inputData.getString(DownloadWorker.FILE_TITLE)
+            ?: return fail("Download title is required.", file)
+
         val tmdbId = inputData.getInt(DownloadWorker.TMDB_ID, 0)
-        if (tmdbId == 0) {
-            Log.d(TAG, "tmdbId is required.")
-            file.deleteIfExistsSafely()
-            return Result.failure()
-        }
-        val episodeNumber = inputData.getInt(DownloadWorker.EPISODE_NUMBER, 0)
-        if (episodeNumber == 0) {
-            Log.d(TAG, "episodeNumber is required.")
-            file.deleteIfExistsSafely()
-            return Result.failure()
-        }
+            .takeIf { it != 0 }
+            ?: return fail("TMDB ID is required.", file)
+
+        val mediaType = inputData.getString(DownloadWorker.MEDIA_TYPE)
+            ?: return fail("Media type is required.", file)
 
         val notificationId = inputData.getInt(DownloadWorker.NOTIFICATION_ID, 0)
-        if (notificationId == 0) {
-            Log.d(TAG, "NOTIFICATION_ID is required.")
-            file.deleteIfExistsSafely()
-            return Result.failure()
-        }
+            .takeIf { it != 0 }
+            ?: return fail("Notification ID is required.", file)
 
-        try {
-            saveOffline(title, tmdbId, seasonNumber, episodeNumber, filePath, notificationId)
+        return try {
+            when (mediaType) {
+                MediaType.tv.name -> {
+                    val seasonNumber = inputData.getInt(DownloadWorker.SEASON_NUMBER, 0)
+                        .takeIf { it != 0 }
+                        ?: return fail("Season number is required.", file)
+
+                    val episodeNumber = inputData.getInt(DownloadWorker.EPISODE_NUMBER, 0)
+                        .takeIf { it != 0 }
+                        ?: return fail("Episode number is required.", file)
+
+                    saveOfflineShow(title, tmdbId, seasonNumber, episodeNumber, filePath, notificationId)
+                    Result.success()
+                }
+
+                MediaType.movie.name -> {
+                    saveOfflineMovie(title, tmdbId, filePath, notificationId)
+                    Result.success()
+                }
+
+                else -> {
+                    fail("Unsupported media type: $mediaType", file)
+                }
+            }
         } catch (e: Exception) {
-            Log.d(TAG, e.message ?: "Unable to write metadata, deleting download...")
-            file.deleteIfExistsSafely()
-            return Result.failure()
+            fail(e.message ?: "Unable to write metadata.", file)
         }
-        return Result.success()
     }
 
-    private suspend fun saveOffline(
+    private suspend fun saveOfflineMovie(
+        title: String,
+        tmdbId: Int,
+        filePath: String,
+        notificationId: Int
+    ) {
+    }
+
+    private suspend fun saveOfflineShow(
         title: String,
         tmdbId: Int,
         seasonNumber: Int,
@@ -180,5 +192,11 @@ class OfflineDatabaseWorker @AssistedInject constructor(
             }
         }
         return true
+    }
+
+    private fun fail(message: String, file: File? = null): Result {
+        Log.e(TAG, message)
+        file?.deleteIfExistsSafely()
+        return Result.failure()
     }
 }
