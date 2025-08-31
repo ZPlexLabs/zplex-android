@@ -198,7 +198,8 @@ class HomeFragment : Fragment() {
             seasonNumber = show.seasonNumber,
             showName = show.name,
             seasonPosterPath = null,
-            showPoster = show.posterPath
+            showPoster = show.posterPath,
+            seasons = listOf()
         )
         findNavController().navigateSafe(R.id.action_homeFragment_to_episodesListFragment)
     }

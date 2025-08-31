@@ -221,7 +221,8 @@ class EpisodesFragment : Fragment() {
                 )
                 sharedViewModel.loadSeasons(
                     showId = showSeason.tmdbId,
-                    showName = showSeason.showName
+                    showName = showSeason.showName,
+                    seasons = showSeason.seasons
                 )
                 sharedViewModel.selectSeason(showSeason.seasonNumber)
             }

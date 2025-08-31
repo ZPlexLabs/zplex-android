@@ -37,6 +37,7 @@ sealed class MediaDataModel {
         val seasonNumber: Int,
         val seasonPlot: String,
         val seasonYearAndEpisodeCount: String,
+        val seasons: List<Season>
     ) : MediaDataModel()
 
     @Keep

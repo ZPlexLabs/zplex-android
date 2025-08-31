@@ -272,6 +272,7 @@ class MediaViewModel @Inject constructor(
                             seasonNumber = season.season_number,
                             seasonPlot = seasonPlot,
                             seasonYearAndEpisodeCount = yearSeason,
+                            seasons = seasonList
                         )
                     )
                 }

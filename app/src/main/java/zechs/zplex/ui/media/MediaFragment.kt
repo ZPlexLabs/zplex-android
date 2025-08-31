@@ -281,7 +281,8 @@ class MediaFragment : Fragment() {
                     seasonNumber = lastSeason.seasonNumber,
                     showName = lastSeason.showName,
                     seasonPosterPath = lastSeason.seasonPosterPath,
-                    showPoster = lastSeason.showPoster
+                    showPoster = lastSeason.showPoster,
+                    seasons = lastSeason.seasons
                 )
             }
 
@@ -409,7 +410,8 @@ class MediaFragment : Fragment() {
         seasonNumber: Int,
         showName: String?,
         seasonPosterPath: String?,
-        showPoster: String?
+        showPoster: String?,
+        seasons: List<Season>
     ) {
         seasonViewModel.setShowSeason(
             tmdbId = tmdbId,
@@ -417,7 +419,8 @@ class MediaFragment : Fragment() {
             seasonNumber = seasonNumber,
             showName = showName ?: "Unknown",
             seasonPosterPath = seasonPosterPath,
-            showPoster = showPoster
+            showPoster = showPoster,
+            seasons = seasons
         )
         findNavController().navigateSafe(R.id.action_fragmentMedia_to_episodeListFragment)
     }

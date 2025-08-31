@@ -130,7 +130,8 @@ class FragmentList : Fragment(), ListClickListener {
                         seasonNumber = season.season_number,
                         showName = it.showName,
                         posterPath = season.poster_path,
-                        showPoster = it.showPoster
+                        showPoster = it.showPoster,
+                        seasons = it.seasons
                     )
                 }
 
@@ -161,7 +162,8 @@ class FragmentList : Fragment(), ListClickListener {
         seasonNumber: Int,
         showName: String?,
         posterPath: String?,
-        showPoster: String?
+        showPoster: String?,
+        seasons: List<Season>
     ) {
         seasonViewModel.setShowSeason(
             tmdbId = tmdbId,
@@ -169,7 +171,8 @@ class FragmentList : Fragment(), ListClickListener {
             seasonNumber = seasonNumber,
             showName = showName ?: "Unknown",
             seasonPosterPath = posterPath,
-            showPoster = showPoster
+            showPoster = showPoster,
+            seasons = seasons
         )
         findNavController().navigateSafe(R.id.action_fragmentList_to_episodesListFragment)
     }

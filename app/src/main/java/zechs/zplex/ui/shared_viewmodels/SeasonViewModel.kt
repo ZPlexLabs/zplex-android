@@ -4,6 +4,7 @@ import androidx.annotation.Keep
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import zechs.zplex.data.model.tmdb.entities.Season
 
 @Keep
 data class ShowSeason(
@@ -12,7 +13,8 @@ data class ShowSeason(
     val seasonNumber: Int,
     val showName: String,
     val seasonPosterPath: String?,
-    val showPoster: String?
+    val showPoster: String?,
+    val seasons: List<Season>
 )
 
 class SeasonViewModel : ViewModel() {
@@ -26,10 +28,18 @@ class SeasonViewModel : ViewModel() {
         seasonNumber: Int,
         showName: String,
         seasonPosterPath: String?,
-        showPoster: String?
+        showPoster: String?,
+        seasons: List<Season>
     ) {
-        val update =
-            ShowSeason(tmdbId, seasonName, seasonNumber, showName, seasonPosterPath, showPoster)
+        val update = ShowSeason(
+            tmdbId,
+            seasonName,
+            seasonNumber,
+            showName,
+            seasonPosterPath,
+            showPoster,
+            seasons
+        )
         if (_showSeason.value == update) return
         _showSeason.value = update
     }
