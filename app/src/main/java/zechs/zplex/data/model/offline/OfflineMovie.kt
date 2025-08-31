@@ -25,10 +25,10 @@ data class OfflineMovie(
 
     fun toMovie(): Movie {
         val type = object : TypeToken<MovieResponse>() {}.type
-        val tv: TvResponse = Gson().fromJson(json, type)
+        val tv: MovieResponse = Gson().fromJson(json, type)
         return Movie(
             id = tv.id,
-            title = tv.name!!,
+            title = tv.title!!,
             media_type = "movie",
             poster_path = tv.poster_path,
             vote_average = tv.vote_average,

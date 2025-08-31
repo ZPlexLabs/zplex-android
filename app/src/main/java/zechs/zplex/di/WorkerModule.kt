@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.work.Configuration
 import androidx.work.WorkManager
+import com.google.gson.Gson
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,6 +12,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import zechs.zplex.data.local.api_cache.ApiCacheDao
 import zechs.zplex.data.local.offline.OfflineEpisodeDao
+import zechs.zplex.data.local.offline.OfflineMovieDao
 import zechs.zplex.data.local.offline.OfflineSeasonDao
 import zechs.zplex.data.local.offline.OfflineShowDao
 import zechs.zplex.data.repository.DriveRepository
@@ -43,15 +45,14 @@ object WorkerModule {
     @Singleton
     @Provides
     fun provideOfflineDatabaseWorkerFactory(
+        gson: Gson,
+        tmdbRepository: TmdbRepository,
         offlineShowDao: OfflineShowDao,
         offlineSeasonDao: OfflineSeasonDao,
         offlineEpisodeDao: OfflineEpisodeDao,
-        tmdbRepository: TmdbRepository
+        offlineMovieDao: OfflineMovieDao
     ): OfflineDatabaseWorkerFactory {
-        return OfflineDatabaseWorkerFactory(
-            offlineShowDao, offlineSeasonDao, offlineEpisodeDao,
-            tmdbRepository
-        )
+        return OfflineDatabaseWorkerFactory(gson, tmdbRepository, offlineShowDao, offlineSeasonDao, offlineEpisodeDao, offlineMovieDao)
     }
 
     @Singleton

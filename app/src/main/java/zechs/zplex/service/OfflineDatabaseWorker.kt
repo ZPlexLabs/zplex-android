@@ -13,7 +13,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
-import com.google.gson.GsonBuilder
+import com.google.gson.Gson
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -21,10 +21,12 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import zechs.zplex.R
 import zechs.zplex.data.local.offline.OfflineEpisodeDao
+import zechs.zplex.data.local.offline.OfflineMovieDao
 import zechs.zplex.data.local.offline.OfflineSeasonDao
 import zechs.zplex.data.local.offline.OfflineShowDao
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.offline.OfflineEpisode
+import zechs.zplex.data.model.offline.OfflineMovie
 import zechs.zplex.data.model.offline.OfflineSeason
 import zechs.zplex.data.model.offline.OfflineShow
 import zechs.zplex.data.repository.TmdbRepository
@@ -33,10 +35,12 @@ import java.io.File
 import javax.inject.Inject
 
 class OfflineDatabaseWorkerFactory @Inject constructor(
+    private val gson: Gson,
+    private val tmdbRepository: TmdbRepository,
     private val offlineShowDao: OfflineShowDao,
     private val offlineSeasonDao: OfflineSeasonDao,
     private val offlineEpisodeDao: OfflineEpisodeDao,
-    private val tmdbRepository: TmdbRepository
+    private val offlineMovieDao: OfflineMovieDao
 ) : WorkerFactory() {
 
     override fun createWorker(
@@ -44,20 +48,19 @@ class OfflineDatabaseWorkerFactory @Inject constructor(
         workerClassName: String,
         workerParameters: WorkerParameters
     ): ListenableWorker =
-        OfflineDatabaseWorker(
-            appContext, workerParameters,
-            tmdbRepository, offlineShowDao, offlineSeasonDao, offlineEpisodeDao
-        )
+        OfflineDatabaseWorker(appContext, workerParameters, gson, tmdbRepository, offlineShowDao, offlineSeasonDao, offlineEpisodeDao, offlineMovieDao)
 }
 
 @HiltWorker
 class OfflineDatabaseWorker @AssistedInject constructor(
     @Assisted private val context: Context,
     @Assisted workerParams: WorkerParameters,
+    private val gson: Gson,
     private val tmdbRepository: TmdbRepository,
     private val offlineShowDao: OfflineShowDao,
     private val offlineSeasonDao: OfflineSeasonDao,
-    private val offlineEpisodeDao: OfflineEpisodeDao
+    private val offlineEpisodeDao: OfflineEpisodeDao,
+    private val offlineMovieDao: OfflineMovieDao
 ) : CoroutineWorker(context, workerParams) {
 
     private val notificationManager = applicationContext.getSystemService(
@@ -124,6 +127,17 @@ class OfflineDatabaseWorker @AssistedInject constructor(
         filePath: String,
         notificationId: Int
     ) {
+        withContext(Dispatchers.IO) {
+            val movie = tmdbRepository.getMovie(tmdbId, appendToQuery = null)
+            if (movie.isSuccessful && movie.body() != null) {
+                if (!offlineMovieDao.getMovie(tmdbId)) {
+                    offlineMovieDao.upsertMovie(OfflineMovie(tmdbId, gson.toJson(movie.body()!!), filePath))
+                }
+                showDownloadCompleteNotification(notificationId, title)
+            } else {
+                throw Exception("Unable to fetch show details")
+            }
+        }
     }
 
     private suspend fun saveOfflineShow(
@@ -134,10 +148,6 @@ class OfflineDatabaseWorker @AssistedInject constructor(
         filePath: String,
         notificationId: Int
     ) {
-        val gson = GsonBuilder()
-            .serializeNulls()
-            .create()
-
         withContext(Dispatchers.IO) {
             val tvResponse = async { tmdbRepository.getShow(tmdbId, appendToQuery = null) }
             val seasonResponse = async { tmdbRepository.getSeason(tmdbId, seasonNumber) }

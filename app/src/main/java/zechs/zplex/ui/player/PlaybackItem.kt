@@ -18,8 +18,7 @@ data class Movie(
     override val title: String,
     override val posterPath: String?,
     override val fileId: String,
-    // TODO: Offline movies not supported yet
-    override val offline: Boolean = false,
+    override val offline: Boolean,
     override var next: PlaybackItem? = null,
     override var prev: PlaybackItem? = null,
 ) : PlaybackItem

@@ -2,6 +2,7 @@ package zechs.zplex.di
 
 import android.content.Context
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,7 +22,9 @@ object AppModule {
     @Singleton
     @Provides
     fun provideGson(): Gson {
-        return Gson()
+        return GsonBuilder()
+            .serializeNulls()
+            .create()
     }
 
     @Singleton

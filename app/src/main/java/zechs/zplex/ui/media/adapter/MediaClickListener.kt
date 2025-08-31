@@ -28,6 +28,7 @@ interface MediaClickListener {
     fun collectionClick(collectionId: Int)
 
     fun movieWatchNow(movie: Movie, year: Int?)
+    fun movieLongClickWatchNow(movie: Movie, year: Int?)
     fun setMovieWatchNowButton(view: MaterialButton)
     fun movieWatchlist(view: MaterialButton, movie: Movie)
     fun movieShare(tmdbId: Int, title: String, imdbId: String?)

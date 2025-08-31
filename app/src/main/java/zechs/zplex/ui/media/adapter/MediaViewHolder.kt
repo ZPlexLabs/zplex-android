@@ -201,6 +201,10 @@ sealed class MediaViewHolder(
                     setOnClickListener {
                         listener.movieWatchNow(item.movie, item.year)
                     }
+                    setOnLongClickListener {
+                        listener.movieLongClickWatchNow(item.movie, item.year)
+                        return@setOnLongClickListener true
+                    }
 
                     val btnWatchNowTag = "btnWatchNowTAG"
                     if (tag != btnWatchNowTag) {

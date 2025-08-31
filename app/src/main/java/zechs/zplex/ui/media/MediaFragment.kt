@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import com.google.gson.Gson
@@ -324,6 +325,15 @@ class MediaFragment : Fragment() {
                 }
             }
 
+            override fun movieLongClickWatchNow(
+                movie: Movie,
+                year: Int?
+            ) {
+                if (mediaViewModel.hasLoggedIn && movie.fileId != null) {
+                    promptMovieDownload(movie, year)
+                }
+            }
+
             override fun movieShare(tmdbId: Int, title: String, imdbId: String?) {
                 shareIntent(tmdbId, imdbId, title, MediaType.movie)
             }
@@ -609,6 +619,41 @@ class MediaFragment : Fragment() {
             putExtra("startIndex", 0)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }.also { startActivity(it) }
+    }
+
+    private fun promptMovieDownload(movie: Movie, year: Int?) {
+        val title = "${movie.title}${if (year != null) " (${year})" else ""}"
+        if (movie.fileId!!.startsWith(requireContext().filesDir.absolutePath)) {
+            showDeleteMovieDialog(title, movie.id,  movie.fileId!! )
+        } else {
+            showDownloadMovieDialog(title, movie.fileId)
+        }
+    }
+
+    private fun showDownloadMovieDialog(title: String, fileId: String) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.confirm_download, title))
+            .setPositiveButton(R.string.yes) { dialog, _ ->
+                mediaViewModel.downloadMovie(title, fileId)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.no) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun showDeleteMovieDialog(title: String, tmdbId: Int, filePath:String) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(getString(R.string.confirm_delete_movie, title))
+            .setPositiveButton(R.string.yes) { dialog, _ ->
+                mediaViewModel.removeOfflineMovie(tmdbId,filePath)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.no) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     override fun onStart() {

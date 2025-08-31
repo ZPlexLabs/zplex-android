@@ -8,12 +8,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
+import zechs.zplex.data.local.offline.OfflineMovieDao
 import zechs.zplex.data.local.offline.OfflineShowDao
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.entities.Movie
@@ -24,9 +28,12 @@ import zechs.zplex.data.model.tmdb.media.TvResponse
 import zechs.zplex.data.model.tmdb.search.SearchResponse
 import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.data.repository.WatchedRepository
+import zechs.zplex.service.DownloadWorker
+import zechs.zplex.service.OfflineDatabaseWorker
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.media.adapter.MediaDataModel
 import zechs.zplex.utils.SessionManager
+import zechs.zplex.utils.ext.deleteIfExistsSafely
 import zechs.zplex.utils.state.Event
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
@@ -40,7 +47,9 @@ class MediaViewModel @Inject constructor(
     private val tmdbRepository: TmdbRepository,
     private val sessionManager: SessionManager,
     private val watchedRepository: WatchedRepository,
-    private val offlineShowDao: OfflineShowDao
+    private val offlineShowDao: OfflineShowDao,
+    private val offlineMovieDao: OfflineMovieDao,
+    private val workManager: WorkManager
 ) : BaseAndroidViewModel(app) {
 
     private val _dominantColor = MutableLiveData<Int>()
@@ -105,6 +114,7 @@ class MediaViewModel @Inject constructor(
             } else {
                 when (mediaType) {
                     MediaType.tv -> fetchShowLocal(tmdbId)
+                    MediaType.movie -> fetchMovieLocal(tmdbId)
                     else -> {
                         _mediaResponse.postValue(Resource.Error("No internet connection"))
                     }
@@ -151,6 +161,19 @@ class MediaViewModel @Inject constructor(
                 ), company = null
             )
             _mediaResponse.postValue(handleTvResponse)
+        }
+    }
+
+    private suspend fun fetchMovieLocal(
+        tmdbId: Int
+    ) = withContext(Dispatchers.IO) {
+        offlineMovieDao.getMovieById(tmdbId)?.let { movie ->
+            val handleMovieResponse = handleMovieResponse(
+                Response.success(
+                    movie.toMovieResponse()
+                ), company = null
+            )
+            _mediaResponse.postValue(handleMovieResponse)
         }
     }
 
@@ -419,6 +442,7 @@ class MediaViewModel @Inject constructor(
                 )
             }
 
+            val offline = offlineMovieDao.getMovieById(result.id)
             val saved = tmdbRepository.fetchMovieById(result.id)
             val watched = watchedRepository.getWatchedMovie(result.id)
 
@@ -430,7 +454,7 @@ class MediaViewModel @Inject constructor(
                         title = result.title,
                         poster_path = result.poster_path,
                         vote_average = result.vote_average,
-                        fileId = saved?.fileId,
+                        fileId = offline?.filePath ?: saved?.fileId,
                         modifiedTime = saved?.modifiedTime
                     ),
                     watchedMovie = watched,
@@ -529,13 +553,40 @@ class MediaViewModel @Inject constructor(
             return@launch
         } else {
             val title = "${movie.title}${if (year != null) " (${year})" else ""}"
-            val playerMovie = zechs.zplex.ui.player.Movie(tmdbId, title, showPoster, movie.fileId)
+            val isOffline = movie.fileId.startsWith(context.filesDir.path)
+            val playerMovie =
+                zechs.zplex.ui.player.Movie(tmdbId, title, showPoster, movie.fileId, isOffline)
             _movieFile.postValue(Event(Resource.Success(playerMovie)))
         }
     }
 
     fun movieWatchedState(tmdbId: Int): LiveData<WatchedMovie?> {
         return watchedRepository.observeWatchedMovie(tmdbId)
+    }
+
+    fun removeOfflineMovie(tmdbId: Int, filePath: String) = viewModelScope.launch {
+        java.io.File(filePath).deleteIfExistsSafely()
+        offlineMovieDao.deleteMovieById(tmdbId)
+    }
+
+    fun downloadMovie(title: String, fileId: String) {
+        val data = Data.Builder()
+            .putString(DownloadWorker.MEDIA_TYPE, MediaType.movie.name)
+            .putInt(DownloadWorker.TMDB_ID, tmdbId)
+            .putString(DownloadWorker.FILE_ID, fileId)
+            .putString(DownloadWorker.FILE_TITLE, title)
+            .build()
+
+        val downloadRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
+            .setInputData(data)
+            .addTag(fileId)
+            .build()
+
+        val offlineRequest = OneTimeWorkRequestBuilder<OfflineDatabaseWorker>().build()
+
+        workManager.beginWith(downloadRequest)
+            .then(offlineRequest)
+            .enqueue()
     }
 
 }

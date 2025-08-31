@@ -128,4 +128,6 @@
     <string name="all_seasons">All seasons</string>
     <string name="finale">Finale</string>
     <string name="confirm_delete_episode">Are you sure you want to delete "%1$s"?</string>
+    <string name="confirm_delete_movie">Are you sure you want to delete "%1$s"?</string>
+    <string name="confirm_download">Do you want to download "%1$s"?</string>
 </resources>
