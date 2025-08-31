@@ -36,6 +36,7 @@ import zechs.zplex.ThisApp
 import zechs.zplex.databinding.ActivityMainBinding
 import zechs.zplex.service.CacheCleanupWorker
 import zechs.zplex.service.RemoteLibraryIndexingService
+import zechs.zplex.utils.Constants.CACHE_TTL_IN_DAYS
 import zechs.zplex.utils.MaterialMotionInterpolator
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
@@ -118,14 +119,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun scheduleCacheCleanup() {
-        val weeklyWorkRequest = PeriodicWorkRequestBuilder<CacheCleanupWorker>(
-            7, TimeUnit.DAYS
+        val cleanupWorkRequest = PeriodicWorkRequestBuilder<CacheCleanupWorker>(
+            CACHE_TTL_IN_DAYS, TimeUnit.DAYS
         ).build()
 
         workManager.enqueueUniquePeriodicWork(
             "CacheCleanupJob",
             ExistingPeriodicWorkPolicy.KEEP,
-            weeklyWorkRequest
+            cleanupWorkRequest
         )
     }
 

@@ -35,6 +35,7 @@ class CacheCleanupWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         val currentTime = System.currentTimeMillis()
+        Log.d(TAG, "Starting CacheCleanupWorker at $currentTime")
         try {
             apiCacheDao.deleteExpiredCache(currentTime)
             Log.d(TAG, "Cache cleanup successful.")

@@ -16,4 +16,6 @@ object Constants {
     const val SEARCH_DELAY_AMOUNT = 750L
 
     const val GUIDE_TO_MAKE_DRIVE_CLIENT = "https://rclone.org/drive/#making-your-own-client-id"
+
+    const val CACHE_TTL_IN_DAYS: Long = 30L
 }

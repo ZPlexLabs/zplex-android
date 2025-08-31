@@ -21,6 +21,7 @@ import zechs.zplex.data.model.tmdb.search.SearchResponse
 import zechs.zplex.data.model.tmdb.season.SeasonResponse
 import zechs.zplex.data.remote.OmdbApi
 import zechs.zplex.data.remote.TmdbApi
+import zechs.zplex.utils.Constants.CACHE_TTL_IN_DAYS
 import zechs.zplex.utils.ext.nullIfNAOrElse
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,6 +38,7 @@ class TmdbRepository @Inject constructor(
 
     companion object {
         private const val TAG = "TmdbRepository"
+        private const val THIRTY_DAYS_MILLIS = CACHE_TTL_IN_DAYS * 24 * 60 * 60 * 1000L
     }
 
     suspend fun upsertMovie(
@@ -94,7 +96,7 @@ class TmdbRepository @Inject constructor(
             var show = tmdbResponse.body()
 
             if (tmdbResponse.isSuccessful && show != null) {
-                val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
+                val expiration = System.currentTimeMillis() + THIRTY_DAYS_MILLIS
                 val imdbId = show.external_ids?.get("imdb_id")
                 if (!imdbId.isNullOrBlank()) {
                     val omdbResponse = omdbApi.fetchTvById(imdbId)
@@ -152,7 +154,7 @@ class TmdbRepository @Inject constructor(
             var movie = tmdbResponse.body()
 
             if (tmdbResponse.isSuccessful && movie != null) {
-                val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
+                val expiration = System.currentTimeMillis() + THIRTY_DAYS_MILLIS
 
                 val imdbId = movie.imdb_id
                 if (!imdbId.isNullOrBlank()) {
@@ -215,7 +217,7 @@ class TmdbRepository @Inject constructor(
         }
         val season = tmdbApi.getSeason(tvId, seasonNumber)
         if (season.isSuccessful && season.body() != null) {
-            val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
+            val expiration = System.currentTimeMillis() + THIRTY_DAYS_MILLIS
             Log.d(TAG, "Creating cache with key: $cacheKey")
             apiCacheDao.addCache(
                 ApiCache(
@@ -316,7 +318,7 @@ class TmdbRepository @Inject constructor(
             page = page
         )
         if (company.isSuccessful && company.body() != null) {
-            val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
+            val expiration = System.currentTimeMillis() + THIRTY_DAYS_MILLIS
             Log.d(TAG, "Creating cache with key: $cacheKey")
             apiCacheDao.addCache(
                 ApiCache(
@@ -361,7 +363,7 @@ class TmdbRepository @Inject constructor(
             page = page
         )
         if (company.isSuccessful && company.body() != null) {
-            val expiration = System.currentTimeMillis() + 7 * 24 * 60 * 60 * 1000L
+            val expiration = System.currentTimeMillis() + THIRTY_DAYS_MILLIS
             Log.d(TAG, "Creating cache with key: $cacheKey")
             apiCacheDao.addCache(
                 ApiCache(
