@@ -9,8 +9,10 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import zechs.zplex.data.local.offline.OfflineDatabase
 import zechs.zplex.data.local.offline.OfflineEpisodeDao
+import zechs.zplex.data.local.offline.OfflineMovieDao
 import zechs.zplex.data.local.offline.OfflineSeasonDao
 import zechs.zplex.data.local.offline.OfflineShowDao
+import zechs.zplex.data.local.offline.migrations.MIGRATION_1_2
 import javax.inject.Singleton
 
 @Module
@@ -27,7 +29,7 @@ object OfflineDatabaseModule {
         appContext,
         OfflineDatabase::class.java,
         DATABASE_NAME
-    ).build()
+    ).addMigrations(MIGRATION_1_2).build()
 
     @Singleton
     @Provides
