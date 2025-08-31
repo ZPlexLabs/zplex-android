@@ -127,4 +127,5 @@
     <string name="playlist">Playlist</string>
     <string name="all_seasons">All seasons</string>
     <string name="finale">Finale</string>
+    <string name="confirm_delete_episode">Are you sure you want to delete "%1$s"?</string>
 </resources>

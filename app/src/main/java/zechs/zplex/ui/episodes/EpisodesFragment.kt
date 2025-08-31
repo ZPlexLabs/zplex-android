@@ -146,15 +146,16 @@ class EpisodesFragment : Fragment() {
 
 
     private fun showDeleteEpisodeDialog(episode: Episode) {
-        val options = arrayOf(getString(R.string.remove_from_offline))
         MaterialAlertDialogBuilder(requireContext())
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> {
-                        episodesViewModel.removeOffline(episode)
-                    }
-                }
-            }.show()
+            .setTitle(getString(R.string.confirm_delete_episode, episode.name ?: "Episode ${episode.episode_number}"))
+            .setPositiveButton(R.string.yes) { dialog, _ ->
+                episodesViewModel.removeOffline(episode)
+                dialog.dismiss()
+            }
+            .setNegativeButton(R.string.no) { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
     }
 
     override fun onCreateView(
