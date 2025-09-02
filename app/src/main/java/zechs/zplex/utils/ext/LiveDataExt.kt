@@ -14,5 +14,3 @@ fun <T, K, R> LiveData<T>.combineWith(
         mediator.value = block(this.value, liveData.value)
     }
 }
-
-fun <T> LiveData<T>.hasValue(): Boolean = this.value != null

@@ -3,7 +3,6 @@ package zechs.zplex.ui.episodes
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,7 +11,6 @@ import kotlinx.coroutines.launch
 import zechs.zplex.data.model.tmdb.entities.Season
 import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.ui.episodes.EpisodesFragment.Companion.TAG
-import zechs.zplex.utils.ext.hasValue
 import zechs.zplex.utils.ext.ifNullOrEmpty
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
@@ -20,8 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class EpisodesSharedViewModel @Inject constructor(
-    private val tmdbRepository: TmdbRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val tmdbRepository: TmdbRepository
 ) : ViewModel() {
 
     var showName: String = ""
@@ -30,8 +27,8 @@ class EpisodesSharedViewModel @Inject constructor(
     private val _seasons = MutableLiveData<Resource<List<Season>>>()
     val seasons: LiveData<Resource<List<Season>>> = _seasons
 
-    private val _selectedSeasonNumber = savedStateHandle.getLiveData<Int>("seasonNumber")
-    val selectedSeasonNumber: LiveData<Int> get() = _selectedSeasonNumber
+    private val _selectedSeasonNumber = MutableLiveData<Int>()
+    val selectedSeasonNumber: LiveData<Int> = _selectedSeasonNumber
 
     fun loadSeasons(
         showId: Int,
@@ -69,16 +66,9 @@ class EpisodesSharedViewModel @Inject constructor(
         }
     }
 
-    fun initDefaultSeason(defaultSeasonNumber: Int) {
-        if (!_selectedSeasonNumber.hasValue()) {
-            _selectedSeasonNumber.value = defaultSeasonNumber
-        }
-    }
-
     fun selectSeason(seasonNumber: Int) {
         if (_selectedSeasonNumber.value != seasonNumber) {
             _selectedSeasonNumber.value = seasonNumber
-            savedStateHandle["seasonNumber"] = seasonNumber
         }
     }
 }

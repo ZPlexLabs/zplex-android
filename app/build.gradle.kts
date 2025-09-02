@@ -6,7 +6,6 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("androidx.navigation.safeargs.kotlin")
     id("com.google.devtools.ksp")
-    id("kotlin-parcelize")
 }
 
 val tmdbApiKey: String = gradleLocalProperties(rootDir, providers).getProperty("TMDB_API_KEY")
