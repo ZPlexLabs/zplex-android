@@ -22,7 +22,10 @@ import androidx.core.view.doOnAttach
 import androidx.core.view.isInvisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.FragmentNavigatorExtras
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -35,10 +38,12 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.entities.Show
+import zechs.zplex.data.model.offline.OfflineMovie
 import zechs.zplex.data.model.tmdb.entities.Cast
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.data.model.tmdb.entities.Season
@@ -117,6 +122,7 @@ class MediaFragment : Fragment() {
         mediaViewModel.mediaResponse.observe(viewLifecycleOwner) { response ->
             handleMediaResponse(response)
         }
+        observeOfflineMovie(tmdbId)
     }
 
     private fun handleMediaResponse(
@@ -163,6 +169,47 @@ class MediaFragment : Fragment() {
             }
         }
     }
+
+    private fun observeOfflineMovie(tmdbId: Int) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                mediaViewModel.observeMovieById(tmdbId).collect { offlineMovie ->
+                    if (offlineMovie != null) {
+                        Log.d(TAG, "Received update for tmdbId=$tmdbId, filePath=${offlineMovie.filePath}")
+                        handleOfflineMovieUpdate(tmdbId, offlineMovie)
+                    } else {
+                        Log.d(TAG, "No movie found in DB for tmdbId=$tmdbId")
+                    }
+                }
+            }
+        }
+    }
+
+    private fun handleOfflineMovieUpdate(tmdbId: Int, offlineMovie: OfflineMovie) {
+        val index = mediaDataAdapter.currentList.indexOfFirst {
+            it is MediaDataModel.MovieButton && it.movie.id == tmdbId
+        }
+
+        if (index != -1) {
+            val oldItem = mediaDataAdapter.currentList[index] as MediaDataModel.MovieButton
+            Log.d(TAG, "Updating MovieButton at index=$index (old filePath=${oldItem.movie.fileId})")
+
+            val updatedItem = oldItem.copy(
+                movie = oldItem.movie.copy(
+                    fileId = offlineMovie.filePath
+                )
+            )
+
+            val newList = mediaDataAdapter.currentList.toMutableList()
+            newList[index] = updatedItem
+
+            mediaDataAdapter.submitList(newList)
+            Log.d(TAG, "Submitted updated list with new filePath=${offlineMovie.filePath}")
+        } else {
+            Log.d(TAG, "No MovieButton found for tmdbId=$tmdbId in currentList")
+        }
+    }
+
 
     private fun isLoading(hide: Boolean) {
         binding.apply {
@@ -624,7 +671,7 @@ class MediaFragment : Fragment() {
     private fun promptMovieDownload(movie: Movie, year: Int?) {
         val title = "${movie.title}${if (year != null) " (${year})" else ""}"
         if (movie.fileId!!.startsWith(requireContext().filesDir.absolutePath)) {
-            showDeleteMovieDialog(title, movie.id,  movie.fileId!! )
+            showDeleteMovieDialog(title, movie.id, movie.fileId!!)
         } else {
             showDownloadMovieDialog(title, movie.fileId)
         }
@@ -643,11 +690,11 @@ class MediaFragment : Fragment() {
             .show()
     }
 
-    private fun showDeleteMovieDialog(title: String, tmdbId: Int, filePath:String) {
+    private fun showDeleteMovieDialog(title: String, tmdbId: Int, filePath: String) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(getString(R.string.confirm_delete_movie, title))
             .setPositiveButton(R.string.yes) { dialog, _ ->
-                mediaViewModel.removeOfflineMovie(tmdbId,filePath)
+                mediaViewModel.removeOfflineMovie(tmdbId, filePath)
                 dialog.dismiss()
             }
             .setNegativeButton(R.string.no) { dialog, _ ->

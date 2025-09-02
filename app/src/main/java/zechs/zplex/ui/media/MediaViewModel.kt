@@ -589,4 +589,6 @@ class MediaViewModel @Inject constructor(
             .enqueue()
     }
 
+    fun observeMovieById(id: Int) = offlineMovieDao.getMovieByIdAsFlow(id)
+
 }

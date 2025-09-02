@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 import zechs.zplex.data.model.offline.OfflineMovie
 
 @Dao
@@ -21,6 +22,9 @@ interface OfflineMovieDao {
 
     @Query("SELECT * FROM movies WHERE id = :id LIMIT 1")
     suspend fun getMovieById(id: Int): OfflineMovie?
+
+    @Query("SELECT * FROM movies WHERE id = :id LIMIT 1")
+    fun getMovieByIdAsFlow(id: Int): Flow<OfflineMovie?>
 
     @Query("DELETE FROM movies WHERE id = :id")
     suspend fun deleteMovieById(id: Int)
