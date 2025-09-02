@@ -54,10 +54,10 @@ class WatchedRepository @Inject constructor(
     ) = watchedShowDao.getWatchedSeason(tmdbId, season)
 
 
-    fun getWatchedSeasonLive(
+    fun getWatchedSeasonAsFlow(
         tmdbId: Int,
         season: Int
-    ) = watchedShowDao.getWatchedSeasonLive(tmdbId, season)
+    ) = watchedShowDao.getWatchedSeasonAsFlow(tmdbId, season)
 
     fun getAllWatchedShows() = watchedShowDao.getAllWatchedShows()
 

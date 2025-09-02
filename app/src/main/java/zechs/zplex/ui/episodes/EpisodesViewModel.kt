@@ -3,8 +3,8 @@ package zechs.zplex.ui.episodes
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
@@ -13,9 +13,16 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -42,7 +49,6 @@ import zechs.zplex.utils.SessionManager
 import zechs.zplex.utils.ext.deleteIfExistsSafely
 import zechs.zplex.utils.ext.ifNullOrEmpty
 import zechs.zplex.utils.state.Resource
-import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import zechs.zplex.utils.util.Converter
 import zechs.zplex.utils.util.DriveApiQueryBuilder
 import java.time.LocalDate
@@ -61,7 +67,8 @@ class EpisodesViewModel @Inject constructor(
     private val offlineShowDao: OfflineShowDao,
     private val offlineSeasonDao: OfflineSeasonDao,
     private val offlineEpisodeDao: OfflineEpisodeDao,
-    private val workManager: WorkManager
+    private val workManager: WorkManager,
+    private val savedStateHandle: SavedStateHandle
 ) : BaseAndroidViewModel(app) {
 
     var hasLoaded: Boolean = false
@@ -78,6 +85,12 @@ class EpisodesViewModel @Inject constructor(
     var hasLoggedIn = false
         private set
 
+    init {
+        this@EpisodesViewModel.showName = savedStateHandle["showName"]
+        this@EpisodesViewModel.showPoster = savedStateHandle["showPoster"]
+        this@EpisodesViewModel.tmdbId = savedStateHandle.get<Int>("tmdbId") ?: 0
+    }
+
     fun updateStatus() = viewModelScope.launch {
         hasLoggedIn = getLoginStatus()
     }
@@ -87,12 +100,6 @@ class EpisodesViewModel @Inject constructor(
         sessionManager.fetchRefreshToken() ?: return false
         return true
     }
-
-    private val _episodesResponse = MutableLiveData<Resource<List<Episode>>>(Resource.Loading())
-
-    private val _episodesWithWatched = MediatorLiveData<Resource<List<Episode>>>()
-    val episodesWithWatched: LiveData<Resource<List<Episode>>>
-        get() = _episodesWithWatched
 
     private val _playlist = mutableListOf<PlaybackItem>()
 
@@ -107,49 +114,65 @@ class EpisodesViewModel @Inject constructor(
         this@EpisodesViewModel.showName = showName
         this@EpisodesViewModel.showPoster = showPoster
         this@EpisodesViewModel.tmdbId = tmdbId
+        savedStateHandle["showName"] = showName
+        savedStateHandle["showPoster"] = showPoster
+        savedStateHandle["tmdbId"] = tmdbId
     }
 
-    private var job: Job? = null
-
-    fun getSeasonWithWatched(
-        tmdbId: Int,
-        seasonNumber: Int
-    ) {
-        if (seasonHeader.value != null && seasonHeader.value!!.number == seasonNumber) {
-            return;
+    private val initialSeason: Pair<Int, Int>? =
+        savedStateHandle.get<Int>("tmdbId")?.let { tmdbId ->
+            savedStateHandle.get<Int>("seasonNumber")
+                ?.let { seasonNumber -> tmdbId to seasonNumber }
         }
-        job?.cancel()
-        _episodesWithWatched.removeSource(_episodesResponse)
-        _playlist.clear()
-        job = internalGetSeasonWithWatched(tmdbId, seasonNumber)
+
+    private val _selectedSeason = MutableStateFlow(initialSeason)
+
+    fun selectSeason(seasonNumber: Int) {
+        _selectedSeason.value = tmdbId to seasonNumber
+        savedStateHandle["seasonNumber"] = seasonNumber
     }
 
-    private fun internalGetSeasonWithWatched(
-        tmdbId: Int,
-        seasonNumber: Int
-    ) = viewModelScope.launch {
-        getSeason(tmdbId, seasonNumber)
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val episodesWithWatched: StateFlow<Resource<List<Episode>>> =
+        _selectedSeason
+            .filterNotNull()
+            .flatMapLatest { (tmdbId, seasonNumber) ->
+                combine(
+                    getSeasonFlow(tmdbId, seasonNumber),
+                    watchedRepository.getWatchedSeasonAsFlow(tmdbId, seasonNumber),
+                    offlineEpisodeDao.getAllEpisodesAsFlow(tmdbId, seasonNumber)
+                ) { episodes, watched, offline ->
+                    combineSeasonWithWatched(episodes, watched, offline)
+                }
+            }
+            .stateIn(viewModelScope, SharingStarted.Lazily, Resource.Loading())
 
-        val watchedSeason = watchedRepository.getWatchedSeason(tmdbId, seasonNumber)
-        val offlineEpisodes = offlineEpisodeDao.getAllEpisodes(tmdbId, seasonNumber)
 
-        _episodesWithWatched.addSource(_episodesResponse) { episodes ->
-            _episodesWithWatched.value =
-                combineSeasonWithWatched(episodes, watchedSeason, offlineEpisodes)
-        }
-
-        _episodesWithWatched.addSource(
-            watchedRepository.getWatchedSeasonLive(tmdbId, seasonNumber)
-        ) { watched ->
-            _episodesWithWatched.value =
-                combineSeasonWithWatched(_episodesResponse.value!!, watched, offlineEpisodes)
-        }
-
-        _episodesWithWatched.addSource(
-            offlineEpisodeDao.getAllEpisodesAsLiveData(tmdbId, seasonNumber)
-        ) { offlineEpisodes ->
-            _episodesWithWatched.value =
-                combineSeasonWithWatched(_episodesResponse.value!!, watchedSeason, offlineEpisodes)
+    fun getSeasonFlow(tmdbId: Int, seasonNumber: Int): Flow<Resource<List<Episode>>> = flow {
+        emit(Resource.Loading())
+        try {
+            if (hasInternetConnection()) {
+                val tmdbSeason = tmdbRepository.getSeason(tmdbId, seasonNumber)
+                emit((handleSeasonResponse(tmdbId, tmdbSeason)))
+                getLastWatchedEpisode(tmdbId, seasonNumber)
+            } else {
+                val offlineSeason = offlineSeasonDao.getSeasonById(tmdbId, seasonNumber)
+                if (offlineSeason != null) {
+                    val gson = GsonBuilder()
+                        .serializeNulls()
+                        .create()
+                    val type = object : TypeToken<SeasonResponse?>() {}.type
+                    val season: SeasonResponse = gson.fromJson(offlineSeason.json, type)
+                    val responseSeason = Response.success(season)
+                    emit((handleSeasonResponse(tmdbId, responseSeason)))
+                    getLastWatchedEpisode(tmdbId, seasonNumber)
+                } else {
+                    emit((Resource.Error("No internet connection")))
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Resource.Error(e.message ?: "Unknown error"))
         }
     }
 
@@ -158,6 +181,7 @@ class EpisodesViewModel @Inject constructor(
         watched: List<WatchedShow>,
         offline: List<OfflineEpisode>
     ): Resource<List<Episode>> {
+        _playlist.clear()
         if (episodes is Resource.Success) {
             val episodesDataModel = episodes.data!!.toMutableList()
             val watchedMap = watched.associateBy { it.episodeNumber }
@@ -174,25 +198,29 @@ class EpisodesViewModel @Inject constructor(
 
                 offlineMap[getEpisodePattern(episode)]?.let { offlinePath ->
                     Log.d(TAG, "Updating file for ${episode.name} to offline file")
-                    episodesDataModel[index] = episode.copy(fileId = offlinePath)
+                    episodesDataModel[index] = episode.copy(fileId = offlinePath, offline = true)
                 }
                 (episodesDataModel[index])
                     .takeIf { it.fileId != null }
                     ?.let {
+                        val isOffline = it.fileId!!.startsWith(context.filesDir.path)
                         _playlist.add(
                             Show(
                                 tmdbId = tmdbId,
                                 title = showName!!,
                                 posterPath = showPoster,
-                                fileId = it.fileId!!,
+                                fileId = it.fileId,
                                 // ideally this should be check to filesDir
-                                offline = it.fileId.startsWith(context.filesDir.path),
+                                offline = isOffline,
                                 episode = episode,
                                 seasonNumber = it.season_number,
                                 episodeNumber = it.episode_number,
                                 episodeTitle = it.name
                             )
                         )
+                        if (isOffline) {
+                            Log.d(TAG, "Marked episode ${it.episode_number} as offline")
+                        }
                     }
             }
 
@@ -202,37 +230,6 @@ class EpisodesViewModel @Inject constructor(
 
         Log.d(TAG, "Episodes resource is not Success")
         return episodes
-    }
-
-    private fun getSeason(
-        tmdbId: Int,
-        seasonNumber: Int
-    ) = viewModelScope.launch(Dispatchers.IO) {
-        _episodesResponse.postValue((Resource.Loading()))
-        try {
-            if (hasInternetConnection()) {
-                val tmdbSeason = tmdbRepository.getSeason(tmdbId, seasonNumber)
-                _episodesResponse.postValue((handleSeasonResponse(tmdbId, tmdbSeason)))
-                getLastWatchedEpisode(tmdbId, seasonNumber)
-            } else {
-                val offlineSeason = offlineSeasonDao.getSeasonById(tmdbId, seasonNumber)
-                if (offlineSeason != null) {
-                    val gson = GsonBuilder()
-                        .serializeNulls()
-                        .create()
-                    val type = object : TypeToken<SeasonResponse?>() {}.type
-                    val season: SeasonResponse = gson.fromJson(offlineSeason.json, type)
-                    val responseSeason = Response.success(season)
-                    _episodesResponse.postValue((handleSeasonResponse(tmdbId, responseSeason)))
-                    getLastWatchedEpisode(tmdbId, seasonNumber)
-                } else {
-                    _episodesResponse.postValue((Resource.Error("No internet connection")))
-                }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            _episodesResponse.postValue(postError(e))
-        }
     }
 
     data class SeasonHeader(
@@ -437,7 +434,7 @@ class EpisodesViewModel @Inject constructor(
                 if (last == null) {
                     _lastEpisode.value = null
                 } else {
-                    _lastEpisode.value = _episodesResponse.value?.data
+                    _lastEpisode.value = (episodesWithWatched.value as? Resource.Success)?.data
                         ?.firstOrNull { it.episode_number == last.episodeNumber }
                         ?.takeIf { it.fileId != null }
                 }

@@ -34,7 +34,7 @@ interface WatchedShowDao {
                 "WHERE tmdbId = :tmdbId " +
                 "AND seasonNumber = :season"
     )
-    fun getWatchedSeasonLive(tmdbId: Int, season: Int): LiveData<List<WatchedShow>>
+    fun getWatchedSeasonAsFlow(tmdbId: Int, season: Int): Flow<List<WatchedShow>>
 
     @Query(
         "SELECT * FROM `watched_shows` " +

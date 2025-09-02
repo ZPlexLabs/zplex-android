@@ -229,34 +229,37 @@ class EpisodesFragment : Fragment() {
             }
         }
         sharedViewModel.selectedSeasonNumber.observe(viewLifecycleOwner) { seasonNumber ->
-            Log.d(
-                TAG,
-                "getSeasonWithWatched(tmdbId=${episodesViewModel.tmdbId}, seasonNumber=$seasonNumber)"
-            )
-            episodesViewModel.getSeasonWithWatched(episodesViewModel.tmdbId, seasonNumber)
+            Log.d(TAG, "getSeasonWithWatched(tmdbId=${episodesViewModel.tmdbId}, seasonNumber=$seasonNumber)")
+            episodesViewModel.selectSeason(seasonNumber)
         }
-        episodesViewModel.episodesWithWatched.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Resource.Success -> response.data?.let {
-                    TransitionManager.beginDelayedTransition(
-                        binding.root,
-                        MaterialFadeThrough()
-                    )
-                    episodeAdapter.submitList(it)
-                    isLoading(false)
-                    episodesViewModel.hasLoaded = true
-                }
 
-                is Resource.Error -> {
-                    Log.d(TAG, "Error: ${response.message}")
-                    showToast(response.message)
-                    binding.rvList.isInvisible = true
-                }
+        viewLifecycleOwner.lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                episodesViewModel.episodesWithWatched.collect { response ->
+                    Log.d(TAG, "episodesWithWatched=$response")
+                    when (response) {
+                        is Resource.Success -> response.data?.let {
+                            TransitionManager.beginDelayedTransition(
+                                binding.root,
+                                MaterialFadeThrough()
+                            )
+                            episodeAdapter.submitList(it)
+                            isLoading(false)
+                            episodesViewModel.hasLoaded = true
+                        }
 
-                is Resource.Loading -> {
-                    isLoading(true)
-                    episodeAdapter.submitList(null)
-                    removeContinueWatching()
+                        is Resource.Error -> {
+                            Log.d(TAG, "Error: ${response.message}")
+                            showToast(response.message)
+                            binding.rvList.isInvisible = true
+                        }
+
+                        is Resource.Loading -> {
+                            isLoading(true)
+                            episodeAdapter.submitList(null)
+                            removeContinueWatching()
+                        }
+                    }
                 }
             }
         }
