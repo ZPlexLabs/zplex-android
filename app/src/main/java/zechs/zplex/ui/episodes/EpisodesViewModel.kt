@@ -26,6 +26,7 @@ import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.drive.DriveFile
 import zechs.zplex.data.model.drive.File
 import zechs.zplex.data.model.entities.WatchedShow
+import zechs.zplex.data.model.offline.OfflineEpisode
 import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.data.model.tmdb.season.SeasonResponse
 import zechs.zplex.data.repository.DriveRepository
@@ -130,34 +131,51 @@ class EpisodesViewModel @Inject constructor(
         getSeason(tmdbId, seasonNumber)
 
         val watchedSeason = watchedRepository.getWatchedSeason(tmdbId, seasonNumber)
+        val offlineEpisodes = offlineEpisodeDao.getAllEpisodes(tmdbId, seasonNumber)
 
         _episodesWithWatched.addSource(_episodesResponse) { episodes ->
             _episodesWithWatched.value =
-                combineSeasonWithWatched(episodes, watchedSeason)
+                combineSeasonWithWatched(episodes, watchedSeason, offlineEpisodes)
         }
 
         _episodesWithWatched.addSource(
             watchedRepository.getWatchedSeasonLive(tmdbId, seasonNumber)
         ) { watched ->
             _episodesWithWatched.value =
-                combineSeasonWithWatched(_episodesResponse.value!!, watched)
+                combineSeasonWithWatched(_episodesResponse.value!!, watched, offlineEpisodes)
+        }
+
+        _episodesWithWatched.addSource(
+            offlineEpisodeDao.getAllEpisodesAsLiveData(tmdbId, seasonNumber)
+        ) { offlineEpisodes ->
+            _episodesWithWatched.value =
+                combineSeasonWithWatched(_episodesResponse.value!!, watchedSeason, offlineEpisodes)
         }
     }
 
     private fun combineSeasonWithWatched(
         episodes: Resource<List<Episode>>,
-        watched: List<WatchedShow>
+        watched: List<WatchedShow>,
+        offline: List<OfflineEpisode>
     ): Resource<List<Episode>> {
         if (episodes is Resource.Success) {
             val episodesDataModel = episodes.data!!.toMutableList()
+            val watchedMap = watched.associateBy { it.episodeNumber }
+            val offlineMap = offline.associate { episode ->
+                "S%02dE%02d".format(episode.seasonNumber, episode.episodeNumber) to episode.filePath
+            }
 
             episodesDataModel.forEachIndexed { index, episode ->
-                watched.firstOrNull { it.episodeNumber == episode.episode_number }
-                    ?.let { watchedShow ->
-                        val newProgress = watchedShow.watchProgress()
-                        Log.d(TAG, "Updating watched progress for ${episode.name} to $newProgress")
-                        episodesDataModel[index] = episode.copy(progress = newProgress)
-                    }
+                watchedMap[episode.episode_number]?.let { watchedShow ->
+                    val newProgress = watchedShow.watchProgress()
+                    Log.d(TAG, "Updating watched progress for ${episode.name} to $newProgress")
+                    episodesDataModel[index] = episode.copy(progress = newProgress)
+                }
+
+                offlineMap[getEpisodePattern(episode)]?.let { offlinePath ->
+                    Log.d(TAG, "Updating file for ${episode.name} to offline file")
+                    episodesDataModel[index] = episode.copy(fileId = offlinePath)
+                }
                 (episodesDataModel[index])
                     .takeIf { it.fileId != null }
                     ?.let {
@@ -244,7 +262,7 @@ class EpisodesViewModel @Inject constructor(
                 if (savedShow?.fileId != null) {
                     handleSeasonFolder(result, savedShow.fileId, seasonDataModel)
                 } else {
-                    handleDefaultMapping(result.episodes, result.season_number!!, seasonDataModel)
+                    handleDefaultMapping(result.episodes, seasonDataModel)
                 }
             }
 
@@ -289,15 +307,10 @@ class EpisodesViewModel @Inject constructor(
         val seasonFolder = findSeasonFolder(showFolderId, seasonFolderName)
 
         if (seasonFolder != null) {
-            handleEpisodesInFolder(
-                result.episodes!!,
-                result.season_number!!,
-                seasonFolder.id,
-                seasonDataModel
-            )
+            handleEpisodesInFolder(result.episodes!!, seasonFolder.id, seasonDataModel)
         } else {
             Log.d(TAG, "No folder found with name \"$seasonFolderName\"")
-            handleDefaultMapping(result.episodes!!, result.season_number!!, seasonDataModel)
+            handleDefaultMapping(result.episodes!!, seasonDataModel)
         }
     }
 
@@ -322,7 +335,6 @@ class EpisodesViewModel @Inject constructor(
 
     private suspend fun handleEpisodesInFolder(
         episodes: List<Episode>,
-        seasonNumber: Int,
         seasonFolderId: String,
         seasonDataModel: MutableList<Episode>
     ) {
@@ -334,16 +346,15 @@ class EpisodesViewModel @Inject constructor(
         )
 
         if (episodesInFolder is Resource.Success && episodesInFolder.data != null) {
-            processMatchingEpisodes(episodes, seasonNumber, episodesInFolder.data, seasonDataModel)
+            processMatchingEpisodes(episodes, episodesInFolder.data, seasonDataModel)
         } else {
             Log.d(TAG, "No files found in season folder")
-            handleDefaultMapping(episodes, seasonNumber, seasonDataModel)
+            handleDefaultMapping(episodes, seasonDataModel)
         }
     }
 
     private fun processMatchingEpisodes(
         episodes: List<Episode>,
-        seasonNumber: Int,
         filesInFolder: List<File>,
         seasonDataModel: MutableList<Episode>
     ) {
@@ -351,39 +362,24 @@ class EpisodesViewModel @Inject constructor(
             filesInFolder.map { it.toDriveFile() }.filter { it.isVideoFile }
         )
 
-        val offlineEpisodes = offlineEpisodeDao
-            .getAllEpisodes(tmdbId, seasonNumber)
-            .associate { episode ->
-                "S%02dE%02d".format(episode.seasonNumber, episode.episodeNumber) to episode.filePath
-            }
-
         var match = 0
-        var offline = 0
         episodes.forEach { episode ->
-            val offlineFile = offlineEpisodes[getEpisodePattern(episode)]
-            if (offlineFile != null) {
-                Log.d(TAG, "Found matching file for episode ${getEpisodePattern(episode)}")
-                // java.io.File(offlineFile).length()
-                seasonDataModel.add(episode.copy(fileId = offlineFile, offline = true))
-                offline++
+            val matchingEpisode = findMatchingEpisode(episode, episodeMap)
+            if (matchingEpisode == null) {
+                Log.d(TAG, "No matching file found for episode ${getEpisodePattern(episode)}")
+                seasonDataModel.add(episode.copy(fileId = null))
             } else {
-                val matchingEpisode = findMatchingEpisode(episode, episodeMap)
-                if (matchingEpisode == null) {
-                    Log.d(TAG, "No matching file found for episode ${getEpisodePattern(episode)}")
-                    seasonDataModel.add(episode.copy(fileId = null))
-                } else {
-                    Log.d(TAG, "Found matching file for episode ${getEpisodePattern(episode)}")
-                    seasonDataModel.add(
-                        episode.copy(
-                            fileId = matchingEpisode.id,
-                            fileSize = matchingEpisode.humanSize
-                        )
+                Log.d(TAG, "Found matching file for episode ${getEpisodePattern(episode)}")
+                seasonDataModel.add(
+                    episode.copy(
+                        fileId = matchingEpisode.id,
+                        fileSize = matchingEpisode.humanSize
                     )
-                    match++
-                }
+                )
+                match++
             }
         }
-        Log.d(TAG, "Matched $match out of ${episodes.size} episodes and $offline were offline.")
+        Log.d(TAG, "Matched $match out of ${episodes.size} episodes")
     }
 
 
@@ -423,22 +419,11 @@ class EpisodesViewModel @Inject constructor(
 
     private fun handleDefaultMapping(
         episodes: List<Episode>,
-        seasonNumber: Int,
         seasonDataModel: MutableList<Episode>
     ) {
         Log.d(TAG, "Mapping attempt failed, using default")
-        val offlineEpisodes = offlineEpisodeDao
-            .getAllEpisodes(tmdbId, seasonNumber)
-            .associate { episode ->
-                "S%02dE%02d".format(episode.seasonNumber, episode.episodeNumber) to episode.filePath
-            }
         episodes.forEach { episode ->
-            val offlineFile = offlineEpisodes[getEpisodePattern(episode)]
-            if (offlineFile == null) {
-                seasonDataModel.add(episode.copy(fileId = null))
-            } else {
-                seasonDataModel.add(episode.copy(fileId = offlineFile, offline = true))
-            }
+            seasonDataModel.add(episode.copy(fileId = null))
         }
     }
 

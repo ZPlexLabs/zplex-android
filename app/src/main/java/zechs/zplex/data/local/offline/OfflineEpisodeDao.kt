@@ -1,5 +1,6 @@
 package zechs.zplex.data.local.offline
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -13,12 +14,15 @@ interface OfflineEpisodeDao {
     suspend fun upsertEpisode(offlineEpisode: OfflineEpisode): Long
 
     @Query("SELECT * FROM episodes WHERE tmdbId = :tmdbId AND seasonNumber = :seasonNumber")
-    fun getAllEpisodes(tmdbId: Int, seasonNumber: Int): List<OfflineEpisode>
+    suspend fun getAllEpisodes(tmdbId: Int, seasonNumber: Int): List<OfflineEpisode>
+
+    @Query("SELECT * FROM episodes WHERE tmdbId = :tmdbId AND seasonNumber = :seasonNumber")
+    fun getAllEpisodesAsLiveData(tmdbId: Int, seasonNumber: Int): LiveData<List<OfflineEpisode>>
 
     @Query(
         "SELECT EXISTS(SELECT * FROM episodes WHERE tmdbId = :tmdbId AND seasonNumber = :seasonNumber AND episodeNumber = :episodeNumber)"
     )
-    fun getEpisode(tmdbId: Int, seasonNumber: Int, episodeNumber: Int): Boolean
+    suspend fun getEpisode(tmdbId: Int, seasonNumber: Int, episodeNumber: Int): Boolean
 
     @Query("DELETE FROM episodes WHERE tmdbId = :tmdbId AND seasonNumber = :seasonNumber AND episodeNumber = :episodeNumber")
     suspend fun deleteEpisode(tmdbId: Int, seasonNumber: Int, episodeNumber: Int)
