@@ -225,7 +225,7 @@ class EpisodesFragment : Fragment() {
                     showName = showSeason.showName,
                     seasons = showSeason.seasons
                 )
-                sharedViewModel.selectSeason(showSeason.seasonNumber)
+                sharedViewModel.initDefaultSeason(showSeason.seasonNumber)
             }
         }
         sharedViewModel.selectedSeasonNumber.observe(viewLifecycleOwner) { seasonNumber ->
