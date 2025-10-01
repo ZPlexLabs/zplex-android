@@ -19,6 +19,7 @@ import kotlinx.coroutines.withContext
 import zechs.zplex.BuildConfig
 import zechs.zplex.R
 import zechs.zplex.ui.server.ServerFragment.Companion.TAG
+import zechs.zplex.utils.ApiManager
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
@@ -28,6 +29,7 @@ import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class ServerViewModel @Inject constructor(
+    private val apiManager: ApiManager,
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -87,7 +89,8 @@ class ServerViewModel @Inject constructor(
                 val host = hostUrl.host
                 val port = portNumber
 
-                val healthUrl = URL(protocol, host, port, "/health")
+                val baseUrl = URL(protocol, host, port, "")
+                val healthUrl = URL(baseUrl, "/health")
                 Log.d(TAG, "Trying to connect to server: $healthUrl")
 
                 withContext(Dispatchers.IO) {
@@ -99,7 +102,7 @@ class ServerViewModel @Inject constructor(
                     try {
                         val code = connection.responseCode
                         if (code == 200) {
-                            // TODO: Save it to DataStore
+                            apiManager.saveApi(baseUrl.toString())
                             _events.emit(ServerEvent.ConnectionSuccessful)
                         } else {
                             _events.emit(ServerEvent.ShowError(R.string.error_invalid_server))

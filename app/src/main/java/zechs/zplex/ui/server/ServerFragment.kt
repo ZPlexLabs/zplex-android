@@ -9,7 +9,7 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -31,7 +31,7 @@ class ServerFragment : Fragment() {
     private var _binding: FragmentServerBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: ServerViewModel by viewModels()
+    private val viewModel by activityViewModels<ServerViewModel>()
 
     override fun onCreateView(
         inflater: LayoutInflater,
