@@ -130,4 +130,17 @@
     <string name="confirm_delete_episode">Are you sure you want to delete "%1$s"?</string>
     <string name="confirm_delete_movie">Are you sure you want to delete "%1$s"?</string>
     <string name="confirm_download">Do you want to download "%1$s"?</string>
+    <string name="connect_to_server">Connect to Server</string>
+    <string name="host">Host</string>
+    <string name="host_helper_text">Example: 192.168.1.100 or https://myserver.com</string>
+    <string name="port">Port</string>
+    <string name="port_helper_text">Example: 8096 or 443</string>
+    <string name="connect">Connect</string>
+    <string name="failed_to_connect">Failed to Connect</string>
+    <string name="invalid_host_missing_protocol">Invalid host. Please include protocol (http:// or https://).</string>
+    <string name="error_invalid_server">Unable to connect to the server. Please check the address and try again.</string>
+    <string name="something_went_wrong_reason">Something went wrong: %1$s</string>
+    <string name="error_network">A network error occurred. Please check your connection and try again.</string>
+    <string name="invalid_port_range">Port must be between 1 and 65535.</string>
+    <string name="host_and_port_cannot_be_empty">Host and port cannot be empty.</string>
 </resources>
