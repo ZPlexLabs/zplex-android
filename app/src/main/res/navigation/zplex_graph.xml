@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    app:startDestination="@id/homeFragment">
+    app:startDestination="@id/serverFragment">
 
     <fragment
         android:id="@+id/homeFragment"
@@ -196,5 +196,21 @@
         android:id="@+id/seasonsBottomSheetFragment"
         android:name="zechs.zplex.ui.episodes.SeasonsBottomSheetFragment"
         tools:layout="@layout/bottom_seasons_sheet_fragment" />
+
+    <fragment
+        android:id="@+id/serverFragment"
+        android:name="zechs.zplex.ui.server.ServerFragment"
+        android:label="ServerFragment"
+        tools:layout="@layout/fragment_server">
+        <action
+            android:id="@+id/action_serverFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="zechs.zplex.ui.login.LoginFragment"
+        android:label="LoginFragment"
+        tools:layout="@layout/fragment_login" />
 
 </navigation>

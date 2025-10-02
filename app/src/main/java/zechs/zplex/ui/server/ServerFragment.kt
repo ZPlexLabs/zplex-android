@@ -13,14 +13,15 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.transition.TransitionManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.FragmentServerBinding
 import zechs.zplex.utils.MaterialMotionInterpolator
+import zechs.zplex.utils.ext.navigateSafe
 
 class ServerFragment : Fragment() {
 
@@ -32,6 +33,19 @@ class ServerFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel by activityViewModels<ServerViewModel>()
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        exitTransition = MaterialSharedAxis(MaterialSharedAxis.X, true).apply {
+            interpolator = MaterialMotionInterpolator.getEmphasizedDecelerateInterpolator()
+            duration = 300L
+        }
+
+        reenterTransition = MaterialSharedAxis(MaterialSharedAxis.X, false).apply {
+            interpolator = MaterialMotionInterpolator.getEmphasizedAccelerateInterpolator()
+            duration = 200L
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -138,11 +152,7 @@ class ServerFragment : Fragment() {
                         }
 
                         is ServerEvent.ConnectionSuccessful -> {
-                            Snackbar.make(
-                                binding.root,
-                                "Connection successful!",
-                                Snackbar.LENGTH_SHORT
-                            ).show()
+                            findNavController().navigateSafe(R.id.action_serverFragment_to_loginFragment)
                         }
                     }
                 }
