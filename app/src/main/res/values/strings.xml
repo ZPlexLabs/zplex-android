@@ -143,4 +143,9 @@
     <string name="error_network">A network error occurred. Please check your connection and try again.</string>
     <string name="invalid_port_range">Port must be between 1 and 65535.</string>
     <string name="host_and_port_cannot_be_empty">Host and port cannot be empty.</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="create_an_account">Create an account?</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="sign_in_to_access_your_account">Sign in to access your account</string>
 </resources>
