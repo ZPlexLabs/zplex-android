@@ -11,6 +11,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialSharedAxis
@@ -18,6 +19,7 @@ import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.FragmentLoginBinding
 import zechs.zplex.utils.MaterialMotionInterpolator
+import zechs.zplex.utils.ext.navigateSafe
 
 class LoginFragment : Fragment() {
 
@@ -56,6 +58,10 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.inputUsername.doAfterTextChanged { viewModel.onUsernameChanged(it.toString()) }
         binding.inputPassword.doAfterTextChanged { viewModel.onPasswordChanged(it.toString()) }
+
+        binding.btnSignup.setOnClickListener {
+            findNavController().navigateSafe(R.id.action_loginFragment_to_signupFragment)
+        }
 
         binding.btnLogin.setOnClickListener {
             viewModel.onLoginClicked()

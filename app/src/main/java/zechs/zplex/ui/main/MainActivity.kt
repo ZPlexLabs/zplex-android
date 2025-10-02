@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.serverFragment, R.id.loginFragment,
+                R.id.serverFragment, R.id.loginFragment, R.id.signupFragment,
                 R.id.fragmentMedia, R.id.castsFragment,
                 R.id.episodesListFragment, R.id.fragmentList,
                 R.id.fragmentCollection, R.id.watchFragment,
