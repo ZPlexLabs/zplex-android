@@ -1,6 +1,6 @@
 package zechs.zplex.data.model
 
-data class LoginErrorResponse(
+data class ErrorResponse(
     val message: String,
     val details: String
 )

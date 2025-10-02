@@ -37,6 +37,8 @@ class EndpointInterceptor @Inject constructor(
                     .build()
 
                 val newRequest = request.newBuilder()
+                    .addHeader("Accept", "application/json")
+                    .addHeader("Content-Type", "application/json")
                     .url(updatedUrl)
                     .build()
 

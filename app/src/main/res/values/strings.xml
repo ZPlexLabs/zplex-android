@@ -157,4 +157,17 @@
     <string name="login_unexpected_error">An unexpected error occurred. Please try again.</string>
     <string name="login_http_error">Unexpected response from server (HTTP %1$d).</string>
     <string name="login_empty_details">The server returned an unexpected response. Please try again later.</string>
+    <string name="create_account">Create Account</string>
+    <string name="sign_up_to_get_started">Sign up to get started</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="already_have_account">Already have an account? Sign In</string>
+    <string name="signup_invalid_form_details">Please fill all required fields correctly</string>
+    <string name="signup_duplicate_user">This username is already taken</string>
+    <string name="signup_duplicate_user_details">The username you entered already exists. Please choose another one.</string>
+    <string name="something_went_wrong_details">Unexpected server error occurred</string>
+    <string name="error_network_details">Unable to connect to server. Please check your connection.</string>
+    <string name="signup_success">Signup Successful</string>
+    <string name="signup_success_message">Your account has been created. Please login.</string>
 </resources>
