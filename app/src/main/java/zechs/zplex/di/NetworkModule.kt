@@ -10,7 +10,11 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Retrofit
+import retrofit2.converter.moshi.MoshiConverterFactory
 import zechs.zplex.BuildConfig
+import zechs.zplex.data.remote.ZPlexApi
+import zechs.zplex.data.remote.interceptor.EndpointInterceptor
 import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.TokenAuthenticator
 import zechs.zplex.utils.Constants.OMDB_API_KEY
@@ -103,4 +107,35 @@ object NetworkModule {
             .build()
     }
 
+    @Provides
+    @Singleton
+    @Named("OkHttpClientWithEndpointInterceptor")
+    fun provideOkHttpClientWithEndpointInterceptor(
+        logging: Lazy<HttpLoggingInterceptor>,
+        endpointInterceptor: EndpointInterceptor
+    ): OkHttpClient {
+        return OkHttpClient.Builder()
+            .also {
+                if (BuildConfig.DEBUG) {
+                    // Logging only in debug builds
+                    it.addInterceptor(logging.get())
+                }
+                it.addInterceptor(endpointInterceptor)
+            }.build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideZPlexApi(
+        @Named("OkHttpClientWithEndpointInterceptor")
+        client: OkHttpClient,
+        moshi: Moshi
+    ): ZPlexApi {
+        return Retrofit.Builder()
+            .baseUrl("http://localhost")
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(ZPlexApi::class.java)
+    }
 }

@@ -148,4 +148,13 @@
     <string name="create_an_account">Create an account?</string>
     <string name="welcome_back">Welcome Back</string>
     <string name="sign_in_to_access_your_account">Sign in to access your account</string>
+    <string name="login_incorrect_credentials">Incorrect username or password. Please try again.</string>
+    <string name="login_not_authorized">You are not authorized to access this service.</string>
+    <string name="login_server_unavailable">Server is currently unavailable. Please try again later.</string>
+    <string name="login_resource_not_found">Requested resource not found.</string>
+    <string name="login_failed">Login failed. Please try again.</string>
+    <string name="login_no_connection">Unable to connect. Please check your internet connection.</string>
+    <string name="login_unexpected_error">An unexpected error occurred. Please try again.</string>
+    <string name="login_http_error">Unexpected response from server (HTTP %1$d).</string>
+    <string name="login_empty_details">The server returned an unexpected response. Please try again later.</string>
 </resources>
