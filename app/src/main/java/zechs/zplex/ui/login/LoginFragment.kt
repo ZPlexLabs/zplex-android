@@ -93,11 +93,19 @@ class LoginFragment : Fragment() {
                                 .show()
                         }
 
-                        is LoginEvent.LoginSuccess -> {
+                        LoginEvent.LoginSuccess -> {
                             Snackbar.make(
                                 binding.root, " Uh, i guess you are logged in huh!",
                                 Snackbar.LENGTH_LONG
                             ).show()
+                        }
+
+                        LoginEvent.LoginSuccessButNoCapability -> {
+                            MaterialAlertDialogBuilder(requireContext())
+                                .setTitle(R.string.dialog_title_account_incomplete)
+                                .setMessage(R.string.dialog_message_no_capability)
+                                .setPositiveButton(R.string.dialog_button_got_it, null)
+                                .show()
                         }
                     }
                 }

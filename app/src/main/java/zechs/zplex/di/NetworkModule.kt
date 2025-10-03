@@ -14,7 +14,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import zechs.zplex.BuildConfig
 import zechs.zplex.data.remote.ZPlexApi
+import zechs.zplex.data.remote.ZPlexTokenApi
 import zechs.zplex.data.remote.interceptor.EndpointInterceptor
+import zechs.zplex.data.remote.interceptor.TokenInterceptor
 import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.TokenAuthenticator
 import zechs.zplex.utils.Constants.OMDB_API_KEY
@@ -116,18 +118,37 @@ object NetworkModule {
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .also {
+                it.addInterceptor(endpointInterceptor)
                 if (BuildConfig.DEBUG) {
                     // Logging only in debug builds
                     it.addInterceptor(logging.get())
                 }
+            }.build()
+    }
+
+    @Provides
+    @Singleton
+    @Named("ZPlexApiHttpClient")
+    fun provideZPlexApiHttpClient(
+        logging: Lazy<HttpLoggingInterceptor>,
+        endpointInterceptor: EndpointInterceptor,
+        tokenInterceptor: TokenInterceptor
+    ): OkHttpClient {
+        return OkHttpClient.Builder()
+            .also {
                 it.addInterceptor(endpointInterceptor)
+                if (BuildConfig.DEBUG) {
+                    // Logging only in debug builds
+                    it.addInterceptor(logging.get())
+                }
+                it.addInterceptor(tokenInterceptor)
             }.build()
     }
 
     @Provides
     @Singleton
     fun provideZPlexApi(
-        @Named("OkHttpClientWithEndpointInterceptor")
+        @Named("ZPlexApiHttpClient")
         client: OkHttpClient,
         moshi: Moshi
     ): ZPlexApi {
@@ -137,5 +158,20 @@ object NetworkModule {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(ZPlexApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTokenRefreshApi(
+        @Named("OkHttpClientWithEndpointInterceptor")
+        client: OkHttpClient,
+        moshi: Moshi
+    ): ZPlexTokenApi {
+        return Retrofit.Builder()
+            .baseUrl("http://localhost")
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(ZPlexTokenApi::class.java)
     }
 }

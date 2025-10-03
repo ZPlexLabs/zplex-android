@@ -170,4 +170,14 @@
     <string name="error_network_details">Unable to connect to server. Please check your connection.</string>
     <string name="signup_success">Signup Successful</string>
     <string name="signup_success_message">Your account has been created. Please login.</string>
+    <string name="dialog_title_account_incomplete">Account Setup Incomplete</string>
+    <string name="dialog_message_no_capability">
+        Your account has been created successfully, but it doesn’t have the required access enabled yet.
+        This usually happens with new accounts.
+
+        Please reach out to your administrator to enable the necessary capabilities so you can start using the app.
+    </string>
+    <string name="dialog_button_got_it">Got it</string>
+    <string name="no_data_available_at_the_moment">No data available at the moment.</string>
+    <string name="response_body_was_null">Response body was null.</string>
 </resources>
