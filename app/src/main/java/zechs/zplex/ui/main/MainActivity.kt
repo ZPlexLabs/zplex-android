@@ -13,6 +13,7 @@ import android.view.animation.Interpolator
 import android.view.animation.TranslateAnimation
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -22,7 +23,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -30,6 +33,7 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.ThisApp
@@ -38,6 +42,7 @@ import zechs.zplex.service.CacheCleanupWorker
 import zechs.zplex.service.RemoteLibraryIndexingService
 import zechs.zplex.utils.Constants.CACHE_TTL_IN_DAYS
 import zechs.zplex.utils.MaterialMotionInterpolator
+import zechs.zplex.utils.ext.navigateSafe
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -49,6 +54,8 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var workManager: WorkManager
+
+    private val viewModel by viewModels<MainViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -117,6 +124,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         scheduleCacheCleanup()
+
+        redirectOnLogin()
     }
 
     private fun scheduleCacheCleanup() {
@@ -242,6 +251,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
+    private fun redirectOnLogin() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.hasLoggedIn
+                    .filter { it }
+                    .collect {
+                        Log.d(TAG, "User logged in, navigating to Landing Fragment")
+                        navController.navigateSafe(R.id.action_serverFragment_to_landingFragment)
+                    }
+            }
+        }
     }
 
     companion object {

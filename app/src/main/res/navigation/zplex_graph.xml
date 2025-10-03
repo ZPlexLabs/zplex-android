@@ -205,6 +205,12 @@
         <action
             android:id="@+id/action_serverFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_serverFragment_to_landingFragment"
+            app:destination="@id/landingFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/serverFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -217,7 +223,10 @@
             app:destination="@id/signupFragment" />
         <action
             android:id="@+id/action_loginFragment_to_landingFragment"
-            app:destination="@id/landingFragment" />
+            app:destination="@id/landingFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/loginFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
