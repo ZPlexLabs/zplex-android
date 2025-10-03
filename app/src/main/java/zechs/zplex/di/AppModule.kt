@@ -12,7 +12,6 @@ import zechs.zplex.data.local.WatchedMovieDao
 import zechs.zplex.data.local.WatchedShowDao
 import zechs.zplex.data.repository.WatchedRepository
 import zechs.zplex.service.IndexingStateFlow
-import zechs.zplex.utils.ApiManager
 import zechs.zplex.utils.SessionManager
 import javax.inject.Singleton
 
@@ -34,13 +33,6 @@ object AppModule {
         @ApplicationContext appContext: Context,
         gson: Gson
     ): SessionManager = SessionManager(appContext, gson)
-
-    @Singleton
-    @Provides
-    fun provideApiManager(
-        @ApplicationContext appContext: Context,
-    ): ApiManager = ApiManager(appContext)
-
 
     @Singleton
     @Provides

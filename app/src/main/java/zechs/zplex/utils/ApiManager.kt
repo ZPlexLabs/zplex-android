@@ -5,11 +5,14 @@ import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 
-class ApiManager @Inject constructor(val context: Context) {
+class ApiManager @Inject constructor(
+    @ApplicationContext context: Context,
+) {
 
     private val dataStore = context.dataStore
 
