@@ -13,7 +13,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.launch
 import zechs.zplex.R
@@ -94,10 +93,7 @@ class LoginFragment : Fragment() {
                         }
 
                         LoginEvent.LoginSuccess -> {
-                            Snackbar.make(
-                                binding.root, " Uh, i guess you are logged in huh!",
-                                Snackbar.LENGTH_LONG
-                            ).show()
+                            findNavController().navigateSafe(R.id.action_loginFragment_to_landingFragment)
                         }
 
                         LoginEvent.LoginSuccessButNoCapability -> {

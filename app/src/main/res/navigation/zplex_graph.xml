@@ -215,6 +215,9 @@
         <action
             android:id="@+id/action_loginFragment_to_signupFragment"
             app:destination="@id/signupFragment" />
+        <action
+            android:id="@+id/action_loginFragment_to_landingFragment"
+            app:destination="@id/landingFragment" />
     </fragment>
 
     <fragment
@@ -229,5 +232,11 @@
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/landingFragment"
+        android:name="zechs.zplex.ui.landing.LandingFragment"
+        android:label="LandingFragment"
+        tools:layout="@layout/fragment_landing" />
 
 </navigation>
