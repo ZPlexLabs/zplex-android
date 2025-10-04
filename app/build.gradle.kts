@@ -97,7 +97,7 @@ dependencies {
     val espressoVersion = "3.7.0"
     val glideVersion = "5.0.5"
     val gsonVersion = "2.13.2"
-    val hiltVersion = "2.57.1"
+    val hiltVersion = "2.57.2"
     val hiltExtVersion = "1.3.0"
     val junitVersion = "4.13.2"
     val kotlinCoreVersion = "1.17.0"
