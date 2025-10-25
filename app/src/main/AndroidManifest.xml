@@ -25,7 +25,7 @@
         android:windowSoftInputMode="adjustPan|adjustResize"
         tools:ignore="AllowBackup">
         <activity
-            android:name="zechs.zplex.ui.main.MainActivity"
+            android:name="zechs.zplex.ui.zplex.ZPlexActivity"
             android:configChanges="orientation"
             android:exported="true"
             android:windowSoftInputMode="adjustPan"

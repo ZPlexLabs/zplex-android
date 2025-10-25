@@ -7,18 +7,7 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
-    <style name="AppTheme" parent="Theme.Material3.DynamicColors.Dark.NoActionBar">
-        <item name="chipStyle">@style/Widget.App.Chip</item>
-        <item name="popupMenuBackground">@drawable/popup_menu_bg</item>
-        <item name="android:listPopupWindowStyle">@style/MyListPopupWindow</item>
-        <item name="materialCardViewStyle">@style/Widget.App.Card</item>
-    </style>
-
-    <style name="NewAppTheme" parent="Theme.Material3.DynamicColors.Dark.NoActionBar">
-        <item name="android:windowIsFloating">false</item>
-        <item name="android:windowFullscreen">false</item>
-        <item name="android:fitsSystemWindows">true</item>
-    </style>
+    <style name="AppTheme" parent="Theme.Material3.Dark.NoActionBar" />
 
     <style name="MenuTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">
         <item name="android:textColorSecondary">@color/textColor</item>

@@ -69,63 +69,27 @@ class MainActivity : AppCompatActivity() {
             R.id.mainNavHostFragment
         ) as NavHostFragment
         navController = navHostFragment.navController
-        binding.bottomNavigationView.setupWithNavController(navController)
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                R.id.serverFragment, R.id.loginFragment, R.id.signupFragment, R.id.landingFragment,
-                R.id.fragmentMedia, R.id.castsFragment,
-                R.id.episodesListFragment, R.id.fragmentList,
-                R.id.fragmentCollection, R.id.watchFragment,
-                R.id.bigImageFragment, R.id.signInFragment,
-                R.id.settingsFragment, R.id.seasonsBottomSheetFragment -> {
-                    hideSlideDown(binding.bottomNavigationView)
-                    ViewCompat.setOnApplyWindowInsetsListener(binding.zplexFrame) { view, insets ->
-                        val bars = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                                    or WindowInsetsCompat.Type.displayCutout()
-                        )
-                        view.updatePadding(
-                            left = bars.left,
-                            top = bars.top,
-                            right = bars.right,
-                            bottom = bars.bottom,
-                        )
-                        WindowInsetsCompat.CONSUMED
-                    }
-                }
-
-                else -> {
-                    showSlideUp(binding.bottomNavigationView)
-                    ViewCompat.setOnApplyWindowInsetsListener(binding.zplexFrame) { view, insets ->
-                        val bars = insets.getInsets(
-                            WindowInsetsCompat.Type.systemBars()
-                                    or WindowInsetsCompat.Type.displayCutout()
-                        )
-                        view.updatePadding(
-                            left = bars.left,
-                            top = bars.top,
-                            right = bars.right,
-                            bottom = 0,
-                        )
-                        WindowInsetsCompat.CONSUMED
-                    }
-                }
-            }
-        }
-        val app = application as ThisApp
-        if (!app.indexServiceExecuted) {
-            startService(Intent(this, RemoteLibraryIndexingService::class.java))
-            app.indexServiceExecuted = true
-        }
+//        ViewCompat.setOnApplyWindowInsetsListener(binding.zplexFrame) { view, insets ->
+//            val bars = insets.getInsets(
+//                WindowInsetsCompat.Type.systemBars()
+//                        or WindowInsetsCompat.Type.displayCutout()
+//            )
+//            view.updatePadding(
+//                left = bars.left,
+//                top = bars.top,
+//                right = bars.right,
+//                bottom = bars.bottom,
+//            )
+//            WindowInsetsCompat.CONSUMED
+//        }
+        redirectOnLogin()
 
         if (!hasNotificationPermission()) {
             requestNotificationPermission()
         }
 
         scheduleCacheCleanup()
-
-        redirectOnLogin()
     }
 
     private fun scheduleCacheCleanup() {
@@ -172,70 +136,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun slideAnimation(
-        view: View,
-        fromXDelta: Float, toXDelta: Float,
-        fromYDelta: Float, toYDelta: Float,
-        show: Boolean
-    ) = lifecycleScope.launch {
-        if (view.animation?.hasStarted() == true && view.animation?.hasEnded() == false) {
-            return@launch
-        }
-        if (show && view.isVisible) {
-            return@launch
-        }
-        if (!show && view.isGone) {
-            return@launch
-        }
-
-        view.setLayerType(View.LAYER_TYPE_HARDWARE, null)
-
-        val animationListener = object : AnimationListener {
-            override fun onAnimationStart(animation: Animation?) {}
-
-            override fun onAnimationEnd(animation: Animation?) {
-                view.setLayerType(View.LAYER_TYPE_NONE, null)
-                view.isGone = !show
-            }
-
-            override fun onAnimationRepeat(animation: Animation?) {}
-        }
-
-        val interpolator = if (show) {
-            MaterialMotionInterpolator.getEmphasizedDecelerateInterpolator()
-        } else {
-            MaterialMotionInterpolator.getEmphasizedAccelerateInterpolator()
-        }
-        createTranslateAnimation(
-            fromXDelta,
-            toXDelta,
-            fromYDelta,
-            toYDelta,
-            interpolator,
-            animationListener
-        ).also { view.startAnimation(it) }
-    }
-
-    private fun createTranslateAnimation(
-        fromXDelta: Float, toXDelta: Float,
-        fromYDelta: Float, toYDelta: Float,
-        interpolator: Interpolator,
-        animationListener: AnimationListener? = null
-    ): TranslateAnimation {
-        return TranslateAnimation(fromXDelta, toXDelta, fromYDelta, toYDelta).apply {
-            this.interpolator = interpolator
-            duration = 250L
-            animationListener?.let { setAnimationListener(it) }
-        }
-    }
-
-    private fun showSlideUp(view: View) {
-        slideAnimation(view, 0f, 0f, view.height.toFloat(), 0f, true)
-    }
-
-    private fun hideSlideDown(view: View) {
-        slideAnimation(view, 0f, 0f, 0f, view.height.toFloat(), false)
-    }
 
     private fun hasNotificationPermission(): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
