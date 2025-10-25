@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.core.view.isInvisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
@@ -60,6 +61,14 @@ class LoginFragment : Fragment() {
 
         binding.btnSignup.setOnClickListener {
             findNavController().navigateSafe(R.id.action_loginFragment_to_signupFragment)
+        }
+
+        binding.inputPassword.setOnEditorActionListener { textView, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                viewModel.onLoginClicked()
+                return@setOnEditorActionListener true
+            }
+            return@setOnEditorActionListener false
         }
 
         binding.btnLogin.setOnClickListener {

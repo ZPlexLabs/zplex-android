@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.core.view.isVisible
 import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
@@ -60,6 +61,13 @@ class SignupFragment : Fragment() {
         binding.inputUsername.doOnTextChanged { text, _, _, _ -> viewModel.onUsernameChanged(text.toString()) }
         binding.inputPassword.doOnTextChanged { text, _, _, _ -> viewModel.onPasswordChanged(text.toString()) }
 
+        binding.inputPassword.setOnEditorActionListener { textView, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
+                viewModel.onSignupClicked()
+                return@setOnEditorActionListener true
+            }
+            return@setOnEditorActionListener false
+        }
         binding.btnSignup.setOnClickListener {
             viewModel.onSignupClicked()
         }
