@@ -871,7 +871,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         val subtitle = when (metadata) {
             is ShowMetadata -> {
                 val epString = "S${metadata.seasonNumber} • E${metadata.episodeNumber}"
-                val epName = metadata.episodeName?.let { " — $it" } ?: ""
+                val epName = metadata.episodeName?.let { " - $it" } ?: ""
                 epString + epName
             }
 
