@@ -122,7 +122,9 @@ class MediaFragment : Fragment() {
         mediaViewModel.mediaResponse.observe(viewLifecycleOwner) { response ->
             handleMediaResponse(response)
         }
-        observeOfflineMovie(tmdbId)
+        if (mediaType == MediaType.movie) {
+            observeOfflineMovie(tmdbId)
+        }
     }
 
     private fun handleMediaResponse(
