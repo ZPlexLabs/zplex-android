@@ -150,6 +150,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         when (buttonEvent.action) {
             ButtonEvent.ACTION_UP -> {
                 player.cyclePause()
+                updateNotification()
             }
         }
     }
@@ -220,7 +221,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             progressBar.setOnSeekBarChangeListener(seekBarChangeListener)
 
             // init onClick listeners
-            btnPlayPause.setOnClickListener { player.cyclePause() }
+            btnPlayPause.setOnClickListener {
+                player.cyclePause()
+                updateNotification()
+            }
             btnPip.setOnClickListener { goIntoPiP() }
             exoFfwd.setOnClickListener { skipForward() }
             exoRew.setOnClickListener { rewindBackward() }
@@ -1199,6 +1203,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             return
         }
         player.cyclePause()
+        updateNotification()
         saveProgress(viewModel.head)
 
         activityIsForeground = false
