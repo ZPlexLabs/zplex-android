@@ -995,6 +995,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             saveProgress(viewModel.head)
             player.stop()
             Log.d(TAG, "Killing MPV Player as exited from PiP Mode")
+            releaseMediaSession()
             finish()
         }
     }
