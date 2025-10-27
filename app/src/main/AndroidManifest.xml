@@ -77,7 +77,13 @@
         </provider>
 
         <receiver android:name=".service.DownloadActionReceiver" />
-        <receiver android:name=".ui.player.NotificationButtonReceiver" />
+        <receiver
+            android:name=".ui.player.NotificationButtonReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

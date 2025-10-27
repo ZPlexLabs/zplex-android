@@ -113,6 +113,10 @@ dependencies {
     val roomVersion = "2.7.2"
     val testExtJunitVersion = "1.3.0"
     val workVersion = "2.10.3"
+    val mediaVersion = "1.7.1"
+
+    // Media Session
+    implementation("androidx.media:media:$mediaVersion")
 
     // --- AndroidX Core ---
     implementation("androidx.core:core-ktx:$kotlinCoreVersion")
