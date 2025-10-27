@@ -1,7 +1,11 @@
 package zechs.zplex.ui.player
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PictureInPictureParams
 import android.app.RemoteAction
+import android.content.ComponentName
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.drawable.Icon
@@ -16,6 +20,9 @@ import android.media.AudioManager.STREAM_MUSIC
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.util.Rational
 import android.view.View
@@ -27,6 +34,7 @@ import androidx.activity.viewModels
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
@@ -38,10 +46,13 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.media.session.MediaButtonReceiver
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.AutoTransition
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.google.android.material.snackbar.Snackbar
@@ -50,6 +61,7 @@ import com.samsung.android.sdk.penremote.ButtonEvent
 import com.samsung.android.sdk.penremote.SpenEventListener
 import com.samsung.android.sdk.penremote.SpenUnit
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import zechs.mpv.MPVLib
 import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_END_FILE
@@ -58,11 +70,13 @@ import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART
 import zechs.mpv.MPVView
 import zechs.mpv.utils.Utils
 import zechs.zplex.R
+import zechs.zplex.data.model.PosterSize
 import zechs.zplex.databinding.ActivityMpvBinding
 import zechs.zplex.databinding.PlayerControlViewBinding
 import zechs.zplex.databinding.SideSheetEpisodesBinding
 import zechs.zplex.ui.player.sidesheet.episodes.adapter.SideSheetEpisodesAdapter
 import zechs.zplex.utils.Constants.DRIVE_API
+import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.SpenRemoteHelper
 import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.util.Orientation
@@ -78,10 +92,21 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
     companion object {
         const val TAG = "MPVActivity"
 
+        // Notification channel constants
+        private const val PLAYER_CHANNEL_ID = "zplex_video_player"
+        private const val MEDIA_SESSION_ID = "zplex_session"
+        private const val PLAYER_NOTIFICATION_ID = 100002
+
         // fraction to which audio volume is ducked on loss of audio focus
         private const val AUDIO_FOCUS_DUCKING = 0.5f
         private const val SKIP_DURATION = 10 // in seconds
     }
+
+    // Media session & notification
+    private lateinit var mediaSession: MediaSessionCompat
+    private var notificationManager: NotificationManager? = null
+    private var currentNotification: Notification? = null
+    private var isSessionActive = false
 
     private lateinit var audioManager: AudioManager
     private var audioFocusRestore: () -> Unit = {}
@@ -254,6 +279,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         }
         playlistObserver()
         playMedia()
+        initMediaSession()
 
         if (isSamsungWithSPen()) {
             SpenRemoteHelper.initialize(
@@ -507,6 +533,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         } else {
             window.addFlags(FLAG_KEEP_SCREEN_ON)
         }
+        updateNotification()
     }
 
     private fun skipForward() {
@@ -734,6 +761,214 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         return Build.MANUFACTURER.equals("samsung", ignoreCase = true) && hasSPenFeature
     }
 
+    private fun initMediaSession() {
+        val mediaButtonReceiver = ComponentName(
+            applicationContext,
+            NotificationButtonReceiver::class.java
+        )
+
+        mediaSession = MediaSessionCompat(this, MEDIA_SESSION_ID, mediaButtonReceiver, null)
+            .apply {
+                setCallback(object : MediaSessionCompat.Callback() {
+                    override fun onPlay() {
+                        player.cyclePause()
+                        updatePlaybackState(PlaybackStateCompat.STATE_PLAYING)
+                        updateNotification()
+                    }
+
+                    override fun onPause() {
+                        player.cyclePause()
+                        updatePlaybackState(PlaybackStateCompat.STATE_PAUSED)
+                        updateNotification()
+                    }
+
+                    override fun onSeekTo(pos: Long) {
+                        player.timePos = (pos / 1000).toInt()
+                    }
+
+                    override fun onSkipToNext() {
+                        saveProgress(viewModel.head)
+                        player.stop()
+                        viewModel.next()
+                        updateNotification()
+                    }
+
+                    override fun onSkipToPrevious() {
+                        saveProgress(viewModel.head)
+                        player.stop()
+                        viewModel.previous()
+                        updateNotification()
+                    }
+                })
+            }
+
+        notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val channel = NotificationChannel(
+            PLAYER_CHANNEL_ID,
+            "Playback",
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = "Playback controls"
+        }
+        notificationManager?.createNotificationChannel(channel)
+
+        if (!isSessionActive) {
+            mediaSession.isActive = true
+            isSessionActive = true
+        }
+    }
+
+    private fun releaseMediaSession() {
+        if (isSessionActive) {
+            mediaSession.isActive = false
+            isSessionActive = false
+        }
+        try {
+            mediaSession.release()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to release Media Session", e)
+        }
+        notificationManager?.cancel(PLAYER_NOTIFICATION_ID)
+    }
+
+    private fun updatePlaybackState(
+        state: Int,
+        customActions: List<PlaybackStateCompat.CustomAction>? = null
+    ) {
+        if (!::mediaSession.isInitialized) return
+
+        val positionMs = (player.timePos?.times(1000))?.toLong() ?: 0L
+        val playbackSpeed = if (player.paused == true)
+            0f else (MPVLib.getPropertyDouble("speed")?.toFloat() ?: 1f)
+
+        val stateBuilder = PlaybackStateCompat.Builder()
+            .setActions(
+                PlaybackStateCompat.ACTION_PLAY or
+                        PlaybackStateCompat.ACTION_PAUSE or
+                        PlaybackStateCompat.ACTION_PLAY_PAUSE or
+                        PlaybackStateCompat.ACTION_SEEK_TO or
+                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+            )
+            .setState(state, positionMs, playbackSpeed)
+
+        customActions?.forEach { stateBuilder.addCustomAction(it) }
+
+        mediaSession.setPlaybackState(stateBuilder.build())
+    }
+
+    private fun updateMetadata(metadata: MediaMetadataData) {
+        if (!::mediaSession.isInitialized) return
+
+        val metadataBuilder = MediaMetadataCompat.Builder()
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, metadata.title)
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, metadata.title)
+
+        val subtitle = when (metadata) {
+            is ShowMetadata -> {
+                val epString = "S${metadata.seasonNumber} • E${metadata.episodeNumber}"
+                val epName = metadata.episodeName?.let { " — $it" } ?: ""
+                epString + epName
+            }
+
+            is MovieMetadata -> metadata.studio ?: ""
+        }
+
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, subtitle)
+        metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, subtitle)
+
+        val durationMs = metadata.durationSecs?.times(1000L) ?: ((player.duration ?: 0) * 1000L)
+        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, durationMs)
+
+        metadata.posterPath?.let { path ->
+            val posterUrl = "$TMDB_IMAGE_PREFIX/${PosterSize.w342}${path}"
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    val bitmap = Glide.with(this@MPVActivity)
+                        .asBitmap()
+                        .load(posterUrl)
+                        .diskCacheStrategy(DiskCacheStrategy.ALL)
+                        .submit()
+                        .get()
+                    metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to load poster: ${e.message}")
+                } finally {
+                    mediaSession.setMetadata(metadataBuilder.build())
+                }
+            }
+        } ?: mediaSession.setMetadata(metadataBuilder.build())
+    }
+
+    private fun buildNotification(): Notification {
+        val controller = mediaSession.controller
+        val mediaMetadata = controller.metadata
+
+        val title = mediaMetadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+            ?: controller.queueTitle?.toString() ?: "Preparing playback..."
+        val subtitle =
+            mediaMetadata?.getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE) ?: ""
+
+        val playAction = if (player.paused == true) {
+            NotificationCompat.Action.Builder(
+                R.drawable.ic_play_24,
+                "Play",
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                    this,
+                    PlaybackStateCompat.ACTION_PLAY
+                )
+            ).build()
+        } else {
+            NotificationCompat.Action.Builder(
+                R.drawable.ic_pause_24,
+                "Pause",
+                MediaButtonReceiver.buildMediaButtonPendingIntent(
+                    this,
+                    PlaybackStateCompat.ACTION_PAUSE
+                )
+            ).build()
+        }
+
+        val prevAction = NotificationCompat.Action.Builder(
+            R.drawable.ic_previous_24,
+            "Previous",
+            MediaButtonReceiver.buildMediaButtonPendingIntent(
+                this,
+                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+            )
+        ).build()
+        val nextAction = NotificationCompat.Action.Builder(
+            R.drawable.ic_next_24,
+            "Next",
+            MediaButtonReceiver.buildMediaButtonPendingIntent(
+                this,
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+            )
+        ).build()
+
+        val style = androidx.media.app.NotificationCompat.MediaStyle()
+            .setMediaSession(mediaSession.sessionToken)
+            .setShowActionsInCompactView(0, 1, 2)
+
+        val builder = NotificationCompat.Builder(this, PLAYER_CHANNEL_ID)
+            .setContentTitle(title)
+            .setContentText(subtitle)
+            .setSmallIcon(R.drawable.ic_tv_play)
+            .setStyle(style)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .addAction(prevAction)
+            .addAction(playAction)
+            .addAction(nextAction)
+            .setOnlyAlertOnce(true)
+
+        return builder.build()
+    }
+
+    private fun updateNotification() {
+        currentNotification = buildNotification()
+        notificationManager?.notify(PLAYER_NOTIFICATION_ID, currentNotification)
+    }
+
     private fun onPiPModeChangedImpl(state: Boolean) {
         Log.v(TAG, "onPiPModeChanged($state)")
         if (state) {
@@ -784,10 +1019,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         val params = with(PictureInPictureParams.Builder()) {
             val aspect = player.getVideoAspect() ?: 0.0
             setAspectRatio(Rational(aspect.times(10000).toInt(), 10000))
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                setAutoEnterEnabled(true)
-                setSeamlessResizeEnabled(true)
-            }
+            setAutoEnterEnabled(true)
+            setSeamlessResizeEnabled(true)
             setActions(actions)
         }
         try {
@@ -820,10 +1053,27 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         if (!activityIsForeground) return
         runOnUiThread {
             when (property) {
-                "time-pos" -> updatePlaybackPos(value.toInt())
-                "duration" -> updatePlaybackDuration(value.toInt())
+                "time-pos" -> {
+                    updatePlaybackPos(value.toInt())
+                    val state =
+                        if (player.paused == true) PlaybackStateCompat.STATE_PAUSED
+                        else PlaybackStateCompat.STATE_PLAYING
+                    updatePlaybackState(state)
+                }
+
+                "duration" -> {
+                    updatePlaybackDuration(value.toInt())
+                    mediaSession.controller.metadata?.let { currentMetadata ->
+                        val updatedMetadata = MediaMetadataCompat.Builder(currentMetadata)
+                            .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, value * 1000L)
+                            .build()
+                        mediaSession.setMetadata(updatedMetadata)
+                    }
+                }
+
                 "demuxer-cache-time" -> updateBufferedPos(value.toInt())
             }
+            updateNotification()
         }
     }
 
@@ -879,6 +1129,44 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                 }
                 if (eventId == MPV_EVENT_FILE_LOADED) {
                     Log.d(TAG, "File has starting playing...")
+
+                    viewModel.head?.let { head ->
+                        val metadata: MediaMetadataData? = when (head) {
+                            is Movie -> {
+                                MovieMetadata(
+                                    title = head.title,
+                                    posterPath = head.posterPath,
+                                    durationSecs = player.duration ?: 0,
+                                    studio = "No studio"
+                                )
+                            }
+
+                            is Show -> {
+                                ShowMetadata(
+                                    title = head.title,
+                                    posterPath = head.posterPath,
+                                    durationSecs = player.duration ?: 0,
+                                    seasonNumber = head.seasonNumber,
+                                    episodeNumber = head.episodeNumber,
+                                    episodeName = head.episodeTitle
+                                )
+                            }
+
+                            else -> null
+                        }
+
+                        metadata?.let {
+                            updateMetadata(it)
+                            updatePlaybackState(
+                                if (player.paused == true)
+                                    PlaybackStateCompat.STATE_PAUSED
+                                else
+                                    PlaybackStateCompat.STATE_PLAYING
+                            )
+                            updateNotification()
+                        }
+                    }
+
                 }
                 if (eventId == MPV_EVENT_END_FILE) {
                     binding.controller.apply {
@@ -960,6 +1248,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
         player.removeObserver(this)
         player.destroy()
+        releaseMediaSession()
 
         super.onDestroy()
     }
