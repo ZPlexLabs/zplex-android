@@ -59,7 +59,8 @@ sealed class MediaDataModel {
         val movie: Movie,
         val watchedMovie: WatchedMovie?,
         val year: Int?,
-        val imdbId: String?
+        val imdbId: String?,
+        val studio: String?
     ) : MediaDataModel()
 
     @Keep

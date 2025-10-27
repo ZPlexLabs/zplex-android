@@ -1137,7 +1137,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                                     title = head.title,
                                     posterPath = head.posterPath,
                                     durationSecs = player.duration ?: 0,
-                                    studio = "No studio"
+                                    studio = head.studio
                                 )
                             }
 
