@@ -226,8 +226,14 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                 updateNotification()
             }
             btnPip.setOnClickListener { goIntoPiP() }
-            exoFfwd.setOnClickListener { skipForward() }
-            exoRew.setOnClickListener { rewindBackward() }
+            exoFfwd.setOnClickListener {
+                skipForward()
+                updateNotification()
+            }
+            exoRew.setOnClickListener {
+                rewindBackward()
+                updateNotification()
+            }
             btnAudio.setOnClickListener { pickAudio() }
             btnSubtitle.setOnClickListener { pickSub() }
             btnChapter.setOnClickListener { pickChapter() }
@@ -537,6 +543,11 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         } else {
             window.addFlags(FLAG_KEEP_SCREEN_ON)
         }
+        when (state) {
+            PlaybackState.PLAYING -> updatePlaybackState(PlaybackStateCompat.STATE_PLAYING)
+            PlaybackState.PAUSED -> updatePlaybackState(PlaybackStateCompat.STATE_PAUSED)
+            PlaybackState.BUFFERING -> updatePlaybackState(PlaybackStateCompat.STATE_BUFFERING)
+        }
         updateNotification()
     }
 
@@ -776,14 +787,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                 setCallback(object : MediaSessionCompat.Callback() {
                     override fun onPlay() {
                         player.cyclePause()
-                        updatePlaybackState(PlaybackStateCompat.STATE_PLAYING)
-                        updateNotification()
                     }
 
                     override fun onPause() {
                         player.cyclePause()
-                        updatePlaybackState(PlaybackStateCompat.STATE_PAUSED)
-                        updateNotification()
                     }
 
                     override fun onSeekTo(pos: Long) {
@@ -794,14 +801,12 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                         saveProgress(viewModel.head)
                         player.stop()
                         viewModel.next()
-                        updateNotification()
                     }
 
                     override fun onSkipToPrevious() {
                         saveProgress(viewModel.head)
                         player.stop()
                         viewModel.previous()
-                        updateNotification()
                     }
                 })
             }
@@ -1058,14 +1063,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
         if (!activityIsForeground) return
         runOnUiThread {
             when (property) {
-                "time-pos" -> {
-                    updatePlaybackPos(value.toInt())
-                    val state =
-                        if (player.paused == true) PlaybackStateCompat.STATE_PAUSED
-                        else PlaybackStateCompat.STATE_PLAYING
-                    updatePlaybackState(state)
-                }
-
+                "time-pos" -> updatePlaybackPos(value.toInt())
                 "duration" -> {
                     updatePlaybackDuration(value.toInt())
                     mediaSession.controller.metadata?.let { currentMetadata ->
@@ -1078,7 +1076,6 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
                 "demuxer-cache-time" -> updateBufferedPos(value.toInt())
             }
-            updateNotification()
         }
     }
 
