@@ -460,7 +460,7 @@ class MediaViewModel @Inject constructor(
                     watchedMovie = watched,
                     imdbId = result.imdb_id,
                     year = year,
-                    studio = result.production_companies?.first()?.name
+                    studio = result.production_companies?.firstOrNull()?.name
                 )
             )
 
