@@ -106,18 +106,18 @@ dependencies {
     val lifecycleVersion = "2.9.4"
     val materialVersion = "1.13.0"
     val moshiVersion = "1.15.2"
-    val navigationVersion = "2.9.5"
-    val okhttpVersion = "5.1.0"
+    val navigationVersion = "2.9.6"
+    val okhttpVersion = "5.3.0"
     val paletteVersion = "1.0.0"
     val renderscriptToolkitVersion = "b6363490c3"
     val retrofitVersion = "3.0.0"
-    val roomVersion = "2.8.1"
+    val roomVersion = "2.8.3"
     val testExtJunitVersion = "1.3.0"
-    val workVersion = "2.10.5"
+    val workVersion = "2.11.0"
     val mediaVersion = "1.7.1"
 
     // Media Session
-    implementation("androidx.media:media:${mediaVersion}")
+    implementation("androidx.media:media:$mediaVersion")
 
     // --- AndroidX Core ---
     implementation("androidx.core:core-ktx:$kotlinCoreVersion")
@@ -155,7 +155,7 @@ dependencies {
     // --- Image Loading ---
     implementation("com.github.bumptech.glide:glide:$glideVersion")
     implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion")
-    kapt("com.github.bumptech.glide:compiler:4.16.0")
+    ksp("com.github.bumptech.glide:compiler:$glideVersion")
     implementation("io.coil-kt:coil:$coilVersion")
 
     // --- Persistence ---
