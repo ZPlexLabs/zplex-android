@@ -8,6 +8,8 @@ import android.app.RemoteAction
 import android.content.ComponentName
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Icon
 import android.media.AudioManager
 import android.media.AudioManager.AUDIOFOCUS_GAIN
@@ -51,8 +53,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.AutoTransition
 import androidx.transition.Fade
 import androidx.transition.TransitionManager
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
+import coil.Coil
+import coil.request.CachePolicy
+import coil.request.ImageRequest
+import coil.request.SuccessResult
+import coil.size.Size
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.sidesheet.SideSheetDialog
 import com.google.android.material.snackbar.Snackbar
@@ -63,6 +68,7 @@ import com.samsung.android.sdk.penremote.SpenUnit
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import zechs.mpv.MPVLib
 import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_END_FILE
 import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_FILE_LOADED
@@ -893,13 +899,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
             val posterUrl = "$TMDB_IMAGE_PREFIX/${PosterSize.w342}${path}"
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
-                    val bitmap = Glide.with(this@MPVActivity)
-                        .asBitmap()
-                        .load(posterUrl)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .submit()
-                        .get()
-                    metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, bitmap)
+                    val bitmap = fetchBitmapWithCoil(this@MPVActivity, posterUrl)
+                    bitmap?.let {
+                        metadataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ART, it)
+                    }
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to load poster: ${e.message}")
                 } finally {
@@ -907,6 +910,26 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
                 }
             }
         } ?: mediaSession.setMetadata(metadataBuilder.build())
+    }
+
+    suspend fun fetchBitmapWithCoil(context: Context, url: String): Bitmap? {
+        val request = ImageRequest.Builder(context)
+            .data(url)
+            .diskCachePolicy(CachePolicy.ENABLED)
+            .memoryCachePolicy(CachePolicy.ENABLED)
+            .allowHardware(false)
+            .size(Size.ORIGINAL)
+            .build()
+
+        return withContext(Dispatchers.IO) {
+            val result = Coil.imageLoader(context).execute(request)
+            if (result is SuccessResult) {
+                val drawable = result.drawable
+                (drawable as? BitmapDrawable)?.bitmap
+            } else {
+                null
+            }
+        }
     }
 
     private fun buildNotification(): Notification {

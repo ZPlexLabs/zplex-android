@@ -5,11 +5,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
+import coil.load
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.databinding.ItemWatchedBinding
@@ -70,45 +66,35 @@ class WatchedViewHolder(
                     tvName.text = name
                     watchedProgress.setProgressCompat(show.watchProgress(), true)
 
-                    Glide.with(ivPoster)
-                        .load(mediaPosterUrl)
-                        .listener(object : RequestListener<Drawable> {
-                            override fun onLoadFailed(
-                                e: GlideException?,
-                                model: Any?,
-                                target: Target<Drawable>,
-                                isFirstResource: Boolean
-                            ): Boolean {
-                                return false
-                            }
+                    ivPoster.load(mediaPosterUrl) {
+                        placeholder(R.drawable.no_poster)
 
-                            override fun onResourceReady(
-                                resource: Drawable,
-                                model: Any,
-                                target: Target<Drawable>,
-                                dataSource: DataSource,
-                                isFirstResource: Boolean
-                            ): Boolean {
+                        listener(
+                            onError = { request, throwable ->
+                            },
+                            onSuccess = { request, result ->
+                                // same as onResourceReady
                                 if (!hasLoadedResource && isPoster) {
                                     hasLoadedResource = true
-                                    calcDominantColor(resource, onFinish = { c ->
+
+                                    val drawable = result.drawable
+
+                                    calcDominantColor(drawable) { c ->
                                         c?.let {
                                             val color = if (isDark(c)) lightUpColor(c) else c
                                             watchedProgress.setIndicatorColor(color)
                                         }
-                                    })
-                                    calcMutedColor(resource, onFinish = { c ->
+                                    }
+
+                                    calcMutedColor(drawable) { c ->
                                         c?.let {
                                             watchedProgress.trackColor = darkenColor(c)
                                         }
-                                    })
+                                    }
                                 }
-                                return false
                             }
-
-                        })
-                        .placeholder(R.drawable.no_poster)
-                        .into(ivPoster)
+                        )
+                    }
                 }
             }
 
@@ -125,44 +111,33 @@ class WatchedViewHolder(
                 itemBinding.apply {
                     tvName.text = movie.name
                     watchedProgress.setProgressCompat(movie.watchProgress(), true)
-                    Glide.with(ivPoster)
-                        .load(mediaPosterUrl)
-                        .listener(object : RequestListener<Drawable> {
-                            override fun onLoadFailed(
-                                e: GlideException?,
-                                model: Any?,
-                                target: Target<Drawable>,
-                                isFirstResource: Boolean
-                            ): Boolean {
-                                return false
-                            }
-
-                            override fun onResourceReady(
-                                resource: Drawable,
-                                model: Any,
-                                target: Target<Drawable>,
-                                dataSource: DataSource,
-                                isFirstResource: Boolean
-                            ): Boolean {
+                    ivPoster.load(mediaPosterUrl) {
+                        placeholder(R.drawable.no_poster)
+                        listener(
+                            onError = { request, throwable ->
+                            },
+                            onSuccess = { request, result ->
                                 if (!hasLoadedResource && isPoster) {
                                     hasLoadedResource = true
-                                    calcDominantColor(resource, onFinish = { c ->
+
+                                    val drawable = result.drawable
+
+                                    calcDominantColor(drawable) { c ->
                                         c?.let {
                                             val color = if (isDark(c)) lightUpColor(c) else c
                                             watchedProgress.setIndicatorColor(color)
                                         }
-                                    })
-                                    calcMutedColor(resource, onFinish = { c ->
+                                    }
+
+                                    calcMutedColor(drawable) { c ->
                                         c?.let {
                                             watchedProgress.trackColor = darkenColor(c)
                                         }
-                                    })
+                                    }
                                 }
-                                return false
                             }
-                        })
-                        .placeholder(R.drawable.no_poster)
-                        .into(ivPoster)
+                        )
+                    }
                 }
             }
         }
