@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
     id("androidx.navigation.safeargs.kotlin")
+    kotlin("kapt")
     id("com.google.devtools.ksp")
 }
 
@@ -153,6 +154,8 @@ dependencies {
 
     // --- Image Loading ---
     implementation("com.github.bumptech.glide:glide:$glideVersion")
+    implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
     implementation("io.coil-kt:coil:$coilVersion")
 
     // --- Persistence ---
