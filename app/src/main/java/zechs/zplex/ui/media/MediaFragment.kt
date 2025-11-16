@@ -122,7 +122,9 @@ class MediaFragment : Fragment() {
         mediaViewModel.mediaResponse.observe(viewLifecycleOwner) { response ->
             handleMediaResponse(response)
         }
-        observeOfflineMovie(tmdbId)
+        if (mediaType == MediaType.movie) {
+            observeOfflineMovie(tmdbId)
+        }
     }
 
     private fun handleMediaResponse(
@@ -356,9 +358,9 @@ class MediaFragment : Fragment() {
                     }
             }
 
-            override fun movieWatchNow(movie: Movie, year: Int?) {
+            override fun movieWatchNow(movie: Movie, year: Int?, studio :String?) {
                 if (mediaViewModel.hasLoggedIn) {
-                    mediaViewModel.playMovie(movie, year)
+                    mediaViewModel.playMovie(movie, year, studio)
                 } else {
                     val snackBar = Snackbar.make(
                         binding.root,

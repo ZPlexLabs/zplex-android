@@ -199,7 +199,7 @@ sealed class MediaViewHolder(
                 btnWatchNow.apply {
                     icon = getDrawable(R.drawable.ic_play_circle_24)
                     setOnClickListener {
-                        listener.movieWatchNow(item.movie, item.year)
+                        listener.movieWatchNow(item.movie, item.year, item.studio)
                     }
                     setOnLongClickListener {
                         listener.movieLongClickWatchNow(item.movie, item.year)

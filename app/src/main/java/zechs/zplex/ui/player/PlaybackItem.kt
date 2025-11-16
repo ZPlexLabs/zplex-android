@@ -21,6 +21,7 @@ data class Movie(
     override val offline: Boolean,
     override var next: PlaybackItem? = null,
     override var prev: PlaybackItem? = null,
+    val studio: String? = null
 ) : PlaybackItem
 
 
@@ -46,6 +47,7 @@ data class GsonPlaybackItem(
     val posterPath: String?,
     val next: Int?,
     val prev: Int?,
+    val studio: String?,
     val episode: Episode?,
     val seasonNumber: Int?,
     val episodeNumber: Int?,
@@ -67,7 +69,7 @@ data class GsonPlaybackItem(
                 episodeTitle
             )
         } else {
-            Movie(tmdbId, title, posterPath, fileId, offline, null, null)
+            Movie(tmdbId, title, posterPath, fileId, offline, null, null, studio)
         }
     }
 }

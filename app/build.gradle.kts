@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
     id("androidx.navigation.safeargs.kotlin")
+    kotlin("kapt")
     id("com.google.devtools.ksp")
 }
 
@@ -113,6 +114,10 @@ dependencies {
     val roomVersion = "2.8.1"
     val testExtJunitVersion = "1.3.0"
     val workVersion = "2.10.5"
+    val mediaVersion = "1.7.1"
+
+    // Media Session
+    implementation("androidx.media:media:${mediaVersion}")
 
     // --- AndroidX Core ---
     implementation("androidx.core:core-ktx:$kotlinCoreVersion")
@@ -136,6 +141,7 @@ dependencies {
     implementation(platform("com.squareup.okhttp3:okhttp-bom:$okhttpVersion"))
     implementation("com.squareup.okhttp3:okhttp")
     implementation("com.squareup.okhttp3:logging-interceptor")
+    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps")
     implementation("com.squareup.retrofit2:retrofit:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-moshi:$retrofitVersion")
     implementation("com.squareup.retrofit2:converter-scalars:$retrofitVersion")
@@ -148,6 +154,8 @@ dependencies {
 
     // --- Image Loading ---
     implementation("com.github.bumptech.glide:glide:$glideVersion")
+    implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
     implementation("io.coil-kt:coil:$coilVersion")
 
     // --- Persistence ---

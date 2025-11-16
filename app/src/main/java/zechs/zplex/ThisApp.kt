@@ -6,14 +6,22 @@ import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import dagger.hilt.android.HiltAndroidApp
+import okhttp3.OkHttpClient
 import zechs.zplex.utils.CrashHandler
+import javax.inject.Inject
+import javax.inject.Named
 
 @HiltAndroidApp
 class ThisApp : Application(), ImageLoaderFactory {
     var indexServiceExecuted = false
 
+    @Inject
+    @Named("OkHttpClient")
+    lateinit var okHttpClient: OkHttpClient
+
     override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)
+            .okHttpClient(okHttpClient)
             .memoryCache {
                 MemoryCache.Builder(this)
                     .maxSizePercent(0.25)

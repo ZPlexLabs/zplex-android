@@ -7,6 +7,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Dns
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -74,9 +75,11 @@ object NetworkModule {
     @Named("OkHttpClient")
     fun provideOkHttpClient(
         logging: Lazy<HttpLoggingInterceptor>,
+        dns: Dns
     ): OkHttpClient {
         return OkHttpClient.Builder()
             .also {
+                it.dns(dns)
                 if (BuildConfig.DEBUG) {
                     // Logging only in debug builds
                     it.addInterceptor(logging.get())

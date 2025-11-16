@@ -459,7 +459,8 @@ class MediaViewModel @Inject constructor(
                     ),
                     watchedMovie = watched,
                     imdbId = result.imdb_id,
-                    year = year
+                    year = year,
+                    studio = result.production_companies?.firstOrNull()?.name
                 )
             )
 
@@ -547,15 +548,17 @@ class MediaViewModel @Inject constructor(
     val movieFile: LiveData<Event<Resource<zechs.zplex.ui.player.Movie>>>
         get() = _movieFile
 
-    fun playMovie(movie: Movie, year: Int?) = viewModelScope.launch {
+    fun playMovie(movie: Movie, year: Int?, studio: String?) = viewModelScope.launch {
         if (movie.fileId == null) {
             _movieFile.postValue(Event(Resource.Error("Movie not found")))
             return@launch
         } else {
             val title = "${movie.title}${if (year != null) " (${year})" else ""}"
             val isOffline = movie.fileId.startsWith(context.filesDir.path)
-            val playerMovie =
-                zechs.zplex.ui.player.Movie(tmdbId, title, showPoster, movie.fileId, isOffline)
+            val playerMovie = zechs.zplex.ui.player.Movie(
+                tmdbId, title, showPoster, movie.fileId, isOffline,
+                studio = studio
+            )
             _movieFile.postValue(Event(Resource.Success(playerMovie)))
         }
     }

@@ -185,11 +185,13 @@ class PlayerViewModel @Inject constructor(
     }
 
     fun next() {
+        if (head?.next == null) return
         head = head?.next
         updateWithToken()
     }
 
     fun previous() {
+        if (head?.prev == null) return
         head = head?.prev
         updateWithToken()
     }

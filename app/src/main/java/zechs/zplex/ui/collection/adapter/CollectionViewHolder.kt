@@ -3,7 +3,7 @@ package zechs.zplex.ui.collection.adapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
-import com.bumptech.glide.Glide
+import coil.load
 import zechs.zplex.R
 import zechs.zplex.data.model.BackdropSize
 import zechs.zplex.data.model.PosterSize
@@ -31,10 +31,10 @@ sealed class CollectionViewHolder(
 
             itemBinding.apply {
                 tvName.text = item.title
-                Glide.with(ivBackdrop)
-                    .load(backdropUrl)
-                    .placeholder(R.drawable.no_thumb)
-                    .into(ivBackdrop)
+                ivBackdrop.load(backdropUrl) {
+                    placeholder(R.drawable.no_thumb)
+                    error(R.drawable.no_thumb)
+                }
             }
         }
     }
