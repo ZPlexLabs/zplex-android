@@ -46,10 +46,6 @@ class HomeViewModel @Inject constructor(
     val homeMedia: LiveData<Resource<List<HomeDataModel>>>
         get() = _homeMedia
 
-    init {
-        getHomeMedia()
-    }
-
     val movies = watchedRepository.getAllWatchedMovies()
     val shows = watchedRepository.getAllWatchedShows()
 

@@ -1,19 +1,16 @@
 package zechs.zplex.ui.home
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.data.model.entities.WatchedShow
 import zechs.zplex.data.model.tmdb.entities.Media
@@ -24,7 +21,6 @@ import zechs.zplex.ui.home.adapter.HomeDataModel
 import zechs.zplex.ui.home.adapter.watched.WatchedDataModel
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
 import zechs.zplex.utils.ext.navigateSafe
-import zechs.zplex.utils.state.Resource
 
 
 class HomeFragment : Fragment() {
@@ -59,42 +55,29 @@ class HomeFragment : Fragment() {
             isTitleCentered = false
             setTitleTextAppearance(context, R.style.homeTitleTextAppearance)
             title = resources.getString(R.string.app_name)
-            inflateMenu(R.menu.main_menu)
-            setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.action_settings -> {
-                        findNavController().navigateSafe(R.id.action_homeFragment_to_settingsFragment)
-                        true
-                    }
-
-                    else -> false
-                }
-            }
+//            inflateMenu(R.menu.main_menu)
+//            setOnMenuItemClickListener { item ->
+//                when (item.itemId) {
+//                    R.id.action_settings -> {
+//                        findNavController().navigateSafe(R.id.action_homeFragment_to_settingsFragment)
+//                        true
+//                    }
+//
+//                    else -> false
+//                }
+//            }
         }
 
         setupRecyclerView()
-        setupTrendingObserver()
-    }
-
-    private fun setupTrendingObserver() {
-        homeViewModel.homeMedia.observe(viewLifecycleOwner) { response ->
-            when (response) {
-                is Resource.Success -> {
-                    Log.d(TAG, "Success")
-                    isLoading(false)
-                    homeMediaSuccess(response.data!!)
+        homeViewModel.watchedMedia.observe(viewLifecycleOwner) { watchedList ->
+            watchedList?.let {
+                val sortedList = it.sortedByDescending { watchedData ->
+                    when (watchedData) {
+                        is WatchedDataModel.Show -> watchedData.show.createdAt
+                        is WatchedDataModel.Movie -> watchedData.movie.createdAt
+                    }
                 }
-
-                is Resource.Error -> {
-                    isLoading(false)
-                    Log.d(TAG, "Error: ${response.message}")
-                    homeMediaError(response.message!!)
-                }
-
-                is Resource.Loading -> {
-                    isLoading(true)
-                    Log.d(TAG, "isLoading")
-                }
+                setupWatchedList(sortedList)
             }
         }
     }
@@ -134,51 +117,13 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun homeMediaSuccess(listResponse: List<HomeDataModel>) {
-        homeDataAdapter.submitList(listResponse)
-
-        homeViewModel.watchedMedia.observe(viewLifecycleOwner) { watchedList ->
-            watchedList?.let {
-                val sortedList = it.sortedByDescending { watchedData ->
-                    when (watchedData) {
-                        is WatchedDataModel.Show -> watchedData.show.createdAt
-                        is WatchedDataModel.Movie -> watchedData.movie.createdAt
-                    }
-                }
-                setupWatchedList(sortedList)
-            }
+    private fun setupWatchedList(watchedList: List<WatchedDataModel>) {
+        val currentList = mutableListOf<HomeDataModel>()
+        if (watchedList.isNotEmpty()) {
+            currentList.add(HomeDataModel.Header(getString(R.string.continue_watching)))
+            currentList.add(HomeDataModel.Watched(watchedList))
         }
-    }
-
-    private fun setupWatchedList(
-        watchedList: List<WatchedDataModel>
-    ) = viewLifecycleOwner.lifecycleScope.launch {
-        val currentList = homeDataAdapter.currentList.toMutableList()
-        Log.d(TAG, "WatchedDataModel=$watchedList")
-        Log.d(TAG, "currentListSize=${homeDataAdapter.itemCount}")
-        Log.d(TAG, "currentList.size=${currentList.size}")
-        currentList.forEachIndexed { i, a ->
-            Log.d(TAG, "currentList[$i]=$a")
-        }
-        when (homeDataAdapter.itemCount) {
-            5 -> {
-                if (watchedList.isNotEmpty()) {
-                    currentList.add(1, HomeDataModel.Header(getString(R.string.continue_watching)))
-                    currentList.add(2, HomeDataModel.Watched(watchedList))
-                }
-            }
-
-            7 -> {
-                currentList.removeAt(1)
-                currentList.removeAt(1)
-                if (watchedList.isNotEmpty()) {
-                    currentList.add(1, HomeDataModel.Header(getString(R.string.continue_watching)))
-                    currentList.add(2, HomeDataModel.Watched(watchedList))
-                }
-            }
-
-            else -> {}
-        }
+        currentList.add(HomeDataModel.Header("\uD83D\uDEA7 This screen is under construction \uD83D\uDEA7"))
         homeDataAdapter.submitList(currentList)
     }
 
