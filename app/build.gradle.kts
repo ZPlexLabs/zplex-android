@@ -1,18 +1,17 @@
+import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
     id("com.google.dagger.hilt.android")
     id("androidx.navigation.safeargs.kotlin")
-    kotlin("kapt")
     id("com.google.devtools.ksp")
 }
 
 val tmdbApiKey: String = gradleLocalProperties(rootDir, providers).getProperty("TMDB_API_KEY")
 val omdbApiKey: String = gradleLocalProperties(rootDir, providers).getProperty("OMDB_API_KEY")
 
-android {
+extensions.configure<ApplicationExtension> {
     namespace = "zechs.zplex"
     compileSdk = 36
 
@@ -49,21 +48,10 @@ android {
         }
     }
 
-    java {
-        toolchain {
-            languageVersion.set(JavaLanguageVersion.of(17))
-        }
-    }
-
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
-    }
-
     buildFeatures {
         viewBinding = true
         buildConfig = true
+        resValues = true
     }
 
     splits {
@@ -75,6 +63,10 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
 }
 
 dependencies {
@@ -94,26 +86,26 @@ dependencies {
     val coilVersion = "2.7.0"
     val constraintLayoutVersion = "2.2.1"
     val coroutinesVersion = "1.10.2"
-    val datastoreVersion = "1.1.7"
+    val datastoreVersion = "1.2.1"
     val espressoVersion = "3.7.0"
     val glideVersion = "5.0.5"
     val gsonVersion = "2.13.2"
-    val hiltVersion = "2.57.2"
+    val hiltVersion = "2.59.2"
     val hiltExtVersion = "1.3.0"
     val junitVersion = "4.13.2"
-    val kotlinCoreVersion = "1.17.0"
-    val androidXActivity = "1.11.0"
-    val lifecycleVersion = "2.9.4"
+    val kotlinCoreVersion = "1.18.0"
+    val androidXActivity = "1.13.0"
+    val lifecycleVersion = "2.10.0"
     val materialVersion = "1.13.0"
     val moshiVersion = "1.15.2"
-    val navigationVersion = "2.9.6"
-    val okhttpVersion = "5.3.0"
+    val navigationVersion = "2.9.7"
+    val okhttpVersion = "5.3.2"
     val paletteVersion = "1.0.0"
     val renderscriptToolkitVersion = "b6363490c3"
     val retrofitVersion = "3.0.0"
-    val roomVersion = "2.8.3"
+    val roomVersion = "2.8.4"
     val testExtJunitVersion = "1.3.0"
-    val workVersion = "2.11.0"
+    val workVersion = "2.11.2"
     val mediaVersion = "1.7.1"
 
     // Media Session
