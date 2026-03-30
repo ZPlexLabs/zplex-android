@@ -1,6 +1,6 @@
 package zechs.zplex.ui.myshows
 
-import android.content.res.ColorStateList
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
@@ -13,22 +13,24 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
+import kotlinx.coroutines.launch
 import zechs.zplex.R
-import zechs.zplex.data.model.MediaType
-import zechs.zplex.data.model.entities.Movie
-import zechs.zplex.data.model.entities.Show
+import zechs.zplex.core.navigation.navigateSafe
+import zechs.zplex.core.ui.animation.MaterialMotionInterpolator
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.FragmentMyShowsBinding
-import zechs.zplex.ui.shared_adapters.media.MediaAdapter
-import zechs.zplex.utils.MaterialMotionInterpolator
-import zechs.zplex.utils.ext.navigateSafe
+import zechs.zplex.ui.myshows.adapter.MediaListItemAdapter
+import zechs.zplex.utils.UiResult
+import zechs.zplex.zplex_api.data.remote.api.MediaListItem
 
 
 class MyShowsFragment : Fragment() {
@@ -44,10 +46,20 @@ class MyShowsFragment : Fragment() {
     private var layoutManager: RecyclerView.LayoutManager? = null
 
     private val mediaAdapter by lazy {
-        MediaAdapter(
-            rating = true,
-            mediaOnClick = { navigateToMedia(it) }
+        MediaListItemAdapter(
+            onClick = {
+                Snackbar.make(binding.root, "Clicked on ${it.title}", Snackbar.LENGTH_SHORT)
+                    .show()
+            }
         )
+    }
+
+    class GridSpacingDecoration(private val spacing: Int) : RecyclerView.ItemDecoration() {
+        override fun getItemOffsets(
+            outRect: Rect, view: View, parent: RecyclerView, state: RecyclerView.State
+        ) {
+            outRect.set(spacing, spacing, spacing, spacing)
+        }
     }
 
     private var selectedTabIndex = 0
@@ -135,88 +147,6 @@ class MyShowsFragment : Fragment() {
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
-
-        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-        ) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                return true
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
-                val media = mediaAdapter.currentList[position]
-
-                val bottomNavView: BottomNavigationView? =
-                    activity?.findViewById(R.id.bottomNavigationView)
-
-                val name = media.name ?: media.title
-
-                Log.d(TAG, "name=$name, mediaType=${media.media_type}")
-
-                val snackBar = Snackbar.make(
-                    view, "$name removed from your library",
-                    Snackbar.LENGTH_SHORT
-                )
-                when (media.media_type) {
-                    MediaType.tv -> {
-                        val show = Show(
-                            id = media.id,
-                            name = media.name ?: "",
-                            media_type = media.media_type.name,
-                            poster_path = media.poster_path,
-                            vote_average = media.vote_average,
-                            fileId = media.fileId,
-                            modifiedTime = media.modifiedTime
-                        )
-                        myShowsViewModel.deleteShow(media.id)
-                        snackBar.setAction(R.string.undo) {
-                            Log.d(TAG, "Undo invoked(), show=$show")
-                            myShowsViewModel.saveShow(show)
-                        }
-                    }
-
-                    MediaType.movie -> {
-                        val movie = Movie(
-                            id = media.id,
-                            title = media.title ?: "",
-                            media_type = media.media_type.name,
-                            poster_path = media.poster_path,
-                            vote_average = media.vote_average,
-                            fileId = media.fileId,
-                            modifiedTime = media.modifiedTime
-                        )
-                        myShowsViewModel.deleteMovie(movie.id)
-                        snackBar.setAction(R.string.undo) {
-                            Log.d(TAG, "Undo invoked(), movie=$movie")
-                            myShowsViewModel.saveMovie(movie)
-                        }
-                    }
-
-                    else -> {}
-                }
-
-                bottomNavView?.let {
-                    snackBar.anchorView = it
-                }
-                val accentColor = ColorStateList.valueOf(
-                    ContextCompat.getColor(
-                        requireContext(),
-                        R.color.colorAccent
-                    )
-                )
-
-                snackBar.setActionTextColor(accentColor)
-                snackBar.show()
-            }
-        }
-
-        ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(binding.rvMyShows)
     }
 
     private fun handleSelectedTab(selectedTab: Int) {
@@ -224,7 +154,6 @@ class MyShowsFragment : Fragment() {
         when (selectedTab) {
             0 -> observeMovies()
             1 -> observeShows()
-            else -> removeAllObservers()
         }
     }
 
@@ -246,7 +175,6 @@ class MyShowsFragment : Fragment() {
                 when (newTabText) {
                     resources.getString(R.string.movies) -> observeMovies()
                     resources.getString(R.string.tv_shows) -> observeShows()
-                    else -> removeAllObservers()
                 }
 
                 // Prep new list position
@@ -257,25 +185,117 @@ class MyShowsFragment : Fragment() {
     }
 
     private fun observeMovies() {
-        myShowsViewModel.movies.observe(viewLifecycleOwner) { media ->
-            handleLibrary(media)
-            mediaAdapter.submitList(media.map { it.toMedia() })
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                myShowsViewModel.movies.collect { state ->
+                    renderMovies(state)
+                }
+            }
         }
-        myShowsViewModel.shows.removeObservers(viewLifecycleOwner)
     }
 
     private fun observeShows() {
-        myShowsViewModel.shows.observe(viewLifecycleOwner) { media ->
-            handleLibrary(media)
-            mediaAdapter.submitList(media.map { it.toMedia() })
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                myShowsViewModel.tvShows.collect { state ->
+                    renderTvShows(state)
+                }
+            }
         }
-
-        myShowsViewModel.movies.removeObservers(viewLifecycleOwner)
     }
 
-    private fun removeAllObservers() {
-        myShowsViewModel.shows.removeObservers(viewLifecycleOwner)
-        myShowsViewModel.movies.removeObservers(viewLifecycleOwner)
+    private fun renderTvShows(state: UiResult<MediaListItem>) {
+        renderMedia(
+            state = state,
+            onInitialLoad = { myShowsViewModel.loadTvShows() },
+            onRetry = { myShowsViewModel.retryTvShows() },
+            onSuccess = { handleLibrary(it) }
+        )
+    }
+
+    private fun renderMovies(state: UiResult<MediaListItem>) {
+        renderMedia(
+            state = state,
+            onInitialLoad = { myShowsViewModel.loadMovies() },
+            onRetry = { myShowsViewModel.retryMovies() },
+            onSuccess = { handleLibrary(it) }
+        )
+    }
+
+    private fun renderMedia(
+        state: UiResult<MediaListItem>,
+        onInitialLoad: () -> Unit,
+        onRetry: () -> Unit,
+        onSuccess: (List<MediaListItem>) -> Unit = {}
+    ) {
+        when (state) {
+
+            is UiResult.Idle -> {
+                binding.progressBar.isVisible = false
+                binding.rvMyShows.isVisible = false
+                binding.errorView.root.isVisible = false
+
+                onInitialLoad()
+            }
+
+            is UiResult.Loading -> {
+                if (state.data.isEmpty()) {
+                    // First load
+                    binding.progressBar.isVisible = true
+                    binding.rvMyShows.isVisible = false
+                } else {
+                    // Pagination loading
+                    binding.progressBar.isVisible = false
+                    binding.rvMyShows.isVisible = true
+
+                    showPaginationLoader(true)
+                    mediaAdapter.submitList(state.data)
+                }
+
+                binding.errorView.root.isVisible = false
+            }
+
+            is UiResult.Success -> {
+                binding.progressBar.isVisible = false
+                binding.rvMyShows.isVisible = true
+                binding.errorView.root.isVisible = false
+
+                showPaginationLoader(false)
+
+                onSuccess(state.data)
+                mediaAdapter.submitList(state.data)
+            }
+
+            is UiResult.Error -> {
+                binding.progressBar.isVisible = false
+
+                if (state.data.isEmpty()) {
+                    // Full screen error
+                    binding.rvMyShows.isVisible = false
+                    binding.errorView.root.isVisible = true
+                    binding.errorView.errorTxt.text = state.message
+
+                    binding.errorView.retryBtn.setOnClickListener {
+                        onRetry()
+                    }
+                } else {
+                    // Pagination error
+                    binding.rvMyShows.isVisible = true
+                    binding.errorView.root.isVisible = false
+
+                    mediaAdapter.submitList(state.data)
+                    showPaginationLoader(false)
+
+                    Snackbar.make(binding.rvMyShows, state.message, Snackbar.LENGTH_INDEFINITE)
+                        .setAction(R.string.retry) { onRetry() }
+                        .show()
+                }
+            }
+        }
+    }
+
+    private fun showPaginationLoader(show: Boolean) {
+        binding.progressBarPagination.isGone = !show
     }
 
     private fun handleLibrary(media: List<*>?) {
@@ -316,12 +336,29 @@ class MyShowsFragment : Fragment() {
                 }
             }
 
-        mediaAdapter.registerAdapterDataObserver(adapterObserver)
-
+        val onScrollPaginationListener = object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
+                if (dy <= 0) return
+                val layoutManager = rv.layoutManager as LinearLayoutManager
+                val total = layoutManager.itemCount
+                val lastVisible = layoutManager.findLastVisibleItemPosition()
+                if (lastVisible >= total - spanCount) {
+                    val selectedTabPosition = binding.tabLayout.selectedTabPosition
+                    when (selectedTabPosition) {
+                        0 -> myShowsViewModel.loadMovies()
+                        1 -> myShowsViewModel.loadTvShows()
+                    }
+                }
+            }
+        }
         binding.rvMyShows.apply {
             adapter = mediaAdapter
             layoutManager = gridLayoutManager
+            addOnScrollListener(onScrollPaginationListener)
+            addItemDecoration(GridSpacingDecoration(8))
         }
+
+        mediaAdapter.registerAdapterDataObserver(adapterObserver)
     }
 
     private fun navigateToMedia(media: Media) {

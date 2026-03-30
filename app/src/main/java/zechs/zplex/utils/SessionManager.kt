@@ -10,8 +10,8 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import zechs.zplex.data.model.drive.DriveClient
-import zechs.zplex.data.model.drive.TokenResponse
+import zechs.zplex.googledrive.data.model.DriveClient
+import zechs.zplex.googledrive.data.remote.api.token.model.TokenResponse
 import javax.inject.Inject
 
 

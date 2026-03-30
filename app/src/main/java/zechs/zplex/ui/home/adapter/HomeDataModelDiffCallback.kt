@@ -12,12 +12,20 @@ class HomeDataModelDiffCallback : DiffUtil.ItemCallback<HomeDataModel>() {
                 is HomeDataModel.Header && oldItem.heading == newItem.heading
             -> true
 
-        oldItem is HomeDataModel.Media && newItem
-                is HomeDataModel.Media && oldItem.media == newItem.media
+        oldItem is HomeDataModel.MediaMenu && newItem
+                is HomeDataModel.MediaMenu && oldItem.title == newItem.title
             -> true
 
-        oldItem is HomeDataModel.Banner && newItem
-                is HomeDataModel.Banner && oldItem.media == newItem.media
+        oldItem is HomeDataModel.LatestTvShows && newItem
+                is HomeDataModel.LatestTvShows && oldItem.show == newItem.show
+            -> true
+
+        oldItem is HomeDataModel.LatestMovies && newItem
+                is HomeDataModel.LatestMovies && oldItem.movies == newItem.movies
+            -> true
+
+        oldItem is HomeDataModel.Suggestions && newItem
+                is HomeDataModel.Suggestions && oldItem.suggestions == newItem.suggestions
             -> true
 
         oldItem is HomeDataModel.Watched && newItem

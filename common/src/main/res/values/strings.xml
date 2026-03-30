@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="no_data_available_at_the_moment">No data available at the moment.</string>
+    <string name="response_body_was_null">Response body was null.</string>
+    <string name="unexpected_error">An unexpected error occurred. Please try again.</string>
+    <string name="http_error">Unexpected response from server (HTTP %1$d).</string>
+    <string name="empty_details">The server returned an unexpected response. Please try again later.</string>
+    <string name="no_connection">Unable to connect. Please check your internet connection.</string>
+</resources>

@@ -4,9 +4,9 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import zechs.zplex.R
-import zechs.zplex.data.model.drive.DriveFile
 import zechs.zplex.databinding.ItemDriveFileBinding
 import zechs.zplex.databinding.ItemLoadingBinding
+import zechs.zplex.googledrive.data.remote.api.drive.model.DriveFile
 
 class FilesAdapter(
     val onClickListener: (DriveFile) -> Unit

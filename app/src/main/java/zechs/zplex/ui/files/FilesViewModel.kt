@@ -10,10 +10,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
-import zechs.zplex.data.repository.DriveRepository
+import zechs.zplex.common.utils.Resource
+import zechs.zplex.googledrive.data.repository.DriveRepository
 import zechs.zplex.ui.files.FilesFragment.Companion.TAG
 import zechs.zplex.ui.files.adapter.FilesDataModel
-import zechs.zplex.utils.state.Resource
 import java.net.SocketTimeoutException
 import javax.inject.Inject
 

@@ -1,7 +1,7 @@
 package zechs.zplex.ui.files.adapter
 
 import androidx.annotation.Keep
-import zechs.zplex.data.model.drive.DriveFile
+import zechs.zplex.googledrive.data.remote.api.drive.model.DriveFile
 
 sealed class FilesDataModel {
 

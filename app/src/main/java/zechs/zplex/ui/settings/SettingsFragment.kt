@@ -35,7 +35,7 @@ import zechs.zplex.utils.FolderPickerResultContract
 import zechs.zplex.utils.FolderType
 import zechs.zplex.utils.SelectedFolder
 import zechs.zplex.utils.StartFolderPicker
-import zechs.zplex.utils.ext.navigateSafe
+import zechs.zplex.core.navigation.navigateSafe
 
 
 class SettingsFragment : Fragment() {

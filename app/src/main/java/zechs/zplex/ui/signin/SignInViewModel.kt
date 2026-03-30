@@ -9,25 +9,24 @@ import dagger.Lazy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import zechs.zplex.data.model.drive.AuthorizationResponse
-import zechs.zplex.data.model.drive.DriveClient
-import zechs.zplex.data.repository.DriveRepository
-import zechs.zplex.utils.SessionManager
-import zechs.zplex.utils.state.Resource
+import zechs.zplex.common.utils.Resource
+import zechs.zplex.googledrive.data.local.DriveClientStore
+import zechs.zplex.googledrive.data.model.DriveClient
+import zechs.zplex.googledrive.data.remote.api.token.model.AuthorizationResponse
+import zechs.zplex.googledrive.data.repository.DriveRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val driveRepository: Lazy<DriveRepository>,
-    private val sessionManager: SessionManager
+    driveClientStore: DriveClientStore
 ) : ViewModel() {
 
     private val _loginStatus = MutableLiveData<Resource<AuthorizationResponse>>()
     val loginStatus: LiveData<Resource<AuthorizationResponse>>
         get() = _loginStatus
 
-    val client = sessionManager.fetchDriveClientFlow()
-
+    val client = driveClientStore.flow()
 
     private var driveClient: DriveClient? = null
 

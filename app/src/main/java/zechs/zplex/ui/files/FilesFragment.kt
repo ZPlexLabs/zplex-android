@@ -27,15 +27,15 @@ import com.google.android.material.transition.MaterialFadeThrough
 import com.google.android.material.transition.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
 import zechs.zplex.R
-import zechs.zplex.data.model.drive.DriveFile
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.databinding.FragmentFilesBinding
+import zechs.zplex.googledrive.data.remote.api.drive.model.DriveFile
+import zechs.zplex.googledrive.query.DriveApiQueryBuilder
 import zechs.zplex.ui.files.adapter.FilesAdapter
 import zechs.zplex.ui.files.adapter.FilesDataModel
 import zechs.zplex.ui.folder_picker.FolderPickerActivity
 import zechs.zplex.utils.FolderPickerResultContract
 import zechs.zplex.utils.FolderType
-import zechs.zplex.utils.state.Resource
-import zechs.zplex.utils.util.DriveApiQueryBuilder
 
 
 @AndroidEntryPoint
@@ -257,7 +257,7 @@ class FilesFragment : Fragment() {
                 id = file.shortcutDetails.targetId!!,
                 name = file.name,
                 query = DriveApiQueryBuilder()
-                    .inParents(file.shortcutDetails.targetId)
+                    .inParents(file.shortcutDetails.targetId as String)
                     .trashed(false)
                     .build()
             )

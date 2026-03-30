@@ -27,12 +27,12 @@ import kotlinx.coroutines.withContext
 import okhttp3.ResponseBody
 import okio.use
 import zechs.zplex.R
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.model.MediaType
-import zechs.zplex.data.model.drive.DriveClient
-import zechs.zplex.data.model.drive.FileResponse
-import zechs.zplex.data.repository.DriveRepository
+import zechs.zplex.googledrive.data.model.DriveClient
+import zechs.zplex.googledrive.data.remote.api.drive.model.FileResponse
+import zechs.zplex.googledrive.data.repository.DriveRepository
 import zechs.zplex.utils.SessionManager
-import zechs.zplex.utils.state.Resource
 import java.io.File
 import java.io.FileInputStream
 import java.security.MessageDigest
@@ -133,7 +133,12 @@ class DownloadWorker @AssistedInject constructor(
         val notificationId = Random.nextInt(1, Int.MAX_VALUE)
 
         val file = try {
-            downloadFile(client = client, title = title, fileId = fileId, notificationId = notificationId)
+            downloadFile(
+                client = client,
+                title = title,
+                fileId = fileId,
+                notificationId = notificationId
+            )
         } catch (e: Exception) {
             return fail("Download failed: ${e.message ?: "Unknown error"}")
         }

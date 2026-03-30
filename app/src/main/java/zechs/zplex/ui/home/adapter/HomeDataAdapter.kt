@@ -51,8 +51,8 @@ class HomeDataAdapter(
 
             is HomeViewHolder.ListViewHolder -> {
                 when (item) {
-                    is HomeDataModel.Media -> holder.bindMedia(item)
-                    is HomeDataModel.Banner -> holder.bindBanner(item)
+//                    is HomeDataModel.Media -> holder.bindMedia(item)
+//                    is HomeDataModel.Banner -> holder.bindBanner(item)
                     is HomeDataModel.Watched -> holder.bindWatched(item)
                     else -> {}
                 }
@@ -63,9 +63,12 @@ class HomeDataAdapter(
     override fun getItemViewType(position: Int): Int {
         return when (getItem(position)) {
             is HomeDataModel.Header -> R.layout.item_heading
-            is HomeDataModel.Media -> R.layout.item_list
-            is HomeDataModel.Banner -> R.layout.item_list
+//            is HomeDataModel.Media -> R.layout.item_list
+//            is HomeDataModel.Banner -> R.layout.item_list
             is HomeDataModel.Watched -> R.layout.item_list
+            else -> {
+                0
+            }
         }
     }
 

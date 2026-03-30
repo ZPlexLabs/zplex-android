@@ -10,14 +10,16 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import zechs.zplex.utils.UserSession
+import zechs.zplex.zplex_api.data.local.session.SessionStorage
+import zechs.zplex.zplex_api.data.local.user.UserStorage
 import java.nio.charset.Charset
 import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val userSession: UserSession
+    private val userStorage: UserStorage,
+    private val sessionStorage: SessionStorage
 ) : ViewModel() {
 
     companion object {
@@ -41,9 +43,9 @@ class MainViewModel @Inject constructor(
     }
 
     private suspend fun isUserSessionValid(): Boolean {
-        val user = userSession.fetchUserSession()
-        val accessToken = userSession.fetchAccessToken()
-        val refreshToken = userSession.fetchRefreshToken()
+        val user = userStorage.getUser()
+        val accessToken = sessionStorage.getAccessToken()
+        val refreshToken = sessionStorage.getRefreshToken()
 
         if (user == null || accessToken.isNullOrEmpty() || refreshToken.isNullOrEmpty()) {
             Log.d(TAG, "One or more session values are missing. User not logged in.")

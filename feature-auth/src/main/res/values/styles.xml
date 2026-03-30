@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MenuTheme" parent="@style/ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:textColorSecondary">@color/textColor</item>
+        <item name="android:actionMenuTextColor">@color/textColor</item>
+        <item name="android:backgroundTint">@color/cardColor</item>
+        <item name="android:textColor">@color/textColor</item>
+        <item name="colorControlNormal">@color/textColor</item>
+        <item name="selectableItemBackground">?android:selectableItemBackground</item>
+        <item name="colorControlHighlight">@color/colorAccent</item>
+        <item name="selectableItemBackgroundBorderless">?android:selectableItemBackground</item>
+    </style>
+
+    <style name="titleTextAppearance">
+        <item name="android:textColor">@color/textColor</item>
+<!--        <item name="fontFamily">@font/roboto_black</item>-->
+        <item name="android:textSize">18sp</item>
+    </style>
+</resources>

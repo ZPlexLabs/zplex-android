@@ -70,6 +70,7 @@ extensions.configure<ApplicationExtension> {
 }
 
 dependencies {
+
     // --- Local Modules and AAR/JARs ---
     implementation(project(":mpv"))
     implementation(
@@ -80,6 +81,10 @@ dependencies {
             )
         )
     )
+    implementation(project(":common"))
+    implementation(project(":feature-auth"))
+    implementation(project(":googledrive"))
+    implementation(project(":zplex-api"))
 
     // --- Version Variables ---
     val appCompatVersion = "1.7.1"

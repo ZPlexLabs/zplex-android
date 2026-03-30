@@ -38,6 +38,7 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.databinding.FragmentEpisodesBinding
@@ -49,8 +50,7 @@ import zechs.zplex.ui.shared_viewmodels.EpisodeViewModel
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.ext.dpToPx
-import zechs.zplex.utils.ext.navigateSafe
-import zechs.zplex.utils.state.Resource
+import zechs.zplex.core.navigation.navigateSafe
 
 @AndroidEntryPoint
 class EpisodesFragment : Fragment() {
@@ -147,7 +147,12 @@ class EpisodesFragment : Fragment() {
 
     private fun showDeleteEpisodeDialog(episode: Episode) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.confirm_delete_episode, episode.name ?: "Episode ${episode.episode_number}"))
+            .setTitle(
+                getString(
+                    R.string.confirm_delete_episode,
+                    episode.name ?: "Episode ${episode.episode_number}"
+                )
+            )
             .setPositiveButton(R.string.yes) { dialog, _ ->
                 episodesViewModel.removeOffline(episode)
                 dialog.dismiss()
@@ -229,7 +234,10 @@ class EpisodesFragment : Fragment() {
             }
         }
         sharedViewModel.selectedSeasonNumber.observe(viewLifecycleOwner) { seasonNumber ->
-            Log.d(TAG, "getSeasonWithWatched(tmdbId=${episodesViewModel.tmdbId}, seasonNumber=$seasonNumber)")
+            Log.d(
+                TAG,
+                "getSeasonWithWatched(tmdbId=${episodesViewModel.tmdbId}, seasonNumber=$seasonNumber)"
+            )
             episodesViewModel.selectSeason(seasonNumber)
         }
 

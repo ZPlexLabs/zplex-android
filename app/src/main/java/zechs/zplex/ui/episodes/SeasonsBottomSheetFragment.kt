@@ -11,9 +11,9 @@ import androidx.transition.TransitionManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.transition.MaterialFadeThrough
 import dagger.hilt.android.AndroidEntryPoint
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.databinding.BottomSeasonsSheetFragmentBinding
 import zechs.zplex.ui.shared_adapters.season.SeasonsAdapter
-import zechs.zplex.utils.state.Resource
 
 @AndroidEntryPoint
 class SeasonsBottomSheetFragment : BottomSheetDialogFragment() {

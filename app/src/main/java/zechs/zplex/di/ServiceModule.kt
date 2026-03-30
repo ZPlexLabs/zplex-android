@@ -10,9 +10,9 @@ import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 import zechs.zplex.data.remote.RemoteLibrary
-import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.RemoteLibraryRepository
 import zechs.zplex.data.repository.TmdbRepository
+import zechs.zplex.googledrive.data.repository.DriveRepository
 import zechs.zplex.service.RemoteLibraryIndexingService
 import zechs.zplex.utils.BuildNotificationUtils
 import zechs.zplex.utils.SessionManager

@@ -76,15 +76,15 @@ import zechs.mpv.MPVLib.mpvEventId.MPV_EVENT_PLAYBACK_RESTART
 import zechs.mpv.MPVView
 import zechs.mpv.utils.Utils
 import zechs.zplex.R
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.databinding.ActivityMpvBinding
 import zechs.zplex.databinding.PlayerControlViewBinding
 import zechs.zplex.databinding.SideSheetEpisodesBinding
+import zechs.zplex.googledrive.config.DriveConfig
 import zechs.zplex.ui.player.sidesheet.episodes.adapter.SideSheetEpisodesAdapter
-import zechs.zplex.utils.Constants.DRIVE_API
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
 import zechs.zplex.utils.SpenRemoteHelper
-import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.util.Orientation
 import zechs.zplex.utils.util.getNextOrientation
 import zechs.zplex.utils.util.setOrientation
@@ -396,7 +396,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
             is Resource.Success -> {
                 val accessToken = resource.data!!.token
-                val playbackItem = resource.data.item
+                val playbackItem = (resource.data as PlayerViewModel.Playback).item
                 if (playbackItem != null) {
                     val playlistButton = binding.controller.playerToolbar.menu
                         .findItem(R.id.action_playlist)
@@ -481,7 +481,10 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
 
     private fun resumeVideo(startPosition: Long) {
         val startPositionInSeconds = startPosition / 1000
-        Log.d(TAG, "MPV(resumeVideo=${Utils.prettyTime(startPositionInSeconds.toInt())}) startPositionInSeconds=$startPositionInSeconds")
+        Log.d(
+            TAG,
+            "MPV(resumeVideo=${Utils.prettyTime(startPositionInSeconds.toInt())}) startPositionInSeconds=$startPositionInSeconds"
+        )
         MPVLib.setOptionString("start", Utils.prettyTime(startPositionInSeconds.toInt()))
         val timePos = MPVLib.getPropertyInt("time-pos")
         if ((timePos != null) && (abs(timePos - startPositionInSeconds) > 2)) {
@@ -491,7 +494,8 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver {
     }
 
     private fun getStreamUrl(fileId: String): String {
-        val uri = "${DRIVE_API}/files/${fileId}?supportsAllDrives=True&alt=media".toUri()
+        val uri =
+            "${DriveConfig.DRIVE_API}/files/${fileId}?supportsAllDrives=True&alt=media".toUri()
         Log.d(TAG, "STREAM_URL=$uri")
         return uri.toString()
     }

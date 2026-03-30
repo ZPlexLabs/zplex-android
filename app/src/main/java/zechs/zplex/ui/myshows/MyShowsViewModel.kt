@@ -1,53 +1,60 @@
 package zechs.zplex.ui.myshows
 
 import android.app.Application
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
-import zechs.zplex.data.local.offline.OfflineMovieDao
-import zechs.zplex.data.local.offline.OfflineShowDao
-import zechs.zplex.data.model.entities.Movie
-import zechs.zplex.data.model.entities.Show
-import zechs.zplex.data.repository.TmdbRepository
+import kotlinx.coroutines.flow.StateFlow
 import zechs.zplex.ui.BaseAndroidViewModel
+import zechs.zplex.utils.Pager
+import zechs.zplex.utils.UiResult
+import zechs.zplex.zplex_api.data.remote.api.MediaListItem
+import zechs.zplex.zplex_api.data.repository.MoviesRepository
+import zechs.zplex.zplex_api.data.repository.TvShowsRepository
 import javax.inject.Inject
 
 @HiltViewModel
 class MyShowsViewModel @Inject constructor(
     app: Application,
-    private val tmdbRepository: TmdbRepository,
-    offlineShowDao: OfflineShowDao,
-    offlineMovieDao: OfflineMovieDao
+    private val tvShowsRepository: TvShowsRepository,
+    private val moviesRepository: MoviesRepository
 ) : BaseAndroidViewModel(app) {
 
-    fun saveShow(show: Show) = viewModelScope.launch {
-        tmdbRepository.upsertShow(show)
+    /* -------------------- TV SHOWS -------------------- */
+
+    private val tvPager = Pager(
+        scope = viewModelScope,
+        request = { page ->
+            tvShowsRepository.tvShows(pageNumber = page)
+        }
+    )
+
+    val tvShows: StateFlow<UiResult<MediaListItem>> = tvPager.state
+
+    fun loadTvShows(reset: Boolean = false) {
+        tvPager.loadNext(reset)
     }
 
-    fun deleteShow(tmdbId: Int) = viewModelScope.launch {
-        tmdbRepository.deleteShow(tmdbId)
+    fun retryTvShows() = tvPager.retry()
+
+    fun refreshTvShows() = tvPager.refresh()
+
+
+    /* -------------------- MOVIES -------------------- */
+
+    private val moviePager = Pager(
+        scope = viewModelScope,
+        request = { page ->
+            moviesRepository.movies(pageNumber = page)
+        }
+    )
+
+    val movies: StateFlow<UiResult<MediaListItem>> = moviePager.state
+
+    fun loadMovies(reset: Boolean = false) {
+        moviePager.loadNext(reset)
     }
 
-    fun saveMovie(movie: Movie) = viewModelScope.launch {
-        tmdbRepository.upsertMovie(movie)
-    }
+    fun retryMovies() = moviePager.retry()
 
-    fun deleteMovie(tmdbId: Int) = viewModelScope.launch {
-        tmdbRepository.deleteMovie(tmdbId)
-    }
-
-    val movies: LiveData<List<Movie>> = if (hasInternetConnection()) {
-        tmdbRepository.getSavedMovies()
-    } else {
-        offlineMovieDao.getAllMovies().map { it.map { tv -> tv.toMovie() } }
-    }
-
-    val shows: LiveData<List<Show>> = if (hasInternetConnection()) {
-        tmdbRepository.getSavedShows()
-    } else {
-        offlineShowDao.getAllShows().map { it.map { tv -> tv.toShow() } }
-    }
-
+    fun refreshMovies() = moviePager.refresh()
 }

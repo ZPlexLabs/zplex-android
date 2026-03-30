@@ -20,3 +20,7 @@ dependencyResolutionManagement {
 rootProject.name = "ZPlex"
 include(":app")
 include(":mpv")
+include(":common")
+include(":feature-auth")
+include(":googledrive")
+include(":zplex-api")

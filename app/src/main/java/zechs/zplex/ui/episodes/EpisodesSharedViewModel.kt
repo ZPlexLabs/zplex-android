@@ -8,11 +8,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.model.tmdb.entities.Season
 import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.ui.episodes.EpisodesFragment.Companion.TAG
 import zechs.zplex.utils.ext.ifNullOrEmpty
-import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import javax.inject.Inject
 
@@ -35,7 +35,10 @@ class EpisodesSharedViewModel @Inject constructor(
         showName: String,
         seasons: List<Season>
     ) = viewModelScope.launch(Dispatchers.IO) {
-        Log.d(TAG, "loadSeasons() called with: showId=$showId, showName=$showName, seasonsSize=${seasons.size}")
+        Log.d(
+            TAG,
+            "loadSeasons() called with: showId=$showId, showName=$showName, seasonsSize=${seasons.size}"
+        )
 
         _seasons.postValue(Resource.Loading())
         this@EpisodesSharedViewModel.showName = showName
@@ -49,7 +52,10 @@ class EpisodesSharedViewModel @Inject constructor(
         Log.d(TAG, "Fetching seasons from repository for showId=$showId")
         try {
             val response = tmdbRepository.getShow(showId)
-            Log.d(TAG, "API Response -> isSuccessful=${response.isSuccessful}, code=${response.code()}, message=${response.message()}")
+            Log.d(
+                TAG,
+                "API Response -> isSuccessful=${response.isSuccessful}, code=${response.code()}, message=${response.message()}"
+            )
 
             if (response.isSuccessful && response.body() != null) {
                 val fetchedSeasons = response.body()?.seasons ?: emptyList()

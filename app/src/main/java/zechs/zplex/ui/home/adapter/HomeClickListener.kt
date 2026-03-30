@@ -1,11 +1,14 @@
 package zechs.zplex.ui.home.adapter
 
-import zechs.zplex.data.model.tmdb.entities.Media
-import zechs.zplex.ui.home.adapter.watched.WatchedDataModel
+import zechs.zplex.zplex_api.data.remote.api.movies.LatestMovie
+import zechs.zplex.zplex_api.data.remote.api.suggestions.SuggestionMediaItem
+import zechs.zplex.zplex_api.data.remote.api.tvshows.LatestTvShow
 
 interface HomeClickListener {
 
-    fun onClickMedia(media: Media)
-    fun onClickWatched(watched: WatchedDataModel)
-    fun onLongClickWatched(watched: WatchedDataModel)
+    fun onClickMenu(type: MenuType)
+    fun onClickLatestShow(show: LatestTvShow)
+    fun onClickLatestMovie(movie: LatestMovie)
+    fun onClickSuggestionItem(suggestion: SuggestionMediaItem)
+
 }

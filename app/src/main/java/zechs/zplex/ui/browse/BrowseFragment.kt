@@ -33,6 +33,8 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import zechs.zplex.R
+import zechs.zplex.common.utils.Resource
+import zechs.zplex.core.navigation.navigateSafe
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.Order
 import zechs.zplex.data.model.SortBy
@@ -44,8 +46,6 @@ import zechs.zplex.ui.dialog.FiltersDialog
 import zechs.zplex.ui.shared_adapters.media.MediaAdapter
 import zechs.zplex.ui.shared_viewmodels.FiltersViewModel
 import zechs.zplex.utils.Constants.SEARCH_DELAY_AMOUNT
-import zechs.zplex.utils.ext.navigateSafe
-import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.util.Keyboard
 
 class BrowseFragment : Fragment() {

@@ -15,8 +15,8 @@ import zechs.zplex.data.local.offline.OfflineEpisodeDao
 import zechs.zplex.data.local.offline.OfflineMovieDao
 import zechs.zplex.data.local.offline.OfflineSeasonDao
 import zechs.zplex.data.local.offline.OfflineShowDao
-import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.TmdbRepository
+import zechs.zplex.googledrive.data.repository.DriveRepository
 import zechs.zplex.service.CacheCleanupWorkerFactory
 import zechs.zplex.service.DelegatingWorkerFactory
 import zechs.zplex.service.DownloadWorkerFactory
@@ -52,7 +52,10 @@ object WorkerModule {
         offlineEpisodeDao: OfflineEpisodeDao,
         offlineMovieDao: OfflineMovieDao
     ): OfflineDatabaseWorkerFactory {
-        return OfflineDatabaseWorkerFactory(gson, tmdbRepository, offlineShowDao, offlineSeasonDao, offlineEpisodeDao, offlineMovieDao)
+        return OfflineDatabaseWorkerFactory(
+            gson, tmdbRepository, offlineShowDao, offlineSeasonDao,
+            offlineEpisodeDao, offlineMovieDao
+        )
     }
 
     @Singleton

@@ -7,12 +7,12 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.model.tmdb.collection.CollectionsResponse
 import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.ui.BaseAndroidViewModel
 import zechs.zplex.ui.collection.adapter.CollectionDataModel
 import zechs.zplex.utils.state.Event
-import zechs.zplex.utils.state.Resource
 import java.io.IOException
 import javax.inject.Inject
 

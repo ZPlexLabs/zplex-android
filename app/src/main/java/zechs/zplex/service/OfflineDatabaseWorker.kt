@@ -48,7 +48,16 @@ class OfflineDatabaseWorkerFactory @Inject constructor(
         workerClassName: String,
         workerParameters: WorkerParameters
     ): ListenableWorker =
-        OfflineDatabaseWorker(appContext, workerParameters, gson, tmdbRepository, offlineShowDao, offlineSeasonDao, offlineEpisodeDao, offlineMovieDao)
+        OfflineDatabaseWorker(
+            appContext,
+            workerParameters,
+            gson,
+            tmdbRepository,
+            offlineShowDao,
+            offlineSeasonDao,
+            offlineEpisodeDao,
+            offlineMovieDao
+        )
 }
 
 @HiltWorker
@@ -103,7 +112,14 @@ class OfflineDatabaseWorker @AssistedInject constructor(
                         .takeIf { it != 0 }
                         ?: return fail("Episode number is required.", file)
 
-                    saveOfflineShow(title, tmdbId, seasonNumber, episodeNumber, filePath, notificationId)
+                    saveOfflineShow(
+                        title,
+                        tmdbId,
+                        seasonNumber,
+                        episodeNumber,
+                        filePath,
+                        notificationId
+                    )
                     Result.success()
                 }
 
@@ -131,7 +147,13 @@ class OfflineDatabaseWorker @AssistedInject constructor(
             val movie = tmdbRepository.getMovie(tmdbId, appendToQuery = null)
             if (movie.isSuccessful && movie.body() != null) {
                 if (!offlineMovieDao.getMovie(tmdbId)) {
-                    offlineMovieDao.upsertMovie(OfflineMovie(tmdbId, gson.toJson(movie.body()!!), filePath))
+                    offlineMovieDao.upsertMovie(
+                        OfflineMovie(
+                            tmdbId,
+                            gson.toJson(movie.body()!!),
+                            filePath
+                        )
+                    )
                 }
                 showDownloadCompleteNotification(notificationId, title)
             } else {

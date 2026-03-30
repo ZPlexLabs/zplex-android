@@ -8,16 +8,17 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import zechs.zplex.data.model.drive.DriveFile
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.entities.Show
 import zechs.zplex.data.remote.RemoteLibrary
+import zechs.zplex.googledrive.data.remote.api.drive.model.DriveFile
+import zechs.zplex.googledrive.data.repository.DriveRepository
+import zechs.zplex.googledrive.query.DriveApiQueryBuilder
 import zechs.zplex.service.RemoteLibraryIndexingService
 import zechs.zplex.service.RemoteLibraryIndexingService.Companion.INDEXING_SERVICE_NOTIFICATION_ID
 import zechs.zplex.utils.BuildNotificationUtils
 import zechs.zplex.utils.SessionManager
-import zechs.zplex.utils.state.Resource
-import zechs.zplex.utils.util.DriveApiQueryBuilder
 import javax.inject.Inject
 
 class RemoteLibraryRepository @Inject constructor(

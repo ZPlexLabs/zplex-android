@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.model.entities.WatchedMovie
 import zechs.zplex.data.model.entities.WatchedShow
 import zechs.zplex.data.model.tmdb.search.SearchResponse
@@ -20,7 +21,6 @@ import zechs.zplex.ui.home.adapter.HomeDataModel
 import zechs.zplex.ui.home.adapter.watched.WatchedDataModel
 import zechs.zplex.utils.SessionManager
 import zechs.zplex.utils.ext.combineWith
-import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import java.time.LocalDate
 import javax.inject.Inject
@@ -134,7 +134,7 @@ class HomeViewModel @Inject constructor(
         if (theatres.isSuccessful && theatres.body() != null) {
             val theatresList = theatres.body()!!.results
             if (theatresList.isNotEmpty()) {
-                homeMedia.add(HomeDataModel.Banner(media = theatresList))
+//                homeMedia.add(HomeDataModel.Banner(media = theatresList))
             }
         }
 
@@ -145,7 +145,7 @@ class HomeViewModel @Inject constructor(
 
             if (trendingList.isNotEmpty()) {
                 homeMedia.add(HomeDataModel.Header(heading = "Trending today"))
-                homeMedia.add(HomeDataModel.Media(media = trendingList))
+//                homeMedia.add(HomeDataModel.Media(media = trendingList))
             }
         }
 
@@ -153,7 +153,7 @@ class HomeViewModel @Inject constructor(
             val popularList = popular.body()!!.results
             if (popularList.isNotEmpty()) {
                 homeMedia.add(HomeDataModel.Header(heading = "Popular on streaming"))
-                homeMedia.add(HomeDataModel.Media(media = popularList))
+                // homeMedia.add(HomeDataModel.Media(media = popularList))
             }
         }
 

@@ -3,6 +3,7 @@ package zechs.mpv
 import android.content.Context
 import android.util.Log
 import java.util.Locale
+import androidx.core.content.edit
 
 class ConfigManager(context: Context) {
     companion object {
@@ -21,9 +22,8 @@ class ConfigManager(context: Context) {
 
     fun putCacheSize(cacheSize: Long) {
         Log.d(TAG, "Setting cache size: $cacheSize")
-        with(preferences.edit()) {
+        preferences.edit {
             putLong(ConfigKeys.CACHE_SIZE.name, cacheSize)
-            apply()
         }
     }
 
@@ -35,16 +35,15 @@ class ConfigManager(context: Context) {
 
     fun putDefaultAudioLang(lang: Locale) {
         Log.d(TAG, "Setting default audio language: ${lang.isO3Language}")
-        with(preferences.edit()) {
+        preferences.edit {
             putString(ConfigKeys.DEFAULT_AUDIO_LANG.name, lang.isO3Language)
-            apply()
         }
     }
 
     fun getDefaultAudioLang(): Locale {
         val langString = preferences.getString(
             ConfigKeys.DEFAULT_AUDIO_LANG.name,
-            Locale.getDefault().isO3Language
+            Locale.ENGLISH.isO3Language
         )!!
         val defaultAudioLang = Locale(langString)
         Log.d(TAG, "Retrieved default audio language: $defaultAudioLang")
@@ -53,16 +52,15 @@ class ConfigManager(context: Context) {
 
     fun putDefaultSubtitleLang(lang: Locale) {
         Log.d(TAG, "Setting default subtitle language: ${lang.isO3Language}")
-        with(preferences.edit()) {
+        preferences.edit {
             putString(ConfigKeys.DEFAULT_SUBTITLE_LANG.name, Locale.getDefault().isO3Language)
-            apply()
         }
     }
 
     fun getDefaultSubtitleLang(): Locale {
         val langString = preferences.getString(
             ConfigKeys.DEFAULT_SUBTITLE_LANG.name,
-            Locale.getDefault().isO3Language
+            Locale.ENGLISH.isO3Language
         )!!
         val defaultSubtitleLang = Locale(langString)
         Log.d(TAG, "Retrieved default subtitle language: $defaultSubtitleLang")

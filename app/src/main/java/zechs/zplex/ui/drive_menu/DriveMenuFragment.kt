@@ -13,8 +13,8 @@ import com.google.android.material.transition.MaterialSharedAxis
 import zechs.zplex.R
 import zechs.zplex.databinding.FragmentDriveMenuBinding
 import zechs.zplex.ui.folder_picker.FolderPickerActivity
-import zechs.zplex.utils.ext.navigateSafe
-import zechs.zplex.utils.util.DriveApiQueryBuilder
+import zechs.zplex.core.navigation.navigateSafe
+import zechs.zplex.googledrive.query.DriveApiQueryBuilder
 
 class DriveMenuFragment : Fragment() {
 

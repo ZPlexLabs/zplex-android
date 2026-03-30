@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connect_to_server">Connect to Server</string>
+    <string name="host">Host</string>
+    <string name="cancel">Cancel</string>
+    <string name="host_helper_text">Example: 192.168.1.100 or https://myserver.com</string>
+    <string name="port">Port</string>
+    <string name="port_helper_text">Example: 8096 or 443</string>
+    <string name="connect">Connect</string>
+    <string name="failed_to_connect">Failed to Connect</string>
+    <string name="invalid_host_missing_protocol">Invalid host. Please include protocol (http:// or https://).</string>
+    <string name="error_invalid_server">Unable to connect to the server. Please check the address and try again.</string>
+    <string name="something_went_wrong_reason">Something went wrong: %1$s</string>
+    <string name="error_network">A network error occurred. Please check your connection and try again.</string>
+    <string name="invalid_port_range">Port must be between 1 and 65535.</string>
+    <string name="host_and_port_cannot_be_empty">Host and port cannot be empty.</string>
+    <string name="login_incorrect_credentials">Incorrect username or password. Please try again.</string>
+    <string name="login_not_authorized">You are not authorized to access this service.</string>
+    <string name="login_server_unavailable">Server is currently unavailable. Please try again later.</string>
+    <string name="login_resource_not_found">Requested resource not found.</string>
+    <string name="login_failed">Login failed. Please try again.</string>
+    <string name="login_no_connection">Unable to connect. Please check your internet connection.</string>
+    <string name="login_unexpected_error">An unexpected error occurred. Please try again.</string>
+    <string name="login_http_error">Unexpected response from server (HTTP %1$d).</string>
+    <string name="login_empty_details">The server returned an unexpected response. Please try again later.</string>
+    <string name="signup_invalid_form_details">Please fill all required fields correctly</string>
+    <string name="signup_duplicate_user">This username is already taken</string>
+    <string name="signup_duplicate_user_details">The username you entered already exists. Please choose another one.</string>
+    <string name="something_went_wrong_details">Unexpected server error occurred</string>
+    <string name="something_went_wrong">Something went wrong</string>
+    <string name="error_network_details">Unable to connect to server. Please check your connection.</string>
+    <string name="ok">OK</string>
+    <string name="signup_success">Signup Successful</string>
+    <string name="signup_success_message">Your account has been created. Please login.</string>
+    <string name="dialog_title_account_incomplete">Account Setup Incomplete</string>
+    <string name="dialog_message_no_capability">
+        Your account has been created successfully, but it doesn’t have the required access enabled yet.
+        This usually happens with new accounts.
+
+        Please reach out to your administrator to enable the necessary capabilities so you can start using the app.
+    </string>
+    <string name="dialog_button_got_it">Got it</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="create_an_account">Create an account?</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="sign_in_to_access_your_account">Sign in to access your account</string>
+    <string name="create_account">Create Account</string>
+    <string name="sign_up_to_get_started">Sign up to get started</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_in">Sign in</string>
+    <string name="already_have_account">Already have an account? Sign In</string>
+</resources>

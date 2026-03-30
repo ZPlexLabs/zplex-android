@@ -17,6 +17,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.local.offline.OfflineMovieDao
 import zechs.zplex.data.local.offline.OfflineShowDao
 import zechs.zplex.data.model.MediaType
@@ -35,7 +36,6 @@ import zechs.zplex.ui.media.adapter.MediaDataModel
 import zechs.zplex.utils.SessionManager
 import zechs.zplex.utils.ext.deleteIfExistsSafely
 import zechs.zplex.utils.state.Event
-import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.state.ResourceExt.Companion.postError
 import zechs.zplex.utils.util.Converter
 import java.util.Locale

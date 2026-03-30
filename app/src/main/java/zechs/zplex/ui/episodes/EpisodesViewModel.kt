@@ -26,19 +26,21 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import retrofit2.Response
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.local.offline.OfflineEpisodeDao
 import zechs.zplex.data.local.offline.OfflineSeasonDao
 import zechs.zplex.data.local.offline.OfflineShowDao
 import zechs.zplex.data.model.MediaType
-import zechs.zplex.data.model.drive.DriveFile
-import zechs.zplex.data.model.drive.File
 import zechs.zplex.data.model.entities.WatchedShow
 import zechs.zplex.data.model.offline.OfflineEpisode
 import zechs.zplex.data.model.tmdb.entities.Episode
 import zechs.zplex.data.model.tmdb.season.SeasonResponse
-import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.TmdbRepository
 import zechs.zplex.data.repository.WatchedRepository
+import zechs.zplex.googledrive.data.remote.api.drive.model.DriveFile
+import zechs.zplex.googledrive.data.remote.api.drive.model.File
+import zechs.zplex.googledrive.data.repository.DriveRepository
+import zechs.zplex.googledrive.query.DriveApiQueryBuilder
 import zechs.zplex.service.DownloadWorker
 import zechs.zplex.service.OfflineDatabaseWorker
 import zechs.zplex.ui.BaseAndroidViewModel
@@ -48,9 +50,7 @@ import zechs.zplex.ui.player.Show
 import zechs.zplex.utils.SessionManager
 import zechs.zplex.utils.ext.deleteIfExistsSafely
 import zechs.zplex.utils.ext.ifNullOrEmpty
-import zechs.zplex.utils.state.Resource
 import zechs.zplex.utils.util.Converter
-import zechs.zplex.utils.util.DriveApiQueryBuilder
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -134,18 +134,15 @@ class EpisodesViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val episodesWithWatched: StateFlow<Resource<List<Episode>>> =
-        _selectedSeason
-            .filterNotNull()
-            .flatMapLatest { (tmdbId, seasonNumber) ->
-                combine(
-                    getSeasonFlow(tmdbId, seasonNumber),
-                    watchedRepository.getWatchedSeasonAsFlow(tmdbId, seasonNumber),
-                    offlineEpisodeDao.getAllEpisodesAsFlow(tmdbId, seasonNumber)
-                ) { episodes, watched, offline ->
-                    combineSeasonWithWatched(episodes, watched, offline)
-                }
+        _selectedSeason.filterNotNull().flatMapLatest { (tmdbId, seasonNumber) ->
+            combine(
+                getSeasonFlow(tmdbId, seasonNumber),
+                watchedRepository.getWatchedSeasonAsFlow(tmdbId, seasonNumber),
+                offlineEpisodeDao.getAllEpisodesAsFlow(tmdbId, seasonNumber)
+            ) { episodes, watched, offline ->
+                combineSeasonWithWatched(episodes, watched, offline)
             }
-            .stateIn(viewModelScope, SharingStarted.Lazily, Resource.Loading())
+        }.stateIn(viewModelScope, SharingStarted.Lazily, Resource.Loading())
 
 
     fun getSeasonFlow(tmdbId: Int, seasonNumber: Int): Flow<Resource<List<Episode>>> = flow {
@@ -158,9 +155,7 @@ class EpisodesViewModel @Inject constructor(
             } else {
                 val offlineSeason = offlineSeasonDao.getSeasonById(tmdbId, seasonNumber)
                 if (offlineSeason != null) {
-                    val gson = GsonBuilder()
-                        .serializeNulls()
-                        .create()
+                    val gson = GsonBuilder().serializeNulls().create()
                     val type = object : TypeToken<SeasonResponse?>() {}.type
                     val season: SeasonResponse = gson.fromJson(offlineSeason.json, type)
                     val responseSeason = Response.success(season)
@@ -177,9 +172,7 @@ class EpisodesViewModel @Inject constructor(
     }
 
     private fun combineSeasonWithWatched(
-        episodes: Resource<List<Episode>>,
-        watched: List<WatchedShow>,
-        offline: List<OfflineEpisode>
+        episodes: Resource<List<Episode>>, watched: List<WatchedShow>, offline: List<OfflineEpisode>
     ): Resource<List<Episode>> {
         _playlist.clear()
         if (episodes is Resource.Success) {
@@ -200,28 +193,26 @@ class EpisodesViewModel @Inject constructor(
                     Log.d(TAG, "Updating file for ${episode.name} to offline file")
                     episodesDataModel[index] = episode.copy(fileId = offlinePath, offline = true)
                 }
-                (episodesDataModel[index])
-                    .takeIf { it.fileId != null }
-                    ?.let {
-                        val isOffline = it.fileId!!.startsWith(context.filesDir.path)
-                        _playlist.add(
-                            Show(
-                                tmdbId = tmdbId,
-                                title = showName!!,
-                                posterPath = showPoster,
-                                fileId = it.fileId,
-                                // ideally this should be check to filesDir
-                                offline = isOffline,
-                                episode = episode,
-                                seasonNumber = it.season_number,
-                                episodeNumber = it.episode_number,
-                                episodeTitle = it.name
-                            )
+                (episodesDataModel[index]).takeIf { it.fileId != null }?.let {
+                    val isOffline = it.fileId!!.startsWith(context.filesDir.path)
+                    _playlist.add(
+                        Show(
+                            tmdbId = tmdbId,
+                            title = showName!!,
+                            posterPath = showPoster,
+                            fileId = it.fileId,
+                            // ideally this should be check to filesDir
+                            offline = isOffline,
+                            episode = episode,
+                            seasonNumber = it.season_number,
+                            episodeNumber = it.episode_number,
+                            episodeTitle = it.name
                         )
-                        if (isOffline) {
-                            Log.d(TAG, "Marked episode ${it.episode_number} as offline")
-                        }
+                    )
+                    if (isOffline) {
+                        Log.d(TAG, "Marked episode ${it.episode_number} as offline")
                     }
+                }
             }
 
             Log.d(TAG, "Combined episodes with watched successfully")
@@ -245,8 +236,7 @@ class EpisodesViewModel @Inject constructor(
         get() = _seasonHeader
 
     private suspend fun handleSeasonResponse(
-        tmdbId: Int,
-        response: Response<seasonResponseTmdb>
+        tmdbId: Int, response: Response<seasonResponseTmdb>
     ): Resource<List<Episode>> {
         if (response.body() != null) {
             val result = response.body()!!
@@ -291,14 +281,11 @@ class EpisodesViewModel @Inject constructor(
             number = result.season_number ?: 0,
             seasonName = result.name,
             seasonPosterPath = result.poster_path,
-            seasonOverview = result.overview.ifNullOrEmpty { overviewBuilder.toString() }
-        )
+            seasonOverview = result.overview.ifNullOrEmpty { overviewBuilder.toString() })
     }
 
     private suspend fun handleSeasonFolder(
-        result: seasonResponseTmdb,
-        showFolderId: String,
-        seasonDataModel: MutableList<Episode>
+        result: seasonResponseTmdb, showFolderId: String, seasonDataModel: MutableList<Episode>
     ) {
         val seasonFolderName = "Season ${result.season_number}"
         val seasonFolder = findSeasonFolder(showFolderId, seasonFolderName)
@@ -312,38 +299,32 @@ class EpisodesViewModel @Inject constructor(
     }
 
     private suspend fun findSeasonFolder(
-        showFolderId: String,
-        seasonFolderName: String
+        showFolderId: String, seasonFolderName: String
     ): DriveFile? {
         val filesInShowFolder = driveRepository.getAllFilesInFolder(
-            queryBuilder = DriveApiQueryBuilder()
-                .inParents(showFolderId)
-                .mimeTypeEquals("application/vnd.google-apps.folder")
-                .trashed(false)
+            queryBuilder = DriveApiQueryBuilder().inParents(showFolderId)
+                .mimeTypeEquals("application/vnd.google-apps.folder").trashed(false)
         )
 
         if (filesInShowFolder is Resource.Success && filesInShowFolder.data != null) {
-            return filesInShowFolder.data
-                .firstOrNull { it.name.equals(seasonFolderName, true) }
+            return (filesInShowFolder.data as List<File>).firstOrNull {
+                it.name.equals(seasonFolderName, true)
+            }
                 ?.toDriveFile()
         }
         return null
     }
 
     private suspend fun handleEpisodesInFolder(
-        episodes: List<Episode>,
-        seasonFolderId: String,
-        seasonDataModel: MutableList<Episode>
+        episodes: List<Episode>, seasonFolderId: String, seasonDataModel: MutableList<Episode>
     ) {
         val episodesInFolder = driveRepository.getAllFilesInFolder(
-            queryBuilder = DriveApiQueryBuilder()
-                .inParents(seasonFolderId)
-                .mimeTypeNotEquals("application/vnd.google-apps.folder")
-                .trashed(false)
+            queryBuilder = DriveApiQueryBuilder().inParents(seasonFolderId)
+                .mimeTypeNotEquals("application/vnd.google-apps.folder").trashed(false)
         )
 
         if (episodesInFolder is Resource.Success && episodesInFolder.data != null) {
-            processMatchingEpisodes(episodes, episodesInFolder.data, seasonDataModel)
+            processMatchingEpisodes(episodes, episodesInFolder.data as List<File>, seasonDataModel)
         } else {
             Log.d(TAG, "No files found in season folder")
             handleDefaultMapping(episodes, seasonDataModel)
@@ -351,13 +332,10 @@ class EpisodesViewModel @Inject constructor(
     }
 
     private fun processMatchingEpisodes(
-        episodes: List<Episode>,
-        filesInFolder: List<File>,
-        seasonDataModel: MutableList<Episode>
+        episodes: List<Episode>, filesInFolder: List<File>, seasonDataModel: MutableList<Episode>
     ) {
-        val episodeMap = buildEpisodeMap(
-            filesInFolder.map { it.toDriveFile() }.filter { it.isVideoFile }
-        )
+        val episodeMap =
+            buildEpisodeMap(filesInFolder.map { it.toDriveFile() }.filter { it.isVideoFile })
 
         var match = 0
         episodes.forEach { episode ->
@@ -369,8 +347,7 @@ class EpisodesViewModel @Inject constructor(
                 Log.d(TAG, "Found matching file for episode ${getEpisodePattern(episode)}")
                 seasonDataModel.add(
                     episode.copy(
-                        fileId = matchingEpisode.id,
-                        fileSize = matchingEpisode.humanSize
+                        fileId = matchingEpisode.id, fileSize = matchingEpisode.humanSize
                     )
                 )
                 match++
@@ -391,8 +368,7 @@ class EpisodesViewModel @Inject constructor(
     }
 
     private fun findMatchingEpisode(
-        episode: Episode,
-        episodeMap: Map<String, DriveFile>
+        episode: Episode, episodeMap: Map<String, DriveFile>
     ): DriveFile? {
         val episodePattern = getEpisodePattern(episode)
         return episodeMap[episodePattern]
@@ -415,8 +391,7 @@ class EpisodesViewModel @Inject constructor(
     }
 
     private fun handleDefaultMapping(
-        episodes: List<Episode>,
-        seasonDataModel: MutableList<Episode>
+        episodes: List<Episode>, seasonDataModel: MutableList<Episode>
     ) {
         Log.d(TAG, "Mapping attempt failed, using default")
         episodes.forEach { episode ->
@@ -428,15 +403,14 @@ class EpisodesViewModel @Inject constructor(
     val lastEpisode = _lastEpisode.asStateFlow()
 
     private suspend fun getLastWatchedEpisode(tmdbId: Int, seasonNumber: Int) {
-        watchedRepository.getLastWatchedEpisode(tmdbId, seasonNumber)
-            .stateIn(viewModelScope)
+        watchedRepository.getLastWatchedEpisode(tmdbId, seasonNumber).stateIn(viewModelScope)
             .collect { last ->
                 if (last == null) {
                     _lastEpisode.value = null
                 } else {
-                    _lastEpisode.value = (episodesWithWatched.value as? Resource.Success)?.data
-                        ?.firstOrNull { it.episode_number == last.episodeNumber }
-                        ?.takeIf { it.fileId != null }
+                    _lastEpisode.value =
+                        (episodesWithWatched.value as? Resource.Success)?.data?.firstOrNull { it.episode_number == last.episodeNumber }
+                            ?.takeIf { it.fileId != null }
                 }
             }
     }
@@ -445,26 +419,21 @@ class EpisodesViewModel @Inject constructor(
         episode.fileId ?: kotlin.run {
             Log.d(TAG, "EpisodesViewModel.startDownload requires fileId")
         }
-        val data = Data.Builder()
-            .putString(DownloadWorker.MEDIA_TYPE, MediaType.tv.name)
+        val data = Data.Builder().putString(DownloadWorker.MEDIA_TYPE, MediaType.tv.name)
             .putInt(DownloadWorker.TMDB_ID, tmdbId)
             .putInt(DownloadWorker.EPISODE_NUMBER, episode.episode_number)
             .putInt(DownloadWorker.SEASON_NUMBER, episode.season_number)
             .putString(DownloadWorker.FILE_ID, episode.fileId!!)
-            .putString(DownloadWorker.FILE_TITLE, title)
-            .build()
+            .putString(DownloadWorker.FILE_TITLE, title).build()
 
 
-        val downloadRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
-            .setInputData(data)
-            .addTag(episode.fileId)
-            .build()
+        val downloadRequest =
+            OneTimeWorkRequestBuilder<DownloadWorker>().setInputData(data).addTag(episode.fileId)
+                .build()
 
         val offlineRequest = OneTimeWorkRequestBuilder<OfflineDatabaseWorker>().build()
 
-        workManager.beginWith(downloadRequest)
-            .then(offlineRequest)
-            .enqueue()
+        workManager.beginWith(downloadRequest).then(offlineRequest).enqueue()
     }
 
     fun removeOffline(episode: Episode) = viewModelScope.launch(Dispatchers.IO) {

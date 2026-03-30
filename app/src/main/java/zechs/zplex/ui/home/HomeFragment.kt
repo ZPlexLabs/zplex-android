@@ -9,18 +9,21 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import zechs.zplex.R
+import zechs.zplex.core.navigation.navigateSafe
 import zechs.zplex.data.model.entities.WatchedShow
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.ui.home.adapter.HomeClickListener
 import zechs.zplex.ui.home.adapter.HomeDataAdapter
 import zechs.zplex.ui.home.adapter.HomeDataModel
+import zechs.zplex.ui.home.adapter.MenuType
 import zechs.zplex.ui.home.adapter.watched.WatchedDataModel
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
-import zechs.zplex.utils.ext.navigateSafe
+import zechs.zplex.zplex_api.data.remote.api.movies.LatestMovie
+import zechs.zplex.zplex_api.data.remote.api.suggestions.SuggestionMediaItem
+import zechs.zplex.zplex_api.data.remote.api.tvshows.LatestTvShow
 
 
 class HomeFragment : Fragment() {
@@ -55,17 +58,6 @@ class HomeFragment : Fragment() {
             isTitleCentered = false
             setTitleTextAppearance(context, R.style.homeTitleTextAppearance)
             title = resources.getString(R.string.app_name)
-//            inflateMenu(R.menu.main_menu)
-//            setOnMenuItemClickListener { item ->
-//                when (item.itemId) {
-//                    R.id.action_settings -> {
-//                        findNavController().navigateSafe(R.id.action_homeFragment_to_settingsFragment)
-//                        true
-//                    }
-//
-//                    else -> false
-//                }
-//            }
         }
 
         setupRecyclerView()
@@ -95,25 +87,40 @@ class HomeFragment : Fragment() {
     }
 
     private val homeClickListener = object : HomeClickListener {
-        override fun onClickMedia(media: Media) {
-            navigateToMedia(media)
+        //        override fun onClickMedia(media: Media) {
+//            navigateToMedia(media)
+//        }
+//
+//        override fun onClickWatched(watched: WatchedDataModel) {
+//            when (watched) {
+//                is WatchedDataModel.Movie -> navigateToMedia(watched.movie.toMedia())
+//                is WatchedDataModel.Show -> navigateToSeason(watched.show)
+//            }
+//        }
+//
+//        override fun onLongClickWatched(watched: WatchedDataModel) {
+//            MaterialAlertDialogBuilder(requireContext())
+//                .setTitle(getString(R.string.remove_from_watched))
+//                .setPositiveButton(getString(R.string.yes)) { _, _ ->
+//                    homeViewModel.removeWatchedMedia(watched)
+//                }
+//                .setNegativeButton(getString(R.string.no)) { _, _ -> }
+//                .show()
+//        }
+        override fun onClickMenu(type: MenuType) {
+            TODO("Not yet implemented")
         }
 
-        override fun onClickWatched(watched: WatchedDataModel) {
-            when (watched) {
-                is WatchedDataModel.Movie -> navigateToMedia(watched.movie.toMedia())
-                is WatchedDataModel.Show -> navigateToSeason(watched.show)
-            }
+        override fun onClickLatestShow(show: LatestTvShow) {
+            TODO("Not yet implemented")
         }
 
-        override fun onLongClickWatched(watched: WatchedDataModel) {
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle(getString(R.string.remove_from_watched))
-                .setPositiveButton(getString(R.string.yes)) { _, _ ->
-                    homeViewModel.removeWatchedMedia(watched)
-                }
-                .setNegativeButton(getString(R.string.no)) { _, _ -> }
-                .show()
+        override fun onClickLatestMovie(movie: LatestMovie) {
+            TODO("Not yet implemented")
+        }
+
+        override fun onClickSuggestionItem(suggestion: SuggestionMediaItem) {
+            TODO("Not yet implemented")
         }
     }
 

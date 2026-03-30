@@ -6,7 +6,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.tmdb.media.MovieResponse
-import zechs.zplex.data.model.tmdb.media.TvResponse
 
 @Entity(
     tableName = "movies",

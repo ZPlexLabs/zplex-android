@@ -1,5 +1,6 @@
 package zechs.zplex.utils.state
 
+import zechs.zplex.common.utils.Resource
 import java.io.IOException
 
 class ResourceExt {

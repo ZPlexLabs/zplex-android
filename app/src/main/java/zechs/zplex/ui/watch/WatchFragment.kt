@@ -14,6 +14,7 @@ import androidx.transition.TransitionManager
 import coil.load
 import dagger.hilt.android.AndroidEntryPoint
 import zechs.zplex.R
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.model.StillSize
 import zechs.zplex.data.model.tmdb.entities.Cast
 import zechs.zplex.data.model.tmdb.entities.Episode
@@ -21,8 +22,7 @@ import zechs.zplex.databinding.FragmentWatchBinding
 import zechs.zplex.ui.shared_adapters.casts.CastAdapter
 import zechs.zplex.ui.shared_viewmodels.EpisodeViewModel
 import zechs.zplex.utils.Constants.TMDB_IMAGE_PREFIX
-import zechs.zplex.utils.ext.navigateSafe
-import zechs.zplex.utils.state.Resource
+import zechs.zplex.core.navigation.navigateSafe
 
 @AndroidEntryPoint
 class WatchFragment : Fragment() {

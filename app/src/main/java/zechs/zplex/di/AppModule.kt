@@ -21,14 +21,6 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideGson(): Gson {
-        return GsonBuilder()
-            .serializeNulls()
-            .create()
-    }
-
-    @Singleton
-    @Provides
     fun provideSessionDataStore(
         @ApplicationContext appContext: Context,
         gson: Gson

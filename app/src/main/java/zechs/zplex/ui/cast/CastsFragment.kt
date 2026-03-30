@@ -17,13 +17,13 @@ import androidx.transition.TransitionManager
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.MaterialFadeThrough
 import zechs.zplex.R
+import zechs.zplex.common.utils.Resource
+import zechs.zplex.core.navigation.navigateSafe
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.FragmentListBinding
 import zechs.zplex.ui.cast.adapter.CastDataAdapter
 import zechs.zplex.ui.image.BigImageViewModel
-import zechs.zplex.utils.ext.navigateSafe
-import zechs.zplex.utils.state.Resource
 
 class CastsFragment : Fragment() {
 

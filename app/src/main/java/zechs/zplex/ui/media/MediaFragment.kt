@@ -40,6 +40,7 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.entities.Movie
 import zechs.zplex.data.model.entities.Show
@@ -57,8 +58,7 @@ import zechs.zplex.ui.media.adapter.MediaDataAdapter
 import zechs.zplex.ui.media.adapter.MediaDataModel
 import zechs.zplex.ui.player.MPVActivity
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
-import zechs.zplex.utils.ext.navigateSafe
-import zechs.zplex.utils.state.Resource
+import zechs.zplex.core.navigation.navigateSafe
 import zechs.zplex.utils.util.ColorManager.Companion.getContrastColor
 import zechs.zplex.utils.util.ColorManager.Companion.isDark
 import zechs.zplex.utils.util.ColorManager.Companion.lightUpColor
@@ -177,7 +177,10 @@ class MediaFragment : Fragment() {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mediaViewModel.observeMovieById(tmdbId).collect { offlineMovie ->
                     if (offlineMovie != null) {
-                        Log.d(TAG, "Received update for tmdbId=$tmdbId, filePath=${offlineMovie.filePath}")
+                        Log.d(
+                            TAG,
+                            "Received update for tmdbId=$tmdbId, filePath=${offlineMovie.filePath}"
+                        )
                         handleOfflineMovieUpdate(tmdbId, offlineMovie)
                     } else {
                         Log.d(TAG, "No movie found in DB for tmdbId=$tmdbId")
@@ -194,7 +197,10 @@ class MediaFragment : Fragment() {
 
         if (index != -1) {
             val oldItem = mediaDataAdapter.currentList[index] as MediaDataModel.MovieButton
-            Log.d(TAG, "Updating MovieButton at index=$index (old filePath=${oldItem.movie.fileId})")
+            Log.d(
+                TAG,
+                "Updating MovieButton at index=$index (old filePath=${oldItem.movie.fileId})"
+            )
 
             val updatedItem = oldItem.copy(
                 movie = oldItem.movie.copy(
@@ -358,7 +364,7 @@ class MediaFragment : Fragment() {
                     }
             }
 
-            override fun movieWatchNow(movie: Movie, year: Int?, studio :String?) {
+            override fun movieWatchNow(movie: Movie, year: Int?, studio: String?) {
                 if (mediaViewModel.hasLoggedIn) {
                     mediaViewModel.playMovie(movie, year, studio)
                 } else {

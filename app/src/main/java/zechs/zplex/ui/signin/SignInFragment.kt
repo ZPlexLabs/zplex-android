@@ -25,11 +25,11 @@ import com.google.android.material.transition.MaterialSharedAxis
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.databinding.FragmentSignInBinding
 import zechs.zplex.ui.code.DialogCode
 import zechs.zplex.utils.Constants.GUIDE_TO_MAKE_DRIVE_CLIENT
 import zechs.zplex.utils.ext.hideKeyboardWhenOffFocus
-import zechs.zplex.utils.state.Resource
 
 @AndroidEntryPoint
 class SignInFragment : Fragment() {
@@ -212,7 +212,7 @@ class SignInFragment : Fragment() {
                     val hasAlreadyLoggedIn = client != null
                     binding.apply {
                         if (hasAlreadyLoggedIn) {
-                            clientId.editText!!.setText(client!!.clientId)
+                            clientId.editText!!.setText(client.clientId)
                             clientSecret.editText!!.setText(client.clientSecret)
                             redirectUri.editText!!.setText(client.redirectUri)
                         }

@@ -14,12 +14,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import zechs.zplex.R
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.model.MediaType
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.FragmentUpcomingBinding
 import zechs.zplex.ui.shared_adapters.detailed_media.DetailedMediaAdapter
-import zechs.zplex.utils.ext.navigateSafe
-import zechs.zplex.utils.state.Resource
+import zechs.zplex.core.navigation.navigateSafe
 
 class UpcomingFragment : Fragment() {
 

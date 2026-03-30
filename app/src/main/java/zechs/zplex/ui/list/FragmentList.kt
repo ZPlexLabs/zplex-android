@@ -22,7 +22,7 @@ import zechs.zplex.ui.list.adapter.ListClickListener
 import zechs.zplex.ui.list.adapter.ListDataAdapter
 import zechs.zplex.ui.list.adapter.ListDataModel
 import zechs.zplex.ui.shared_viewmodels.SeasonViewModel
-import zechs.zplex.utils.ext.navigateSafe
+import zechs.zplex.core.navigation.navigateSafe
 
 class FragmentList : Fragment(), ListClickListener {
 

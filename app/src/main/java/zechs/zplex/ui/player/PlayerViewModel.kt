@@ -10,14 +10,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import zechs.zplex.common.utils.Resource
 import zechs.zplex.data.model.entities.WatchedMovie
 import zechs.zplex.data.model.entities.WatchedShow
 import zechs.zplex.data.model.tmdb.entities.Episode
-import zechs.zplex.data.repository.DriveRepository
 import zechs.zplex.data.repository.WatchedRepository
+import zechs.zplex.googledrive.data.repository.DriveRepository
 import zechs.zplex.ui.player.MPVActivity.Companion.TAG
 import zechs.zplex.utils.SessionManager
-import zechs.zplex.utils.state.Resource
 import java.util.Calendar
 import javax.inject.Inject
 
