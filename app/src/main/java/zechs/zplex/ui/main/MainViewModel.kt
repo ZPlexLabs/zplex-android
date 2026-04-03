@@ -1,84 +1,68 @@
 package zechs.zplex.ui.main
 
-import android.util.Base64
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import org.json.JSONObject
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import zechs.zplex.zplex_api.data.local.auth.AuthState
 import zechs.zplex.zplex_api.data.local.session.SessionStorage
 import zechs.zplex.zplex_api.data.local.user.UserStorage
-import java.nio.charset.Charset
-import java.util.Date
+import zechs.zplex.zplex_api.utils.TokenValidator
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val userStorage: UserStorage,
-    private val sessionStorage: SessionStorage
+    userStorage: UserStorage,
+    sessionStorage: SessionStorage,
+    private val tokenValidator: TokenValidator
 ) : ViewModel() {
 
     companion object {
-        private const val TAG = "MainViewModel"
+        private const val TAG = "ZPlexViewModel"
     }
 
-    private val _hasLoggedIn = MutableStateFlow(false)
-    val hasLoggedIn: StateFlow<Boolean> = _hasLoggedIn.asStateFlow()
+    val authState: StateFlow<AuthState> =
+        combine(
+            userStorage.userFlow(),
+            sessionStorage.accessTokenFlow(),
+            sessionStorage.refreshTokenFlow()
+        ) { user, accessToken, refreshToken ->
 
-    init {
-        checkUserSession()
-    }
+            Log.d(TAG, "Auth combine triggered")
 
-    private fun checkUserSession() {
-        viewModelScope.launch {
-            Log.d(TAG, "Checking user session...")
-            val isLoggedIn = isUserSessionValid()
-            Log.d(TAG, "User session valid: $isLoggedIn")
-            _hasLoggedIn.value = isLoggedIn
-        }
-    }
+            when {
+                user == null -> {
+                    Log.d(TAG, "AuthState -> LoggedOut (user null)")
+                    AuthState.LoggedOut
+                }
 
-    private suspend fun isUserSessionValid(): Boolean {
-        val user = userStorage.getUser()
-        val accessToken = sessionStorage.getAccessToken()
-        val refreshToken = sessionStorage.getRefreshToken()
+                accessToken.isNullOrEmpty() -> {
+                    Log.d(TAG, "AuthState -> LoggedOut (accessToken missing)")
+                    AuthState.LoggedOut
+                }
 
-        if (user == null || accessToken.isNullOrEmpty() || refreshToken.isNullOrEmpty()) {
-            Log.d(TAG, "One or more session values are missing. User not logged in.")
-            return false
-        }
+                refreshToken.isNullOrEmpty() -> {
+                    Log.d(TAG, "AuthState -> LoggedOut (refreshToken missing)")
+                    AuthState.LoggedOut
+                }
 
-        val refreshTokenValid = isTokenValid(refreshToken)
-        Log.d(TAG, "Refresh token valid: $refreshTokenValid")
+                !tokenValidator.isValid(accessToken) -> {
+                    Log.d(TAG, "AuthState -> LoggedOut (accessToken expired)")
+                    AuthState.LoggedOut
+                }
 
-        return refreshTokenValid
-    }
-
-    fun isTokenValid(token: String): Boolean {
-        return try {
-            val parts = token.split(".")
-            if (parts.size != 3) {
-                Log.e(TAG, "Token format invalid: does not have 3 parts")
-                return false
+                else -> {
+                    Log.d(TAG, "AuthState -> LoggedIn")
+                    AuthState.LoggedIn
+                }
             }
-
-            val payload = parts[1]
-            val decodedBytes = Base64.decode(payload, Base64.URL_SAFE or Base64.NO_WRAP)
-            val payloadJson = JSONObject(String(decodedBytes, Charset.forName("UTF-8")))
-
-            val exp = payloadJson.optLong("exp", 0L)
-            val now = Date().time / 1000
-
-            Log.d(TAG, "Token expiry: $exp, current time: $now")
-
-            now < exp
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to decode token", e)
-            false
-        }
-    }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = AuthState.Loading
+        )
 }
