@@ -28,6 +28,7 @@
             android:name="zechs.zplex.ui.main.MainActivity"
             android:configChanges="orientation"
             android:exported="true"
+            android:theme="@style/Theme.Zplex"
             android:windowSoftInputMode="adjustPan"
             tools:ignore="LockedOrientationActivity">
             <intent-filter>

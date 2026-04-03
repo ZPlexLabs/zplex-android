@@ -7,28 +7,28 @@
         android:icon="@drawable/ic_home_24"
         android:title="@string/home" />
 
-    <!--    <item-->
-    <!--        android:id="@+id/discoverFragment"-->
-    <!--        android:enabled="true"-->
-    <!--        android:icon="@drawable/ic_browse_24dp"-->
-    <!--        android:title="@string/discover" />-->
-
     <item
         android:id="@+id/searchFragment"
         android:enabled="true"
         android:icon="@drawable/ic_search"
         android:title="@string/search" />
 
-    <!--    <item-->
-    <!--        android:id="@+id/upcomingFragment"-->
-    <!--        android:enabled="true"-->
-    <!--        android:icon="@drawable/ic_upcoming_black_24dp"-->
-    <!--        android:title="@string/upcoming" />-->
+    <item
+        android:id="@+id/downloadsFragment"
+        android:enabled="true"
+        android:icon="@drawable/ic_downloads_24"
+        android:title="@string/downloads" />
 
     <item
-        android:id="@+id/myShowsFragment"
+        android:id="@+id/moviesFragment"
         android:enabled="true"
-        android:icon="@drawable/ic_library_24dp"
-        android:title="@string/library" />
+        android:icon="@drawable/ic_movies_24"
+        android:title="@string/movies" />
+
+    <item
+        android:id="@+id/tvShowsFragment"
+        android:enabled="true"
+        android:icon="@drawable/ic_tvshows_24"
+        android:title="@string/tv_shows" />
 
 </menu>

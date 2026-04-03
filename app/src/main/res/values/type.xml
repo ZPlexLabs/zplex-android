@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TextAppearance.Zplex.Title" parent="TextAppearance.Material3.TitleLarge">
+        <item name="fontFamily">@font/inter_bold</item>
+    </style>
+
+    <style name="TextAppearance.Zplex.Body" parent="TextAppearance.Material3.BodyMedium">
+        <item name="fontFamily">@font/inter</item>
+    </style>
+
+    <style name="TextAppearance.Zplex.Label" parent="TextAppearance.Material3.LabelMedium">
+        <item name="fontFamily">@font/inter_medium</item>
+    </style>
+
+</resources>

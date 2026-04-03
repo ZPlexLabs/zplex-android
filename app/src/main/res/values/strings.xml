@@ -128,4 +128,5 @@
 
     <string name="no_data_available_at_the_moment">No data available at the moment.</string>
     <string name="response_body_was_null">Response body was null.</string>
+    <string name="downloads">Downloads</string>
 </resources>

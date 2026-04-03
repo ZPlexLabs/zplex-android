@@ -1,6 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#000000</color>
+    <!-- Primary -->
+    <color name="primary">#7C4DFF</color>
+    <color name="onPrimary">#FFFFFF</color>
+
+    <!-- Material dark surfaces (IMPORTANT) -->
+    <color name="surface">#121212</color>
+    <color name="onSurface">#E6E1E5</color>
+
+    <color name="black">#000000</color>
+    <color name="divider">#1FFFFFFF</color>
+    <color name="white_87">#DEFFFFFF</color>
     <color name="colorPrimaryDark">#1E1E22</color>
     <color name="cardColor">#171717</color>
     <color name="colorAccent">#6750a4</color>
