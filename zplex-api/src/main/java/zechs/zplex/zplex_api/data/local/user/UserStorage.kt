@@ -1,6 +1,7 @@
 package zechs.zplex.zplex_api.data.local.user
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -22,29 +23,74 @@ class UserStorage @Inject constructor(
     fun userFlow(): Flow<User?> {
         return dataStore.data
             .map { preferences ->
-                preferences[USER_KEY]?.let { json ->
-                    try {
-                        gson.fromJson(json, User::class.java)
-                    } catch (e: Exception) {
-                        null
-                    }
+                val json = preferences[USER_KEY]
+
+                if (json == null) {
+                    Log.d(TAG, "userFlow -> No user found")
+                    return@map null
+                }
+
+                try {
+                    val user = gson.fromJson(json, User::class.java)
+                    Log.d(TAG, "userFlow -> User loaded: ${user.username}")
+                    user
+                } catch (e: Exception) {
+                    Log.e(TAG, "userFlow -> Failed to parse user JSON", e)
+                    null
                 }
             }
             .distinctUntilChanged()
     }
 
     suspend fun saveUser(user: User) {
-        dataStore.edit {
-            it[USER_KEY] = gson.toJson(user)
+        try {
+            val json = gson.toJson(user)
+
+            dataStore.edit {
+                it[USER_KEY] = json
+            }
+
+            Log.d(TAG, "saveUser -> User saved: ${user.username}")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "saveUser -> Failed to save user", e)
         }
     }
 
     suspend fun getUser(): User? {
-        val json = dataStore.data.first()[USER_KEY] ?: return null
-        return gson.fromJson(json,User::class.java)
+        return try {
+            val json = dataStore.data.first()[USER_KEY]
+
+            if (json == null) {
+                Log.d(TAG, "getUser -> No user found")
+                return null
+            }
+
+            val user = gson.fromJson(json, User::class.java)
+            Log.d(TAG, "getUser -> User loaded: ${user.username}")
+            user
+
+        } catch (e: Exception) {
+            Log.e(TAG, "getUser -> Failed to read user", e)
+            null
+        }
+    }
+
+    suspend fun clearUser() {
+        try {
+            dataStore.edit {
+                it.remove(USER_KEY)
+            }
+            Log.d(TAG, "clearUser -> User cleared")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "clearUser -> Failed to clear user", e)
+        }
     }
 
     companion object {
+        private const val TAG = "UserStorage"
+
         private val Context.dataStore by preferencesDataStore("user")
         private val USER_KEY = stringPreferencesKey("user")
     }
