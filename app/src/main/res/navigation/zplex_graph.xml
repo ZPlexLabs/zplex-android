@@ -6,9 +6,9 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="zechs.zplex.ui.home.HomeFragment"
+        android:name="zechs.zplex.feature_home.ui.HomeFragment"
         android:label="Home"
-        tools:layout="@layout/fragment_list">
+        tools:layout="@layout/fragment_home">
         <action
             android:id="@+id/action_homeFragment_to_fragmentMedia"
             app:destination="@id/fragmentMedia" />

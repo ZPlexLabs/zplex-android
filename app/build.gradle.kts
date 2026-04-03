@@ -83,6 +83,7 @@ dependencies {
     )
     implementation(project(":common"))
     implementation(project(":feature-auth"))
+    implementation(project(":feature-home"))
     implementation(project(":googledrive"))
     implementation(project(":zplex-api"))
 

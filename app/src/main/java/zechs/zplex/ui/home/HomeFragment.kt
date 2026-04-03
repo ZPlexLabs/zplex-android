@@ -15,6 +15,7 @@ import zechs.zplex.core.navigation.navigateSafe
 import zechs.zplex.data.model.entities.WatchedShow
 import zechs.zplex.data.model.tmdb.entities.Media
 import zechs.zplex.databinding.FragmentListBinding
+import zechs.zplex.feature_home.ui.HomeFragmentDirections
 import zechs.zplex.ui.home.adapter.HomeClickListener
 import zechs.zplex.ui.home.adapter.HomeDataAdapter
 import zechs.zplex.ui.home.adapter.HomeDataModel
@@ -157,11 +158,11 @@ class HomeFragment : Fragment() {
     }
 
     private fun navigateToMedia(media: Media) {
-        HomeFragmentDirections
-            .actionHomeFragmentToFragmentMedia(media)
-            .also {
-                findNavController().navigateSafe(it)
-            }
+//        HomeFragmentDirections
+//            .actionHomeFragmentToFragmentMedia(media)
+//            .also {
+//                findNavController().navigateSafe(it)
+//            }
     }
 
     private fun isLoading(hide: Boolean) {
