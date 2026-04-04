@@ -197,4 +197,10 @@
         android:name="zechs.zplex.ui.episodes.SeasonsBottomSheetFragment"
         tools:layout="@layout/bottom_seasons_sheet_fragment" />
 
+    <fragment
+        android:id="@id/moviesFragment"
+        android:name="zechs.zplex.feature_movies.ui.MoviesFragment"
+        android:label="MoviesFragment"
+        tools:layout="@layout/fragment_movies" />
+
 </navigation>
