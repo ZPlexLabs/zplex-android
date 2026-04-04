@@ -203,4 +203,10 @@
         android:label="MoviesFragment"
         tools:layout="@layout/fragment_movies" />
 
+    <fragment
+        android:id="@id/tvShowsFragment"
+        android:name="zechs.zplex.feature_shows.ui.ShowsFragment"
+        android:label="ShowsFragment"
+        tools:layout="@layout/fragment_shows" />
+
 </navigation>
