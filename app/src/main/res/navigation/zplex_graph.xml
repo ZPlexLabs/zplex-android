@@ -209,4 +209,10 @@
         android:label="ShowsFragment"
         tools:layout="@layout/fragment_shows" />
 
+    <fragment
+        android:id="@+id/downloadsFragment"
+        android:name="zechs.zplex.feature_downloads.ui.DownloadsFragment"
+        android:label="DownloadsFragment"
+        tools:layout="@layout/fragment_downloads" />
+
 </navigation>
