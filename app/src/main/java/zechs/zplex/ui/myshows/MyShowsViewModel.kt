@@ -39,13 +39,13 @@ class MyShowsViewModel @Inject constructor(
     }
 
     val movies: LiveData<List<Movie>> = if (hasInternetConnection()) {
-        tmdbRepository.getSavedMovies()
+        tmdbRepository.getSavedMoviesAsLiveData()
     } else {
         offlineMovieDao.getAllMovies().map { it.map { tv -> tv.toMovie() } }
     }
 
     val shows: LiveData<List<Show>> = if (hasInternetConnection()) {
-        tmdbRepository.getSavedShows()
+        tmdbRepository.getSavedShowsAsLiveData()
     } else {
         offlineShowDao.getAllShows().map { it.map { tv -> tv.toShow() } }
     }

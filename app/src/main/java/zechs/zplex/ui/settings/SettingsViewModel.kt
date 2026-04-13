@@ -44,15 +44,15 @@ class SettingsViewModel @Inject constructor(
     fun logOut() = viewModelScope.launch(Dispatchers.IO) {
         _loading.value = true
         val savedMovies = async {
-            tmdbRepository.getSavedMovies().value?.map { movie ->
+            tmdbRepository.getSavedMovies().map { movie ->
                 async { tmdbRepository.upsertMovie(movie.copy(fileId = null)) }
-            }?.awaitAll()
+            }.awaitAll()
         }
 
         val savedShows = async {
-            tmdbRepository.getSavedShows().value?.map { show ->
+            tmdbRepository.getSavedShows().map { show ->
                 async { tmdbRepository.upsertShow(show.copy(fileId = null)) }
-            }?.awaitAll()
+            }.awaitAll()
         }
 
         savedMovies.await()

@@ -164,16 +164,19 @@ class RemoteLibraryRepository @Inject constructor(
         tmdbRepository.upsertMovie(newMovie)
     }
 
-    private suspend fun synchronizeLocalMoviesWithRemote(driveFiles: List<DriveFile>) {
-        tmdbRepository.getSavedMovies().value?.forEach { savedMovie ->
-            if (driveFiles.none { driveFile -> driveFile.id == savedMovie.fileId }) {
+    private suspend fun synchronizeLocalMoviesWithRemote(shows: List<DriveFile>) {
+        val savedMovies = tmdbRepository.getSavedMovies()
+
+        val remoteIds = shows.map { it.id }.toSet()
+
+        savedMovies.forEach { savedMovie ->
+            if (savedMovie.fileId !in remoteIds) {
                 Log.d(TAG, "Deleting movie: ${savedMovie.title} from the database.")
                 updateNotification("Deleting movie: ${savedMovie.title} from the database.")
                 tmdbRepository.deleteMovie(savedMovie.id)
             }
         }
     }
-
 
     override suspend fun indexShows() {
         Log.d(TAG, "Beginning indexing shows...")
@@ -290,8 +293,12 @@ class RemoteLibraryRepository @Inject constructor(
 
 
     private suspend fun synchronizeLocalShowsWithRemote(shows: List<DriveFile>) {
-        tmdbRepository.getSavedShows().value?.forEach { savedShow ->
-            if (shows.none { show -> show.id == savedShow.fileId }) {
+        val savedShows = tmdbRepository.getSavedShows()
+
+        val remoteIds = shows.map { it.id }.toSet()
+
+        savedShows.forEach { savedShow ->
+            if (savedShow.fileId !in remoteIds) {
                 Log.d(TAG, "Deleting show: ${savedShow.name} from the database.")
                 updateNotification("Deleting show: ${savedShow.name} from the database.")
                 tmdbRepository.deleteShow(savedShow.id)
