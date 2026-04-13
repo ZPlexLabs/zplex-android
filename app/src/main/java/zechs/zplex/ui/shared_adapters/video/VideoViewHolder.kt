@@ -2,6 +2,7 @@ package zechs.zplex.ui.shared_adapters.video
 
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.size.Precision
 import zechs.zplex.R
 import zechs.zplex.data.model.tmdb.entities.Video
 import zechs.zplex.databinding.ItemVideoBinding
@@ -15,6 +16,7 @@ class VideoViewHolder(
 
         itemBinding.apply {
             ivBackdrop.load(video.thumbUrl) {
+                precision(Precision.EXACT)
                 placeholder(R.drawable.no_thumb)
             }
 

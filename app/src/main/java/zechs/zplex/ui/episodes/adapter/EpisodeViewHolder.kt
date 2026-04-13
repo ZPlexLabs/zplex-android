@@ -6,6 +6,7 @@ import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.size.Precision
 import com.google.android.material.progressindicator.LinearProgressIndicator
 import zechs.zplex.R
 import zechs.zplex.data.model.StillSize
@@ -29,7 +30,10 @@ class EpisodeViewHolder(
 
             if (!episode.still_path.isNullOrEmpty()) {
                 val episodeThumb = "${TMDB_IMAGE_PREFIX}/${StillSize.original}${episode.still_path}"
-                ivThumb.load(episodeThumb) { placeholder(R.drawable.no_thumb) }
+                ivThumb.load(episodeThumb) {
+                    precision(Precision.EXACT)
+                    placeholder(R.drawable.no_thumb)
+                }
             }
 
             if (episode.progress == 0) {

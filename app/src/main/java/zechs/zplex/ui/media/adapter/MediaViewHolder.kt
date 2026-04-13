@@ -12,6 +12,7 @@ import androidx.viewbinding.ViewBinding
 import coil.load
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import coil.size.Precision
 import zechs.zplex.R
 import zechs.zplex.data.model.BackdropSize
 import zechs.zplex.data.model.PosterSize
@@ -65,11 +66,13 @@ sealed class MediaViewHolder(
             }
             itemBinding.apply {
                 ivPoster.load(posterUrl) {
+                    precision(Precision.EXACT)
                     placeholder(R.drawable.no_poster)
                     listener(imageRequestListener)
                 }
 
                 ivBackdrop.load(backdropUrl) {
+                    precision(Precision.EXACT)
                     placeholder(R.drawable.no_thumb)
                 }
 
@@ -123,6 +126,7 @@ sealed class MediaViewHolder(
             }
             itemBinding.apply {
                 ivSeasonPoster.load(seasonPosterUrl) {
+                    precision(Precision.EXACT)
                     placeholder(R.drawable.no_poster)
                 }
                 tvSeasonNumber.text = item.seasonName
@@ -145,6 +149,7 @@ sealed class MediaViewHolder(
                     "$TMDB_IMAGE_PREFIX/${BackdropSize.w780}${item.bannerPoster}"
                 }
                 ivBanner.load(bannerUrl) {
+                    precision(Precision.EXACT)
                     placeholder(R.drawable.no_thumb)
                 }
                 tvCollection.text = item.collectionName

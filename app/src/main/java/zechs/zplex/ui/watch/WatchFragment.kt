@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.transition.TransitionManager
 import coil.load
+import coil.size.Precision
 import dagger.hilt.android.AndroidEntryPoint
 import zechs.zplex.R
 import zechs.zplex.data.model.StillSize
@@ -111,6 +112,7 @@ class WatchFragment : Fragment() {
         }
 
         binding.ivBackdrop.load(episodeStillUrl) {
+            precision(Precision.EXACT)
             placeholder(R.drawable.no_thumb)
         }
 

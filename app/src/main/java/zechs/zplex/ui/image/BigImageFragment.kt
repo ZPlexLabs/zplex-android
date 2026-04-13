@@ -12,6 +12,7 @@ import coil.load
 import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import coil.size.Precision
 import com.google.android.material.transition.MaterialFadeThrough
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
@@ -56,6 +57,7 @@ class BigImageFragment : Fragment() {
             } else R.drawable.no_poster
 
             binding.bigImageView.load(imageUrl) {
+                precision(Precision.EXACT)
                 placeholder(R.drawable.no_poster)
                 listener(imageRequestListener)
             }

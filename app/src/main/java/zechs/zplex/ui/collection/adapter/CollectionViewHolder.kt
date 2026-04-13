@@ -4,6 +4,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import coil.load
+import coil.size.Precision
 import zechs.zplex.R
 import zechs.zplex.data.model.BackdropSize
 import zechs.zplex.data.model.PosterSize
@@ -32,6 +33,7 @@ sealed class CollectionViewHolder(
             itemBinding.apply {
                 tvName.text = item.title
                 ivBackdrop.load(backdropUrl) {
+                    precision(Precision.EXACT)
                     placeholder(R.drawable.no_thumb)
                     error(R.drawable.no_thumb)
                 }

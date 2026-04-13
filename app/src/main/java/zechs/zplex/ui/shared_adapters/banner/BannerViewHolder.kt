@@ -2,6 +2,7 @@ package zechs.zplex.ui.shared_adapters.banner
 
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.size.Precision
 import zechs.zplex.R
 import zechs.zplex.data.model.BackdropSize
 import zechs.zplex.data.model.tmdb.entities.Media
@@ -29,11 +30,13 @@ class BannerViewHolder(
             tvRatingText.text = ratingText
 
             ivBanner.load(mediaBannerUrl) {
+                precision(Precision.EXACT)
                 placeholder(R.drawable.no_thumb)
                 transformations(BlurTransformation(25, 1f))
             }
 
             ivMainBanner.load(mediaBannerUrl) {
+                precision(Precision.EXACT)
                 placeholder(R.drawable.no_thumb)
             }
 

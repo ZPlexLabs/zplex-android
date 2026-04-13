@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
 import coil.load
+import coil.size.Precision
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -147,7 +148,12 @@ class EpisodesFragment : Fragment() {
 
     private fun showDeleteEpisodeDialog(episode: Episode) {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.confirm_delete_episode, episode.name ?: "Episode ${episode.episode_number}"))
+            .setTitle(
+                getString(
+                    R.string.confirm_delete_episode,
+                    episode.name ?: "Episode ${episode.episode_number}"
+                )
+            )
             .setPositiveButton(R.string.yes) { dialog, _ ->
                 episodesViewModel.removeOffline(episode)
                 dialog.dismiss()
@@ -229,7 +235,10 @@ class EpisodesFragment : Fragment() {
             }
         }
         sharedViewModel.selectedSeasonNumber.observe(viewLifecycleOwner) { seasonNumber ->
-            Log.d(TAG, "getSeasonWithWatched(tmdbId=${episodesViewModel.tmdbId}, seasonNumber=$seasonNumber)")
+            Log.d(
+                TAG,
+                "getSeasonWithWatched(tmdbId=${episodesViewModel.tmdbId}, seasonNumber=$seasonNumber)"
+            )
             episodesViewModel.selectSeason(seasonNumber)
         }
 
@@ -268,7 +277,10 @@ class EpisodesFragment : Fragment() {
             val itemBinding = binding.seasonHeader
             if (!header.seasonPosterPath.isNullOrBlank()) {
                 val posterUrl = "${TMDB_IMAGE_PREFIX}/${PosterSize.w780}${header.seasonPosterPath}"
-                itemBinding.ivPoster.load(posterUrl) { placeholder(R.drawable.no_poster) }
+                itemBinding.ivPoster.load(posterUrl) {
+                    precision(Precision.EXACT)
+                    placeholder(R.drawable.no_poster)
+                }
             }
 
             val overviewText = header.seasonOverview

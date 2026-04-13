@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import coil.load
+import coil.size.Precision
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import zechs.zplex.R
@@ -44,6 +45,7 @@ sealed class CastViewHolder(
             }
             itemBinding.apply {
                 ivPoster.load(posterUrl) {
+                    precision(Precision.EXACT)
                     placeholder(R.drawable.no_poster)
                 }
                 tvName.text = item.name

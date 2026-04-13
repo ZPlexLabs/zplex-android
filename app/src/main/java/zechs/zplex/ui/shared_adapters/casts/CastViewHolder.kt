@@ -2,6 +2,7 @@ package zechs.zplex.ui.shared_adapters.casts
 
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.size.Precision
 import zechs.zplex.R
 import zechs.zplex.data.model.ProfileSize
 import zechs.zplex.data.model.tmdb.entities.Cast
@@ -21,6 +22,7 @@ class CastViewHolder(
         }
         itemBinding.apply {
             actorImage.load(imageUrl) {
+                precision(Precision.EXACT)
                 placeholder(R.drawable.no_actor)
             }
             actorName.text = cast.name

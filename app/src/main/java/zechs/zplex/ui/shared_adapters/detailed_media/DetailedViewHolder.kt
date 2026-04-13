@@ -2,6 +2,7 @@ package zechs.zplex.ui.shared_adapters.detailed_media
 
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.size.Precision
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.data.model.tmdb.entities.Media
@@ -27,6 +28,7 @@ class DetailedViewHolder(
             }
 
             ivPoster.load(posterUrl) {
+                precision(Precision.EXACT)
                 placeholder(R.drawable.no_poster)
             }
 

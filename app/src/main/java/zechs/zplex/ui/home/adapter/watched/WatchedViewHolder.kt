@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.size.Precision
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.databinding.ItemWatchedBinding
@@ -68,6 +69,7 @@ class WatchedViewHolder(
 
                     ivPoster.load(mediaPosterUrl) {
                         placeholder(R.drawable.no_poster)
+                        precision(Precision.EXACT)
 
                         listener(
                             onError = { request, throwable ->
@@ -112,6 +114,7 @@ class WatchedViewHolder(
                     tvName.text = movie.name
                     watchedProgress.setProgressCompat(movie.watchProgress(), true)
                     ivPoster.load(mediaPosterUrl) {
+                        precision(Precision.EXACT)
                         placeholder(R.drawable.no_poster)
                         listener(
                             onError = { request, throwable ->

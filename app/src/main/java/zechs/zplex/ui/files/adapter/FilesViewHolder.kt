@@ -4,6 +4,7 @@ import androidx.core.view.isGone
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import coil.load
+import coil.size.Precision
 import zechs.zplex.R
 import zechs.zplex.databinding.ItemDriveFileBinding
 import zechs.zplex.databinding.ItemLoadingBinding
@@ -25,6 +26,7 @@ sealed class FilesViewHolder(
                 val iconLink = item.iconLink128 ?: R.drawable.ic_my_drive_24
 
                 ivFileType.load(iconLink) {
+                    precision(Precision.EXACT)
                     placeholder(R.drawable.ic_my_drive_24)
                     size(48, 48)
                 }

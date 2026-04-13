@@ -2,6 +2,7 @@ package zechs.zplex.ui.shared_adapters.season
 
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import coil.size.Precision
 import zechs.zplex.R
 import zechs.zplex.data.model.PosterSize
 import zechs.zplex.data.model.tmdb.entities.Season
@@ -23,6 +24,7 @@ class SeasonViewHolder(
             }
 
             ivPoster.load(seasonPosterUrl) {
+                precision(Precision.EXACT)
                 placeholder(R.drawable.no_poster)
             }
 
