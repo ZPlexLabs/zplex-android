@@ -2,6 +2,9 @@ package zechs.zplex.ui.folder_picker
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,7 +32,19 @@ class FolderPickerActivity : AppCompatActivity() {
             R.id.folderPickerNavHostFragment
         ) as NavHostFragment
         navController = navHostFragment.navController
-
+        ViewCompat.setOnApplyWindowInsetsListener(binding.linearLayout) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars()
+                        or WindowInsetsCompat.Type.displayCutout()
+            )
+            view.updatePadding(
+                left = bars.left,
+                top = bars.top,
+                right = bars.right,
+                bottom = bars.bottom,
+            )
+            WindowInsetsCompat.CONSUMED
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
