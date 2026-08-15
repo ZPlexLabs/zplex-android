@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -18,12 +19,17 @@ enum class TopLevelDestination(
     MOVIES("movies", "Movies", Icons.Filled.Movie),
     SHOWS("shows", "Shows", Icons.Filled.Tv),
     SEARCH("search", "Search", Icons.Filled.Search),
-    DOWNLOADS("downloads", "Downloads", Icons.Filled.Download)
+    DOWNLOADS("downloads", "Downloads", Icons.Filled.Download),
+    ACCOUNT("account", "Account", Icons.Filled.Person)
 }
 
 /** Shared destinations reachable from any top-level screen. */
 object ZplexRoutes {
     const val DETAIL = "detail/{mediaType}/{tmdbId}"
+    const val HISTORY = "history"
+    const val ADMIN = "admin"
+    const val PROFILES = "profiles"
+    const val KIDS_MODE = "kids-mode"
 
     fun detail(mediaType: String, tmdbId: Int) = "detail/$mediaType/$tmdbId"
 }

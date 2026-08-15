@@ -8,11 +8,15 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import zechs.zplex.common.ui.theme.ThemeMode
+import zechs.zplex.common.ui.theme.ThemeViewModel
 import zechs.zplex.common.ui.theme.ZplexTheme
 
 /**
@@ -21,9 +25,11 @@ import zechs.zplex.common.ui.theme.ZplexTheme
  */
 @Composable
 fun ZplexAppShell(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    themeViewModel: ThemeViewModel = hiltViewModel()
 ) {
-    ZplexTheme {
+    val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
+    ZplexTheme(darkTheme = themeMode.resolveIsDark()) {
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = backStackEntry?.destination
         val isTopLevel = TopLevelDestination.entries.any { destination ->
@@ -63,4 +69,11 @@ private fun NavHostController.navigateToTopLevel(destination: TopLevelDestinatio
         launchSingleTop = true
         restoreState = true
     }
+}
+
+@Composable
+private fun ThemeMode.resolveIsDark(): Boolean = when (this) {
+    ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+    ThemeMode.LIGHT -> false
+    ThemeMode.DARK -> true
 }

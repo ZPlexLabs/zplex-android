@@ -91,6 +91,7 @@ dependencies {
     implementation(project(":feature-downloads"))
     implementation(project(":feature-player"))
     implementation(project(":feature-search"))
+    implementation(project(":feature-settings"))
     implementation(project(":googledrive"))
     implementation(project(":zplex-api"))
 
@@ -188,6 +189,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.activity:activity-compose:$androidXActivity")
     implementation("androidx.navigation:navigation-compose:$navigationVersion")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // --- WorkManager ---
     implementation("androidx.work:work-runtime-ktx:$workVersion")

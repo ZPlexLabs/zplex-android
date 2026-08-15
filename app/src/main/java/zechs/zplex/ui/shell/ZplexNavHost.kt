@@ -1,6 +1,10 @@
 package zechs.zplex.ui.shell
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -15,6 +19,7 @@ import zechs.zplex.feature_movies.browse.ShowsBrowseRoute
 import zechs.zplex.feature_movies.detail.DetailRoute
 import zechs.zplex.feature_player.PlayerActivity
 import zechs.zplex.feature_search.search.SearchRoute
+import zechs.zplex.feature_settings.account.AccountRoute
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
 
 /** Navigation-Compose graph wiring the top-level and shared destinations. */
@@ -64,6 +69,14 @@ fun ZplexNavHost(
                 onOpenPlayer = { args -> context.startActivity(PlayerActivity.newIntent(context, args)) }
             )
         }
+        composable(TopLevelDestination.ACCOUNT.route) {
+            AccountRoute(
+                onOpenHistory = { navController.navigate(ZplexRoutes.HISTORY) },
+                onOpenAdmin = { navController.navigate(ZplexRoutes.ADMIN) }
+            )
+        }
+        composable(ZplexRoutes.HISTORY) { PlaceholderScreen("Watch history") }
+        composable(ZplexRoutes.ADMIN) { PlaceholderScreen("Admin") }
 
         composable(
             route = ZplexRoutes.DETAIL,
@@ -81,5 +94,12 @@ fun ZplexNavHost(
                 onBack = { navController.popBackStack() }
             )
         }
+    }
+}
+
+@Composable
+private fun PlaceholderScreen(label: String) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text(label)
     }
 }

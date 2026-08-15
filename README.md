@@ -260,6 +260,17 @@ The `:feature-downloads` Compose module renders the **Downloads** top-level tab.
 * **Download trigger** — the detail screen's *Download* action enqueues a `DownloadRequest` (the movie's playable file, or a show's next-up/first-available episode) via `DownloadRepository`.
 * **Offline playback** — `PlayerViewModel.resolveStream()` first checks `DownloadRepository.completedFile(fileId)`; if a finished local file exists it plays that path directly (no grant, no network), otherwise it falls back to a stream grant. This makes downloaded titles play automatically whether or not the device is online.
 
+### Account / Settings
+
+The `:feature-settings` Compose module renders the **Account** top-level tab (`AccountViewModel`/`AccountScreen`, MVI):
+
+* **Profile** — name, `@username`, and an "Adult content enabled" flag read from `UserStorage.userFlow()`.
+* **Capabilities** — the user's own `capabilities: List<Int>` resolved to labels via `ConfigStorage.getCapabilities()` (the server-driven `Capability{id,label,description}` catalog), rendered as chips. There's no self-service endpoint for a user's own library/rating access (`allowedLibraries`/`maxRatingRank`/`allowUnrated` are only returned by the admin-only user list), so non-admins see capabilities only — full access details are visible to admins via the Admin screen.
+* **Theme** — a `SingleChoiceSegmentedButtonRow` (System/Light/Dark) backed by `ThemePrefsStore` (`:common`, Preferences DataStore). `ZplexAppShell` collects the same store via a small `ThemeViewModel` and passes `darkTheme` to `ZplexTheme`, so the toggle applies instantly app-wide.
+* **Server info** — the configured `streamingHost` and the app's `versionName` (read from `PackageManager` at runtime, avoiding a cross-module `BuildConfig` dependency).
+* **Logout** — confirm dialog clears `SessionStorage`/`UserStorage`; `MainActivity`'s reactive `AuthState` collector then flips back to the legacy login flow automatically.
+* **Hub rows** — Watch history and Admin (the latter only shown when the user holds the `UPDATE_USERS_CAPABILITIES` capability) navigate to shared routes; Switch profile and Kids mode are present as rows pending their own milestones.
+
 ---
 
 ## 🎥 Streaming Architecture
