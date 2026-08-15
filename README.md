@@ -190,6 +190,15 @@ The `:feature-home` `home` package renders the Emby-style home screen in Compose
 
 ---
 
+### Browse (Movies & Shows)
+
+The `:feature-movies` `browse` package hosts one generic, `MediaType`-parameterised browse feature reused by both the Movies and Shows destinations:
+
+* **Paging3 data layer (`:zplex-api`)** — `MediaListPagingSource` wraps the page-numbered `movies`/`tvShows` endpoints (`PaginatedResponse` → `PagingSource`, stopping when `pageNumber >= pageCount`). `FilterQuery` holds the selected genre/rating/studio/year selections and renders them to the backend `filterBy` grammar. `BrowsePrefsStore` (Preferences DataStore) persists the sort, order, and filter selection per `MediaType`.
+* **`BrowseViewModel` (MVI)** — an abstract base driving a `cachedIn` `Pager` flow off a sort/order/filter query `StateFlow`; changing the sort or filter re-issues the pager. Filter chip sections are derived from the cached server `ConfigResponse`. `MoviesBrowseViewModel`/`ShowsBrowseViewModel` supply the matching repository. Selections are restored from `BrowsePrefsStore` on start and saved on every change.
+
+---
+
 ## API Wiring (`:zplex-api`)
 
 The `:zplex-api` module hosts Retrofit interfaces and repositories for the backend:
