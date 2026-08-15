@@ -1,10 +1,6 @@
 package zechs.zplex.ui.shell
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -13,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import zechs.zplex.feature_home.home.HomeRoute
+import zechs.zplex.feature_downloads.downloads.DownloadsRoute
 import zechs.zplex.feature_movies.browse.MoviesBrowseRoute
 import zechs.zplex.feature_movies.browse.ShowsBrowseRoute
 import zechs.zplex.feature_movies.detail.DetailRoute
@@ -62,7 +59,11 @@ fun ZplexNavHost(
                 }
             )
         }
-        composable(TopLevelDestination.DOWNLOADS.route) { PlaceholderScreen("Downloads") }
+        composable(TopLevelDestination.DOWNLOADS.route) {
+            DownloadsRoute(
+                onOpenPlayer = { args -> context.startActivity(PlayerActivity.newIntent(context, args)) }
+            )
+        }
 
         composable(
             route = ZplexRoutes.DETAIL,
@@ -80,12 +81,5 @@ fun ZplexNavHost(
                 onBack = { navController.popBackStack() }
             )
         }
-    }
-}
-
-@Composable
-private fun PlaceholderScreen(label: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(label)
     }
 }

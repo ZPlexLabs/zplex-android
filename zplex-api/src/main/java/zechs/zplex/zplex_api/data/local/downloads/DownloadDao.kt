@@ -17,6 +17,9 @@ interface DownloadDao {
     @Query("SELECT * FROM downloads WHERE id = :id")
     suspend fun getById(id: String): DownloadEntity?
 
+    @Query("SELECT * FROM downloads WHERE fileId = :fileId AND status = 'COMPLETED' LIMIT 1")
+    suspend fun getCompletedByFileId(fileId: String): DownloadEntity?
+
     @Upsert
     suspend fun upsert(entity: DownloadEntity)
 

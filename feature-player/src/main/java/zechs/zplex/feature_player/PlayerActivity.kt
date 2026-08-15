@@ -128,10 +128,12 @@ class PlayerActivity : ComponentActivity(), MPVLib.EventObserver {
         lifecycleScope.launch {
             when (val result = viewModel.resolveStream(item.fileId)) {
                 is StreamResult.Ready -> {
-                    MPVLib.setOptionString(
-                        "http-header-fields",
-                        "Authorization: Bearer ${result.grant}"
-                    )
+                    if (!result.isLocal) {
+                        MPVLib.setOptionString(
+                            "http-header-fields",
+                            "Authorization: Bearer ${result.grant}"
+                        )
+                    }
                     if (resume && args.startPositionMs > 0) {
                         MPVLib.setOptionString("start", (args.startPositionMs / 1000).toString())
                     } else {

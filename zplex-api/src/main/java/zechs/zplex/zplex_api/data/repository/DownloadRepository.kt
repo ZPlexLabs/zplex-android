@@ -29,6 +29,12 @@ class DownloadRepository @Inject constructor(
 
     fun observeDownload(id: String): Flow<DownloadEntity?> = downloadDao.observeById(id)
 
+    /** Returns the completed local file for a fileId, or null if not downloaded. */
+    suspend fun completedFile(fileId: String): File? {
+        val entity = downloadDao.getCompletedByFileId(fileId) ?: return null
+        return entity.filePath?.let { File(it) }?.takeIf { it.exists() }
+    }
+
     suspend fun enqueue(request: DownloadRequest) {
         val now = System.currentTimeMillis()
         val existing = downloadDao.getById(request.id)

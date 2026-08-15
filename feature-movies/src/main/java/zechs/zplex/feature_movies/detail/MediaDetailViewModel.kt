@@ -20,6 +20,8 @@ import zechs.zplex.zplex_api.data.remote.api.movies.MovieDetails
 import zechs.zplex.zplex_api.data.remote.api.playlist.model.PlaylistItemRequest
 import zechs.zplex.zplex_api.data.remote.api.playlist.model.PlaylistResponse
 import zechs.zplex.zplex_api.data.remote.api.tvshows.TvShowDetails
+import zechs.zplex.zplex_api.data.download.DownloadRequest
+import zechs.zplex.zplex_api.data.repository.DownloadRepository
 import zechs.zplex.zplex_api.data.repository.MeRepository
 import zechs.zplex.zplex_api.data.repository.MoviesRepository
 import zechs.zplex.zplex_api.data.repository.PlaylistRepository
@@ -31,7 +33,8 @@ class MediaDetailViewModel @Inject constructor(
     private val moviesRepository: MoviesRepository,
     private val tvShowsRepository: TvShowsRepository,
     private val meRepository: MeRepository,
-    private val playlistRepository: PlaylistRepository
+    private val playlistRepository: PlaylistRepository,
+    private val downloadRepository: DownloadRepository
 ) : MviViewModel<DetailState, DetailAction, DetailEvent>(DetailState()) {
 
     private var loadedKey: Pair<MediaType, Int>? = null
@@ -54,7 +57,7 @@ class MediaDetailViewModel @Inject constructor(
                 ?.let { sendEvent(DetailEvent.OpenUrl(it)) }
                 ?: sendEvent(DetailEvent.ShowMessage("No trailer available"))
 
-            DetailAction.Download -> sendEvent(DetailEvent.ShowMessage("Downloads arrive in a later milestone"))
+            DetailAction.Download -> download()
             DetailAction.ShowPlaylistPicker -> setState { copy(showPlaylistPicker = true) }
             DetailAction.DismissPlaylistPicker -> setState { copy(showPlaylistPicker = false) }
             is DetailAction.AddToPlaylist -> addToPlaylist(action.playlistId)
@@ -250,6 +253,58 @@ class MediaDetailViewModel @Inject constructor(
                 }
                 playEpisode(startRow)
             }
+        }
+    }
+
+    private fun download() {
+        val header = currentState.header
+        when (currentState.mediaType) {
+            MediaType.MOVIE -> {
+                val fileId = currentState.playableFileId
+                if (fileId == null) {
+                    sendEvent(DetailEvent.ShowMessage("This title is not available to download"))
+                    return
+                }
+                enqueueDownload(
+                    DownloadRequest(
+                        fileId = fileId,
+                        tmdbId = currentState.tmdbId,
+                        mediaType = MediaType.MOVIE,
+                        title = header?.title.orEmpty(),
+                        posterPath = header?.posterUrl
+                    )
+                )
+            }
+
+            MediaType.SHOW -> {
+                val episode = (currentState.nextUp
+                    ?: currentState.episodes.firstOrNull { it.episode.fileId != null })?.episode
+                if (episode?.fileId == null) {
+                    sendEvent(DetailEvent.ShowMessage("Episode not available to download"))
+                    return
+                }
+                val season = episode.seasonNumber?.toInt() ?: 0
+                val number = episode.episodeNumber?.toInt() ?: 0
+                enqueueDownload(
+                    DownloadRequest(
+                        fileId = episode.fileId!!,
+                        tmdbId = currentState.tmdbId,
+                        mediaType = MediaType.SHOW,
+                        title = header?.title.orEmpty(),
+                        subtitle = episodeSubtitle(season, number, episode.title),
+                        seasonNumber = season,
+                        episodeNumber = number,
+                        posterPath = header?.posterUrl
+                    )
+                )
+            }
+        }
+    }
+
+    private fun enqueueDownload(request: DownloadRequest) {
+        viewModelScope.launch {
+            downloadRepository.enqueue(request)
+            sendEvent(DetailEvent.ShowMessage("Download started"))
         }
     }
 

@@ -10,11 +10,12 @@ import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
 import zechs.zplex.zplex_api.data.remote.api.me.model.PlayedRequest
 import zechs.zplex.zplex_api.data.remote.api.me.model.ProgressUpdateRequest
 import zechs.zplex.zplex_api.data.repository.MeRepository
+import zechs.zplex.zplex_api.data.repository.DownloadRepository
 import zechs.zplex.zplex_api.data.repository.StreamRepository
 import javax.inject.Inject
 
 sealed interface StreamResult {
-    data class Ready(val url: String, val grant: String) : StreamResult
+    data class Ready(val url: String, val grant: String, val isLocal: Boolean = false) : StreamResult
     data class Failed(val message: String) : StreamResult
 }
 
@@ -23,10 +24,14 @@ class PlayerViewModel @Inject constructor(
     private val streamRepository: StreamRepository,
     private val configStorage: ConfigStorage,
     private val prefsStore: PlayerPrefsStore,
-    private val meRepository: MeRepository
+    private val meRepository: MeRepository,
+    private val downloadRepository: DownloadRepository
 ) : ViewModel() {
 
     suspend fun resolveStream(fileId: String): StreamResult {
+        downloadRepository.completedFile(fileId)?.let {
+            return StreamResult.Ready(it.absolutePath, grant = "", isLocal = true)
+        }
         val host = configStorage.getConfig()?.streamingHost
             ?: return StreamResult.Failed("Streaming host is not configured")
         return when (val result = streamRepository.getStreamUrl(fileId, host)) {

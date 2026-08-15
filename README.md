@@ -252,6 +252,13 @@ The `:zplex-api` module hosts the download engine that fetches the **original fi
 * **Byte-resume** — pausing cancels the worker but keeps the `.part` file; resuming re-requests a grant and continues with an HTTP `Range` request from the last saved offset. If the server ignores the range and returns `200`, the partial file is discarded and the download restarts.
 * **Integration** — the worker is registered through the app's existing `DelegatingWorkerFactory`; the `download_client` OkHttp client uses no read/write timeout for long transfers.
 
+### Downloads UI & offline playback
+
+The `:feature-downloads` Compose module renders the **Downloads** top-level tab. `DownloadsViewModel` (MVI) observes `DownloadRepository.observeDownloads()`; `DownloadsScreen` lists each item with title/subtitle, a progress bar for active/paused transfers, a status line (queued, bytes, paused, size, or error), and total storage used in the app bar. Row actions map to the engine: **Pause/Cancel** while running, **Resume/Cancel** when paused or queued, **Retry/Delete** on failure, and **Play/Delete** once completed.
+
+* **Download trigger** — the detail screen's *Download* action enqueues a `DownloadRequest` (the movie's playable file, or a show's next-up/first-available episode) via `DownloadRepository`.
+* **Offline playback** — `PlayerViewModel.resolveStream()` first checks `DownloadRepository.completedFile(fileId)`; if a finished local file exists it plays that path directly (no grant, no network), otherwise it falls back to a stream grant. This makes downloaded titles play automatically whether or not the device is online.
+
 ---
 
 ## 🎥 Streaming Architecture
