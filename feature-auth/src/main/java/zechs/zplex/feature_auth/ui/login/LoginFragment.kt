@@ -12,11 +12,9 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.transition.MaterialSharedAxis
 import kotlinx.coroutines.launch
-import zechs.zplex.core.navigation.navigateSafe
 import zechs.zplex.core.ui.animation.MaterialMotionInterpolator
 import zechs.zplex.feature_auth.R
 import zechs.zplex.feature_auth.databinding.FragmentLoginBinding
@@ -59,10 +57,6 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.inputUsername.doAfterTextChanged { viewModel.onUsernameChanged(it.toString()) }
         binding.inputPassword.doAfterTextChanged { viewModel.onPasswordChanged(it.toString()) }
-
-        binding.btnSignup.setOnClickListener {
-            findNavController().navigateSafe(R.id.action_loginFragment_to_signupFragment)
-        }
 
         binding.inputPassword.setOnEditorActionListener { textView, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {

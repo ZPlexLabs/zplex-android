@@ -111,16 +111,5 @@
                 tools:visibility="visible" />
         </FrameLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSignup"
-            style="@style/Widget.Material3.Button.TextButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="16dp"
-            android:text="@string/create_an_account"
-            android:textAllCaps="false"
-            app:cornerRadius="6dp" />
-
     </LinearLayout>
 </ScrollView>
