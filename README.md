@@ -243,6 +243,15 @@ Catalog rails and server config are cached for offline use with a stale-while-re
 * **Config DataStore** — `ConfigStore` persists the `ConfigResponse` (filters + streaming host) via Preferences DataStore; `ConfigRepository` saves on each successful fetch and exposes `cachedConfig` for offline reads.
 * **SWR helper** — `networkBoundResource` (in `:common`) emits `CacheResource.Loading/Success/Error`, driven by `ConnectivityObserver` for the online check.
 
+### Offline downloads
+
+The `:zplex-api` module hosts the download engine that fetches the **original file** (never re-encoded) to internal app storage:
+
+* **Room `downloads`** — `DownloadsDatabase`/`DownloadDao` persist a `DownloadEntity` per item (stable `id` = `movie_<tmdbId>` or `show_<tmdbId>_s<season>_e<episode>`) tracking `status` (`QUEUED/RUNNING/PAUSED/COMPLETED/FAILED`), `downloadedBytes`/`totalBytes`, `filePath`, and media metadata. `DownloadRepository` exposes `observeDownloads()`, `enqueue()`, `pause()`, `resume()`, `cancel()`, and `delete()`.
+* **`MediaDownloadWorker`** — a WorkManager `CoroutineWorker` (unique work keyed by download `id`) that requests a fresh stream grant, streams `{streamingHost}/api/stream/{fileId}` with a `Bearer` token to `filesDir/zplex-downloads/<id>.part`, then renames to `<id>` on completion. It runs as a foreground service (`dataSync`) with a progress notification carrying **Pause**/**Cancel** actions handled by `DownloadControlReceiver`.
+* **Byte-resume** — pausing cancels the worker but keeps the `.part` file; resuming re-requests a grant and continues with an HTTP `Range` request from the last saved offset. If the server ignores the range and returns `200`, the partial file is discarded and the download restarts.
+* **Integration** — the worker is registered through the app's existing `DelegatingWorkerFactory`; the `download_client` OkHttp client uses no read/write timeout for long transfers.
+
 ---
 
 ## 🎥 Streaming Architecture

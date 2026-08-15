@@ -62,6 +62,10 @@
             android:name=".service.RemoteLibraryIndexingService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge" />
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
@@ -78,6 +82,9 @@
         </provider>
 
         <receiver android:name=".service.DownloadActionReceiver" />
+        <receiver
+            android:name="zechs.zplex.zplex_api.data.download.DownloadControlReceiver"
+            android:exported="false" />
         <receiver
             android:name=".ui.player.NotificationButtonReceiver"
             android:exported="false">

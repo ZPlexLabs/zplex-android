@@ -22,6 +22,7 @@ import zechs.zplex.service.DelegatingWorkerFactory
 import zechs.zplex.service.DownloadWorkerFactory
 import zechs.zplex.service.OfflineDatabaseWorkerFactory
 import zechs.zplex.utils.SessionManager
+import zechs.zplex.zplex_api.data.download.MediaDownloadWorkerFactory
 import javax.inject.Singleton
 
 @Module
@@ -72,12 +73,14 @@ object WorkerModule {
     fun provideDelegatingWorkerFactory(
         downloadWorkerFactory: DownloadWorkerFactory,
         offlineDatabaseWorkerFactory: OfflineDatabaseWorkerFactory,
-        cacheCleanupWorkerFactory: CacheCleanupWorkerFactory
+        cacheCleanupWorkerFactory: CacheCleanupWorkerFactory,
+        mediaDownloadWorkerFactory: MediaDownloadWorkerFactory
     ): DelegatingWorkerFactory {
         return DelegatingWorkerFactory(
             downloadWorkerFactory,
             offlineDatabaseWorkerFactory,
-            cacheCleanupWorkerFactory
+            cacheCleanupWorkerFactory,
+            mediaDownloadWorkerFactory
         )
     }
 

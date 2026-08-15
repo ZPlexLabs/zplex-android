@@ -4,12 +4,15 @@ import android.content.Context
 import androidx.work.ListenableWorker
 import androidx.work.WorkerFactory
 import androidx.work.WorkerParameters
+import zechs.zplex.zplex_api.data.download.MediaDownloadWorker
+import zechs.zplex.zplex_api.data.download.MediaDownloadWorkerFactory
 import javax.inject.Inject
 
 class DelegatingWorkerFactory @Inject constructor(
     private val downloadWorkerFactory: DownloadWorkerFactory,
     private val offlineDatabaseWorkerFactory: OfflineDatabaseWorkerFactory,
-    private val cacheCleanupWorkerFactory: CacheCleanupWorkerFactory
+    private val cacheCleanupWorkerFactory: CacheCleanupWorkerFactory,
+    private val mediaDownloadWorkerFactory: MediaDownloadWorkerFactory
 ) : WorkerFactory() {
 
     override fun createWorker(
@@ -18,6 +21,9 @@ class DelegatingWorkerFactory @Inject constructor(
         workerParameters: WorkerParameters
     ): ListenableWorker? {
         return when (workerClassName) {
+            MediaDownloadWorker::class.java.name ->
+                mediaDownloadWorkerFactory.createWorker(appContext, workerClassName, workerParameters)
+
             DownloadWorker::class.java.name ->
                 downloadWorkerFactory.createWorker(appContext, workerClassName, workerParameters)
 
