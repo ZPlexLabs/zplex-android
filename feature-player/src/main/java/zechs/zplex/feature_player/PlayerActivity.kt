@@ -50,6 +50,9 @@ class PlayerActivity : ComponentActivity(), MPVLib.EventObserver {
     private var durationSec = 0
 
     private var indicatorJob: Job? = null
+    private var heartbeatJob: Job? = null
+    private var upNextJob: Job? = null
+    private var markedPlayed = false
 
     private var hudState = mutableStateOf(PlayerHudState())
     private fun setHud(update: PlayerHudState.() -> PlayerHudState) {
@@ -102,8 +105,11 @@ class PlayerActivity : ComponentActivity(), MPVLib.EventObserver {
     }
 
     private fun loadItem(index: Int, resume: Boolean) {
+        sendProgress()
+        upNextJob?.cancel()
         currentIndex = index
         reachedRestart = false
+        markedPlayed = false
         val item = args.items[index]
         setHud {
             copy(
@@ -163,6 +169,8 @@ class PlayerActivity : ComponentActivity(), MPVLib.EventObserver {
         onPrev = { if (currentIndex > 0) loadItem(currentIndex - 1, resume = false) },
         onBrightnessDelta = { delta -> adjustBrightness(delta) },
         onVolumeDelta = { delta -> adjustVolume(delta) },
+        onCancelUpNext = { cancelUpNext() },
+        onPlayUpNextNow = { playUpNextNow() },
         onDismissError = { finish() }
     )
 
@@ -289,14 +297,20 @@ class PlayerActivity : ComponentActivity(), MPVLib.EventObserver {
 
     override fun eventProperty(property: String, value: Long) = runOnUiThread {
         when (property) {
-            "time-pos" -> setHud { copy(positionSec = value.toInt()) }
+            "time-pos" -> {
+                setHud { copy(positionSec = value.toInt()) }
+                maybeMarkPlayed(value.toInt())
+            }
             "duration" -> { durationSec = value.toInt(); setHud { copy(durationSec = value.toInt()) } }
             "demuxer-cache-time" -> setHud { copy(bufferedSec = value.toInt()) }
         }
     }
 
     override fun eventProperty(property: String, value: Boolean) = runOnUiThread {
-        if (property == "pause") setHud { copy(isPlaying = !value) }
+        if (property == "pause") {
+            setHud { copy(isPlaying = !value) }
+            if (value) sendProgress() else startHeartbeat()
+        }
     }
 
     override fun eventProperty(property: String, value: String) {}
@@ -312,6 +326,7 @@ class PlayerActivity : ComponentActivity(), MPVLib.EventObserver {
             MPV_EVENT_PLAYBACK_RESTART -> {
                 reachedRestart = true
                 setHud { copy(isBuffering = false) }
+                startHeartbeat()
             }
 
             MPV_EVENT_END_FILE -> {
@@ -329,14 +344,81 @@ class PlayerActivity : ComponentActivity(), MPVLib.EventObserver {
         }
     }
 
-    /** Overridden behaviour extended for auto-advance in H2. */
     private fun onPlaybackEnded() {
+        markPlayedNow()
+        sendProgress()
+        heartbeatJob?.cancel()
         if (currentIndex < args.items.lastIndex) {
-            loadItem(currentIndex + 1, resume = false)
+            startUpNextCountdown()
         }
     }
 
+    // ---- Progress / played ----
+
+    private fun startHeartbeat() {
+        heartbeatJob?.cancel()
+        heartbeatJob = lifecycleScope.launch {
+            while (true) {
+                delay(10_000)
+                sendProgress()
+            }
+        }
+    }
+
+    private fun sendProgress() {
+        if (!playerReady || durationSec <= 0) return
+        val item = currentItem
+        val pos = (player.timePos ?: return).toLong() * 1000
+        val dur = durationSec.toLong() * 1000
+        lifecycleScope.launch { viewModel.updateProgress(item, pos, dur) }
+    }
+
+    private fun maybeMarkPlayed(positionSec: Int) {
+        if (markedPlayed || durationSec <= 0) return
+        if (positionSec.toFloat() / durationSec >= 0.90f) markPlayedNow()
+    }
+
+    private fun markPlayedNow() {
+        if (markedPlayed) return
+        markedPlayed = true
+        val item = currentItem
+        lifecycleScope.launch { viewModel.markPlayed(item) }
+    }
+
+    // ---- Up next ----
+
+    private fun startUpNextCountdown() {
+        val next = args.items.getOrNull(currentIndex + 1) ?: return
+        upNextJob?.cancel()
+        upNextJob = lifecycleScope.launch {
+            for (remaining in UP_NEXT_SECONDS downTo 1) {
+                setHud { copy(upNext = UpNextState(next.title, remaining)) }
+                delay(1_000)
+            }
+            playUpNextNow()
+        }
+    }
+
+    private fun cancelUpNext() {
+        upNextJob?.cancel()
+        setHud { copy(upNext = null) }
+    }
+
+    private fun playUpNextNow() {
+        upNextJob?.cancel()
+        if (currentIndex < args.items.lastIndex) loadItem(currentIndex + 1, resume = false)
+    }
+
+    override fun onStop() {
+        sendProgress()
+        heartbeatJob?.cancel()
+        super.onStop()
+    }
+
     override fun onDestroy() {
+        sendProgress()
+        heartbeatJob?.cancel()
+        upNextJob?.cancel()
         if (playerReady) {
             player.removeObserver(this)
             player.destroy()
@@ -345,6 +427,8 @@ class PlayerActivity : ComponentActivity(), MPVLib.EventObserver {
     }
 
     companion object {
+        private const val UP_NEXT_SECONDS = 10
+
         fun newIntent(context: Context, args: PlayerArgs) =
             android.content.Intent(context, PlayerActivity::class.java)
                 .putExtra(PlayerArgs.EXTRA, args)
