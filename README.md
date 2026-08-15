@@ -185,6 +185,7 @@ The `:zplex-api` module hosts Retrofit interfaces and repositories for the backe
 * **Stream grants** — `StreamRepository` (see below).
 * **Watch state** — `MeApi`/`MeRepository`: progress (`PUT /api/me/progress`), continue-watching, history, watchlist, and played state under `/api/me/*`. Uses the shared `MediaType` enum (`SHOW`/`MOVIE`) and `SafeApiCaller.callUnit` for `204 No Content` responses.
 * **Playlists** — `PlaylistApi`/`PlaylistRepository`: list/create/rename/delete playlists and add/remove/reorder items under `/api/me/playlists/*`.
+* **Admin** — `AdminApi`/`AdminRepository`: list users, update capabilities/access, delete users, and manage per-user blacklists under `/api/auth/admin/*` (requires the `UPDATE_USERS_CAPABILITIES` capability).
 
 Shared credit models (`IdNamePair`, `Cast`, `Crew`, `Studio`) live under `data.remote.api.media`. Snake_case JSON fields are mapped with Moshi `@Json` names.
 

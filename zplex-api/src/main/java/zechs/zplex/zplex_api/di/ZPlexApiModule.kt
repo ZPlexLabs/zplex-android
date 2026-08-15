@@ -8,6 +8,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import zechs.zplex.zplex_api.data.remote.api.admin.AdminApi
 import zechs.zplex.zplex_api.data.remote.api.config.ConfigApi
 import zechs.zplex.zplex_api.data.remote.api.login.LoginApi
 import zechs.zplex.zplex_api.data.remote.api.me.MeApi
@@ -119,5 +120,11 @@ object ZPlexApiModule {
     @Singleton
     fun providePlaylistApi(@Named("zplex_retrofit") retrofit: Retrofit): PlaylistApi {
         return retrofit.create(PlaylistApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAdminApi(@Named("zplex_retrofit") retrofit: Retrofit): AdminApi {
+        return retrofit.create(AdminApi::class.java)
     }
 }
