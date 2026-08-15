@@ -12,6 +12,7 @@ import zechs.zplex.zplex_api.data.remote.api.config.ConfigApi
 import zechs.zplex.zplex_api.data.remote.api.login.LoginApi
 import zechs.zplex.zplex_api.data.remote.api.me.MeApi
 import zechs.zplex.zplex_api.data.remote.api.movies.MovieApi
+import zechs.zplex.zplex_api.data.remote.api.playlist.PlaylistApi
 import zechs.zplex.zplex_api.data.remote.api.stream.StreamApi
 import zechs.zplex.zplex_api.data.remote.api.token.TokenApi
 import zechs.zplex.zplex_api.data.remote.api.tvshows.TvShowApi
@@ -112,5 +113,11 @@ object ZPlexApiModule {
     @Singleton
     fun provideMeApi(@Named("zplex_retrofit") retrofit: Retrofit): MeApi {
         return retrofit.create(MeApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePlaylistApi(@Named("zplex_retrofit") retrofit: Retrofit): PlaylistApi {
+        return retrofit.create(PlaylistApi::class.java)
     }
 }
