@@ -41,6 +41,9 @@ dependencies {
     val moshiVersion = "1.15.2"
     val retrofitVersion = "3.0.0"
     val composeBomVersion = "2025.08.01"
+    val coroutinesVersion = "1.11.0"
+    val lifecycleVersion = "2.10.0"
+    val navigationComposeVersion = "2.9.7"
 
     // --- Networking ---
     implementation(platform("com.squareup.okhttp3:okhttp-bom:$okhttpVersion"))
@@ -80,6 +83,14 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.material3:material3-window-size-class")
+
+    // --- Coroutines / Lifecycle / Navigation (Compose) ---
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
+    implementation("androidx.navigation:navigation-compose:$navigationComposeVersion")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")

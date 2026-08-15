@@ -162,6 +162,19 @@ Feature modules should keep screen-specific state and navigation events local wh
 
 ---
 
+## Compose App Architecture
+
+The `:common` module defines a lightweight MVI contract for Compose screens:
+
+* `UiState`, `UiAction`, `UiEvent` — markers for immutable state, user intents, and one-off side effects.
+* `MviViewModel<S, A, E>` — exposes `state` as a `StateFlow`, one-off `events` as a `Flow` (via a buffered `Channel`), plus `setState`/`sendEvent`/`onAction` helpers.
+* `UiError` + `Result.fold` — map the shared `Result` type into UI-facing errors with a headline message and optional detail.
+* `ConnectivityObserver` (`NetworkConnectivityObserver`) — a `callbackFlow`-based online/offline stream over `ConnectivityManager`, provided via Hilt (`ConnectivityModule`).
+
+Navigation uses **Navigation-Compose**; feature ViewModels extend `MviViewModel` and render state with Compose, without Fragments or ViewBinding.
+
+---
+
 ## 🎥 Streaming Architecture
 
 ### Stream Grants
