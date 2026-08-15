@@ -179,7 +179,8 @@ The `zechs.zplex.ui.shell` package hosts the Compose navigation shell for the re
 
 * `ZplexAppShell` — wraps the app in `ZplexTheme` and a `NavigationSuiteScaffold` that renders a bottom bar on compact widths and a navigation rail on larger screens (via `currentWindowAdaptiveInfo()`), collapsing to `NavigationSuiteType.None` on full-screen detail/player destinations.
 * `TopLevelDestination` — the Home/Movies/Shows/Downloads tabs; `ZplexRoutes` defines the shared `detail/{mediaType}/{tmdbId}` destination. Playback is a separate full-screen `PlayerActivity` (in `:feature-player`) launched via `Intent` rather than a nav route.
-* `ZplexNavHost` — the Navigation-Compose graph. Placeholder screens stand in for the top-level and shared destinations until the feature Composables land.
+* `ZplexNavHost` — the Navigation-Compose graph hosting the top-level and shared destinations.
+* **Entry point** — `MainActivity` hosts a `ComposeView` (`composeShell`) that renders `ZplexAppShell` once `AuthState` is `LoggedIn`; while `LoggedOut` it shows the legacy `FragmentContainerView` running `feature-auth`'s login/signup/server fragment graph. The old fragment-based main graph (`R.navigation.zplex_graph`) is no longer used as the logged-in destination.
 
 ### Home
 

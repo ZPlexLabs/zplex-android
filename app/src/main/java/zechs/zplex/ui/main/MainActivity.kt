@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
@@ -21,11 +22,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import zechs.zplex.R
 import zechs.zplex.databinding.ActivityMainBinding
+import zechs.zplex.ui.shell.ZplexAppShell
 import zechs.zplex.zplex_api.data.local.auth.AuthState
 
 @AndroidEntryPoint
@@ -48,6 +49,15 @@ class MainActivity : AppCompatActivity() {
             R.id.mainNavHostFragment
         ) as NavHostFragment
         navController = navHostFragment.navController
+
+        binding.composeShell.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        )
+        binding.composeShell.setContent { ZplexAppShell() }
+        binding.bottomNavigationView.isGone = true
+        // Hidden until the first AuthState resolves, avoiding a Home flash during the splash.
+        binding.composeShell.isGone = true
+        binding.mainNavHostFragment.isGone = true
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
             val bars = insets.getInsets(
@@ -134,50 +144,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private var graphSet = false
+    private var authGraphSet = false
 
+    /** Logged in: the Compose shell owns navigation. Logged out: the legacy auth fragment graph. */
     private fun setGraph(isLoggedIn: Boolean) {
         Log.d(TAG, "AuthState -> isLoggedIn=$isLoggedIn")
 
-        val newGraph = navController.navInflater.inflate(
-            if (isLoggedIn) R.navigation.zplex_graph
-            else zechs.zplex.feature_auth.R.navigation.auth_nav_graph
-        )
+        binding.composeShell.isGone = !isLoggedIn
+        binding.mainNavHostFragment.isGone = isLoggedIn
 
-        val newGraphId = newGraph.id
-        Log.d(TAG, "GraphCheck -> newGraphId=$newGraphId")
-
-        if (graphSet) {
-            val currentGraphId = navController.graph.id
-            Log.d(TAG, "GraphCheck -> currentGraphId=$currentGraphId")
-
-            if (currentGraphId == newGraphId) {
-                Log.d(TAG, "GraphSwitch -> skipped (same graph)")
-                updateBottomNav(isLoggedIn)
-                return
-            }
-        } else {
-            Log.d(TAG, "GraphCheck -> no graph set yet")
-        }
-
-        Log.d(TAG, "GraphSwitch -> switching to ${if (isLoggedIn) "MAIN_GRAPH" else "AUTH_GRAPH"}")
-
-        navController.graph = newGraph
-        graphSet = true
-
-        updateBottomNav(isLoggedIn)
-    }
-
-    private fun updateBottomNav(isLoggedIn: Boolean) {
-        Log.d(TAG, "BottomNav -> isVisible=$isLoggedIn")
-
-        binding.bottomNavigationView.isGone = !isLoggedIn
-
-        if (isLoggedIn) {
-            Log.d(TAG, "BottomNav -> attaching with NavController")
-            binding.bottomNavigationView.setupWithNavController(navController)
-        } else {
-            Log.d(TAG, "BottomNav -> hidden, skipping setup")
+        if (!isLoggedIn && !authGraphSet) {
+            navController.graph = navController.navInflater.inflate(
+                zechs.zplex.feature_auth.R.navigation.auth_nav_graph
+            )
+            authGraphSet = true
         }
     }
 
