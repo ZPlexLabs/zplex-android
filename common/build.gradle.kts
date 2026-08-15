@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library")
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
@@ -27,6 +28,7 @@ android {
     }
     buildFeatures {
         buildConfig = true
+        compose = true
     }
 }
 
@@ -38,6 +40,7 @@ dependencies {
     val okhttpVersion = "5.4.0"
     val moshiVersion = "1.15.2"
     val retrofitVersion = "3.0.0"
+    val composeBomVersion = "2025.08.01"
 
     // --- Networking ---
     implementation(platform("com.squareup.okhttp3:okhttp-bom:$okhttpVersion"))
@@ -68,6 +71,15 @@ dependencies {
     implementation("androidx.core:core-ktx:1.18.0")
     implementation("androidx.appcompat:appcompat:1.8.0")
     implementation("com.google.android.material:material:1.14.0")
+    implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
+    implementation("androidx.compose.animation:animation")
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation("androidx.compose.material3:material3-window-size-class")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")

@@ -149,6 +149,63 @@ Key pinned dependency versions (latest stable, audited):
 
 ---
 
+## Compose Design System
+
+The shared `:common` module provides the Compose foundation for the adaptive Android rebuild:
+
+* `ZplexTheme` — light and dark Material 3 color schemes, typography, and shapes.
+* `ZplexMotion` — shared motion durations for consistent transitions.
+* `ZplexAdaptiveScaffold` — bottom navigation on compact widths and a navigation rail on larger widths using `WindowSizeClass`.
+* `ZplexLoadingState`, `ZplexEmptyState`, and `ZplexErrorState` — reusable loading, empty, and retryable error states.
+
+Feature modules should keep screen-specific state and navigation events local while reusing these primitives for consistent behavior across phone and tablet layouts.
+
+---
+
+## 🎥 Streaming Architecture
+
+### Stream Grants
+
+The app uses **short-lived stream grants** (valid ~2 minutes) to access media files through a Cloudflare Worker:
+
+1. **Request Grant**: Call `StreamRepository.getStreamUrl(fileId, streamingHost)` to obtain a signed JWT grant from the backend (`GET /api/stream/grant/{fileId}`).
+2. **Build URL**: The repository constructs the worker URL: `{streamingHost}/api/stream/{fileId}`.
+3. **Stream Content**: Use the grant as a Bearer token in the Authorization header when requesting the stream.
+
+The backend verifies that:
+- User has `STREAM` capability
+- File belongs to an allowed library
+- Content rating is permitted
+- File is not blacklisted
+
+The worker verifies:
+- JWT signature is valid
+- `fileId` in token matches the requested path
+- Grant has not expired
+
+**Usage example:**
+
+```kotlin
+// In a ViewModel or use case
+val streamingHost = configRepository.config().data.streamingHost
+val result = streamRepository.getStreamUrl(fileId, streamingHost)
+
+when (result) {
+    is Result.Success -> {
+        val (url, token) = result.data
+        // Pass url + token to player
+        // Player must set Authorization: Bearer {token}
+    }
+    is Result.Error -> {
+        // Handle 403 (access denied) or other errors
+    }
+}
+```
+
+> Grants expire after ~2 minutes. The player should re-request a grant on 401 responses to handle expiration.
+
+---
+
 ## 🔗 Related Projects
 
 * **[DriveStream](https://github.com/itszechs/DriveStream)** – A Google Drive client app with **MPV integration** for streaming video files.
