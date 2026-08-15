@@ -1,6 +1,5 @@
 package zechs.zplex.feature_home.home
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,13 +10,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
+import zechs.zplex.common.ui.snackbar.LocalSnackbarHostState
 import zechs.zplex.common.ui.state.ZplexEmptyState
 import zechs.zplex.common.ui.state.ZplexErrorState
 import zechs.zplex.common.ui.state.ZplexLoadingState
@@ -30,13 +32,14 @@ fun HomeRoute(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    androidx.compose.runtime.LaunchedEffect(Unit) {
+    val snackbarHostState = LocalSnackbarHostState.current
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is HomeEvent.NavigateToDetail -> onOpenDetail(event.mediaType, event.tmdbId)
                 is HomeEvent.ShowMessage ->
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    scope.launch { snackbarHostState.showSnackbar(event.message) }
             }
         }
     }

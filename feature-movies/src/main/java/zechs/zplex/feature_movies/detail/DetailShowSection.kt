@@ -1,5 +1,6 @@
 package zechs.zplex.feature_movies.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -144,7 +145,10 @@ private fun EpisodeItem(
                 model = TmdbImage.backdrop(episode.stillPath, size = "w300"),
                 contentDescription = episode.title,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().height(68.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(68.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             )
             Icon(
                 Icons.Filled.PlayArrow,

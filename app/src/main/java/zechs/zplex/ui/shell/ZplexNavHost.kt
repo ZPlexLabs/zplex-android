@@ -1,5 +1,10 @@
 package zechs.zplex.ui.shell
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +28,8 @@ import zechs.zplex.feature_admin.users.AdminUsersRoute
 import zechs.zplex.feature_admin.edit.AdminEditRoute
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
 
+private const val TRANSITION_DURATION_MS = 260
+
 /** Navigation-Compose graph wiring the top-level and shared destinations. */
 @Composable
 fun ZplexNavHost(
@@ -33,7 +40,17 @@ fun ZplexNavHost(
     NavHost(
         navController = navController,
         startDestination = TopLevelDestination.HOME.route,
-        modifier = modifier
+        modifier = modifier,
+        enterTransition = {
+            slideInHorizontally(tween(TRANSITION_DURATION_MS)) { it / 5 } +
+                fadeIn(tween(TRANSITION_DURATION_MS))
+        },
+        exitTransition = { fadeOut(tween(TRANSITION_DURATION_MS / 2)) },
+        popEnterTransition = { fadeIn(tween(TRANSITION_DURATION_MS)) },
+        popExitTransition = {
+            slideOutHorizontally(tween(TRANSITION_DURATION_MS)) { it / 5 } +
+                fadeOut(tween(TRANSITION_DURATION_MS))
+        }
     ) {
         composable(TopLevelDestination.HOME.route) {
             HomeRoute(

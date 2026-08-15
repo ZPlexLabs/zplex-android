@@ -228,6 +228,7 @@ private fun PosterGridItem(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .clip(RoundedCornerShape(10.dp))
                     .then(
                         if (selected) Modifier.padding(3.dp) else Modifier
@@ -290,6 +291,7 @@ internal fun DetailPaneContent(item: MediaListItem) {
             modifier = Modifier
                 .width(180.dp)
                 .aspectRatio(2f / 3f)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .clip(RoundedCornerShape(12.dp))
         )
         Text(

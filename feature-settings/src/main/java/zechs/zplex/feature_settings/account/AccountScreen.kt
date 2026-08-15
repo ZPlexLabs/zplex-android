@@ -33,11 +33,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
+import zechs.zplex.common.ui.snackbar.LocalSnackbarHostState
 import zechs.zplex.common.ui.state.ZplexLoadingState
 import zechs.zplex.common.ui.theme.ThemeMode
 
@@ -51,6 +56,8 @@ fun AccountRoute(
     viewModel: AccountViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = LocalSnackbarHostState.current
+    val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
@@ -58,7 +65,8 @@ fun AccountRoute(
                 AccountEvent.NavigateToAdmin -> onOpenAdmin()
                 AccountEvent.NavigateToProfiles -> onOpenProfiles()
                 AccountEvent.NavigateToKidsMode -> onOpenKidsMode()
-                is AccountEvent.ShowMessage -> Unit
+                is AccountEvent.ShowMessage ->
+                    scope.launch { snackbarHostState.showSnackbar(event.message) }
             }
         }
     }
@@ -112,12 +120,16 @@ fun AccountScreen(
     }
 
     if (state.showLogoutConfirm) {
+        val haptic = LocalHapticFeedback.current
         AlertDialog(
             onDismissRequest = { onAction(AccountAction.DismissLogoutConfirm) },
             title = { Text("Log out?") },
             text = { Text("You'll need to sign in again to continue watching.") },
             confirmButton = {
-                TextButton(onClick = { onAction(AccountAction.ConfirmLogout) }) { Text("Log out") }
+                TextButton(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onAction(AccountAction.ConfirmLogout)
+                }) { Text("Log out") }
             },
             dismissButton = {
                 TextButton(onClick = { onAction(AccountAction.DismissLogoutConfirm) }) { Text("Cancel") }

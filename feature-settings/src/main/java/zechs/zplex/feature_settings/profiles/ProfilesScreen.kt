@@ -27,6 +27,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -68,7 +70,8 @@ fun ProfilesScreen(
                     ProfileRow(
                         account = account,
                         isActive = account.username == state.activeUsername,
-                        onAction = onAction
+                        onAction = onAction,
+                        modifier = Modifier.animateItem()
                     )
                 }
                 item {
@@ -85,12 +88,16 @@ fun ProfilesScreen(
     }
 
     if (state.pendingRemoveUsername != null) {
+        val haptic = LocalHapticFeedback.current
         AlertDialog(
             onDismissRequest = { onAction(ProfilesAction.DismissRemove) },
             title = { Text("Remove @${state.pendingRemoveUsername}?") },
             text = { Text("You'll need to sign in again to add it back.") },
             confirmButton = {
-                TextButton(onClick = { onAction(ProfilesAction.ConfirmRemove) }) { Text("Remove") }
+                TextButton(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onAction(ProfilesAction.ConfirmRemove)
+                }) { Text("Remove") }
             },
             dismissButton = {
                 TextButton(onClick = { onAction(ProfilesAction.DismissRemove) }) { Text("Cancel") }
@@ -117,10 +124,11 @@ fun ProfilesScreen(
 private fun ProfileRow(
     account: SavedAccount,
     isActive: Boolean,
-    onAction: (ProfilesAction) -> Unit
+    onAction: (ProfilesAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(enabled = !isActive) { onAction(ProfilesAction.SwitchTo(account)) }
             .padding(horizontal = 16.dp, vertical = 12.dp)

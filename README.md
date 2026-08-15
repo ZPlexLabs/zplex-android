@@ -123,6 +123,15 @@ The `zechs.zplex.ui.shell` package hosts the Compose navigation shell for the re
 * `ZplexNavHost` — the Navigation-Compose graph hosting the top-level and shared destinations.
 * **Entry point** — `MainActivity` hosts a `ComposeView` (`composeShell`) that renders `ZplexAppShell` once `AuthState` is `LoggedIn`; while `LoggedOut` it shows the legacy `FragmentContainerView` running `feature-auth`'s login/signup/server fragment graph. The old fragment-based main graph (`R.navigation.zplex_graph`) is no longer used as the logged-in destination.
 
+### Polish
+
+* **Snackbars** — `LocalSnackbarHostState` (`:common`) is a `CompositionLocal<SnackbarHostState>` provided once by `ZplexAppShell`, which hosts a single `SnackbarHost` over the nav shell. Every screen's one-shot `ShowMessage` event calls `LocalSnackbarHostState.current` + `scope.launch { it.showSnackbar(...) }` instead of ad-hoc `Toast`s, so messages look and behave consistently app-wide.
+* **Navigation transitions** — `ZplexNavHost` sets a consistent slide+fade `enterTransition`/`popExitTransition` (push) and fade `exitTransition`/`popEnterTransition` (reveal) across all destinations.
+* **Haptics** — `LocalHapticFeedback` ticks on the Continue Watching long-press-to-remove gesture and on destructive confirm actions (logout, delete user, remove profile).
+* **List animations** — list rows with a stable `key` (Admin users, Downloads, History, Profiles, Search results, Home rails) apply `Modifier.animateItem()` for smooth insert/remove/reorder.
+* **Image placeholders** — every meaningful `AsyncImage` (poster/backdrop/still) paints `MaterialTheme.colorScheme.surfaceVariant` behind the image so loading/error states show a themed block instead of blank space; decorative overlays (e.g. title logos) are left transparent intentionally.
+* **Accessibility** — the Admin capability rows use `Modifier.toggleable` on the row with `Checkbox(onCheckedChange = null)` so TalkBack exposes one merged toggle target instead of two overlapping ones.
+
 ### Home
 
 The `:feature-home` `home` package renders the Emby-style home screen in Compose:

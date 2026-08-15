@@ -25,12 +25,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
+import zechs.zplex.common.ui.snackbar.LocalSnackbarHostState
 import zechs.zplex.common.ui.state.ZplexEmptyState
 import zechs.zplex.common.ui.state.ZplexErrorState
 import zechs.zplex.common.ui.state.ZplexLoadingState
@@ -45,11 +50,14 @@ fun AdminUsersRoute(
     viewModel: AdminUsersViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = LocalSnackbarHostState.current
+    val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is AdminUsersEvent.OpenUserEdit -> onOpenUser(event.username)
-                is AdminUsersEvent.ShowMessage -> Unit
+                is AdminUsersEvent.ShowMessage ->
+                    scope.launch { snackbarHostState.showSnackbar(event.message) }
             }
         }
     }
@@ -84,7 +92,11 @@ fun AdminUsersScreen(
                 )
             ) {
                 items(state.users, key = { it.username }) { user ->
-                    UserRow(user = user, onAction = onAction)
+                    UserRow(
+                        user = user,
+                        onAction = onAction,
+                        modifier = Modifier.animateItem()
+                    )
                     HorizontalDivider()
                 }
             }
@@ -93,12 +105,16 @@ fun AdminUsersScreen(
 
     val pending = state.pendingDeleteUsername
     if (pending != null) {
+        val haptic = LocalHapticFeedback.current
         AlertDialog(
             onDismissRequest = { onAction(AdminUsersAction.DismissDeleteConfirm) },
             title = { Text("Delete $pending?") },
             text = { Text("This permanently removes the account.") },
             confirmButton = {
-                TextButton(onClick = { onAction(AdminUsersAction.ConfirmDelete) }) { Text("Delete") }
+                TextButton(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onAction(AdminUsersAction.ConfirmDelete)
+                }) { Text("Delete") }
             },
             dismissButton = {
                 TextButton(onClick = { onAction(AdminUsersAction.DismissDeleteConfirm) }) { Text("Cancel") }
@@ -110,10 +126,11 @@ fun AdminUsersScreen(
 @Composable
 private fun UserRow(
     user: UserSummaryResponse,
-    onAction: (AdminUsersAction) -> Unit
+    onAction: (AdminUsersAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onAction(AdminUsersAction.OpenUser(user.username)) }
             .padding(horizontal = 16.dp, vertical = 12.dp),

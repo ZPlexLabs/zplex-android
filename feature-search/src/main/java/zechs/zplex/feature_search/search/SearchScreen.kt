@@ -142,15 +142,15 @@ private fun SearchList(
             }
         }
         items(items = items, key = { "${it.mediaType}_${it.tmdbId}" }) { item ->
-            SearchRow(item = item, onClick = { onOpen(item) })
+            SearchRow(item = item, onClick = { onOpen(item) }, modifier = Modifier.animateItem())
         }
     }
 }
 
 @Composable
-private fun SearchRow(item: SearchResultItem, onClick: () -> Unit) {
+private fun SearchRow(item: SearchResultItem, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 12.dp),

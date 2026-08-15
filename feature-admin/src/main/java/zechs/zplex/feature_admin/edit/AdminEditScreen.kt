@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.AlertDialog
@@ -30,11 +31,16 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
+import zechs.zplex.common.ui.snackbar.LocalSnackbarHostState
 import zechs.zplex.common.ui.state.ZplexErrorState
 import zechs.zplex.common.ui.state.ZplexLoadingState
 import zechs.zplex.zplex_api.data.remote.api.admin.model.BlacklistEntry
@@ -47,11 +53,14 @@ fun AdminEditRoute(
     viewModel: AdminEditViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = LocalSnackbarHostState.current
+    val scope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 AdminEditEvent.NavigateBack -> onBack()
-                is AdminEditEvent.ShowMessage -> Unit
+                is AdminEditEvent.ShowMessage ->
+                    scope.launch { snackbarHostState.showSnackbar(event.message) }
             }
         }
     }
@@ -108,12 +117,16 @@ fun AdminEditScreen(
     }
 
     if (state.showDeleteConfirm) {
+        val haptic = LocalHapticFeedback.current
         AlertDialog(
             onDismissRequest = { onAction(AdminEditAction.DismissDeleteConfirm) },
             title = { Text("Delete @${state.username}?") },
             text = { Text("This permanently removes the account.") },
             confirmButton = {
-                TextButton(onClick = { onAction(AdminEditAction.ConfirmDelete) }) { Text("Delete") }
+                TextButton(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onAction(AdminEditAction.ConfirmDelete)
+                }) { Text("Delete") }
             },
             dismissButton = {
                 TextButton(onClick = { onAction(AdminEditAction.DismissDeleteConfirm) }) { Text("Cancel") }
@@ -131,12 +144,15 @@ private fun CapabilitiesSection(state: AdminEditState, onAction: (AdminEditActio
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { onAction(AdminEditAction.ToggleCapability(capability.id)) },
+                        .toggleable(
+                            value = capability.id in state.selectedCapabilityIds,
+                            onValueChange = { onAction(AdminEditAction.ToggleCapability(capability.id)) }
+                        ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
                         checked = capability.id in state.selectedCapabilityIds,
-                        onCheckedChange = { onAction(AdminEditAction.ToggleCapability(capability.id)) }
+                        onCheckedChange = null
                     )
                     Column {
                         Text(capability.label)

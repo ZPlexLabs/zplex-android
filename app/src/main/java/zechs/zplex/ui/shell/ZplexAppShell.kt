@@ -10,12 +10,15 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,6 +39,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import zechs.zplex.common.ui.kids.KidsModeViewModel
+import zechs.zplex.common.ui.snackbar.LocalSnackbarHostState
 import zechs.zplex.common.ui.theme.ThemeMode
 import zechs.zplex.common.ui.theme.ThemeViewModel
 import zechs.zplex.common.ui.theme.ZplexTheme
@@ -56,6 +60,7 @@ fun ZplexAppShell(
 ) {
     val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
     val kidsModeEnabled by kidsModeViewModel.isEnabled.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     ZplexTheme(darkTheme = themeMode.resolveIsDark()) {
         val backStackEntry by navController.currentBackStackEntryAsState()
@@ -77,24 +82,31 @@ fun ZplexAppShell(
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
-            NavigationSuiteScaffold(
-                layoutType = layoutType,
-                navigationSuiteItems = {
-                    visibleDestinations.forEach { destination ->
-                        val selected = currentDestination?.hierarchy?.any {
-                            it.route == destination.route
-                        } == true
-                        item(
-                            selected = selected,
-                            onClick = { navController.navigateToTopLevel(destination) },
-                            icon = { Icon(destination.icon, contentDescription = destination.label) },
-                            label = { Text(destination.label) }
-                        )
+            CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
+                NavigationSuiteScaffold(
+                    layoutType = layoutType,
+                    navigationSuiteItems = {
+                        visibleDestinations.forEach { destination ->
+                            val selected = currentDestination?.hierarchy?.any {
+                                it.route == destination.route
+                            } == true
+                            item(
+                                selected = selected,
+                                onClick = { navController.navigateToTopLevel(destination) },
+                                icon = { Icon(destination.icon, contentDescription = destination.label) },
+                                label = { Text(destination.label) }
+                            )
+                        }
                     }
+                ) {
+                    ZplexNavHost(navController = navController)
                 }
-            ) {
-                ZplexNavHost(navController = navController)
             }
+
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
 
             if (kidsModeEnabled) {
                 KidsModeExitButton(

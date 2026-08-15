@@ -2,7 +2,6 @@ package zechs.zplex.feature_movies.detail
 
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -29,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,7 +41,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
 import zechs.zplex.common.player.PlayerArgs
+import zechs.zplex.common.ui.snackbar.LocalSnackbarHostState
 import zechs.zplex.common.ui.state.ZplexCircularLoading
 import zechs.zplex.common.ui.state.ZplexErrorState
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
@@ -58,6 +60,8 @@ fun DetailRoute(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val snackbarHostState = LocalSnackbarHostState.current
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(mediaType, tmdbId) { viewModel.load(mediaType, tmdbId) }
 
@@ -66,7 +70,7 @@ fun DetailRoute(
             when (event) {
                 is DetailEvent.NavigateToPlayer -> onPlay(event.args)
                 is DetailEvent.ShowMessage ->
-                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                    scope.launch { snackbarHostState.showSnackbar(event.message) }
 
                 is DetailEvent.OpenUrl -> runCatching {
                     context.startActivity(
@@ -74,7 +78,7 @@ fun DetailRoute(
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     )
                 }.onFailure {
-                    Toast.makeText(context, "Can't open link", Toast.LENGTH_SHORT).show()
+                    scope.launch { snackbarHostState.showSnackbar("Can't open link") }
                 }
             }
         }
@@ -148,7 +152,9 @@ private fun DetailContent(
                 model = header.backdropUrl ?: header.posterUrl,
                 contentDescription = header.title,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             )
             Box(
                 Modifier

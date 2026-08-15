@@ -94,7 +94,11 @@ fun DownloadsScreen(
                 )
             ) {
                 items(state.items, key = { it.id }) { item ->
-                    DownloadRow(item = item, onAction = onAction)
+                    DownloadRow(
+                        item = item,
+                        onAction = onAction,
+                        modifier = Modifier.animateItem()
+                    )
                 }
             }
         }
@@ -104,11 +108,12 @@ fun DownloadsScreen(
 @Composable
 private fun DownloadRow(
     item: DownloadEntity,
-    onAction: (DownloadsAction) -> Unit
+    onAction: (DownloadsAction) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val playable = item.status == DownloadStatus.COMPLETED
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(enabled = playable) { onAction(DownloadsAction.Play(item)) }
             .padding(horizontal = 16.dp, vertical = 10.dp),

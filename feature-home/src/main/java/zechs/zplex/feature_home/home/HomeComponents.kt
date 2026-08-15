@@ -31,7 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -96,6 +98,7 @@ internal fun ContinueWatchingRail(
     onClick: (ContinueWatchingCard) -> Unit,
     onRemove: (ContinueWatchingCard) -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SectionHeader("Continue Watching")
         LazyRow(
@@ -105,10 +108,14 @@ internal fun ContinueWatchingRail(
             items(items = items, key = { it.id }) { card ->
                 Column(
                     modifier = Modifier
+                        .animateItem()
                         .width(240.dp)
                         .combinedClickable(
                             onClick = { onClick(card) },
-                            onLongClick = { onRemove(card) }
+                            onLongClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onRemove(card)
+                            }
                         )
                 ) {
                     Box(
@@ -169,6 +176,7 @@ internal fun PosterRail(
             items(items = items, key = { it.tmdbId }) { card ->
                 Column(
                     modifier = Modifier
+                        .animateItem()
                         .width(posterWidth)
                         .clickable { onClick(card) }
                 ) {

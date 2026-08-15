@@ -1,5 +1,6 @@
 package zechs.zplex.feature_settings.history
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -74,7 +75,11 @@ fun HistoryScreen(
                 )
             ) {
                 items(state.items, key = { it.id }) { row ->
-                    HistoryRowItem(row = row, onRemove = { onAction(HistoryAction.Remove(row.id)) })
+                    HistoryRowItem(
+                        row = row,
+                        onRemove = { onAction(HistoryAction.Remove(row.id)) },
+                        modifier = Modifier.animateItem()
+                    )
                 }
             }
         }
@@ -82,9 +87,9 @@ fun HistoryScreen(
 }
 
 @Composable
-private fun HistoryRowItem(row: HistoryRow, onRemove: () -> Unit) {
+private fun HistoryRowItem(row: HistoryRow, onRemove: () -> Unit, modifier: Modifier = Modifier) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -96,6 +101,7 @@ private fun HistoryRowItem(row: HistoryRow, onRemove: () -> Unit) {
             modifier = Modifier
                 .width(56.dp)
                 .height(84.dp)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .clip(RoundedCornerShape(8.dp))
         )
         Column(
