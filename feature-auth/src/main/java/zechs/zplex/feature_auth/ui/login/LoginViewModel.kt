@@ -17,6 +17,8 @@ import zechs.zplex.common.utils.Result
 import zechs.zplex.feature_auth.R
 import zechs.zplex.feature_auth.data.repository.AuthRepository
 import zechs.zplex.feature_auth.data.repository.ConfigRepository
+import zechs.zplex.zplex_api.data.local.accounts.SavedAccount
+import zechs.zplex.zplex_api.data.local.accounts.SavedAccountsStore
 import zechs.zplex.zplex_api.data.local.config.ConfigStorage
 import zechs.zplex.zplex_api.data.local.session.SessionStorage
 import zechs.zplex.zplex_api.data.local.user.UserStorage
@@ -31,7 +33,8 @@ class LoginViewModel @Inject constructor(
     private val configRepository: ConfigRepository,
     private val sessionStorage: SessionStorage,
     private val userStorage: UserStorage,
-    private val configStorage: ConfigStorage
+    private val configStorage: ConfigStorage,
+    private val savedAccountsStore: SavedAccountsStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -76,6 +79,18 @@ class LoginViewModel @Inject constructor(
                             userStorage.saveUser(payload)
                             sessionStorage.saveAccessToken(login.accessToken)
                             sessionStorage.saveRefreshToken(login.refreshToken)
+                            savedAccountsStore.upsert(
+                                SavedAccount(
+                                    username = payload.username,
+                                    firstName = payload.firstName,
+                                    lastName = payload.lastName,
+                                    accessToken = login.accessToken,
+                                    refreshToken = login.refreshToken,
+                                    capabilities = payload.capabilities,
+                                    isAdult = payload.isAdult,
+                                    tokenType = login.tokenType
+                                )
+                            )
                             val asyncConfig = async { saveConfig() }
                             val asyncCapabilities = async { saveCapabilities() }
                             asyncConfig.await()

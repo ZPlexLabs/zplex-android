@@ -45,6 +45,7 @@ import zechs.zplex.common.ui.theme.ThemeMode
 fun AccountRoute(
     onOpenHistory: () -> Unit,
     onOpenAdmin: () -> Unit,
+    onOpenProfiles: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AccountViewModel = hiltViewModel()
 ) {
@@ -54,6 +55,7 @@ fun AccountRoute(
             when (event) {
                 AccountEvent.NavigateToHistory -> onOpenHistory()
                 AccountEvent.NavigateToAdmin -> onOpenAdmin()
+                AccountEvent.NavigateToProfiles -> onOpenProfiles()
                 is AccountEvent.ShowMessage -> Unit
             }
         }

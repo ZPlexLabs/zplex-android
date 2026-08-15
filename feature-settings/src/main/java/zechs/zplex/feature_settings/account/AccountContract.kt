@@ -33,5 +33,6 @@ sealed interface AccountAction : UiAction {
 sealed interface AccountEvent : UiEvent {
     data object NavigateToHistory : AccountEvent
     data object NavigateToAdmin : AccountEvent
+    data object NavigateToProfiles : AccountEvent
     data class ShowMessage(val message: String) : AccountEvent
 }

@@ -46,7 +46,7 @@ class AccountViewModel @Inject constructor(
             AccountAction.ConfirmLogout -> logout()
             AccountAction.OpenHistory -> sendEvent(AccountEvent.NavigateToHistory)
             AccountAction.OpenAdmin -> sendEvent(AccountEvent.NavigateToAdmin)
-            AccountAction.OpenProfiles -> sendEvent(AccountEvent.ShowMessage("Profile switching arrives in a later milestone"))
+            AccountAction.OpenProfiles -> sendEvent(AccountEvent.NavigateToProfiles)
             AccountAction.OpenKidsMode -> sendEvent(AccountEvent.ShowMessage("Kids mode arrives in a later milestone"))
         }
     }

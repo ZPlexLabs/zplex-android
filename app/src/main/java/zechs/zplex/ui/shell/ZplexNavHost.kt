@@ -20,6 +20,7 @@ import zechs.zplex.feature_movies.detail.DetailRoute
 import zechs.zplex.feature_player.PlayerActivity
 import zechs.zplex.feature_search.search.SearchRoute
 import zechs.zplex.feature_settings.account.AccountRoute
+import zechs.zplex.feature_settings.profiles.ProfilesRoute
 import zechs.zplex.feature_admin.users.AdminUsersRoute
 import zechs.zplex.feature_admin.edit.AdminEditRoute
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
@@ -74,9 +75,11 @@ fun ZplexNavHost(
         composable(TopLevelDestination.ACCOUNT.route) {
             AccountRoute(
                 onOpenHistory = { navController.navigate(ZplexRoutes.HISTORY) },
-                onOpenAdmin = { navController.navigate(ZplexRoutes.ADMIN) }
+                onOpenAdmin = { navController.navigate(ZplexRoutes.ADMIN) },
+                onOpenProfiles = { navController.navigate(ZplexRoutes.PROFILES) }
             )
         }
+        composable(ZplexRoutes.PROFILES) { ProfilesRoute() }
         composable(ZplexRoutes.HISTORY) { PlaceholderScreen("Watch history") }
         composable(ZplexRoutes.ADMIN) {
             AdminUsersRoute(

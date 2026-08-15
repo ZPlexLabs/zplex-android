@@ -269,7 +269,17 @@ The `:feature-settings` Compose module renders the **Account** top-level tab (`A
 * **Theme** — a `SingleChoiceSegmentedButtonRow` (System/Light/Dark) backed by `ThemePrefsStore` (`:common`, Preferences DataStore). `ZplexAppShell` collects the same store via a small `ThemeViewModel` and passes `darkTheme` to `ZplexTheme`, so the toggle applies instantly app-wide.
 * **Server info** — the configured `streamingHost` and the app's `versionName` (read from `PackageManager` at runtime, avoiding a cross-module `BuildConfig` dependency).
 * **Logout** — confirm dialog clears `SessionStorage`/`UserStorage`; `MainActivity`'s reactive `AuthState` collector then flips back to the legacy login flow automatically.
-* **Hub rows** — Watch history and Admin (the latter only shown when the user holds the `UPDATE_USERS_CAPABILITIES` capability) navigate to shared routes; Switch profile and Kids mode are present as rows pending their own milestones.
+* **Hub rows** — Watch history and Admin (the latter only shown when the user holds the `UPDATE_USERS_CAPABILITIES` capability) navigate to shared routes; Kids mode is present as a row pending its own milestone.
+
+### Profile switch
+
+`SavedAccountsStore` (`:zplex-api`, DataStore + Gson) keeps every account that has ever logged in on the device (`SavedAccount{username, firstName, lastName, accessToken, refreshToken, capabilities, isAdult, tokenType}`); `LoginViewModel` upserts into it on every successful login. `AccountSwitchRepository` exposes:
+
+* `switchTo(account)` — writes the saved tokens/profile straight into `SessionStorage`/`UserStorage`, flipping `MainActivity`'s reactive `AuthState` to that account instantly, with no network round-trip.
+* `addAccount()` — clears the *active* session only (kept in the saved list) so a different account can log in without losing the others.
+* `removeAccount(username)` — drops a saved account, also clearing the active session if it was the one removed.
+
+The `:feature-settings` `profiles` package (`ProfilesScreen`, reached from the Account hub's *Switch profile* row) lists saved accounts with the active one checked, tap-to-switch, per-account remove (confirm dialog), and an *Add account* action (confirm dialog, since it signs the current profile out).
 
 ### Admin
 
