@@ -11,6 +11,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import zechs.zplex.feature_home.home.HomeRoute
 
 /** Navigation-Compose graph wiring the top-level and shared destinations. */
 @Composable
@@ -23,7 +24,13 @@ fun ZplexNavHost(
         startDestination = TopLevelDestination.HOME.route,
         modifier = modifier
     ) {
-        composable(TopLevelDestination.HOME.route) { PlaceholderScreen("Home") }
+        composable(TopLevelDestination.HOME.route) {
+            HomeRoute(
+                onOpenDetail = { mediaType, tmdbId ->
+                    navController.navigate(ZplexRoutes.detail(mediaType.name.lowercase(), tmdbId))
+                }
+            )
+        }
         composable(TopLevelDestination.MOVIES.route) { PlaceholderScreen("Movies") }
         composable(TopLevelDestination.SHOWS.route) { PlaceholderScreen("Shows") }
         composable(TopLevelDestination.DOWNLOADS.route) { PlaceholderScreen("Downloads") }

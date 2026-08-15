@@ -181,6 +181,13 @@ The `zechs.zplex.ui.shell` package hosts the Compose navigation shell for the re
 * `TopLevelDestination` — the Home/Movies/Shows/Downloads tabs; `ZplexRoutes` defines the shared `detail/{mediaType}/{tmdbId}` and `player/{fileId}` destinations.
 * `ZplexNavHost` — the Navigation-Compose graph. Placeholder screens stand in for the top-level and shared destinations until the feature Composables land.
 
+### Home
+
+The `:feature-home` `home` package renders the Emby-style home screen in Compose:
+
+* `HomeViewModel` (MVI) — loads Continue Watching (`MeRepository`, enriched with movie/show details for titles and backdrops) in parallel with the latest movies/shows rails (offline-first via `CatalogCacheRepository`), combining them into sealed `HomeRow`s. Pull-to-refresh re-subscribes the catalog flows and reloads Continue Watching; dismissing a resumed title is optimistic with rollback on failure.
+* `HomeScreen` — a `PullToRefreshBox` over a `LazyColumn` with a hero carousel (`HorizontalPager`), a Continue Watching rail (per-item progress bar, long-press to remove), and poster rails. Card widths adapt to the window width; images load with Coil. Loading/empty/error use the shared `:common` state composables.
+
 ---
 
 ## API Wiring (`:zplex-api`)
