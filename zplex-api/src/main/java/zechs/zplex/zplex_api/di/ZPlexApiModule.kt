@@ -10,6 +10,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import zechs.zplex.zplex_api.data.remote.api.config.ConfigApi
 import zechs.zplex.zplex_api.data.remote.api.login.LoginApi
+import zechs.zplex.zplex_api.data.remote.api.me.MeApi
 import zechs.zplex.zplex_api.data.remote.api.movies.MovieApi
 import zechs.zplex.zplex_api.data.remote.api.stream.StreamApi
 import zechs.zplex.zplex_api.data.remote.api.token.TokenApi
@@ -105,5 +106,11 @@ object ZPlexApiModule {
     @Singleton
     fun provideStreamApi(@Named("zplex_retrofit") retrofit: Retrofit): StreamApi {
         return retrofit.create(StreamApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideMeApi(@Named("zplex_retrofit") retrofit: Retrofit): MeApi {
+        return retrofit.create(MeApi::class.java)
     }
 }

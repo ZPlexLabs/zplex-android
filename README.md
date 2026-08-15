@@ -183,6 +183,7 @@ The `:zplex-api` module hosts Retrofit interfaces and repositories for the backe
 * **TV Shows** — `TvShowApi`/`TvShowsRepository`: browse, latest, `GET /api/tvshows/{tmdbId}` details (`TvShowDetails`), `GET /api/tvshows/{tmdbId}/seasons` (`Season`), and `GET /api/tvshows/{tmdbId}/seasons/{seasonId}` episodes (`Episode`).
 * **Suggestions** — `SuggestionsRepository`.
 * **Stream grants** — `StreamRepository` (see below).
+* **Watch state** — `MeApi`/`MeRepository`: progress (`PUT /api/me/progress`), continue-watching, history, watchlist, and played state under `/api/me/*`. Uses the shared `MediaType` enum (`SHOW`/`MOVIE`) and `SafeApiCaller.callUnit` for `204 No Content` responses.
 
 Shared credit models (`IdNamePair`, `Cast`, `Crew`, `Studio`) live under `data.remote.api.media`. Snake_case JSON fields are mapped with Moshi `@Json` names.
 

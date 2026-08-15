@@ -19,8 +19,7 @@ class SafeApiCaller @Inject constructor(
 
     suspend fun <T> call(
         apiCall: suspend () -> Response<T>
-    ): Result<T> {
-        return try {
+    ): Result<T> {        return try {
             val response = apiCall()
 
             if (response.isSuccessful) {
@@ -40,6 +39,46 @@ class SafeApiCaller @Inject constructor(
                     ?.takeIf { it.isNotBlank() }
                     ?.let { adapter.fromJson(it) }
 
+                Result.Error(
+                    message = context.getString(R.string.unexpected_error),
+                    details = errorResponse?.details ?: context.getString(
+                        R.string.http_error,
+                        response.code()
+                    )
+                )
+            }
+        } catch (e: IOException) {
+            Result.Error(
+                message = context.getString(R.string.no_connection),
+                details = e.message
+            )
+        } catch (e: HttpException) {
+            Result.Error(
+                message = context.getString(R.string.http_error, e.code()),
+                details = e.message()
+            )
+        } catch (e: Exception) {
+            Result.Error(
+                message = context.getString(R.string.unexpected_error),
+                details = e.message
+            )
+        }
+    }
+
+    /** For endpoints that return no body (e.g. 204 No Content). */
+    suspend fun callUnit(
+        apiCall: suspend () -> Response<Unit>
+    ): Result<Unit> {
+        return try {
+            val response = apiCall()
+            if (response.isSuccessful) {
+                Result.Success(Unit)
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val adapter = moshi.adapter(ErrorResponse::class.java)
+                val errorResponse: ErrorResponse? = errorBody
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { adapter.fromJson(it) }
                 Result.Error(
                     message = context.getString(R.string.unexpected_error),
                     details = errorResponse?.details ?: context.getString(
