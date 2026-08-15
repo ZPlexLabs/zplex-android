@@ -6,6 +6,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("androidx.navigation.safeargs.kotlin")
     id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 val tmdbApiKey: String = gradleLocalProperties(rootDir, providers).getProperty("TMDB_API_KEY")
@@ -52,6 +53,7 @@ extensions.configure<ApplicationExtension> {
         viewBinding = true
         buildConfig = true
         resValues = true
+        compose = true
     }
 
     splits {
@@ -116,6 +118,7 @@ dependencies {
     val testExtJunitVersion = "1.3.0"
     val workVersion = "2.11.2"
     val mediaVersion = "1.8.0"
+    val composeBomVersion = "2025.08.01"
 
     // Media Session
     implementation("androidx.media:media:$mediaVersion")
@@ -171,6 +174,18 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion")
+
+    // --- Compose (adaptive nav shell) ---
+    implementation(platform("androidx.compose:compose-bom:$composeBomVersion"))
+    implementation("androidx.compose.foundation:foundation")
+    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3-adaptive-navigation-suite")
+    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.ui:ui-tooling-preview")
+    debugImplementation("androidx.compose.ui:ui-tooling")
+    implementation("androidx.activity:activity-compose:$androidXActivity")
+    implementation("androidx.navigation:navigation-compose:$navigationVersion")
 
     // --- WorkManager ---
     implementation("androidx.work:work-runtime-ktx:$workVersion")

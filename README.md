@@ -173,6 +173,14 @@ The `:common` module defines a lightweight MVI contract for Compose screens:
 
 Navigation uses **Navigation-Compose**; feature ViewModels extend `MviViewModel` and render state with Compose, without Fragments or ViewBinding.
 
+### Adaptive navigation shell
+
+The `zechs.zplex.ui.shell` package hosts the Compose navigation shell for the rebuild:
+
+* `ZplexAppShell` — wraps the app in `ZplexTheme` and a `NavigationSuiteScaffold` that renders a bottom bar on compact widths and a navigation rail on larger screens (via `currentWindowAdaptiveInfo()`), collapsing to `NavigationSuiteType.None` on full-screen detail/player destinations.
+* `TopLevelDestination` — the Home/Movies/Shows/Downloads tabs; `ZplexRoutes` defines the shared `detail/{mediaType}/{tmdbId}` and `player/{fileId}` destinations.
+* `ZplexNavHost` — the Navigation-Compose graph. Placeholder screens stand in for the top-level and shared destinations until the feature Composables land.
+
 ---
 
 ## API Wiring (`:zplex-api`)
