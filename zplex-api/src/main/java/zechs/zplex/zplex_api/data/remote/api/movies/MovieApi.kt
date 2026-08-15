@@ -2,6 +2,7 @@ package zechs.zplex.zplex_api.data.remote.api.movies
 
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 import zechs.zplex.zplex_api.data.local.PaginatedResponse
 import zechs.zplex.zplex_api.data.remote.api.MediaListItem
@@ -22,5 +23,10 @@ interface MovieApi {
 
     @GET("/api/movie/latest")
     suspend fun moviesLatest(): Response<List<LatestMovie>>
+
+    @GET("/api/movie/{tmdbId}")
+    suspend fun movieDetails(
+        @Path("tmdbId") tmdbId: Int
+    ): Response<MovieDetails>
 
 }

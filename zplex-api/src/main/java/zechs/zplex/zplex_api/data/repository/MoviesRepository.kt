@@ -6,8 +6,8 @@ import zechs.zplex.zplex_api.data.remote.api.MediaListItem
 import zechs.zplex.zplex_api.data.remote.api.enums.OrderBy
 import zechs.zplex.zplex_api.data.remote.api.enums.SortBy
 import zechs.zplex.zplex_api.data.remote.api.movies.LatestMovie
-
 import zechs.zplex.zplex_api.data.remote.api.movies.MovieApi
+import zechs.zplex.zplex_api.data.remote.api.movies.MovieDetails
 import zechs.zplex.zplex_api.utils.ApiConfig.DEFAULT_PAGE_SIZE
 import javax.inject.Inject
 import zechs.zplex.common.utils.Result
@@ -31,4 +31,7 @@ class MoviesRepository @Inject constructor(
         safeApiCaller.call {
             api.movies(sortBy, orderBy, filterBy, pageNumber, pageSize, includeNull)
         }
+
+    suspend fun movieDetails(tmdbId: Int): Result<MovieDetails> =
+        safeApiCaller.call { api.movieDetails(tmdbId) }
 }

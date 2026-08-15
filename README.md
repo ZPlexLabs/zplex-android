@@ -175,6 +175,19 @@ Navigation uses **Navigation-Compose**; feature ViewModels extend `MviViewModel`
 
 ---
 
+## API Wiring (`:zplex-api`)
+
+The `:zplex-api` module hosts Retrofit interfaces and repositories for the backend:
+
+* **Movies** — `MovieApi`/`MoviesRepository`: browse, latest, and `GET /api/movie/{tmdbId}` details (`MovieDetails`).
+* **TV Shows** — `TvShowApi`/`TvShowsRepository`: browse, latest, `GET /api/tvshows/{tmdbId}` details (`TvShowDetails`), `GET /api/tvshows/{tmdbId}/seasons` (`Season`), and `GET /api/tvshows/{tmdbId}/seasons/{seasonId}` episodes (`Episode`).
+* **Suggestions** — `SuggestionsRepository`.
+* **Stream grants** — `StreamRepository` (see below).
+
+Shared credit models (`IdNamePair`, `Cast`, `Crew`, `Studio`) live under `data.remote.api.media`. Snake_case JSON fields are mapped with Moshi `@Json` names.
+
+---
+
 ## 🎥 Streaming Architecture
 
 ### Stream Grants
