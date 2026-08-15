@@ -189,6 +189,14 @@ The `:zplex-api` module hosts Retrofit interfaces and repositories for the backe
 
 Shared credit models (`IdNamePair`, `Cast`, `Crew`, `Studio`) live under `data.remote.api.media`. Snake_case JSON fields are mapped with Moshi `@Json` names.
 
+### Offline cache
+
+Catalog rails and server config are cached for offline use with a stale-while-revalidate strategy:
+
+* **Room `catalog-cache`** — `CatalogCacheDatabase`/`CatalogCacheDao` store `CatalogItemEntity` rows keyed by a `cacheKey`. `CatalogCacheRepository` exposes SWR `Flow`s for latest movies/shows: cached rows emit first, then the network revalidates when online and the cache is stale (`> 15 min`).
+* **Config DataStore** — `ConfigStore` persists the `ConfigResponse` (filters + streaming host) via Preferences DataStore; `ConfigRepository` saves on each successful fetch and exposes `cachedConfig` for offline reads.
+* **SWR helper** — `networkBoundResource` (in `:common`) emits `CacheResource.Loading/Success/Error`, driven by `ConnectivityObserver` for the online check.
+
 ---
 
 ## 🎥 Streaming Architecture

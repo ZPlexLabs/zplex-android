@@ -35,6 +35,8 @@ dependencies {
 
     val hiltVersion = "2.60.1"
     val datastoreVersion = "1.2.1"
+    val roomVersion = "2.8.4"
+    val coroutinesVersion = "1.11.0"
     val navigationVersion = "2.9.7"
     val gsonVersion = "2.14.0"
     val okhttpVersion = "5.4.0"
@@ -58,6 +60,12 @@ dependencies {
 
     // --- Persistence ---
     implementation("androidx.datastore:datastore-preferences:${datastoreVersion}")
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
+
+    // --- Coroutines ---
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
 
     // --- Dependency Injection (Hilt) ---
     implementation("com.google.dagger:hilt-android:$hiltVersion")
