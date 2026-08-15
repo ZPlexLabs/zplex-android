@@ -32,7 +32,7 @@
     <string name="client_secret">Client secret</string>
     <string name="redirect_uri">Redirect uri</string>
     <string name="need_help">Need help?</string>
-    <string name="drive_scope">https://www.googleapis.com/auth/drive</string>
+    <string name="drive_scope">https://www.googleapis.com/auth/drive.readonly</string>
     <string name="scopes">Scopes</string>
     <string name="sign_in">Sign in</string>
     <string name="enter_authorization_code">Enter authorization code?</string>

@@ -12,3 +12,12 @@ gradle
 local.properties
 /app/release/
 /doubletapplayerview/build/
+
+# Secrets
+keystore.properties
+*.jks
+*.keystore
+google-services.json
+*-service-account*.json
+.env
+.env.*
