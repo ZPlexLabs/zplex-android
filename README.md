@@ -61,6 +61,14 @@ cd zplex-android
 2. Open in Android Studio, let Gradle sync, then build & run. Log in with an account
    provisioned on your `zplex-api` instance.
 
+### Environment variables
+
+`zplex-android` does not require any app-specific environment variables for build or runtime.
+
+The app receives server configuration (including `streamingHost`) from `zplex-api`
+`GET /api/config` after login. Ensure your backend services are configured with their
+required env vars (see the READMEs for `zplex-api`, `zplex-stream`, and `zplex-sync`).
+
 ### Build & Toolchain
 
 Multi-module build (`app` + `mpv`, `common`, `feature-*`, `zplex-api`).
