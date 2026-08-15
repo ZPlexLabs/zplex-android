@@ -33,6 +33,8 @@ class MediaDetailViewModel @Inject constructor(
 ) : MviViewModel<DetailState, DetailAction, DetailEvent>(DetailState()) {
 
     private var loadedKey: Pair<MediaType, Int>? = null
+    private var playedSet: Set<Pair<Int, Int>> = emptySet()
+    private var progressByEpisode: Map<Pair<Int, Int>, ContinueWatchingItem> = emptyMap()
 
     fun load(mediaType: MediaType, tmdbId: Int) {
         if (loadedKey == mediaType to tmdbId) return
@@ -81,13 +83,14 @@ class MediaDetailViewModel @Inject constructor(
         val inWatchlist = watchlistD.await().dataOrEmpty()
             .any { it.tmdbId == tmdbId && it.mediaType == mediaType }
         val played = playedD.await().dataOrEmpty()
-        val continueItem = continueD.await().dataOrEmpty()
-            .firstOrNull { it.tmdbId == tmdbId && it.mediaType == mediaType }
+        val continueForMedia = continueD.await().dataOrEmpty()
+            .filter { it.tmdbId == tmdbId && it.mediaType == mediaType }
+        val continueItem = continueForMedia.firstOrNull()
         val playlists = playlistsD.await().dataOrEmpty()
 
         when (mediaType) {
             MediaType.MOVIE -> loadMovie(tmdbId, inWatchlist, played, continueItem, playlists)
-            MediaType.SHOW -> loadShow(tmdbId, inWatchlist, playlists)
+            MediaType.SHOW -> loadShow(tmdbId, inWatchlist, played, continueForMedia, playlists)
         }
     }
 
@@ -140,11 +143,28 @@ class MediaDetailViewModel @Inject constructor(
     private suspend fun loadShow(
         tmdbId: Int,
         inWatchlist: Boolean,
+        played: List<PlayedResponse>,
+        continueForShow: List<ContinueWatchingItem>,
         playlists: List<PlaylistResponse>
     ) {
+        playedSet = played
+            .filter { it.tmdbId == tmdbId && it.mediaType == MediaType.SHOW }
+            .map { it.seasonNumber to it.episodeNumber }
+            .toSet()
+        progressByEpisode = continueForShow.associateBy { it.seasonNumber to it.episodeNumber }
+
         when (val result = tvShowsRepository.tvShowDetails(tmdbId)) {
             is Result.Success -> {
                 val d = result.data
+                val seasons = tvShowsRepository.seasons(tmdbId).dataOrEmpty()
+                val selectedSeasonId = d.latestSeason?.id ?: seasons.firstOrNull()?.id
+                val episodes = selectedSeasonId
+                    ?.let { loadEpisodeRows(tmdbId, it) }
+                    .orEmpty()
+                val nextUp = computeNextUp(episodes)
+                val resume = nextUp
+                    ?.takeIf { it.progressMs > 0 && it.episode.fileId != null }
+                    ?.let { ResumeInfo(it.episode.fileId!!, it.progressMs, it.durationMs, "Resume") }
                 setState {
                     copy(
                         isLoading = false,
@@ -163,8 +183,15 @@ class MediaDetailViewModel @Inject constructor(
                         cast = d.casts.orEmpty(),
                         crew = d.crews.orEmpty(),
                         trailerUrl = d.trailerLink,
+                        resume = resume,
+                        playableFileId = nextUp?.episode?.fileId,
                         inWatchlist = inWatchlist,
-                        playlists = playlists
+                        isPlayed = playedSet.contains(0 to 0),
+                        playlists = playlists,
+                        seasons = seasons,
+                        selectedSeasonId = selectedSeasonId,
+                        episodes = episodes,
+                        nextUp = nextUp
                     )
                 }
             }
@@ -172,6 +199,23 @@ class MediaDetailViewModel @Inject constructor(
             is Result.Error -> setState { copy(isLoading = false, error = result.toUiError()) }
         }
     }
+
+    private suspend fun loadEpisodeRows(tmdbId: Int, seasonId: Int): List<EpisodeRow> =
+        tvShowsRepository.episodes(tmdbId, seasonId).dataOrEmpty().map { ep ->
+            val key = (ep.seasonNumber?.toInt() ?: 0) to (ep.episodeNumber?.toInt() ?: 0)
+            val progress = progressByEpisode[key]
+            EpisodeRow(
+                episode = ep,
+                played = playedSet.contains(key),
+                progressMs = progress?.progressMs ?: 0L,
+                durationMs = progress?.durationMs ?: 0L
+            )
+        }
+
+    private fun computeNextUp(episodes: List<EpisodeRow>): EpisodeRow? =
+        episodes.firstOrNull { it.progressMs in 1L until it.durationMs.coerceAtLeast(1L) }
+            ?: episodes.firstOrNull { !it.played && it.episode.fileId != null }
+            ?: episodes.firstOrNull { it.episode.fileId != null }
 
     private fun play() {
         val fileId = currentState.resume?.fileId ?: currentState.playableFileId
@@ -249,9 +293,46 @@ class MediaDetailViewModel @Inject constructor(
         }
     }
 
-    // Season/episode handling is completed in the show-detail task.
-    private fun selectSeason(seasonId: Int) = Unit
-    private fun toggleEpisodePlayed(row: EpisodeRow) = Unit
+    // Season/episode handling.
+    private fun selectSeason(seasonId: Int) {
+        if (currentState.selectedSeasonId == seasonId) return
+        setState { copy(selectedSeasonId = seasonId, episodesLoading = true) }
+        viewModelScope.launch {
+            val rows = loadEpisodeRows(currentState.tmdbId, seasonId)
+            setState { copy(episodes = rows, episodesLoading = false) }
+        }
+    }
+
+    private fun toggleEpisodePlayed(row: EpisodeRow) {
+        val ep = row.episode
+        val season = ep.seasonNumber?.toInt() ?: return
+        val episode = ep.episodeNumber?.toInt() ?: return
+        val target = !row.played
+        val tmdbId = currentState.tmdbId
+        val key = season to episode
+        playedSet = if (target) playedSet + key else playedSet - key
+        setState {
+            copy(episodes = episodes.map {
+                if (it.episode.id == ep.id) it.copy(played = target) else it
+            })
+        }
+        viewModelScope.launch {
+            val result = if (target) {
+                meRepository.markPlayed(PlayedRequest(MediaType.SHOW, tmdbId, season, episode))
+            } else {
+                meRepository.unmarkPlayed(MediaType.SHOW, tmdbId, season, episode)
+            }
+            if (result is Result.Error) {
+                playedSet = if (target) playedSet - key else playedSet + key
+                setState {
+                    copy(episodes = episodes.map {
+                        if (it.episode.id == ep.id) it.copy(played = !target) else it
+                    })
+                }
+                sendEvent(DetailEvent.ShowMessage(result.message))
+            }
+        }
+    }
 
     private fun movieMeta(d: MovieDetails): List<String> = buildList {
         d.releaseYear?.let { add(it.toString()) }
