@@ -19,13 +19,4 @@
         android:id="@+id/composeShell"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottomNavigationView"
-        style="@style/CompactBottomNav"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottom_navigation_menu" />
 </FrameLayout>

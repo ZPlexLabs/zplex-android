@@ -6,12 +6,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import okhttp3.Dns
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import zechs.zplex.BuildConfig
-import zechs.zplex.utils.Constants.OMDB_API_KEY
-import zechs.zplex.utils.OmdbApiKeyInterceptor
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -19,13 +16,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    @Provides
-    @Singleton
-    @Named("OmdbApiKeyInterceptor")
-    fun provideOmdbApiKeyInterceptor(): Interceptor {
-        return OmdbApiKeyInterceptor(OMDB_API_KEY)
-    }
-
+    /** Shared client for Coil image loading (see ThisApp.newImageLoader()). */
     @Provides
     @Singleton
     @Named("OkHttpClient")
@@ -40,23 +31,6 @@ object NetworkModule {
                     // Logging only in debug builds
                     it.addInterceptor(logging.get())
                 }
-            }.build()
-    }
-
-    @Provides
-    @Singleton
-    @Named("OmdbHttpClient")
-    fun provideOmdbHttpClient(
-        logging: Lazy<HttpLoggingInterceptor>,
-        @Named("OmdbApiKeyInterceptor") omdbApiKeyInterceptor: Interceptor
-    ): OkHttpClient {
-        return OkHttpClient.Builder()
-            .also {
-                if (BuildConfig.DEBUG) {
-                    // Logging only in debug builds
-                    it.addInterceptor(logging.get())
-                }
-                it.addInterceptor(omdbApiKeyInterceptor)
             }.build()
     }
 

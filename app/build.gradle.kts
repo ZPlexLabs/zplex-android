@@ -1,5 +1,4 @@
 import com.android.build.api.dsl.ApplicationExtension
-import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 
 plugins {
     id("com.android.application")
@@ -8,9 +7,6 @@ plugins {
     id("com.google.devtools.ksp")
     id("org.jetbrains.kotlin.plugin.compose")
 }
-
-val tmdbApiKey: String = gradleLocalProperties(rootDir, providers).getProperty("TMDB_API_KEY")
-val omdbApiKey: String = gradleLocalProperties(rootDir, providers).getProperty("OMDB_API_KEY")
 
 extensions.configure<ApplicationExtension> {
     namespace = "zechs.zplex"
@@ -22,9 +18,6 @@ extensions.configure<ApplicationExtension> {
         targetSdk = 36
         versionCode = 22
         versionName = "4.0.0"
-
-        buildConfigField("String", "TMDB_API_KEY", "\"${tmdbApiKey}\"")
-        buildConfigField("String", "OMDB_API_KEY", "\"${omdbApiKey}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -73,16 +66,7 @@ extensions.configure<ApplicationExtension> {
 
 dependencies {
 
-    // --- Local Modules and AAR/JARs ---
-    implementation(project(":mpv"))
-    implementation(
-        fileTree(
-            mapOf(
-                "dir" to "libs",
-                "include" to listOf("extension-*.aar", "*.jar")
-            )
-        )
-    )
+    // --- Local Modules ---
     implementation(project(":common"))
     implementation(project(":feature-auth"))
     implementation(project(":feature-home"))
@@ -93,7 +77,6 @@ dependencies {
     implementation(project(":feature-search"))
     implementation(project(":feature-settings"))
     implementation(project(":feature-admin"))
-    implementation(project(":googledrive"))
     implementation(project(":zplex-api"))
 
     // --- Version Variables ---
@@ -103,10 +86,8 @@ dependencies {
     val coroutinesVersion = "1.11.0"
     val datastoreVersion = "1.2.1"
     val espressoVersion = "3.7.0"
-    val glideVersion = "5.0.5"
     val gsonVersion = "2.14.0"
     val hiltVersion = "2.60.1"
-    val hiltExtVersion = "1.4.0"
     val junitVersion = "4.13.2"
     val kotlinCoreVersion = "1.18.0"
     val androidXActivity = "1.13.0"
@@ -115,8 +96,6 @@ dependencies {
     val moshiVersion = "1.15.2"
     val navigationVersion = "2.9.7"
     val okhttpVersion = "5.4.0"
-    val paletteVersion = "1.0.0"
-    val renderscriptToolkitVersion = "b6363490c3"
     val retrofitVersion = "3.0.0"
     val roomVersion = "2.8.4"
     val testExtJunitVersion = "1.3.0"
@@ -132,7 +111,6 @@ dependencies {
     implementation("androidx.appcompat:appcompat:$appCompatVersion")
     implementation("androidx.constraintlayout:constraintlayout:$constraintLayoutVersion")
     implementation("com.google.android.material:material:$materialVersion")
-    implementation("androidx.palette:palette-ktx:$paletteVersion")
     implementation("androidx.activity:activity-ktx:$androidXActivity")
 
     // --- Kotlin Coroutines ---
@@ -141,9 +119,6 @@ dependencies {
     // --- Dependency Injection (Hilt) ---
     implementation("com.google.dagger:hilt-android:$hiltVersion")
     ksp("com.google.dagger:hilt-compiler:$hiltVersion")
-    implementation("androidx.hilt:hilt-common:$hiltExtVersion")
-    implementation("androidx.hilt:hilt-navigation-fragment:$hiltExtVersion")
-    implementation("androidx.hilt:hilt-work:$hiltExtVersion")
 
     // --- Networking ---
     implementation(platform("com.squareup.okhttp3:okhttp-bom:$okhttpVersion"))
@@ -161,9 +136,6 @@ dependencies {
     implementation("com.google.code.gson:gson:$gsonVersion")
 
     // --- Image Loading ---
-    implementation("com.github.bumptech.glide:glide:$glideVersion")
-    implementation("com.github.bumptech.glide:okhttp3-integration:$glideVersion")
-    ksp("com.github.bumptech.glide:compiler:$glideVersion")
     implementation("io.coil-kt:coil:$coilVersion")
 
     // --- Persistence ---
@@ -173,8 +145,6 @@ dependencies {
     ksp("androidx.room:room-compiler:$roomVersion")
 
     // --- Lifecycle & Navigation ---
-    implementation("androidx.lifecycle:lifecycle-service:$lifecycleVersion")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
     implementation("androidx.navigation:navigation-fragment-ktx:$navigationVersion")
     implementation("androidx.navigation:navigation-ui-ktx:$navigationVersion")
@@ -194,10 +164,6 @@ dependencies {
 
     // --- WorkManager ---
     implementation("androidx.work:work-runtime-ktx:$workVersion")
-
-    // --- Renderscript Replacement ---
-    //noinspection Aligned16KB
-    implementation("com.github.android:renderscript-intrinsics-replacement-toolkit:$renderscriptToolkitVersion")
 
     // --- Testing ---
     testImplementation("junit:junit:$junitVersion")

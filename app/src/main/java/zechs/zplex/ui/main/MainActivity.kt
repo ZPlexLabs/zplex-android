@@ -54,7 +54,6 @@ class MainActivity : AppCompatActivity() {
             ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
         )
         binding.composeShell.setContent { ZplexAppShell() }
-        binding.bottomNavigationView.isGone = true
         // Hidden until the first AuthState resolves, avoiding a Home flash during the splash.
         binding.composeShell.isGone = true
         binding.mainNavHostFragment.isGone = true
