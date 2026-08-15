@@ -1,10 +1,6 @@
 package zechs.zplex.ui.shell
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -22,6 +18,7 @@ import zechs.zplex.feature_search.search.SearchRoute
 import zechs.zplex.feature_settings.account.AccountRoute
 import zechs.zplex.feature_settings.profiles.ProfilesRoute
 import zechs.zplex.feature_settings.kids.KidsModeSetupRoute
+import zechs.zplex.feature_settings.history.HistoryRoute
 import zechs.zplex.feature_admin.users.AdminUsersRoute
 import zechs.zplex.feature_admin.edit.AdminEditRoute
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
@@ -92,7 +89,7 @@ fun ZplexNavHost(
                 }
             )
         }
-        composable(ZplexRoutes.HISTORY) { PlaceholderScreen("Watch history") }
+        composable(ZplexRoutes.HISTORY) { HistoryRoute() }
         composable(ZplexRoutes.ADMIN) {
             AdminUsersRoute(
                 onOpenUser = { username -> navController.navigate(ZplexRoutes.adminEdit(username)) }
@@ -121,12 +118,5 @@ fun ZplexNavHost(
                 onBack = { navController.popBackStack() }
             )
         }
-    }
-}
-
-@Composable
-private fun PlaceholderScreen(label: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(label)
     }
 }

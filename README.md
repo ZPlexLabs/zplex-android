@@ -285,6 +285,10 @@ The `:feature-settings` `profiles` package (`ProfilesScreen`, reached from the A
 
 `KidsModeStore` (`:common`, DataStore) holds an `isEnabled` flag and a **hashed** (SHA-256, never plaintext) 4-digit exit PIN. The Account hub's *Kids mode* row opens `:feature-settings`'s `kids` package (`KidsModeSetupScreen`): the first time it's enabled it prompts to set the PIN (enter + confirm); afterwards enabling reuses the stored PIN. `ZplexAppShell` collects `KidsModeViewModel.isEnabled` and, while true, narrows the navigation suite to **Home/Movies/Shows only** and overlays a lock icon that prompts for the PIN to disable kids mode again. Content itself is already scoped to the profile's rating ceiling server-side (see Admin's access section above) — kids mode only simplifies the client navigation and adds the exit PIN.
 
+### Watch history
+
+The `:feature-settings` `history` package (`HistoryViewModel`/`HistoryScreen`, reached from the Account hub's *Watch history* row) loads `GET /api/me/history` — the same `ContinueWatchingItem` rows as Continue Watching, but the *full* history rather than only in-progress titles — and enriches each with a title/poster via `MoviesRepository`/`TvShowsRepository` (mirroring `HomeViewModel`'s Continue Watching enrichment). Each row shows a poster, title, episode subtitle for shows, and a progress bar; the trailing close icon clears the item optimistically via `MeRepository.dismissContinueWatching(id)` (the same endpoint that dismisses a Continue Watching card, since history and continue-watching share the underlying `watch_progress` row).
+
 ### Admin
 
 The `:feature-admin` Compose module implements the Account hub's **Admin** entry (`GET /api/auth/admin/users` and friends):

@@ -43,6 +43,7 @@ dependencies {
     val navigationVersion = "2.9.7"
     val composeBomVersion = "2025.08.01"
     val coroutinesVersion = "1.11.0"
+    val coilVersion = "2.7.0"
 
     // --- Dependency Injection (Hilt) ---
     implementation("com.google.dagger:hilt-android:$hiltVersion")
@@ -62,6 +63,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:$lifecycleVersion")
     implementation("androidx.navigation:navigation-compose:$navigationVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion")
+    implementation("io.coil-kt:coil-compose:$coilVersion")
 
     implementation("androidx.core:core-ktx:1.18.0")
     implementation("androidx.appcompat:appcompat:1.8.0")
