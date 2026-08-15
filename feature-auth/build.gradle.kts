@@ -36,8 +36,8 @@ android {
 dependencies {
     implementation(project(":common"))
     implementation(project(":zplex-api"))
-    val hiltVersion = "2.59.2"
-    val okhttpVersion = "5.3.2"
+    val hiltVersion = "2.60.1"
+    val okhttpVersion = "5.4.0"
     val moshiVersion = "1.15.2"
     val retrofitVersion = "3.0.0"
 
@@ -60,8 +60,8 @@ dependencies {
     ksp("com.google.dagger:hilt-compiler:$hiltVersion")
 
     implementation("androidx.core:core-ktx:1.18.0")
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("com.google.android.material:material:1.13.0")
+    implementation("androidx.appcompat:appcompat:1.8.0")
+    implementation("com.google.android.material:material:1.14.0")
     implementation("androidx.navigation:navigation-fragment-ktx:2.9.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.9.7")
     testImplementation("junit:junit:4.13.2")

@@ -119,6 +119,34 @@ OMDB_API_KEY=your_omdb_api_key
 
 3. Open in Android Studio, let Gradle sync, then build & run.
 
+### Build & Toolchain
+
+Multi-module build (`app` + `mpv`, `common`, `feature-*`, `googledrive`, `zplex-api`).
+Uses **AGP 9.1.0 with its built-in Kotlin**; KSP2 is enabled (`ksp.UseKSP2=true`).
+Versions are pinned as inline literals per module (no version catalog yet).
+
+Key pinned dependency versions (latest stable, audited):
+
+| Component | Version | Component | Version |
+|-----------|---------|-----------|---------|
+| Gradle | 9.7.0 | Hilt (Dagger) | 2.60.1 |
+| AGP | 9.1.0 | Hilt AndroidX ext | 1.4.0 |
+| KSP | 2.3.11 | OkHttp | 5.4.0 |
+| foojay resolver | 1.0.0 | Retrofit | 3.0.0 |
+| compileSdk | 36 | Gson | 2.14.0 |
+| minSdk | 31 | Moshi | 1.15.2 |
+| AppCompat | 1.8.0 | Coroutines | 1.11.0 |
+| Material | 1.14.0 | ConstraintLayout | 2.2.2 |
+| Navigation | 2.9.7 | Room | 2.8.4 |
+| Lifecycle | 2.10.0 | WorkManager | 2.11.2 |
+| Media | 1.8.0 | Glide | 5.0.5 |
+| core-ktx | 1.18.0 | Coil | 2.7.0 |
+
+> **Held back deliberately:** `androidx.core[-ktx]` (1.18.0) and Glide (5.0.5) are kept
+> at their newest `compileSdk 36`-compatible releases. Their latest versions
+> (`core-ktx 1.19.0`, `glide 5.0.9`) require `compileSdk 37`; that bump is deferred to
+> the Compose/multi-form-factor rebuild, which will move the whole project to SDK 37.
+
 ---
 
 ## 🔗 Related Projects

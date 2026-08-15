@@ -41,7 +41,7 @@ dependencies {
     implementation("androidx.fragment:fragment-ktx:1.8.9")
 
     val lifecycleVersion = "2.10.0"
-    val hiltVersion = "2.59.2"
+    val hiltVersion = "2.60.1"
     val navigationVersion = "2.9.7"
 
     // --- Dependency Injection (Hilt) ---
@@ -53,7 +53,7 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:${navigationVersion}")
 
     implementation("androidx.core:core-ktx:1.18.0")
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("com.google.android.material:material:1.13.0")
+    implementation("androidx.appcompat:appcompat:1.8.0")
+    implementation("com.google.android.material:material:1.14.0")
     testImplementation("junit:junit:4.13.2")
 }
