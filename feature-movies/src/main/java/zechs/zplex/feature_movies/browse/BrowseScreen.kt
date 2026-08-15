@@ -31,25 +31,29 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.BoxWithConstraints
+import zechs.zplex.feature_movies.detail.DetailRoute
 import zechs.zplex.zplex_api.data.remote.api.MediaListItem
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
 
 @Composable
 fun MoviesBrowseRoute(
     onOpenDetail: (MediaType, Int) -> Unit,
+    onOpenPlayer: (String) -> Unit,
     viewModel: MoviesBrowseViewModel = hiltViewModel()
-) = BrowseRoute(viewModel, onOpenDetail)
+) = BrowseRoute(viewModel, onOpenDetail, onOpenPlayer)
 
 @Composable
 fun ShowsBrowseRoute(
     onOpenDetail: (MediaType, Int) -> Unit,
+    onOpenPlayer: (String) -> Unit,
     viewModel: ShowsBrowseViewModel = hiltViewModel()
-) = BrowseRoute(viewModel, onOpenDetail)
+) = BrowseRoute(viewModel, onOpenDetail, onOpenPlayer)
 
 @Composable
 private fun BrowseRoute(
     viewModel: BrowseViewModel,
-    onOpenDetail: (MediaType, Int) -> Unit
+    onOpenDetail: (MediaType, Int) -> Unit,
+    onOpenPlayer: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val pagingItems = viewModel.pagingData.collectAsLazyPagingItems()
@@ -62,7 +66,12 @@ private fun BrowseRoute(
         }
     }
 
-    BrowseScreen(state = state, pagingItems = pagingItems, onAction = viewModel::onAction)
+    BrowseScreen(
+        state = state,
+        pagingItems = pagingItems,
+        onAction = viewModel::onAction,
+        onOpenPlayer = onOpenPlayer
+    )
 }
 
 @Composable
@@ -70,6 +79,7 @@ fun BrowseScreen(
     state: BrowseState,
     pagingItems: LazyPagingItems<MediaListItem>,
     onAction: (BrowseAction) -> Unit,
+    onOpenPlayer: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showFilterSheet by remember { mutableStateOf(false) }
@@ -101,6 +111,8 @@ fun BrowseScreen(
                     )
                     DetailPane(
                         item = state.selectedItem,
+                        mediaType = state.mediaType,
+                        onOpenPlayer = onOpenPlayer,
                         modifier = Modifier.weight(0.38f).fillMaxHeight()
                     )
                 }
@@ -163,7 +175,12 @@ private fun BrowseToolbar(
 }
 
 @Composable
-private fun DetailPane(item: MediaListItem?, modifier: Modifier = Modifier) {
+private fun DetailPane(
+    item: MediaListItem?,
+    mediaType: MediaType,
+    onOpenPlayer: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Surface(
         modifier = modifier,
         tonalElevation = 3.dp
@@ -173,7 +190,14 @@ private fun DetailPane(item: MediaListItem?, modifier: Modifier = Modifier) {
                 Text("Select a title")
             }
         } else {
-            DetailPaneContent(item)
+            DetailRoute(
+                mediaType = mediaType,
+                tmdbId = item.tmdbId,
+                onPlay = onOpenPlayer,
+                onBack = {},
+                embedded = true,
+                viewModel = hiltViewModel(key = "detail_${mediaType.name}_${item.tmdbId}")
+            )
         }
     }
 }
