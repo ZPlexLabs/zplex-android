@@ -271,6 +271,14 @@ The `:feature-settings` Compose module renders the **Account** top-level tab (`A
 * **Logout** — confirm dialog clears `SessionStorage`/`UserStorage`; `MainActivity`'s reactive `AuthState` collector then flips back to the legacy login flow automatically.
 * **Hub rows** — Watch history and Admin (the latter only shown when the user holds the `UPDATE_USERS_CAPABILITIES` capability) navigate to shared routes; Switch profile and Kids mode are present as rows pending their own milestones.
 
+### Admin
+
+The `:feature-admin` Compose module implements the Account hub's **Admin** entry (`GET /api/auth/admin/users` and friends):
+
+* **User list** (`AdminUsersScreen`) — every account with an "Admin" badge for `UPDATE_USERS_CAPABILITIES` holders, a delete action (confirm dialog), and tap-through to the edit screen.
+* **Edit screen** (`AdminEditScreen`, route `admin/{username}`) — capability checkboxes (labels from `ConfigStorage.getCapabilities()`), library access chips (`Movies`/`Shows`, ids 1/2 mirroring the backend's `Library` enum) and a rating-ceiling chip row (mirroring `RatingRank` 1-5, plus a "No ceiling" value), an "allow unrated" switch, and a blacklist manager. Saving calls `updateCapabilities` + `updateAccess` together.
+* **Blacklist** — existing entries (shown as `MEDIATYPE #tmdbId`, since blacklist responses don't include titles) can be removed; new entries are added by searching the same 25-item suggestion catalog used by the Search tab (client-side filtering — see the Search section's note on the backend's lack of full-text search) and calling `addBlacklist`.
+
 ---
 
 ## 🎥 Streaming Architecture

@@ -20,6 +20,8 @@ import zechs.zplex.feature_movies.detail.DetailRoute
 import zechs.zplex.feature_player.PlayerActivity
 import zechs.zplex.feature_search.search.SearchRoute
 import zechs.zplex.feature_settings.account.AccountRoute
+import zechs.zplex.feature_admin.users.AdminUsersRoute
+import zechs.zplex.feature_admin.edit.AdminEditRoute
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
 
 /** Navigation-Compose graph wiring the top-level and shared destinations. */
@@ -76,7 +78,17 @@ fun ZplexNavHost(
             )
         }
         composable(ZplexRoutes.HISTORY) { PlaceholderScreen("Watch history") }
-        composable(ZplexRoutes.ADMIN) { PlaceholderScreen("Admin") }
+        composable(ZplexRoutes.ADMIN) {
+            AdminUsersRoute(
+                onOpenUser = { username -> navController.navigate(ZplexRoutes.adminEdit(username)) }
+            )
+        }
+        composable(
+            route = ZplexRoutes.ADMIN_EDIT,
+            arguments = listOf(navArgument("username") { type = NavType.StringType })
+        ) {
+            AdminEditRoute(onBack = { navController.popBackStack() })
+        }
 
         composable(
             route = ZplexRoutes.DETAIL,

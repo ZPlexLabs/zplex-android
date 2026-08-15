@@ -28,8 +28,11 @@ object ZplexRoutes {
     const val DETAIL = "detail/{mediaType}/{tmdbId}"
     const val HISTORY = "history"
     const val ADMIN = "admin"
+    const val ADMIN_EDIT = "admin/{username}"
     const val PROFILES = "profiles"
     const val KIDS_MODE = "kids-mode"
+
+    fun adminEdit(username: String) = "admin/$username"
 
     fun detail(mediaType: String, tmdbId: Int) = "detail/$mediaType/$tmdbId"
 }
