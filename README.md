@@ -269,7 +269,7 @@ The `:feature-settings` Compose module renders the **Account** top-level tab (`A
 * **Theme** — a `SingleChoiceSegmentedButtonRow` (System/Light/Dark) backed by `ThemePrefsStore` (`:common`, Preferences DataStore). `ZplexAppShell` collects the same store via a small `ThemeViewModel` and passes `darkTheme` to `ZplexTheme`, so the toggle applies instantly app-wide.
 * **Server info** — the configured `streamingHost` and the app's `versionName` (read from `PackageManager` at runtime, avoiding a cross-module `BuildConfig` dependency).
 * **Logout** — confirm dialog clears `SessionStorage`/`UserStorage`; `MainActivity`'s reactive `AuthState` collector then flips back to the legacy login flow automatically.
-* **Hub rows** — Watch history and Admin (the latter only shown when the user holds the `UPDATE_USERS_CAPABILITIES` capability) navigate to shared routes; Kids mode is present as a row pending its own milestone.
+* **Hub rows** — Watch history, Admin (only shown when the user holds the `UPDATE_USERS_CAPABILITIES` capability), Switch profile, and Kids mode navigate to shared routes.
 
 ### Profile switch
 
@@ -280,6 +280,10 @@ The `:feature-settings` Compose module renders the **Account** top-level tab (`A
 * `removeAccount(username)` — drops a saved account, also clearing the active session if it was the one removed.
 
 The `:feature-settings` `profiles` package (`ProfilesScreen`, reached from the Account hub's *Switch profile* row) lists saved accounts with the active one checked, tap-to-switch, per-account remove (confirm dialog), and an *Add account* action (confirm dialog, since it signs the current profile out).
+
+### Kids mode
+
+`KidsModeStore` (`:common`, DataStore) holds an `isEnabled` flag and a **hashed** (SHA-256, never plaintext) 4-digit exit PIN. The Account hub's *Kids mode* row opens `:feature-settings`'s `kids` package (`KidsModeSetupScreen`): the first time it's enabled it prompts to set the PIN (enter + confirm); afterwards enabling reuses the stored PIN. `ZplexAppShell` collects `KidsModeViewModel.isEnabled` and, while true, narrows the navigation suite to **Home/Movies/Shows only** and overlays a lock icon that prompts for the PIN to disable kids mode again. Content itself is already scoped to the profile's rating ceiling server-side (see Admin's access section above) — kids mode only simplifies the client navigation and adds the exit PIN.
 
 ### Admin
 

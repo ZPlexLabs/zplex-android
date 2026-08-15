@@ -21,6 +21,7 @@ import zechs.zplex.feature_player.PlayerActivity
 import zechs.zplex.feature_search.search.SearchRoute
 import zechs.zplex.feature_settings.account.AccountRoute
 import zechs.zplex.feature_settings.profiles.ProfilesRoute
+import zechs.zplex.feature_settings.kids.KidsModeSetupRoute
 import zechs.zplex.feature_admin.users.AdminUsersRoute
 import zechs.zplex.feature_admin.edit.AdminEditRoute
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
@@ -76,10 +77,21 @@ fun ZplexNavHost(
             AccountRoute(
                 onOpenHistory = { navController.navigate(ZplexRoutes.HISTORY) },
                 onOpenAdmin = { navController.navigate(ZplexRoutes.ADMIN) },
-                onOpenProfiles = { navController.navigate(ZplexRoutes.PROFILES) }
+                onOpenProfiles = { navController.navigate(ZplexRoutes.PROFILES) },
+                onOpenKidsMode = { navController.navigate(ZplexRoutes.KIDS_MODE) }
             )
         }
         composable(ZplexRoutes.PROFILES) { ProfilesRoute() }
+        composable(ZplexRoutes.KIDS_MODE) {
+            KidsModeSetupRoute(
+                onEnabled = {
+                    navController.navigate(TopLevelDestination.HOME.route) {
+                        popUpTo(navController.graph.id) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
+            )
+        }
         composable(ZplexRoutes.HISTORY) { PlaceholderScreen("Watch history") }
         composable(ZplexRoutes.ADMIN) {
             AdminUsersRoute(

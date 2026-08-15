@@ -47,7 +47,7 @@ class AccountViewModel @Inject constructor(
             AccountAction.OpenHistory -> sendEvent(AccountEvent.NavigateToHistory)
             AccountAction.OpenAdmin -> sendEvent(AccountEvent.NavigateToAdmin)
             AccountAction.OpenProfiles -> sendEvent(AccountEvent.NavigateToProfiles)
-            AccountAction.OpenKidsMode -> sendEvent(AccountEvent.ShowMessage("Kids mode arrives in a later milestone"))
+            AccountAction.OpenKidsMode -> sendEvent(AccountEvent.NavigateToKidsMode)
         }
     }
 

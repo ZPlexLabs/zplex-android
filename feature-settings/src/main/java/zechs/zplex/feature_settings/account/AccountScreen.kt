@@ -46,6 +46,7 @@ fun AccountRoute(
     onOpenHistory: () -> Unit,
     onOpenAdmin: () -> Unit,
     onOpenProfiles: () -> Unit,
+    onOpenKidsMode: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: AccountViewModel = hiltViewModel()
 ) {
@@ -56,6 +57,7 @@ fun AccountRoute(
                 AccountEvent.NavigateToHistory -> onOpenHistory()
                 AccountEvent.NavigateToAdmin -> onOpenAdmin()
                 AccountEvent.NavigateToProfiles -> onOpenProfiles()
+                AccountEvent.NavigateToKidsMode -> onOpenKidsMode()
                 is AccountEvent.ShowMessage -> Unit
             }
         }

@@ -34,5 +34,6 @@ sealed interface AccountEvent : UiEvent {
     data object NavigateToHistory : AccountEvent
     data object NavigateToAdmin : AccountEvent
     data object NavigateToProfiles : AccountEvent
+    data object NavigateToKidsMode : AccountEvent
     data class ShowMessage(val message: String) : AccountEvent
 }
