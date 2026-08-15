@@ -90,6 +90,7 @@ dependencies {
     implementation(project(":feature-shows"))
     implementation(project(":feature-downloads"))
     implementation(project(":feature-player"))
+    implementation(project(":feature-search"))
     implementation(project(":googledrive"))
     implementation(project(":zplex-api"))
 

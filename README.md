@@ -215,13 +215,19 @@ The `:feature-player` module hosts a full-screen libmpv `PlayerActivity` (reusin
 * **`PlayerActivity`** — hosts `MPVView` under a Compose overlay (`AndroidView`). It sets `http-header-fields: Authorization: Bearer {grant}` before `loadfile`, drives the mpv `EventObserver`, and surfaces state to Compose via a `PlayerHudState`. Controls include play/pause, ±10s skip, a scrubber, playback speed, audio/subtitle track pickers, aspect-ratio cycle, and Picture-in-Picture (button + `onUserLeaveHint`). Gestures: single-tap toggles controls, double-tap left/right seeks ∓10s, and vertical drags adjust brightness (left) / volume (right). Per-show audio/subtitle language choices persist via `PlayerPrefsStore` (Preferences DataStore) and re-apply on load. Direct-play only: if mpv reaches end-of-file without ever starting playback (no `PLAYBACK_RESTART`), the player shows a clear "format isn't supported on this device" message instead of transcoding.
 * **Watch state** — a 10-second heartbeat (and pause/stop/finish) reports progress via `MeRepository.updateProgress` (`PUT /api/me/progress`); playback resumes from the `PlayerArgs` position (seeded from continue-watching on the detail screen) using mpv's `start` option; the episode/movie is marked played once playback passes 90 %. When an item finishes and the playlist has more, an Up-Next card counts down 10 s (Cancel / Play now) before auto-advancing to the next episode.
 
+---
+
+### Search
+
+The `:feature-search` module adds a **Search** top-level tab. `SearchViewModel` (MVI) loads the day's searchable catalog once from `GET /api/suggestion/search` (`SuggestionsRepository.searchSuggestions()` → `SearchSuggestion(tmdbId, title, type)`), then filters it locally against a **300 ms-debounced** query flow. `SearchScreen` shows a search field with a clear button; an empty query lists the catalog under a "Suggested" header, a matching query renders the result rows, and a non-matching query shows an empty state. Tapping a row navigates to the shared detail destination (`mediaType`/`tmdbId`). The backend exposes no title query, so search operates over the returned suggestion set rather than the full library.
+
 ## API Wiring (`:zplex-api`)
 
 The `:zplex-api` module hosts Retrofit interfaces and repositories for the backend:
 
 * **Movies** — `MovieApi`/`MoviesRepository`: browse, latest, and `GET /api/movie/{tmdbId}` details (`MovieDetails`).
 * **TV Shows** — `TvShowApi`/`TvShowsRepository`: browse, latest, `GET /api/tvshows/{tmdbId}` details (`TvShowDetails`), `GET /api/tvshows/{tmdbId}/seasons` (`Season`), and `GET /api/tvshows/{tmdbId}/seasons/{seasonId}` episodes (`Episode`).
-* **Suggestions** — `SuggestionsRepository`.
+* **Suggestions** — `SuggestionsRepository`: search suggestions (`GET /api/suggestion/search`) powering the Search tab.
 * **Stream grants** — `StreamRepository` (see below).
 * **Watch state** — `MeApi`/`MeRepository`: progress (`PUT /api/me/progress`), continue-watching, history, watchlist, and played state under `/api/me/*`. Uses the shared `MediaType` enum (`SHOW`/`MOVIE`) and `SafeApiCaller.callUnit` for `204 No Content` responses.
 * **Playlists** — `PlaylistApi`/`PlaylistRepository`: list/create/rename/delete playlists and add/remove/reorder items under `/api/me/playlists/*`.

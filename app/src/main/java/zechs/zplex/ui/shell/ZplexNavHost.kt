@@ -17,6 +17,7 @@ import zechs.zplex.feature_movies.browse.MoviesBrowseRoute
 import zechs.zplex.feature_movies.browse.ShowsBrowseRoute
 import zechs.zplex.feature_movies.detail.DetailRoute
 import zechs.zplex.feature_player.PlayerActivity
+import zechs.zplex.feature_search.search.SearchRoute
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
 
 /** Navigation-Compose graph wiring the top-level and shared destinations. */
@@ -52,6 +53,13 @@ fun ZplexNavHost(
                     navController.navigate(ZplexRoutes.detail(mediaType.name.lowercase(), tmdbId))
                 },
                 onOpenPlayer = { args -> context.startActivity(PlayerActivity.newIntent(context, args)) }
+            )
+        }
+        composable(TopLevelDestination.SEARCH.route) {
+            SearchRoute(
+                onOpenDetail = { mediaType, tmdbId ->
+                    navController.navigate(ZplexRoutes.detail(mediaType.name.lowercase(), tmdbId))
+                }
             )
         }
         composable(TopLevelDestination.DOWNLOADS.route) { PlaceholderScreen("Downloads") }

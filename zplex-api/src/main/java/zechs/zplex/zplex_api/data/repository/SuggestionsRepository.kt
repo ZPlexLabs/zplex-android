@@ -1,17 +1,16 @@
 package zechs.zplex.zplex_api.data.repository
 
-//import zechs.zplex.zplex_api.data.remote.api.suggestions.SuggestionMediaItem
-//import zechs.zplex.data.remote.ZPlexApi
-//import zechs.zplex.utils.SafeApiCaller
-//import javax.inject.Inject
-//import zechs.zplex.common.utils.Result
-//
-//class SuggestionsRepository @Inject constructor(
-//    private val api: ZPlexApi,
-//    private val safeApiCaller: SafeApiCaller
-//) {
-//
-//    suspend fun suggestions(): Result<List<SuggestionMediaItem>> =
-//        safeApiCaller.call { api.suggestions() }
-//
-//}
+import zechs.zplex.common.utils.Result
+import zechs.zplex.common.utils.SafeApiCaller
+import zechs.zplex.zplex_api.data.remote.api.suggestions.SearchSuggestion
+import zechs.zplex.zplex_api.data.remote.api.suggestions.SuggestionApi
+import javax.inject.Inject
+
+class SuggestionsRepository @Inject constructor(
+    private val api: SuggestionApi,
+    private val safeApiCaller: SafeApiCaller
+) {
+
+    suspend fun searchSuggestions(): Result<List<SearchSuggestion>> =
+        safeApiCaller.call { api.searchSuggestions() }
+}

@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tv
 import androidx.compose.ui.graphics.vector.ImageVector
 
@@ -16,6 +17,7 @@ enum class TopLevelDestination(
     HOME("home", "Home", Icons.Filled.Home),
     MOVIES("movies", "Movies", Icons.Filled.Movie),
     SHOWS("shows", "Shows", Icons.Filled.Tv),
+    SEARCH("search", "Search", Icons.Filled.Search),
     DOWNLOADS("downloads", "Downloads", Icons.Filled.Download)
 }
 
