@@ -1,23 +1,23 @@
 # zplex-android
 
-ZPlex is an Android app for managing and streaming your personal collection of movies and TV shows.
-It connects with **Google Drive** (with user-provided OAuth credentials) and organizes your library automatically using file naming conventions.
-
-Think of it as a lightweight, Drive-powered alternative to Plex — designed for personal use.
+ZPlex is the Android client for **ZPlex Labs**, a self-hosted, Emby-like personal media
+platform. The app is a pure client of the `zplex-api` backend — it never talks to Google
+Drive, TMDB, or OMDB directly. Library indexing (Drive scan + TMDB/OMDB enrichment) runs
+server-side in `zplex-sync`; playback streams through `zplex-stream` via short-lived signed
+grants. See the root `ARCHITECTURE.md` for the full system design.
 
 ---
 
 ## ✨ Key Features
 
-* 📂 **Personal Library Integration** – Indexes movies and TV shows from your Google Drive.
-* 🎬 **Streaming & Offline Support** – Watch instantly or download for offline playback.
-* ⏯ **Smart Playback** – Remembers your progress and resumes where you left off.
-* 🕑 **History Tracking** – Continue watching directly from the home screen.
-* 🔍 **TMDB Search** – Find titles using TheMovieDB API, with metadata support.
-* 📱 **App modes** –
-
-  * With Google Drive → full streaming + offline support.
-  * Without Google Drive → use as a TMDB client with a personal watchlist.
+* 🎬 **Streaming & Offline Support** – Watch instantly via a stream grant, or download the
+  original file for offline playback.
+* ⏯ **Smart Playback** – Server-side watch progress (multi-device), resumes where you left
+  off, auto-advances to the next episode.
+* 🔍 **Search** – Debounced search over the day's suggestion catalog.
+* 👤 **Accounts** – Per-user capabilities, library/rating access, on-device profile
+  switching, and a PIN-gated kids mode — all enforced server-side.
+* 🛡️ **Admin** — user management, capabilities, per-user blacklist, for capability holders.
 
 ---
 
@@ -30,66 +30,13 @@ Home|Library|Details
 
 ## 🧩 How It Works
 
-* On first launch, sign in with Google Drive and select your **Movies** and **TV Shows** folders.
-* ZPlex indexes your library based on the naming rules.
-* You can:
-
-  * **Stream** content directly.
-  * **Download** for offline playback (long-press *Watch Now*).
-* If on airplane mode (or no internet), the app automatically filters the library to downloaded items only.
-* Progress is stored locally, so you can resume playback anytime.
-
----
-
-## 📂 Library Folder Structure
-
-ZPlex relies on **specific naming conventions** (FileBot-style) to index movies and TV shows correctly.
-
-### Movies
-
-| Folder / File Path Example            | Explanation                                   |
-|---------------------------------------|-----------------------------------------------|
-| `Movies/Avatar (2009) [19995].mkv`    | `MovieName (ReleaseYear) [TMDB_ID].extension` |
-| `Movies/Inception (2010) [27205].mp4` | File name includes release year and TMDB ID   |
-
-**FileBot syntax:** `Movies/{n} ({y}) [{id}]`
-> All movies must reside directly in the **Movies** folder.
-
-### TV Shows
-
-| Folder / File Path Example                                                                              | Explanation                                                                                                  |
-|---------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------|
-| `TV Shows/Firefly (2002) [78874]/Season 1/Firefly - S01E01 - Serenity.mkv`                              | `ShowName (ReleaseYear) [TMDB_ID]/Season {number}/{ShowName} - S{season}E{episode} - EpisodeTitle.extension` |
-| `TV Shows/Game of Thrones (2011) [1399]/Season 3/Game of Thrones - S03E09 - The Rains of Castamere.mkv` | Follows the same pattern; ensure correct season/episode formatting.                                          |
-
-**FileBot syntax:** `TV Shows/{n} ({y}) [{id}]/{'Season '+s}/{n} - {s00e00} - {t}`
-
-> * Each show must have its own folder under **TV Shows**.
-> * Season folders should be named exactly `Season {number}`.
-> * Episode files must follow the pattern `ShowName - S{season}E{episode} - EpisodeTitle.extension`.
-### Folder Strucutre
-```
-Movies/
-├─ Avatar (2009) [19995].mkv
-├─ Inception (2010) [27205].mp4
-
-TV Shows/
-├─ Firefly (2002) [78874]/
-│  ├─ Season 1/
-│  │  ├─ Firefly - S01E01 - Serenity.mkv
-│  │  └─ Firefly - S01E02 - The Train Job.mkv
-│  └─ Season 2/
-│     ├─ Firefly - S02E01 - Serenity Returns.mkv
-│     └─ ...
-```
-
----
-
-## 🔑 Google Drive Setup (OAuth)
-
-To use ZPlex with Google Drive, **interested users must create their own OAuth credentials** at [Google Cloud Console](https://console.cloud.google.com/) and link their account within the app.
-
-> The app does **not provide built-in credentials**, so each user needs to configure their own for Drive integration.
+* Sign in with an account provisioned by a server admin (self-signup is disabled; the
+  first admin is seeded from the backend's `ADMIN_PASSWORD` env var).
+* The app browses the catalog `zplex-sync` has already indexed and enriched — no Drive
+  credentials or folder-naming conventions are needed on-device.
+* **Stream** directly (a short-lived signed grant authorizes the Cloudflare Worker), or
+  **download** the original file (never re-encoded) for offline playback.
+* Watch progress, watchlist, and played state sync through `zplex-api` across devices.
 
 ---
 
@@ -98,8 +45,9 @@ To use ZPlex with Google Drive, **interested users must create their own OAuth c
 ### Prerequisites
 
 * Android Studio
-* JDK 11 & 17
-* Android SDK 22+
+* JDK 17
+* Android SDK 31+ (compileSdk 36)
+* A running `zplex-api` + `zplex-stream` backend (see their READMEs) to log in against
 
 ### Local Development Setup
 
@@ -110,18 +58,12 @@ git clone https://github.com/ZPlexLabs/zplex-android.git
 cd zplex-android
 ```
 
-2. Add API keys in **`local.properties`** (create if it doesn’t exist):
-
-```
-TMDB_API_KEY=your_tmdb_api_key
-OMDB_API_KEY=your_omdb_api_key
-```
-
-3. Open in Android Studio, let Gradle sync, then build & run.
+2. Open in Android Studio, let Gradle sync, then build & run. Log in with an account
+   provisioned on your `zplex-api` instance.
 
 ### Build & Toolchain
 
-Multi-module build (`app` + `mpv`, `common`, `feature-*`, `googledrive`, `zplex-api`).
+Multi-module build (`app` + `mpv`, `common`, `feature-*`, `zplex-api`).
 Uses **AGP 9.1.0 with its built-in Kotlin**; KSP2 is enabled (`ksp.UseKSP2=true`).
 Versions are pinned as inline literals per module (no version catalog yet).
 
@@ -139,13 +81,12 @@ Key pinned dependency versions (latest stable, audited):
 | Material | 1.14.0 | ConstraintLayout | 2.2.2 |
 | Navigation | 2.9.7 | Room | 2.8.4 |
 | Lifecycle | 2.10.0 | WorkManager | 2.11.2 |
-| Media | 1.8.0 | Glide | 5.0.5 |
-| core-ktx | 1.18.0 | Coil | 2.7.0 |
+| Media | 1.8.0 | Coil | 2.7.0 |
+| core-ktx | 1.18.0 | | |
 
-> **Held back deliberately:** `androidx.core[-ktx]` (1.18.0) and Glide (5.0.5) are kept
-> at their newest `compileSdk 36`-compatible releases. Their latest versions
-> (`core-ktx 1.19.0`, `glide 5.0.9`) require `compileSdk 37`; that bump is deferred to
-> the Compose/multi-form-factor rebuild, which will move the whole project to SDK 37.
+> **Held back deliberately:** `androidx.core[-ktx]` (1.18.0) is kept at its newest
+> `compileSdk 36`-compatible release. The latest (`core-ktx 1.19.0`) requires
+> `compileSdk 37`; that bump is deferred to a later milestone.
 
 ---
 
