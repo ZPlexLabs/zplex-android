@@ -1,6 +1,7 @@
 package zechs.zplex.feature_movies.detail
 
 import zechs.zplex.common.ui.mvi.UiAction
+import zechs.zplex.common.player.PlayerArgs
 import zechs.zplex.common.ui.mvi.UiError
 import zechs.zplex.common.ui.mvi.UiEvent
 import zechs.zplex.common.ui.mvi.UiState
@@ -86,7 +87,7 @@ sealed interface DetailAction : UiAction {
 }
 
 sealed interface DetailEvent : UiEvent {
-    data class NavigateToPlayer(val fileId: String) : DetailEvent
+    data class NavigateToPlayer(val args: PlayerArgs) : DetailEvent
     data class OpenUrl(val url: String) : DetailEvent
     data class ShowMessage(val message: String) : DetailEvent
 }

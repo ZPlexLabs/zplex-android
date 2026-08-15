@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import zechs.zplex.common.player.PlayerArgs
 import zechs.zplex.common.ui.state.ZplexCircularLoading
 import zechs.zplex.common.ui.state.ZplexErrorState
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
@@ -49,7 +50,7 @@ import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
 fun DetailRoute(
     mediaType: MediaType,
     tmdbId: Int,
-    onPlay: (String) -> Unit,
+    onPlay: (PlayerArgs) -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     embedded: Boolean = false,
@@ -63,7 +64,7 @@ fun DetailRoute(
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
-                is DetailEvent.NavigateToPlayer -> onPlay(event.fileId)
+                is DetailEvent.NavigateToPlayer -> onPlay(event.args)
                 is DetailEvent.ShowMessage ->
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
 

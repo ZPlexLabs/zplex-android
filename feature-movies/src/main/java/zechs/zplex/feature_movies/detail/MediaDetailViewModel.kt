@@ -7,6 +7,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import zechs.zplex.common.ui.mvi.MviViewModel
 import zechs.zplex.common.ui.mvi.toUiError
+import zechs.zplex.common.player.PlayerArgs
+import zechs.zplex.common.player.PlayerItem
 import zechs.zplex.common.utils.Result
 import zechs.zplex.common.utils.TmdbImage
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
@@ -58,9 +60,7 @@ class MediaDetailViewModel @Inject constructor(
             is DetailAction.AddToPlaylist -> addToPlaylist(action.playlistId)
             is DetailAction.CreatePlaylistAndAdd -> createPlaylistAndAdd(action.name)
             is DetailAction.SelectSeason -> selectSeason(action.seasonId)
-            is DetailAction.PlayEpisode -> action.row.episode.fileId
-                ?.let { sendEvent(DetailEvent.NavigateToPlayer(it)) }
-                ?: sendEvent(DetailEvent.ShowMessage("Episode not available"))
+            is DetailAction.PlayEpisode -> playEpisode(action.row)
 
             is DetailAction.ToggleEpisodePlayed -> toggleEpisodePlayed(action.row)
             DetailAction.Retry -> reload()
@@ -218,9 +218,70 @@ class MediaDetailViewModel @Inject constructor(
             ?: episodes.firstOrNull { it.episode.fileId != null }
 
     private fun play() {
-        val fileId = currentState.resume?.fileId ?: currentState.playableFileId
-        if (fileId != null) sendEvent(DetailEvent.NavigateToPlayer(fileId))
-        else sendEvent(DetailEvent.ShowMessage("This title is not available to play"))
+        when (currentState.mediaType) {
+            MediaType.MOVIE -> {
+                val fileId = currentState.resume?.fileId ?: currentState.playableFileId
+                if (fileId == null) {
+                    sendEvent(DetailEvent.ShowMessage("This title is not available to play"))
+                    return
+                }
+                val item = PlayerItem(
+                    fileId = fileId,
+                    tmdbId = currentState.tmdbId,
+                    isTv = false,
+                    title = currentState.header?.title.orEmpty(),
+                    subtitle = null,
+                    seasonNumber = 0,
+                    episodeNumber = 0
+                )
+                sendEvent(
+                    DetailEvent.NavigateToPlayer(
+                        PlayerArgs(listOf(item), 0, currentState.resume?.progressMs ?: 0L)
+                    )
+                )
+            }
+
+            MediaType.SHOW -> {
+                val startRow = currentState.nextUp
+                    ?: currentState.episodes.firstOrNull { it.episode.fileId != null }
+                if (startRow == null) {
+                    sendEvent(DetailEvent.ShowMessage("This title is not available to play"))
+                    return
+                }
+                playEpisode(startRow)
+            }
+        }
+    }
+
+    private fun playEpisode(startRow: EpisodeRow) {
+        val playable = currentState.episodes.filter { it.episode.fileId != null }
+        if (playable.isEmpty()) {
+            sendEvent(DetailEvent.ShowMessage("Episode not available"))
+            return
+        }
+        val startIndex = playable
+            .indexOfFirst { it.episode.id == startRow.episode.id }
+            .coerceAtLeast(0)
+        val showTitle = currentState.header?.title.orEmpty()
+        val items = playable.map { row ->
+            val e = row.episode
+            PlayerItem(
+                fileId = e.fileId!!,
+                tmdbId = currentState.tmdbId,
+                isTv = true,
+                title = showTitle,
+                subtitle = episodeSubtitle(e.seasonNumber?.toInt() ?: 0, e.episodeNumber?.toInt() ?: 0, e.title),
+                seasonNumber = e.seasonNumber?.toInt() ?: 0,
+                episodeNumber = e.episodeNumber?.toInt() ?: 0
+            )
+        }
+        val startProgress = if (playable[startIndex].episode.id == startRow.episode.id) startRow.progressMs else 0L
+        sendEvent(DetailEvent.NavigateToPlayer(PlayerArgs(items, startIndex, startProgress)))
+    }
+
+    private fun episodeSubtitle(season: Int, episode: Int, title: String?): String {
+        val label = "S%02dE%02d".format(season, episode)
+        return if (title.isNullOrBlank()) label else "$label · $title"
     }
 
     private fun toggleWatchlist() {

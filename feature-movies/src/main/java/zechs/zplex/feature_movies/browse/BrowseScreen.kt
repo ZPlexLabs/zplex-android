@@ -31,6 +31,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.BoxWithConstraints
+import zechs.zplex.common.player.PlayerArgs
 import zechs.zplex.feature_movies.detail.DetailRoute
 import zechs.zplex.zplex_api.data.remote.api.MediaListItem
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
@@ -38,14 +39,14 @@ import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
 @Composable
 fun MoviesBrowseRoute(
     onOpenDetail: (MediaType, Int) -> Unit,
-    onOpenPlayer: (String) -> Unit,
+    onOpenPlayer: (PlayerArgs) -> Unit,
     viewModel: MoviesBrowseViewModel = hiltViewModel()
 ) = BrowseRoute(viewModel, onOpenDetail, onOpenPlayer)
 
 @Composable
 fun ShowsBrowseRoute(
     onOpenDetail: (MediaType, Int) -> Unit,
-    onOpenPlayer: (String) -> Unit,
+    onOpenPlayer: (PlayerArgs) -> Unit,
     viewModel: ShowsBrowseViewModel = hiltViewModel()
 ) = BrowseRoute(viewModel, onOpenDetail, onOpenPlayer)
 
@@ -53,7 +54,7 @@ fun ShowsBrowseRoute(
 private fun BrowseRoute(
     viewModel: BrowseViewModel,
     onOpenDetail: (MediaType, Int) -> Unit,
-    onOpenPlayer: (String) -> Unit
+    onOpenPlayer: (PlayerArgs) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val pagingItems = viewModel.pagingData.collectAsLazyPagingItems()
@@ -79,7 +80,7 @@ fun BrowseScreen(
     state: BrowseState,
     pagingItems: LazyPagingItems<MediaListItem>,
     onAction: (BrowseAction) -> Unit,
-    onOpenPlayer: (String) -> Unit,
+    onOpenPlayer: (PlayerArgs) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showFilterSheet by remember { mutableStateOf(false) }
@@ -178,7 +179,7 @@ private fun BrowseToolbar(
 private fun DetailPane(
     item: MediaListItem?,
     mediaType: MediaType,
-    onOpenPlayer: (String) -> Unit,
+    onOpenPlayer: (PlayerArgs) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(

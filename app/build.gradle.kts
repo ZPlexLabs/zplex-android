@@ -89,6 +89,7 @@ dependencies {
     implementation(project(":feature-movies"))
     implementation(project(":feature-shows"))
     implementation(project(":feature-downloads"))
+    implementation(project(":feature-player"))
     implementation(project(":googledrive"))
     implementation(project(":zplex-api"))
 

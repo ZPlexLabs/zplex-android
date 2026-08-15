@@ -178,7 +178,7 @@ Navigation uses **Navigation-Compose**; feature ViewModels extend `MviViewModel`
 The `zechs.zplex.ui.shell` package hosts the Compose navigation shell for the rebuild:
 
 * `ZplexAppShell` — wraps the app in `ZplexTheme` and a `NavigationSuiteScaffold` that renders a bottom bar on compact widths and a navigation rail on larger screens (via `currentWindowAdaptiveInfo()`), collapsing to `NavigationSuiteType.None` on full-screen detail/player destinations.
-* `TopLevelDestination` — the Home/Movies/Shows/Downloads tabs; `ZplexRoutes` defines the shared `detail/{mediaType}/{tmdbId}` and `player/{fileId}` destinations.
+* `TopLevelDestination` — the Home/Movies/Shows/Downloads tabs; `ZplexRoutes` defines the shared `detail/{mediaType}/{tmdbId}` destination. Playback is a separate full-screen `PlayerActivity` (in `:feature-player`) launched via `Intent` rather than a nav route.
 * `ZplexNavHost` — the Navigation-Compose graph. Placeholder screens stand in for the top-level and shared destinations until the feature Composables land.
 
 ### Home
@@ -206,6 +206,13 @@ The `:feature-movies` `detail` package hosts a single `MediaType`-parameterised 
 * **`DetailScreen`** — a scrolling backdrop-led layout with a title logo, a Palette-derived accent colour (`rememberAccentColor`), meta chips, a resume progress bar, a prominent Play/Resume button plus watchlist/played/playlist/trailer/download action icons, tagline, overview, director, and accent-tinted genre/studio/collection chips, followed by cast and crew rails. For shows, an episodes section adds a season dropdown, a Play/Resume next-up button, and per-episode rows (still image with play overlay, title, overview, resume progress bar, and a watched toggle). A `ModalBottomSheet` playlist picker adds the title to an existing or newly created playlist. Loading/error states use the shared `:common` composables.
 
 ---
+
+### Player (libmpv)
+
+The `:feature-player` module hosts a full-screen libmpv `PlayerActivity` (reusing the `:mpv` `MPVView`), launched by an `Intent` carrying a `PlayerArgs` payload (`:common`) — an ordered playlist of `PlayerItem`s (fileId, tmdbId, show/movie, title, S/E), a start index, and a resume position. The detail screen builds the playlist (the whole season from the chosen episode, for auto-advance) and hands it to the shell, which starts the activity.
+
+* **`PlayerViewModel`** — resolves the playable URL through the stream-grant flow: it reads the cached `streamingHost` (`ConfigStorage`) and calls `StreamRepository.getStreamUrl(fileId, host)`, returning the worker URL plus the short-lived JWT grant.
+* **`PlayerActivity`** — hosts `MPVView` under a Compose overlay (`AndroidView`). It sets `http-header-fields: Authorization: Bearer {grant}` before `loadfile`, drives the mpv `EventObserver`, and surfaces state to Compose via a `PlayerHudState`. Controls include play/pause, ±10s skip, a scrubber, playback speed, audio/subtitle track pickers, aspect-ratio cycle, and Picture-in-Picture (button + `onUserLeaveHint`). Gestures: single-tap toggles controls, double-tap left/right seeks ∓10s, and vertical drags adjust brightness (left) / volume (right). Per-show audio/subtitle language choices persist via `PlayerPrefsStore` (Preferences DataStore) and re-apply on load. Direct-play only: if mpv reaches end-of-file without ever starting playback (no `PLAYBACK_RESTART`), the player shows a clear "format isn't supported on this device" message instead of transcoding.
 
 ## API Wiring (`:zplex-api`)
 

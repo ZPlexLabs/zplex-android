@@ -6,6 +6,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -15,6 +16,7 @@ import zechs.zplex.feature_home.home.HomeRoute
 import zechs.zplex.feature_movies.browse.MoviesBrowseRoute
 import zechs.zplex.feature_movies.browse.ShowsBrowseRoute
 import zechs.zplex.feature_movies.detail.DetailRoute
+import zechs.zplex.feature_player.PlayerActivity
 import zechs.zplex.zplex_api.data.remote.api.enums.MediaType
 
 /** Navigation-Compose graph wiring the top-level and shared destinations. */
@@ -23,6 +25,7 @@ fun ZplexNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     NavHost(
         navController = navController,
         startDestination = TopLevelDestination.HOME.route,
@@ -40,7 +43,7 @@ fun ZplexNavHost(
                 onOpenDetail = { mediaType, tmdbId ->
                     navController.navigate(ZplexRoutes.detail(mediaType.name.lowercase(), tmdbId))
                 },
-                onOpenPlayer = { fileId -> navController.navigate(ZplexRoutes.player(fileId)) }
+                onOpenPlayer = { args -> context.startActivity(PlayerActivity.newIntent(context, args)) }
             )
         }
         composable(TopLevelDestination.SHOWS.route) {
@@ -48,7 +51,7 @@ fun ZplexNavHost(
                 onOpenDetail = { mediaType, tmdbId ->
                     navController.navigate(ZplexRoutes.detail(mediaType.name.lowercase(), tmdbId))
                 },
-                onOpenPlayer = { fileId -> navController.navigate(ZplexRoutes.player(fileId)) }
+                onOpenPlayer = { args -> context.startActivity(PlayerActivity.newIntent(context, args)) }
             )
         }
         composable(TopLevelDestination.DOWNLOADS.route) { PlaceholderScreen("Downloads") }
@@ -65,17 +68,9 @@ fun ZplexNavHost(
             DetailRoute(
                 mediaType = MediaType.valueOf(mediaType.uppercase()),
                 tmdbId = tmdbId,
-                onPlay = { fileId -> navController.navigate(ZplexRoutes.player(fileId)) },
+                onPlay = { args -> context.startActivity(PlayerActivity.newIntent(context, args)) },
                 onBack = { navController.popBackStack() }
             )
-        }
-
-        composable(
-            route = ZplexRoutes.PLAYER,
-            arguments = listOf(navArgument("fileId") { type = NavType.StringType })
-        ) { entry ->
-            val fileId = entry.arguments?.getString("fileId").orEmpty()
-            PlaceholderScreen("Player · $fileId")
         }
     }
 }

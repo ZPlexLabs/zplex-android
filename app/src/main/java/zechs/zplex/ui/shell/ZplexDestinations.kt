@@ -22,8 +22,6 @@ enum class TopLevelDestination(
 /** Shared destinations reachable from any top-level screen. */
 object ZplexRoutes {
     const val DETAIL = "detail/{mediaType}/{tmdbId}"
-    const val PLAYER = "player/{fileId}"
 
     fun detail(mediaType: String, tmdbId: Int) = "detail/$mediaType/$tmdbId"
-    fun player(fileId: String) = "player/$fileId"
 }
