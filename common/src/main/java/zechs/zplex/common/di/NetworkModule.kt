@@ -31,12 +31,12 @@ object NetworkModule {
     fun provideMainOkHttp(
         logging: HttpLoggingInterceptor,
         dns: Dns,
-    ): OkHttpClient.Builder {
+    ): OkHttpClient {
         return OkHttpClient.Builder()
             .dns(dns)
             .also {
                 if (BuildConfig.DEBUG) it.addInterceptor(logging)
-            }
+            }.build()
     }
 
 

@@ -30,7 +30,7 @@ class MediaDownloadWorkerFactory @Inject constructor(
     private val downloadDao: DownloadDao,
     private val streamRepository: StreamRepository,
     private val configStorage: ConfigStorage,
-    @Named("download_client") private val client: OkHttpClient
+    @param:Named("download_client") private val client: OkHttpClient
 ) : WorkerFactory() {
 
     override fun createWorker(
@@ -152,8 +152,8 @@ class MediaDownloadWorker(
     private fun execute(host: String, fileId: String, grant: String, offset: Long) =
         client.newCall(
             Request.Builder()
-                .url("$host/api/stream/$fileId")
-                .header("Authorization", "Bearer $grant")
+                .url("https://zplex-stream.zechs.workers.dev/api/stream/$fileId")
+                .header("authorization", "Bearer $grant")
                 .apply { if (offset > 0) header("Range", "bytes=$offset-") }
                 .build()
         ).execute()

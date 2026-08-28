@@ -31,10 +31,10 @@ object ZPlexApiModule {
     @Singleton
     @Named("zplex_http_client_for_token")
     fun provideZPlexHttpClientForToken(
-        @Named("base_client") baseClientBuilder: OkHttpClient.Builder,
+        @Named("base_client") baseHttpClient: OkHttpClient,
         endpointInterceptor: EndpointInterceptor
     ): OkHttpClient {
-        return baseClientBuilder
+        return baseHttpClient.newBuilder()
             .addInterceptor(endpointInterceptor)
             .build()
     }
@@ -43,11 +43,11 @@ object ZPlexApiModule {
     @Singleton
     @Named("zplex_http_client")
     fun provideZPlexHttpClient(
-        @Named("base_client") baseClientBuilder: OkHttpClient.Builder,
+        @Named("base_client") baseHttpClient: OkHttpClient,
         endpointInterceptor: EndpointInterceptor,
         tokenInterceptor: TokenInterceptor
     ): OkHttpClient {
-        return baseClientBuilder
+        return baseHttpClient.newBuilder()
             .addInterceptor(endpointInterceptor)
             .addInterceptor(tokenInterceptor)
             .build()

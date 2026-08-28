@@ -36,8 +36,8 @@ object DownloadsModule {
     @Singleton
     @Named("download_client")
     fun provideDownloadClient(
-        @Named("base_client") baseClientBuilder: OkHttpClient.Builder
-    ): OkHttpClient = baseClientBuilder
+        @Named("base_client") baseHttpClient: OkHttpClient
+    ): OkHttpClient = baseHttpClient.newBuilder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(0, TimeUnit.SECONDS)
         .writeTimeout(0, TimeUnit.SECONDS)
