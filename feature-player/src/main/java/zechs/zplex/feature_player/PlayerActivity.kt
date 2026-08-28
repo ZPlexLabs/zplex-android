@@ -131,13 +131,16 @@ class PlayerActivity : ComponentActivity(), MPVLib.EventObserver {
                     if (!result.isLocal) {
                         MPVLib.setOptionString(
                             "http-header-fields",
-                            "Authorization: Bearer ${result.grant}"
+                            "authorization: Bearer ${result.grant}"
                         )
                     }
                     if (resume && args.startPositionMs > 0) {
                         MPVLib.setOptionString("start", (args.startPositionMs / 1000).toString())
                     } else {
                         MPVLib.setOptionString("start", "0")
+                    }
+                    if (player.vo != null && player.vo!!) {
+                        MPVLib.command(arrayOf("loadfile", result.url))
                     }
                     player.play(result.url)
                 }
